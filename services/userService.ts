@@ -1,4 +1,5 @@
-// Định nghĩa cấu trúc dữ liệu User đồng bộ từ Server MockAPI
+import { api } from "./api";
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -10,69 +11,47 @@ export interface UserProfile {
   membershipTier: string;
 }
 
-const BASE_URL = "https://6a1879181878294b597d355f.mockapi.io/api/v1";
+interface BackendUserProfile {
+  userId: string;
+  fullName?: string;
+  email?: string;
+  avatarUrl?: string;
+  role: number | string;
+  createdAt: string;
+}
+
+const roleToTier = (role: number | string) => {
+  if (role === 2 || role === "MUA") return "MUA";
+  if (role === 0 || role === "Admin") return "Admin";
+  return "Customer";
+};
+
+const mapUserProfile = (data: BackendUserProfile): UserProfile => ({
+  id: data.userId,
+  name: data.fullName || "BeautyBook User",
+  email: data.email || "",
+  avatar: data.avatarUrl || "BB",
+  joinedDate: data.createdAt ? new Date(data.createdAt).toLocaleDateString("vi-VN") : "",
+  statsCompleted: 0,
+  statsFavorites: 0,
+  membershipTier: roleToTier(data.role),
+});
 
 export const userService = {
-  /**
-   * 1. LẤY THÔNG TIN HỒ SƠ USER THEO EMAIL (GET)
-   * Sử dụng khi user đăng nhập thành công để đổ dữ liệu ra màn hình Profile
-   */
-  getUserProfile: async (email: string): Promise<UserProfile> => {
-    try {
-      // Mã hóa email để tránh lỗi ký tự đặc biệt trên URL đường truyền
-      const response = await fetch(
-        `${BASE_URL}/users?email=${encodeURIComponent(email)}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`Lỗi kết nối Server (${response.status})`);
-      }
-
-      const users: UserProfile[] = await response.json();
-
-      // MockAPI lọc theo query sẽ trả về một mảng. Cần check xem có phần tử nào không.
-      if (users && users.length > 0) {
-        return users[0]; // Trả về thông tin user tìm thấy đầu tiên
-      } else {
-        throw new Error("Tài khoản không tồn tại trên hệ thống dữ liệu.");
-      }
-    } catch (error: any) {
-      console.error("Lỗi tại userService.getUserProfile:", error);
-      throw error;
-    }
+  getUserProfile: async (_email?: string): Promise<UserProfile> => {
+    const response = await api.get("/User/profile");
+    return mapUserProfile(response.data);
   },
 
-  /**
-   * 2. CẬP NHẬT THÔNG TIN HỒ SƠ (PUT)
-   * Phục vụ cho chức năng "Chỉnh sửa thông tin" sau này khi user thay đổi tên, avatar...
-   */
   updateUserProfile: async (
-    userId: string,
+    _userId: string,
     updateData: Partial<UserProfile>,
   ): Promise<UserProfile> => {
-    try {
-      const response = await fetch(`${BASE_URL}/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateData),
-      });
+    const response = await api.put("/User/profile", {
+      fullName: updateData.name,
+      avatarUrl: updateData.avatar,
+    });
 
-      if (!response.ok) {
-        throw new Error("Không thể cập nhật thông tin lên server.");
-      }
-
-      return await response.json();
-    } catch (error: any) {
-      console.error("Lỗi tại userService.updateUserProfile:", error);
-      throw error;
-    }
+    return mapUserProfile(response.data.user || response.data);
   },
 };

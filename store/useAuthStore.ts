@@ -1,39 +1,26 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { authService } from "../services/authService";
+import { authService, AuthUser } from "../services/authService";
 
 const TOKEN_KEY = "user_jwt_token";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
 interface AuthState {
-  user: User | null;
-
+  user: AuthUser | null;
   isAuthenticated: boolean;
-
   isLoading: boolean;
-
   initialize: () => Promise<boolean>;
-
   login: (email: string, password: string) => Promise<boolean>;
-
   logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-
   isAuthenticated: false,
-
   isLoading: false,
 
   initialize: async () => {
     try {
-      const token = await AsyncStorage.getItem("user_jwt_token");
+      const token = await AsyncStorage.getItem(TOKEN_KEY);
 
       if (!token) {
         set({
@@ -53,7 +40,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       return true;
     } catch {
-      await AsyncStorage.removeItem("user_jwt_token");
+      await AsyncStorage.removeItem(TOKEN_KEY);
 
       set({
         user: null,

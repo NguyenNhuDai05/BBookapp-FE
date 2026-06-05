@@ -1,19 +1,43 @@
 import { api } from "./api";
 
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role?: number | string;
+}
+
 export const authService = {
   login: async (email: string, password: string) => {
-    const response = await api.post("/auth/login", {
+    const response = await api.post("/Auth/login", {
       email,
       password,
     });
 
-    return response.data;
+    const data = response.data;
+
+    return {
+      accessToken: data.token,
+      expiration: data.expiration,
+      user: {
+        id: data.userId,
+        name: data.fullName,
+        email: data.email,
+        role: data.role,
+      } as AuthUser,
+    };
   },
 
   getMe: async () => {
-    const response = await api.get("/auth/me");
+    const response = await api.get("/User/profile");
+    const data = response.data;
 
-    return response.data;
+    return {
+      id: data.userId,
+      name: data.fullName,
+      email: data.email,
+      role: data.role,
+    } as AuthUser;
   },
 
   register: async (
@@ -27,7 +51,7 @@ export const authService = {
       email,
       password,
       phoneNumber,
-      role: 0,
+      role: 1,
     });
 
     return response.data;
