@@ -1,0 +1,103 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "zustand";
+import { authService } from "../services/authService";
+
+const TOKEN_KEY = "user_jwt_token";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface AuthState {
+  user: User | null;
+
+  isAuthenticated: boolean;
+
+  isLoading: boolean;
+
+  initialize: () => Promise<boolean>;
+
+  login: (email: string, password: string) => Promise<boolean>;
+
+  logout: () => Promise<void>;
+}
+
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+
+  isAuthenticated: false,
+
+  isLoading: false,
+
+  initialize: async () => {
+    try {
+      const token = await AsyncStorage.getItem("user_jwt_token");
+
+      if (!token) {
+        set({
+          user: null,
+          isAuthenticated: false,
+        });
+
+        return false;
+      }
+
+      const user = await authService.getMe();
+
+      set({
+        user,
+        isAuthenticated: true,
+      });
+
+      return true;
+    } catch {
+      await AsyncStorage.removeItem("user_jwt_token");
+
+      set({
+        user: null,
+        isAuthenticated: false,
+      });
+
+      return false;
+    }
+  },
+
+  login: async (email, password) => {
+    try {
+      set({
+        isLoading: true,
+      });
+
+      const data = await authService.login(email, password);
+
+      await AsyncStorage.setItem(TOKEN_KEY, data.accessToken);
+
+      set({
+        user: data.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return true;
+    } catch (error) {
+      console.log(error);
+
+      set({
+        isLoading: false,
+      });
+
+      return false;
+    }
+  },
+
+  logout: async () => {
+    await AsyncStorage.removeItem(TOKEN_KEY);
+
+    set({
+      user: null,
+      isAuthenticated: false,
+    });
+  },
+}));
