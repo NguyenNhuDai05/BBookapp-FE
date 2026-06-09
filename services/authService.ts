@@ -56,4 +56,23 @@ export const authService = {
 
     return response.data;
   },
+
+  loginWithGoogle: async (idToken: string) => {
+    const response = await api.post("/Auth/google", {
+      idToken,
+    });
+
+    const data = response.data;
+
+    return {
+      accessToken: data.token,
+      expiration: data.expiration,
+      user: {
+        id: data.userId,
+        name: data.fullName,
+        email: data.email,
+        role: data.role,
+      } as AuthUser,
+    };
+  },
 };

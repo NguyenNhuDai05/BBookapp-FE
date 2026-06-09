@@ -5,8 +5,8 @@ export default function AuthLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false, // Ẩn thanh header mặc định để tự custom UI tràn viền
-        animation: "slide_from_right", // Hiệu ứng lướt sang ngang chuẩn Native
+        headerShown: false,
+        animation: "slide_from_right",
       }}
     >
       <Stack.Screen name="login" />
