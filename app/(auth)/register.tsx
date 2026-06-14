@@ -25,6 +25,7 @@ const authLogo = require("../../assets/images/logo-bbook.png");
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const login = useAuthStore((state) => state.login);
   const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
 
   const [fullName, setFullName] = useState("");
@@ -45,8 +46,8 @@ export default function RegisterScreen() {
       }
 
       Alert.alert(
-        "Chua ket noi Google OAuth",
-        "Frontend da lay duoc Google token, nhung backend can them endpoint /api/Auth/google de cap JWT cho app.",
+        "Chưa kết nối Google OAuth",
+        "Frontend đã lấy được Google token, nhưng backend cần endpoint /api/Auth/google để cấp JWT cho ứng dụng.",
       );
 
       return false;
@@ -66,44 +67,62 @@ export default function RegisterScreen() {
       !password.trim() ||
       !confirmPassword.trim()
     ) {
-      setError("Vui long nhap day du thong tin.");
+      setError("Vui lòng nhập đầy đủ thông tin.");
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Email khong hop le.");
+      setError("Email không hợp lệ.");
       return;
     }
 
     if (password.length < 6) {
-      setError("Mat khau phai co it nhat 6 ky tu.");
+      setError("Mật khẩu phải có ít nhất 6 ký tự.");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Mat khau xac nhan khong khop.");
+      setError("Mật khẩu xác nhận không khớp.");
       return;
     }
 
     try {
       setLoading(true);
+      const trimmedEmail = email.trim();
+
       await authService.register(
         fullName.trim(),
-        email.trim(),
+        trimmedEmail,
         password,
         phoneNumber.trim(),
       );
 
+      const loggedIn = await login(trimmedEmail, password);
+
+      if (Platform.OS === "web") {
+        window.alert("Đăng ký thành công. Chào mừng bạn đến với bBeauty!");
+        router.replace(loggedIn ? "/(tabs)/home" as any : "/login" as any);
+        return;
+      }
+
       Alert.alert(
-        "Dang ky thanh cong",
-        "Tai khoan cua ban da duoc tao. Hay dang nhap de tiep tuc.",
-        [{ text: "Dang nhap", onPress: () => router.replace("/login" as any) }],
+        "Đăng ký thành công",
+        loggedIn
+          ? "Chào mừng bạn đến với bBeauty!"
+          : "Tài khoản của bạn đã được tạo. Hãy đăng nhập để tiếp tục.",
+        [
+          {
+            text: "OK",
+            onPress: () =>
+              router.replace(loggedIn ? "/(tabs)/home" as any : "/login" as any),
+          },
+        ],
       );
     } catch (err: any) {
       const message =
         err?.response?.data?.message ||
         err?.response?.data?.Message ||
-        "Dang ky that bai. Vui long thu lai.";
+        "Đăng ký thất bại. Vui lòng thử lại.";
       setError(message);
     } finally {
       setLoading(false);
@@ -114,7 +133,7 @@ export default function RegisterScreen() {
     try {
       await signInWithGoogle();
     } catch (err: any) {
-      Alert.alert("Google OAuth", err?.message || "Khong the mo Google OAuth.");
+      Alert.alert("Google OAuth", err?.message || "Không thể mở Google OAuth.");
     }
   };
 
@@ -138,11 +157,11 @@ export default function RegisterScreen() {
               <View style={styles.cardHeader}>
                 <View style={styles.badge}>
                   <Sparkles size={15} color="#F55389" />
-                  <Text style={styles.badgeText}>New member</Text>
+                  <Text style={styles.badgeText}>Thành viên mới</Text>
                 </View>
-                <Text style={styles.title}>Dang ky</Text>
+                <Text style={styles.title}>Đăng ký</Text>
                 <Text style={styles.subtitle}>
-                  Hoan tat thong tin de tao vi va ho so khach hang.
+                  Hoàn tất thông tin để tạo ví và hồ sơ khách hàng.
                 </Text>
               </View>
 
@@ -154,8 +173,8 @@ export default function RegisterScreen() {
 
               <AuthInput
                 icon={<UserRound size={18} color="#E46B87" />}
-                label="Ho va ten"
-                placeholder="Nguyen Van A"
+                label="Họ và tên"
+                placeholder="Nguyễn Văn A"
                 value={fullName}
                 onChangeText={setFullName}
               />
@@ -171,7 +190,7 @@ export default function RegisterScreen() {
 
               <AuthInput
                 icon={<Phone size={18} color="#E46B87" />}
-                label="So dien thoai"
+                label="Số điện thoại"
                 placeholder="09xxxxxxxx"
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
@@ -180,8 +199,8 @@ export default function RegisterScreen() {
 
               <AuthInput
                 icon={<LockKeyhole size={18} color="#E46B87" />}
-                label="Mat khau"
-                placeholder="Toi thieu 6 ky tu"
+                label="Mật khẩu"
+                placeholder="Tối thiểu 6 ký tự"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -189,8 +208,8 @@ export default function RegisterScreen() {
 
               <AuthInput
                 icon={<LockKeyhole size={18} color="#E46B87" />}
-                label="Xac nhan mat khau"
-                placeholder="Nhap lai mat khau"
+                label="Xác nhận mật khẩu"
+                placeholder="Nhập lại mật khẩu"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
@@ -205,13 +224,13 @@ export default function RegisterScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.primaryButtonText}>Tao tai khoan</Text>
+                  <Text style={styles.primaryButtonText}>Tạo tài khoản</Text>
                 )}
               </TouchableOpacity>
 
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>hoac</Text>
+                <Text style={styles.dividerText}>hoặc</Text>
                 <View style={styles.divider} />
               </View>
 
@@ -228,14 +247,14 @@ export default function RegisterScreen() {
                     <View style={styles.googleMark}>
                       <Text style={styles.googleMarkText}>G</Text>
                     </View>
-                    <Text style={styles.googleText}>Dang ky voi Google</Text>
+                    <Text style={styles.googleText}>Đăng ký với Google</Text>
                   </>
                 )}
               </TouchableOpacity>
 
-              <Pressable onPress={() => router.back()} style={styles.switchRow}>
-                <Text style={styles.switchText}>Da co tai khoan?</Text>
-                <Text style={styles.switchAction}> Dang nhap</Text>
+              <Pressable onPress={() => router.replace("/login" as any)} style={styles.switchRow}>
+                <Text style={styles.switchText}>Đã có tài khoản?</Text>
+                <Text style={styles.switchAction}> Đăng nhập</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -297,12 +316,15 @@ const styles = StyleSheet.create({
   brandBlock: {
     alignItems: "center",
     justifyContent: "center",
+    height: 88,
     marginBottom: 22,
+    overflow: "hidden",
   },
   authLogo: {
-    width: "100%",
-    height: 210,
+    width: 390,
+    height: 390,
     opacity: 0.9,
+    transform: [{ translateY: -2 }],
   },
   card: {
     borderRadius: 28,

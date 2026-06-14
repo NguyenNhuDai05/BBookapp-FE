@@ -47,8 +47,8 @@ export default function LoginScreen() {
       }
 
       Alert.alert(
-        "Chua ket noi Google OAuth",
-        "Frontend da lay duoc Google token, nhung backend can them endpoint /api/Auth/google de cap JWT cho app.",
+        "Chưa kết nối Google OAuth",
+        "Frontend đã lấy được Google token, nhưng backend cần endpoint /api/Auth/google để cấp JWT cho ứng dụng.",
       );
 
       return false;
@@ -62,11 +62,11 @@ export default function LoginScreen() {
     const localErrors: { email?: string; password?: string } = {};
 
     if (!email.trim() || !email.includes("@")) {
-      localErrors.email = "Email khong hop le";
+      localErrors.email = "Email không hợp lệ";
     }
 
     if (password.length < 6) {
-      localErrors.password = "Mat khau toi thieu 6 ky tu";
+      localErrors.password = "Mật khẩu tối thiểu 6 ký tự";
     }
 
     if (Object.keys(localErrors).length > 0) {
@@ -86,8 +86,8 @@ export default function LoginScreen() {
     }
 
     Alert.alert(
-      "Dang nhap that bai",
-      "Email hoac mat khau khong chinh xac. Hay kiem tra lai tai khoan trong database backend.",
+      "Đăng nhập thất bại",
+      "Email hoặc mật khẩu không chính xác. Hãy kiểm tra lại tài khoản.",
     );
   };
 
@@ -95,7 +95,7 @@ export default function LoginScreen() {
     try {
       await signInWithGoogle();
     } catch (error: any) {
-      Alert.alert("Google OAuth", error?.message || "Khong the mo Google OAuth.");
+      Alert.alert("Google OAuth", error?.message || "Không thể mở Google OAuth.");
     }
   };
 
@@ -117,9 +117,9 @@ export default function LoginScreen() {
                   <Sparkles size={15} color="#F55389" />
                   <Text style={styles.badgeText}>Beauty booking</Text>
                 </View>
-                <Text style={styles.title}>Dang nhap</Text>
+                <Text style={styles.title}>Đăng nhập</Text>
                 <Text style={styles.subtitle}>
-                  Tiep tuc hanh trinh lam dep cua ban.
+                  Tiếp tục hành trình làm đẹp của bạn.
                 </Text>
               </View>
 
@@ -135,8 +135,8 @@ export default function LoginScreen() {
 
               <AuthInput
                 icon={<LockKeyhole size={18} color="#E46B87" />}
-                label="Mat khau"
-                placeholder="Nhap mat khau"
+                label="Mật khẩu"
+                placeholder="Nhập mật khẩu"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -152,13 +152,13 @@ export default function LoginScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.primaryButtonText}>Dang nhap</Text>
+                  <Text style={styles.primaryButtonText}>Đăng nhập</Text>
                 )}
               </TouchableOpacity>
 
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>hoac</Text>
+                <Text style={styles.dividerText}>hoặc</Text>
                 <View style={styles.divider} />
               </View>
 
@@ -175,7 +175,7 @@ export default function LoginScreen() {
                     <View style={styles.googleMark}>
                       <Text style={styles.googleMarkText}>G</Text>
                     </View>
-                    <Text style={styles.googleText}>Tiep tuc voi Google</Text>
+                    <Text style={styles.googleText}>Tiếp tục với Google</Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -184,8 +184,8 @@ export default function LoginScreen() {
                 onPress={() => router.push("/register" as any)}
                 style={styles.switchRow}
               >
-                <Text style={styles.switchText}>Chua co tai khoan?</Text>
-                <Text style={styles.switchAction}> Dang ky ngay</Text>
+                <Text style={styles.switchText}>Chưa có tài khoản?</Text>
+                <Text style={styles.switchAction}> Đăng ký ngay</Text>
               </Pressable>
             </View>
           </View>
