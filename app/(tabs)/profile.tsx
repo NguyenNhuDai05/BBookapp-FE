@@ -11,10 +11,11 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -39,14 +40,14 @@ interface UserProfile {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { logout, user: authUser } = useAuthStore();
+  const { initialize, logout, user: authUser } = useAuthStore();
 
   // Các State lưu trữ trạng thái dữ liệu thực tế từ Server
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const fetchProfileFromServer = async () => {
+  const fetchProfileFromServer = useCallback(async () => {
     try {
       setLoading(true);
       setErrorMessage("");
@@ -65,16 +66,48 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authUser?.email]);
 
   useEffect(() => {
-    if (authUser?.email) {
-      fetchProfileFromServer();
-    }
-  }, [authUser?.email]);
+    let isMounted = true;
+
+    const loadProfile = async () => {
+      if (authUser?.email) {
+        await fetchProfileFromServer();
+        return;
+      }
+
+      const isAuthSuccess = await initialize();
+
+      if (!isAuthSuccess && isMounted) {
+        setErrorMessage("Phien dang nhap da het han. Vui long dang nhap lai.");
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [authUser?.email, fetchProfileFromServer, initialize]);
 
   // Hàm xử lý đăng xuất đồng bộ hệ thống: Xóa token thiết bị và đẩy về màn Login
   const handleLogout = () => {
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        "Ban co chac chan muon dang xuat khoi ung dung bBeauty khong?",
+      );
+
+      if (confirmed) {
+        logout()
+          .then(() => router.replace("/login" as any))
+          .catch((error) => console.error("Logout error:", error));
+      }
+
+      return;
+    }
+
     Alert.alert(
       "Đăng xuất",
       "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?",
