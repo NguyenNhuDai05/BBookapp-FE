@@ -1,25 +1,16 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import {
-  CalendarDays,
-  CircleUserRound,
-  House,
-  MapPin,
-  MessageCircle,
-  Search,
-  Sparkles,
-  Star,
-} from "lucide-react-native";
+import { MapPin, Search, Sparkles, Star } from "lucide-react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { MUA, muaService } from "../../services/muaService";
 
 const CATEGORIES = ["Tất cả", "Tự nhiên", "Cô dâu", "Nghệ thuật", "Tiệc"];
@@ -506,61 +497,6 @@ export default function HomeScreen() {
             </View>
           </ScrollView>
         )}
-
-        {/* ─── BOTTOM NAVIGATION TAB BAR ─── */}
-        <View
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: "#FCF8FA",
-            borderTopWidth: 0.5,
-            borderTopColor: "#EEE5EA",
-            flexDirection: "row",
-            justifyContent: "space-around",
-            paddingTop: 10,
-            paddingBottom: 24,
-          }}
-        >
-          {[
-            {
-              icon: <House size={20} color="#F06A8B" />,
-              label: "Trang chủ",
-              active: true,
-            },
-            { icon: <Search size={20} color="#70697A" />, label: "Khám phá" },
-            {
-              icon: <CalendarDays size={20} color="#70697A" />,
-              label: "Lịch hẹn",
-            },
-            {
-              icon: <MessageCircle size={20} color="#70697A" />,
-              label: "Chat",
-            },
-            {
-              icon: <CircleUserRound size={20} color="#70697A" />,
-              label: "Hồ sơ",
-            },
-          ].map(({ icon, label, active }) => (
-            <TouchableOpacity
-              key={label}
-              style={{ alignItems: "center", flex: 1 }}
-            >
-              {icon}
-              <Text
-                style={{
-                  fontSize: 10,
-                  marginTop: 4,
-                  fontWeight: active ? "600" : "500",
-                  color: active ? "#F06A8B" : "#8D8593",
-                }}
-              >
-                {label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
       </View>
     </SafeAreaView>
   );
