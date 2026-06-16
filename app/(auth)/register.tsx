@@ -23,6 +23,27 @@ import { useAuthStore } from "../../store/useAuthStore";
 
 const authLogo = require("../../assets/images/logo-bbook.png");
 
+const getRegisterErrorMessage = (err: any) => {
+  const data = err?.response?.data;
+
+  if (typeof data === "string") return data;
+  if (data?.message) return data.message;
+  if (data?.Message) return data.Message;
+
+  if (data?.errors && typeof data.errors === "object") {
+    const firstError = Object.values(data.errors)
+      .flat()
+      .find((item) => typeof item === "string");
+
+    if (firstError) return firstError as string;
+  }
+
+  if (data?.title) return data.title;
+  if (err?.message) return err.message;
+
+  return "Đăng ký thất bại. Vui lòng thử lại.";
+};
+
 export default function RegisterScreen() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
@@ -119,11 +140,12 @@ export default function RegisterScreen() {
         ],
       );
     } catch (err: any) {
+      console.error("Register error:", err?.response?.data || err?.message || err);
       const message =
         err?.response?.data?.message ||
         err?.response?.data?.Message ||
         "Đăng ký thất bại. Vui lòng thử lại.";
-      setError(message);
+      setError(getRegisterErrorMessage(err));
     } finally {
       setLoading(false);
     }

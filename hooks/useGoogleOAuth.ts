@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
+import { Platform } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -16,23 +17,25 @@ export function useGoogleOAuth(
   onGoogleToken: (idToken: string) => Promise<boolean>,
 ) {
   const [loading, setLoading] = useState(false);
-  const isConfigured = Boolean(
-    googleClientIds.webClientId ||
-      googleClientIds.androidClientId ||
-      googleClientIds.iosClientId,
-  );
+
+  const platformClientId = Platform.select({
+    android: googleClientIds.androidClientId,
+    ios: googleClientIds.iosClientId,
+    web: googleClientIds.webClientId,
+    default: googleClientIds.webClientId,
+  });
+
+  const isConfigured = Boolean(platformClientId);
 
   const requestConfig = useMemo(
     () => ({
-      ...googleClientIds,
-      clientId:
-        googleClientIds.webClientId ||
-        googleClientIds.androidClientId ||
-        googleClientIds.iosClientId ||
-        fallbackClientId,
+      webClientId: googleClientIds.webClientId || fallbackClientId,
+      androidClientId: googleClientIds.androidClientId || fallbackClientId,
+      iosClientId: googleClientIds.iosClientId || fallbackClientId,
+      clientId: platformClientId || fallbackClientId,
       selectAccount: true,
     }),
-    [],
+    [platformClientId],
   );
 
   const [request, response, promptAsync] =
@@ -60,7 +63,7 @@ export function useGoogleOAuth(
   const signInWithGoogle = useCallback(async () => {
     if (!isConfigured || !request) {
       throw new Error(
-        "Google OAuth chua duoc cau hinh. Hay them EXPO_PUBLIC_GOOGLE_*_CLIENT_ID vao moi truong Expo.",
+        "Google OAuth chưa được cấu hình cho nền tảng này. Hãy thêm EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID khi chạy trên Android.",
       );
     }
 
