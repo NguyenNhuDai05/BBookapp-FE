@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
   Bell,
+  BriefcaseBusiness,
   ChevronRight,
   CreditCard,
   Globe,
@@ -40,7 +41,7 @@ interface UserProfile {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { initialize, logout, user: authUser } = useAuthStore();
+  const { becomeMUA, initialize, logout, user: authUser } = useAuthStore();
 
   // Các State lưu trữ trạng thái dữ liệu thực tế từ Server
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -134,6 +135,41 @@ export default function ProfileScreen() {
   };
 
   // Hàm render giao diện các dòng chức năng
+  const isMuaAccount = authUser?.role === 2 || authUser?.role === "MUA";
+
+  const handleBecomeMUA = async () => {
+    const runUpgrade = async () => {
+      const success = await becomeMUA();
+      if (success) {
+        router.push("/mua-onboarding" as any);
+        return;
+      }
+
+      if (Platform.OS === "web") {
+        window.alert("Khong the chuyen tai khoan thanh MUA. Vui long thu lai.");
+        return;
+      }
+
+      Alert.alert("Chưa thể chuyển tài khoản", "Vui lòng thử lại sau.");
+    };
+
+    if (Platform.OS === "web") {
+      if (window.confirm("Ban muon dang ky tai khoan nay thanh Makeup Artist?")) {
+        await runUpgrade();
+      }
+      return;
+    }
+
+    Alert.alert(
+      "Trở thành Makeup Artist",
+      "Tài khoản của bạn sẽ được chuyển sang MUA và có thể đăng dịch vụ.",
+      [
+        { text: "Hủy", style: "cancel" },
+        { text: "Tiếp tục", onPress: runUpgrade },
+      ],
+    );
+  };
+
   const renderSettingRow = (
     icon: React.ReactNode,
     title: string,
@@ -267,6 +303,20 @@ export default function ProfileScreen() {
               "Ví & Phương thức thanh toán",
               "Quản lý thẻ ngân hàng, tài khoản ví",
             )}
+            {!isMuaAccount &&
+              renderSettingRow(
+                <BriefcaseBusiness size={20} color="#ff7c98" />,
+                "Become Makeup Artist",
+                "Create MUA profile, services, and portfolio",
+                handleBecomeMUA,
+              )}
+            {isMuaAccount &&
+              renderSettingRow(
+                <BriefcaseBusiness size={20} color="#ff7c98" />,
+                "Makeup Artist profile",
+                "Update portfolio, services, and styles",
+                () => router.push("/mua-onboarding" as any),
+              )}
           </View>
         </View>
 

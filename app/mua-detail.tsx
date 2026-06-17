@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -49,12 +50,11 @@ export default function MUADetailScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   // Danh sách ngày mock để chọn nhanh
-  const availableDates = [
-    "2026-05-29",
-    "2026-05-30",
-    "2026-05-31",
-    "2026-06-01",
-  ];
+  const availableDates = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() + index + 1);
+    return date.toISOString().slice(0, 10);
+  });
   // Danh sách khung giờ mock
   const availableTimes = ["08:00", "10:00", "13:30", "15:30", "17:00", "19:00"];
 
@@ -71,12 +71,21 @@ export default function MUADetailScreen() {
         );
 
         if (infoResult) setMuaInfo(infoResult);
-        setPortfolio(portfolioResult);
-        setServices(servicesResult);
+        setPortfolio(
+          portfolioResult.length > 0
+            ? portfolioResult
+            : infoResult.portfolio || [],
+        );
+        setServices(
+          servicesResult.length > 0 ? servicesResult : infoResult.services || [],
+        );
 
         // Tự động chọn dịch vụ đầu tiên làm mặc định
-        if (servicesResult.length > 0) {
-          setSelectedService(servicesResult[0].id);
+        const resolvedServices =
+          servicesResult.length > 0 ? servicesResult : infoResult.services || [];
+
+        if (resolvedServices.length > 0) {
+          setSelectedService(resolvedServices[0].id);
         }
       } catch (error) {
         console.error("Lỗi khi fetch chi tiết MUA:", error);
@@ -172,10 +181,11 @@ export default function MUADetailScreen() {
       >
         <TouchableOpacity
           onPress={() => setIsBookingModalVisible(true)}
+          disabled={services.length === 0}
           style={{
             height: 56,
             borderRadius: 16,
-            backgroundColor: "#22152B",
+            backgroundColor: services.length === 0 ? "#B8AFBC" : "#22152B",
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
@@ -184,7 +194,9 @@ export default function MUADetailScreen() {
         >
           <CalendarPlus size={20} color="#FFF" />
           <Text style={{ fontSize: 16, fontWeight: "700", color: "#FFF" }}>
-            Đặt lịch với {muaInfo.name}
+            {services.length === 0
+              ? "MUA chưa có dịch vụ"
+              : `Đặt lịch với ${muaInfo.name}`}
           </Text>
         </TouchableOpacity>
       </View>
@@ -400,18 +412,32 @@ export default function MUADetailScreen() {
                   overflow: "hidden",
                 }}
               >
-                <LinearGradient
-                  colors={item.colors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{
-                    flex: 1,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Text style={{ fontSize: 26 }}>{item.icon}</Text>
-                </LinearGradient>
+                {item.imageUrl ? (
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={{ width: "100%", height: "100%" }}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <LinearGradient
+                    colors={item.colors}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                      flex: 1,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 8,
+                    }}
+                  >
+                    <Text
+                      style={{ fontSize: 18, color: "#7C5866" }}
+                      numberOfLines={2}
+                    >
+                      {item.description || item.icon}
+                    </Text>
+                  </LinearGradient>
+                )}
               </TouchableOpacity>
             ))}
           </View>
@@ -429,6 +455,20 @@ export default function MUADetailScreen() {
             Dịch vụ cung cấp
           </Text>
           <View style={{ marginTop: 4 }}>
+            {services.length === 0 && (
+              <View
+                style={{
+                  paddingVertical: 18,
+                  paddingHorizontal: 14,
+                  borderRadius: 14,
+                  backgroundColor: "#F9F6F8",
+                }}
+              >
+                <Text style={{ color: "#8C8390", fontSize: 13 }}>
+                  MUA này chưa cập nhật danh sách dịch vụ.
+                </Text>
+              </View>
+            )}
             {services.map((service, index) => (
               <TouchableOpacity
                 key={service.id}
@@ -446,7 +486,7 @@ export default function MUADetailScreen() {
                   borderRadius: 8,
                 }}
               >
-                <View>
+                <View style={{ flex: 1, paddingRight: 12 }}>
                   <Text
                     style={{
                       fontSize: 15,
@@ -462,6 +502,19 @@ export default function MUADetailScreen() {
                   >
                     {service.time}
                   </Text>
+                  {!!service.description && (
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: "#8C8390",
+                        lineHeight: 17,
+                        marginTop: 4,
+                      }}
+                      numberOfLines={2}
+                    >
+                      {service.description}
+                    </Text>
+                  )}
                 </View>
                 <Text
                   style={{ fontSize: 15, fontWeight: "700", color: "#D86D9A" }}
