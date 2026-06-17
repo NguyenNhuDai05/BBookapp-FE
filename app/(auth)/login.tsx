@@ -56,7 +56,8 @@ export default function LoginScreen() {
     [goHome, loginWithGoogleToken],
   );
 
-  const { googleLoading, signInWithGoogle } = useGoogleOAuth(handleGoogleToken);
+  const { googleLoading, googleReady, signInWithGoogle } =
+    useGoogleOAuth(handleGoogleToken);
 
   const handleLogin = async () => {
     const localErrors: { email?: string; password?: string } = {};
@@ -165,8 +166,11 @@ export default function LoginScreen() {
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={handleGooglePress}
-                disabled={googleLoading}
-                style={[styles.googleButton, googleLoading && styles.disabled]}
+                disabled={googleLoading || !googleReady}
+                style={[
+                  styles.googleButton,
+                  (googleLoading || !googleReady) && styles.disabled,
+                ]}
               >
                 {googleLoading ? (
                   <ActivityIndicator color="#F55389" />

@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
-import { authService } from "../../services/authService";
+import { authService, USER_ROLES } from "../../services/authService";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const authLogo = require("../../assets/images/logo-bbook.png");
@@ -54,6 +54,7 @@ export default function RegisterScreen() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [accountRole, setAccountRole] = useState<number>(USER_ROLES.Customer);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -76,7 +77,8 @@ export default function RegisterScreen() {
     [loginWithGoogleToken, router],
   );
 
-  const { googleLoading, signInWithGoogle } = useGoogleOAuth(handleGoogleToken);
+  const { googleLoading, googleReady, signInWithGoogle } =
+    useGoogleOAuth(handleGoogleToken);
 
   const handleRegister = async () => {
     setError("");
@@ -116,13 +118,20 @@ export default function RegisterScreen() {
         trimmedEmail,
         password,
         phoneNumber.trim(),
+        accountRole,
       );
 
       const loggedIn = await login(trimmedEmail, password);
+      const nextRoute =
+        loggedIn && accountRole === USER_ROLES.MUA
+          ? "/mua-onboarding"
+          : loggedIn
+            ? "/(tabs)/home"
+            : "/login";
 
       if (Platform.OS === "web") {
         window.alert("Đăng ký thành công. Chào mừng bạn đến với bBeauty!");
-        router.replace(loggedIn ? "/(tabs)/home" as any : "/login" as any);
+        router.replace(nextRoute as any);
         return;
       }
 
@@ -134,17 +143,12 @@ export default function RegisterScreen() {
         [
           {
             text: "OK",
-            onPress: () =>
-              router.replace(loggedIn ? "/(tabs)/home" as any : "/login" as any),
+            onPress: () => router.replace(nextRoute as any),
           },
         ],
       );
     } catch (err: any) {
       console.error("Register error:", err?.response?.data || err?.message || err);
-      const message =
-        err?.response?.data?.message ||
-        err?.response?.data?.Message ||
-        "Đăng ký thất bại. Vui lòng thử lại.";
       setError(getRegisterErrorMessage(err));
     } finally {
       setLoading(false);
@@ -237,6 +241,24 @@ export default function RegisterScreen() {
                 secureTextEntry
               />
 
+              <View style={styles.roleGroup}>
+                <Text style={styles.inputLabel}>Loại tài khoản</Text>
+                <View style={styles.roleRow}>
+                  <RoleOption
+                    title="Khách hàng"
+                    description="Tìm và đặt lịch MUA"
+                    active={accountRole === USER_ROLES.Customer}
+                    onPress={() => setAccountRole(USER_ROLES.Customer)}
+                  />
+                  <RoleOption
+                    title="Makeup Artist"
+                    description="Nhận booking và đăng dịch vụ"
+                    active={accountRole === USER_ROLES.MUA}
+                    onPress={() => setAccountRole(USER_ROLES.MUA)}
+                  />
+                </View>
+              </View>
+
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={handleRegister}
@@ -259,8 +281,11 @@ export default function RegisterScreen() {
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={handleGooglePress}
-                disabled={googleLoading}
-                style={[styles.googleButton, googleLoading && styles.disabled]}
+                disabled={googleLoading || !googleReady}
+                style={[
+                  styles.googleButton,
+                  (googleLoading || !googleReady) && styles.disabled,
+                ]}
               >
                 {googleLoading ? (
                   <ActivityIndicator color="#F55389" />
@@ -295,6 +320,33 @@ type AuthInputProps = {
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "phone-pad";
 };
+
+function RoleOption({
+  title,
+  description,
+  active,
+  onPress,
+}: {
+  title: string;
+  description: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      style={[styles.roleOption, active && styles.roleOptionActive]}
+    >
+      <Text style={[styles.roleTitle, active && styles.roleTitleActive]}>
+        {title}
+      </Text>
+      <Text style={[styles.roleDescription, active && styles.roleDescriptionActive]}>
+        {description}
+      </Text>
+    </TouchableOpacity>
+  );
+}
 
 function AuthInput({
   icon,
@@ -403,6 +455,33 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   input: { flex: 1, color: "#301726", fontSize: 15, fontWeight: "600" },
+  roleGroup: { marginBottom: 16 },
+  roleRow: { flexDirection: "row", gap: 10 },
+  roleOption: {
+    flex: 1,
+    minHeight: 78,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#F3C9D2",
+    backgroundColor: "#FFF9FA",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    justifyContent: "center",
+  },
+  roleOptionActive: {
+    borderColor: "#F55389",
+    backgroundColor: "#FFF0F4",
+  },
+  roleTitle: { color: "#4D2636", fontSize: 13, fontWeight: "900" },
+  roleTitleActive: { color: "#F55389" },
+  roleDescription: {
+    color: "#8D6674",
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 4,
+    fontWeight: "700",
+  },
+  roleDescriptionActive: { color: "#6E3549" },
   primaryButton: {
     height: 56,
     borderRadius: 18,
