@@ -21,7 +21,7 @@ interface BackendUserProfile {
 }
 
 const roleToTier = (role: number | string) => {
-  if (role === 2 || role === "MUA") return "MUA";
+  if (role === 2 || role === "MUA") return "Makeup Artist";
   if (role === 0 || role === "Admin") return "Admin";
   return "Customer";
 };

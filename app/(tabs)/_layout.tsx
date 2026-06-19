@@ -6,8 +6,27 @@ import {
   MessageCircle,
   Search,
 } from "lucide-react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
+import { useRequireAuth } from "../../hooks/useRequireAuth";
 
 export default function TabsLayout() {
+  const checkingAuth = useRequireAuth();
+
+  if (checkingAuth) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#FFF6F8",
+        }}
+      >
+        <ActivityIndicator size="large" color="#F55389" />
+      </View>
+    );
+  }
+
   return (
     <Tabs
       screenOptions={{
@@ -15,20 +34,30 @@ export default function TabsLayout() {
 
         tabBarStyle: {
           position: "absolute",
-          left: 16,
-          right: 16,
-          bottom: 16,
+          left: 0,
+          right: 0,
+          bottom: 0,
 
-          height: 72,
+          height: 104,
+          paddingTop: 8,
+          paddingBottom: 28,
 
-          borderRadius: 24,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
 
           backgroundColor: "#fff",
 
           borderTopWidth: 0,
 
-          elevation: 10,
+          elevation: 14,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.12,
+          shadowRadius: 18,
         },
+
+        tabBarItemStyle:
+          Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : undefined,
 
         tabBarActiveTintColor: "#F06A8B",
       }}

@@ -93,7 +93,7 @@ export default function HomeScreen() {
               </View>
               <Text style={styles.heroTitle}>Tìm Makeup Artist phù hợp</Text>
               <Text style={styles.heroSubtitle}>
-                Khám phá MUA, portfolio, dịch vụ và giá trong một nơi.
+                Khám phá Makeup Artist, portfolio, dịch vụ và giá trong một nơi.
               </Text>
 
               <View style={styles.searchShell}>
@@ -170,7 +170,7 @@ export default function HomeScreen() {
               )}
 
               <View style={[styles.sectionHeader, styles.listHeader]}>
-                <Text style={styles.sectionTitle}>Danh sách MUA</Text>
+                <Text style={styles.sectionTitle}>Danh sách Makeup Artist</Text>
                 <Text style={styles.resultCount}>{filteredMUAs.length} kết quả</Text>
               </View>
 
@@ -283,7 +283,7 @@ function EmptyState() {
   return (
     <View style={styles.emptyState}>
       <Image size={22} color="#F55389" />
-      <Text style={styles.emptyTitle}>Chưa tìm thấy MUA phù hợp</Text>
+      <Text style={styles.emptyTitle}>Chưa tìm thấy Makeup Artist phù hợp</Text>
       <Text style={styles.emptySubtitle}>Thử đổi từ khóa hoặc chọn phong cách khác.</Text>
     </View>
   );

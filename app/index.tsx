@@ -2,7 +2,7 @@ import { Asset } from "expo-asset";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Dimensions, Image, Platform, StyleSheet, View } from "react-native";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -20,9 +20,19 @@ const LOGO_WIDTH = isWeb ? SCREEN_WIDTH * 0.35 : SCREEN_WIDTH * 0.8;
 
 export default function SplashScreen() {
   const router = useRouter();
-  const { initialize } = useAuthStore();
+  const initialize = useAuthStore((state) => state.initialize);
+  const routerRef = useRef(router);
+  const hasStartedRef = useRef(false);
+
+  routerRef.current = router;
 
   useEffect(() => {
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let isMounted = true;
+
     const initializeApp = async () => {
       const startTime = Date.now();
 
@@ -54,18 +64,25 @@ export default function SplashScreen() {
 
         const remainingTime = Math.max(0, minimumTimeout - elapsedTime);
 
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
+          if (!isMounted) return;
+
           if (isAuthSuccess) {
-            router.replace("/(tabs)/home" as any);
+            routerRef.current.replace("/(tabs)/home" as any);
           } else {
-            router.replace("/login" as any);
+            routerRef.current.replace("/login" as any);
           }
         }, remainingTime);
       }
     };
 
     initializeApp();
-  }, []);
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [initialize]);
 
   return (
     <LinearGradient

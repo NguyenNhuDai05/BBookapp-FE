@@ -14,9 +14,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useRequireAuth } from "../hooks/useRequireAuth";
 import { MakeupStyle, muaService } from "../services/muaService";
 
 export default function MuaOnboardingScreen() {
+  const checkingAuth = useRequireAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [stylesLoading, setStylesLoading] = useState(true);
@@ -44,18 +46,28 @@ export default function MuaOnboardingScreen() {
 
   useEffect(() => {
     const loadStyles = async () => {
+      if (checkingAuth) return;
+
       try {
         const result = await muaService.getStyles();
         setStyles(result);
       } catch (error) {
-        console.error("Load MUA styles error:", error);
+        console.error("Load Makeup Artist styles error:", error);
       } finally {
         setStylesLoading(false);
       }
     };
 
     loadStyles();
-  }, []);
+  }, [checkingAuth]);
+
+  if (checkingAuth) {
+    return (
+      <View style={stylesSheet.centerScreen}>
+        <ActivityIndicator size="large" color="#F55389" />
+      </View>
+    );
+  }
 
   const toggleStyle = (styleId: number) => {
     setSelectedStyleIds((current) =>
@@ -110,7 +122,7 @@ export default function MuaOnboardingScreen() {
         });
       }
 
-      const message = "Hồ sơ MUA đã được thiết lập. Khách hàng có thể thấy bạn trong danh sách MUA.";
+      const message = "Hồ sơ Makeup Artist đã được thiết lập. Khách hàng có thể thấy bạn trong danh sách Makeup Artist.";
 
       if (Platform.OS === "web") {
         window.alert(message);
@@ -122,7 +134,7 @@ export default function MuaOnboardingScreen() {
         { text: "OK", onPress: () => router.replace("/(tabs)/home" as any) },
       ]);
     } catch (error: any) {
-      console.error("MUA onboarding error:", error?.response?.data || error?.message || error);
+      console.error("Makeup Artist onboarding error:", error?.response?.data || error?.message || error);
       Alert.alert(
         "Chưa lưu được hồ sơ",
         error?.response?.data?.message ||
@@ -154,7 +166,7 @@ export default function MuaOnboardingScreen() {
           <View style={stylesSheet.heroIcon}>
             <BriefcaseBusiness size={24} color="#F55389" />
           </View>
-          <Text style={stylesSheet.heroTitle}>Thiết lập hồ sơ MUA</Text>
+          <Text style={stylesSheet.heroTitle}>Thiết lập hồ sơ Makeup Artist</Text>
           <Text style={stylesSheet.heroSubtitle}>
             Điền những thông tin đầu tiên để khách xem portfolio, dịch vụ và giá.
           </Text>
@@ -282,7 +294,7 @@ export default function MuaOnboardingScreen() {
           {loading ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text style={stylesSheet.submitText}>Hoàn tất hồ sơ MUA</Text>
+            <Text style={stylesSheet.submitText}>Hoàn tất hồ sơ Makeup Artist</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -330,6 +342,12 @@ function Field({
 
 const stylesSheet = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9F6F8" },
+  centerScreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFF6F8",
+  },
   scrollContent: { paddingBottom: 44 },
   hero: {
     paddingHorizontal: 22,

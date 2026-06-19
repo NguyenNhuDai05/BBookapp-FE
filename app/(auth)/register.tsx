@@ -246,7 +246,7 @@ export default function RegisterScreen() {
                 <View style={styles.roleRow}>
                   <RoleOption
                     title="Khách hàng"
-                    description="Tìm và đặt lịch MUA"
+                    description="Tìm và đặt lịch Makeup Artist"
                     active={accountRole === USER_ROLES.Customer}
                     onPress={() => setAccountRole(USER_ROLES.Customer)}
                   />
