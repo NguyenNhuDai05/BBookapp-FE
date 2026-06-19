@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Clock,
   Heart,
+  Star,
   X,
 } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -28,8 +30,15 @@ import {
   PortfolioItem,
   ServiceItem,
 } from "../services/muaService";
+import {
+  formatReviewDate,
+  ReviewItem,
+  reviewService,
+} from "../services/reviewService";
+import { useRequireAuth } from "../hooks/useRequireAuth";
 
 export default function MUADetailScreen() {
+  const checkingAuth = useRequireAuth();
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const targetId = Array.isArray(id) ? id[0] : id;
@@ -41,12 +50,15 @@ export default function MUADetailScreen() {
   const [muaInfo, setMuaInfo] = useState<MUA | null>(null);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [services, setServices] = useState<ServiceItem[]>([]);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
 
   // ─── STATES PHỤC VỤ ĐẶT LỊCH ───
   const [isBookingModalVisible, setIsBookingModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [bookingAddress, setBookingAddress] = useState("");
+  const [bookingNote, setBookingNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Danh sách ngày mock để chọn nhanh
@@ -60,15 +72,15 @@ export default function MUADetailScreen() {
 
   useEffect(() => {
     const loadDetailData = async () => {
-      if (!targetId) return;
+      if (checkingAuth || !targetId) return;
       try {
-        const [infoResult, portfolioResult, servicesResult] = await Promise.all(
-          [
+        const [infoResult, portfolioResult, servicesResult, reviewResult] =
+          await Promise.all([
             muaService.getMUAById(targetId),
             muaService.getPortfolio(targetId),
             muaService.getServices(targetId),
-          ],
-        );
+            reviewService.getByMua(targetId),
+          ]);
 
         if (infoResult) setMuaInfo(infoResult);
         setPortfolio(
@@ -79,6 +91,7 @@ export default function MUADetailScreen() {
         setServices(
           servicesResult.length > 0 ? servicesResult : infoResult.services || [],
         );
+        setReviews(reviewResult);
 
         // Tự động chọn dịch vụ đầu tiên làm mặc định
         const resolvedServices =
@@ -95,14 +108,14 @@ export default function MUADetailScreen() {
     };
 
     loadDetailData();
-  }, [targetId]);
+  }, [checkingAuth, targetId]);
 
   // HÀM XỬ LÝ GỬI ĐẶT LỊCH LÊN SERVER
   const handleConfirmBooking = async () => {
-    if (!targetId || !selectedService || !selectedDate || !selectedTime) {
+    if (!targetId || !selectedService || !selectedDate || !selectedTime || !bookingAddress.trim()) {
       Alert.alert(
         "Thông báo",
-        "Vui lòng chọn đầy đủ Dịch vụ, Ngày và Giờ đặt lịch!",
+        "Vui lòng chọn dịch vụ, ngày giờ và nhập địa chỉ làm makeup.",
       );
       return;
     }
@@ -114,29 +127,33 @@ export default function MUADetailScreen() {
         serviceId: selectedService,
         date: selectedDate,
         timeSlot: selectedTime,
+        address: bookingAddress.trim(),
+        note: bookingNote.trim() || undefined,
       };
 
-      // Gọi hàm POST sang MockAPI đã viết ở service
       const result = await muaService.createBooking(bookingPayload);
 
-      setIsBookingModalVisible(false); // Đóng modal nháp
+      setIsBookingModalVisible(false);
+      setBookingAddress("");
+      setBookingNote("");
       Alert.alert(
-        "Thành công 🎉",
-        `Lịch hẹn của bạn với ${muaInfo?.name} đã được ghi nhận thành công! (Mã đặt: ${result.id || "MUA-" + targetId})`,
-        [{ text: "OK", onPress: () => router.push("/") }], // Quay về trang chủ hoặc lịch trình
+        "Đặt lịch thành công",
+        `Lịch hẹn với ${muaInfo?.name} đã được tạo. Mã đặt lịch: ${result.id || "Booking"}`,
+        [{ text: "Xem lịch sử", onPress: () => router.replace("/(tabs)/bookings" as any) }],
       );
-    } catch (error) {
-      console.error("Lỗi đặt lịch:", error);
+    } catch (error: any) {
+      console.error("Booking error:", error?.response?.data || error?.message || error);
       Alert.alert(
-        "Thất bại",
-        "Đã có lỗi xảy ra trong quá trình đặt lịch. Vui lòng thử lại!",
+        "Đặt lịch thất bại",
+        error?.response?.data?.message ||
+          error?.response?.data?.Message ||
+          "Không thể tạo lịch hẹn. Vui lòng thử lại.",
       );
     } finally {
       setSubmitting(false);
     }
   };
-
-  if (loading) {
+  if (checkingAuth || loading) {
     return (
       <View
         style={{
@@ -195,7 +212,7 @@ export default function MUADetailScreen() {
           <CalendarPlus size={20} color="#FFF" />
           <Text style={{ fontSize: 16, fontWeight: "700", color: "#FFF" }}>
             {services.length === 0
-              ? "MUA chưa có dịch vụ"
+              ? "Makeup Artist chưa có dịch vụ"
               : `Đặt lịch với ${muaInfo.name}`}
           </Text>
         </TouchableOpacity>
@@ -307,7 +324,7 @@ export default function MUADetailScreen() {
               fontWeight: "500",
             }}
           >
-            {muaInfo.styles.join(" & ")} MUA · {muaInfo.yearsOfExp} năm KN
+            {muaInfo.styles.join(" & ")} Makeup Artist · {muaInfo.yearsOfExp} năm KN
           </Text>
 
           {/* BAO THÔNG SỐ */}
@@ -465,7 +482,7 @@ export default function MUADetailScreen() {
                 }}
               >
                 <Text style={{ color: "#8C8390", fontSize: 13 }}>
-                  MUA này chưa cập nhật danh sách dịch vụ.
+                  Makeup Artist này chưa cập nhật danh sách dịch vụ.
                 </Text>
               </View>
             )}
@@ -524,6 +541,140 @@ export default function MUADetailScreen() {
               </TouchableOpacity>
             ))}
           </View>
+
+          <View
+            style={{
+              marginTop: 28,
+              marginBottom: 18,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 15,
+                fontWeight: "700",
+                color: "#1D1A36",
+              }}
+            >
+              Đánh giá từ khách hàng
+            </Text>
+            <Text style={{ fontSize: 12, color: "#8C8390", fontWeight: "700" }}>
+              {reviews.length} review
+            </Text>
+          </View>
+
+          <View
+            style={{
+              borderRadius: 18,
+              borderWidth: 1,
+              borderColor: "#EEE5EA",
+              backgroundColor: "#FFF9FA",
+              padding: 14,
+              marginBottom: 8,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Star size={18} color="#F5A623" fill="#F5A623" />
+              <Text style={{ fontSize: 20, color: "#1F1B36", fontWeight: "800" }}>
+                {Number(muaInfo.rating || 0).toFixed(1)}
+              </Text>
+              <Text style={{ fontSize: 13, color: "#8C8390", fontWeight: "600" }}>
+                / 5.0
+              </Text>
+            </View>
+            <Text
+              style={{
+                marginTop: 6,
+                fontSize: 12,
+                color: "#8C8390",
+                fontWeight: "600",
+              }}
+            >
+              Rating trung bình được cập nhật sau mỗi đánh giá hợp lệ.
+            </Text>
+          </View>
+
+          {reviews.length === 0 ? (
+            <View
+              style={{
+                paddingVertical: 18,
+                paddingHorizontal: 14,
+                borderRadius: 14,
+                backgroundColor: "#F9F6F8",
+              }}
+            >
+              <Text style={{ color: "#8C8390", fontSize: 13 }}>
+                Makeup Artist này chưa có đánh giá nào.
+              </Text>
+            </View>
+          ) : (
+            reviews.map((review) => (
+              <View
+                key={review.reviewId}
+                style={{
+                  borderBottomWidth: 1,
+                  borderBottomColor: "#F6EFF2",
+                  paddingVertical: 14,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        color: "#1F1B36",
+                        fontSize: 14,
+                        fontWeight: "800",
+                      }}
+                      numberOfLines={1}
+                    >
+                      {review.customerName}
+                    </Text>
+                    <Text
+                      style={{
+                        color: "#A397A6",
+                        fontSize: 11,
+                        fontWeight: "600",
+                        marginTop: 2,
+                      }}
+                    >
+                      {formatReviewDate(review.createdAt)}
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <Star
+                        key={value}
+                        size={14}
+                        color="#F5A623"
+                        fill={value <= review.rating ? "#F5A623" : "transparent"}
+                      />
+                    ))}
+                  </View>
+                </View>
+                {!!review.comment && (
+                  <Text
+                    style={{
+                      color: "#5C5461",
+                      fontSize: 13,
+                      lineHeight: 19,
+                      marginTop: 8,
+                    }}
+                  >
+                    {review.comment}
+                  </Text>
+                )}
+              </View>
+            ))
+          )}
         </View>
       </ScrollView>
 
@@ -697,6 +848,56 @@ export default function MUADetailScreen() {
                 </View>
               </View>
 
+              <View style={{ marginBottom: 24 }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "700",
+                    color: "#5C5461",
+                    marginBottom: 12,
+                  }}
+                >
+                  Địa chỉ làm makeup
+                </Text>
+                <TextInput
+                  value={bookingAddress}
+                  onChangeText={setBookingAddress}
+                  placeholder="Số nhà, đường, phường/xã, quận/huyện"
+                  placeholderTextColor="#BCA7B4"
+                  style={{
+                    minHeight: 52,
+                    borderRadius: 14,
+                    borderWidth: 1,
+                    borderColor: "#EEE5EA",
+                    backgroundColor: "#FFF9FA",
+                    paddingHorizontal: 14,
+                    color: "#1F1B36",
+                    fontSize: 14,
+                    fontWeight: "600",
+                  }}
+                />
+                <TextInput
+                  value={bookingNote}
+                  onChangeText={setBookingNote}
+                  placeholder="Ghi chú thêm cho Makeup Artist (tòa nhà, tone makeup mong muốn...)"
+                  placeholderTextColor="#BCA7B4"
+                  multiline
+                  style={{
+                    minHeight: 82,
+                    borderRadius: 14,
+                    borderWidth: 1,
+                    borderColor: "#EEE5EA",
+                    backgroundColor: "#FFF9FA",
+                    paddingHorizontal: 14,
+                    paddingTop: 12,
+                    color: "#1F1B36",
+                    fontSize: 14,
+                    fontWeight: "600",
+                    marginTop: 10,
+                    textAlignVertical: "top",
+                  }}
+                />
+              </View>
               {/* TÓM TẮT DỊCH VỤ ĐÃ CHỌN */}
               <View
                 style={{

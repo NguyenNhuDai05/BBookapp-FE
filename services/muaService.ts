@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { bookingService } from "./bookingService";
 
 export interface PortfolioItem {
   id: string;
@@ -41,6 +42,8 @@ export interface BookingData {
   date: string;
   timeSlot: string;
   serviceId: string;
+  address: string;
+  note?: string;
 }
 
 export interface MakeupStyle {
@@ -109,10 +112,10 @@ const formatPrice = (price: number) =>
   `${new Intl.NumberFormat("vi-VN").format(price)}đ`;
 
 const getInitials = (name?: string) => {
-  if (!name) return "MUA";
+  if (!name) return "Makeup Artist";
 
   const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return "MUA";
+  if (words.length === 0) return "Makeup Artist";
 
   return words
     .slice(-2)
@@ -204,7 +207,7 @@ const toMua = (
     yearsOfExp: Number(profile.experienceYears || 0),
     completedBooks: Number(profile.totalBookings || 0),
     responseRate: 100,
-    bio: profile.bio || "MUA chưa cập nhật giới thiệu.",
+    bio: profile.bio || "Makeup Artist chưa cập nhật giới thiệu.",
     services,
     portfolio,
   };
@@ -273,14 +276,11 @@ export const muaService = {
   createBooking: async (bookingData: BookingData) => {
     const bookingDate = new Date(`${bookingData.date}T${bookingData.timeSlot}:00`);
 
-    const response = await api.post("/Booking", {
+    return bookingService.createBooking({
       muaId: bookingData.muaId,
       serviceId: bookingData.serviceId,
       bookingDate: bookingDate.toISOString(),
-      address: "Địa chỉ sẽ được cập nhật sau",
-      note: `Khung giờ mong muốn: ${bookingData.timeSlot}`,
+      address: bookingData.address,
+      note: bookingData.note,
     });
-
-    return response.data.booking || response.data;
-  },
-};
+  },};

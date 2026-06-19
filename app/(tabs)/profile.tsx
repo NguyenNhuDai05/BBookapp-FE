@@ -81,7 +81,7 @@ export default function ProfileScreen() {
       const isAuthSuccess = await initialize();
 
       if (!isAuthSuccess && isMounted) {
-        setErrorMessage("Phien dang nhap da het han. Vui long dang nhap lai.");
+        setErrorMessage("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
         setLoading(false);
       }
     };
@@ -97,7 +97,7 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     if (Platform.OS === "web") {
       const confirmed = window.confirm(
-        "Ban co chac chan muon dang xuat khoi ung dung bBeauty khong?",
+        "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?",
       );
 
       if (confirmed) {
@@ -146,7 +146,7 @@ export default function ProfileScreen() {
       }
 
       if (Platform.OS === "web") {
-        window.alert("Khong the chuyen tai khoan thanh MUA. Vui long thu lai.");
+        window.alert("Không thể chuyển tài khoản thành Makeup Artist. Vui lòng thử lại.");
         return;
       }
 
@@ -154,7 +154,7 @@ export default function ProfileScreen() {
     };
 
     if (Platform.OS === "web") {
-      if (window.confirm("Ban muon dang ky tai khoan nay thanh Makeup Artist?")) {
+      if (window.confirm("Bạn muốn đăng ký tài khoản này thành Makeup Artist?")) {
         await runUpgrade();
       }
       return;
@@ -162,7 +162,7 @@ export default function ProfileScreen() {
 
     Alert.alert(
       "Trở thành Makeup Artist",
-      "Tài khoản của bạn sẽ được chuyển sang MUA và có thể đăng dịch vụ.",
+      "Tài khoản của bạn sẽ được chuyển sang Makeup Artist và có thể đăng dịch vụ.",
       [
         { text: "Hủy", style: "cancel" },
         { text: "Tiếp tục", onPress: runUpgrade },
@@ -296,7 +296,7 @@ export default function ProfileScreen() {
             {renderSettingRow(
               <Heart size={20} color="#ff7c98" />,
               "Nghệ sĩ yêu thích",
-              "Danh sách các chuyên gia MUA bạn đã lưu",
+              "Danh sách các Makeup Artist bạn đã lưu",
             )}
             {renderSettingRow(
               <CreditCard size={20} color="#ff7c98" />,
@@ -307,7 +307,7 @@ export default function ProfileScreen() {
               renderSettingRow(
                 <BriefcaseBusiness size={20} color="#ff7c98" />,
                 "Become Makeup Artist",
-                "Create MUA profile, services, and portfolio",
+                "Create Makeup Artist profile, services, and portfolio",
                 handleBecomeMUA,
               )}
             {isMuaAccount &&
@@ -360,7 +360,7 @@ export default function ProfileScreen() {
 // ─── THIẾT KẾ STYLE LAYOUT CHUẨN NATIVE RESPONSIVE ───
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9F6F8" },
-  scrollContent: { paddingBottom: 40 },
+  scrollContent: { paddingBottom: 160 },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
