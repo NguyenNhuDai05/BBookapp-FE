@@ -68,9 +68,16 @@ export default function SplashScreen() {
           if (!isMounted) return;
 
           if (isAuthSuccess) {
-            routerRef.current.replace("/(tabs)/home" as any);
+            const currentUser = useAuthStore.getState().user;
+            if (currentUser?.role === 'MUA') {
+              routerRef.current.replace("/(mua)/dashboard" as any);
+            } else if (currentUser?.role === 'ADMIN') {
+              routerRef.current.replace("/(admin)/dashboard" as any);
+            } else {
+              routerRef.current.replace("/(tabs)/home" as any);
+            }
           } else {
-            routerRef.current.replace("/login" as any);
+            routerRef.current.replace("/(auth)/login" as any);
           }
         }, remainingTime);
       }

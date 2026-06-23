@@ -3,10 +3,10 @@ import { useRouter } from "expo-router";
 import { Star } from "lucide-react-native";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import { MUA } from "../services/muaService";
+import { ArtistDto } from "../types/ArtistDto";
 
 interface Props {
-  mua: MUA;
+  mua: ArtistDto;
 }
 
 export default function MUACard({ mua }: Props) {
@@ -19,6 +19,17 @@ export default function MUACard({ mua }: Props) {
     });
   };
 
+  const getAvatarFallback = (name: string) => {
+    if (!name) return 'M';
+    const parts = name.split(' ');
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  const avatarFallback = getAvatarFallback(mua.name);
+
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -26,9 +37,9 @@ export default function MUACard({ mua }: Props) {
       className="bg-white w-64 rounded-3xl mr-4 overflow-hidden border border-pink-100 shadow-sm shadow-pink-200/40"
     >
       <View className="relative w-full h-40 bg-slate-100">
-        {mua.coverUrl ? (
+        {mua.coverImage ? (
           <Image
-            source={{ uri: mua.coverUrl }}
+            source={{ uri: mua.coverImage }}
             className="w-full h-full"
             resizeMode="cover"
           />
@@ -42,33 +53,33 @@ export default function MUACard({ mua }: Props) {
               justifyContent: "center",
             }}
           >
-            <Text className="text-white text-4xl font-bold">{mua.avatar}</Text>
+            <Text className="text-white text-4xl font-bold">{avatarFallback}</Text>
           </LinearGradient>
         )}
 
         <View className="absolute top-3 left-3 bg-black/60 px-2.5 py-1 rounded-full">
           <Text className="text-white text-[10px] font-bold">
-            {mua.yearsOfExp} năm KN
+            {mua.yearsExperience} năm KN
           </Text>
         </View>
         <View className="absolute bottom-3 right-3 bg-bbook-accent px-2.5 py-1 rounded-lg">
           <Text className="text-white text-[10px] font-black uppercase tracking-wider">
-            {mua.completedBooks} đã book
+            {mua.reviewCount} đã book
           </Text>
         </View>
       </View>
 
       <View className="p-4">
         <View className="flex-row items-center mb-2">
-          {mua.avatarUrl ? (
+          {mua.avatar ? (
             <Image
-              source={{ uri: mua.avatarUrl }}
+              source={{ uri: mua.avatar }}
               className="w-8 h-8 rounded-full border border-pink-200 mr-2"
             />
           ) : (
             <View className="w-8 h-8 rounded-full bg-pink-100 mr-2 items-center justify-center">
               <Text className="text-bbook-pinkDark text-[10px] font-black">
-                {mua.avatar}
+                {avatarFallback}
               </Text>
             </View>
           )}
@@ -86,7 +97,7 @@ export default function MUACard({ mua }: Props) {
         </View>
 
         <View className="flex-row flex-wrap h-6 overflow-hidden mb-3">
-          {mua.styles.map((style) => (
+          {mua.specialties.map((style) => (
             <View
               key={style}
               className="bg-peach-light/50 px-2 py-0.5 rounded-md mr-1.5 mb-1.5"
@@ -104,7 +115,7 @@ export default function MUACard({ mua }: Props) {
               Giá khởi điểm
             </Text>
             <Text className="text-bbook-pinkDark font-extrabold text-sm">
-              {mua.priceRange}
+              {mua.services && mua.services.length > 0 ? `${mua.services[0].price.toLocaleString('vi-VN')}đ` : 'Liên hệ'}
             </Text>
           </View>
           <View className="bg-bbook-pinkMedium/10 px-3 py-2 rounded-xl">

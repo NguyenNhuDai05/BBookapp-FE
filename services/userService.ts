@@ -38,9 +38,14 @@ const mapUserProfile = (data: BackendUserProfile): UserProfile => ({
 });
 
 export const userService = {
-  getUserProfile: async (_email?: string): Promise<UserProfile> => {
-    const response = await api.get("/User/profile");
-    return mapUserProfile(response.data);
+  getUserProfile: async (email?: string): Promise<UserProfile> => {
+    try {
+      const response = await api.get("/User/profile");
+      return mapUserProfile(response.data);
+    } catch (e) {
+      console.error('API Error getting user profile:', e);
+      throw e;
+    }
   },
 
   updateUserProfile: async (

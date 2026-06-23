@@ -6,6 +6,7 @@ interface Props {
   onPress: () => void;
   variant?: "primary" | "secondary";
   loading?: boolean;
+  disabled?: boolean;
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export default function CustomButton({
   onPress,
   variant = "primary",
   loading = false,
+  disabled = false,
   className = "",
 }: Props) {
   const bgStyle =
@@ -29,8 +31,8 @@ export default function CustomButton({
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      disabled={loading}
-      className={`w-full py-4 rounded-xl flex-row justify-center items-center ${bgStyle} ${className}`}
+      disabled={loading || disabled}
+      className={`w-full py-4 rounded-xl flex-row justify-center items-center ${bgStyle} ${className} ${(loading || disabled) ? "opacity-70" : ""}`}
     >
       {loading ? (
         <ActivityIndicator

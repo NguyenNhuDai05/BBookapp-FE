@@ -18,8 +18,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
-import { authService, USER_ROLES } from "../../services/authService";
 import { useAuthStore } from "../../store/useAuthStore";
+import { UserRole } from "../../types/auth";
 
 const authLogo = require("../../assets/images/logo-bbook.png");
 
@@ -46,7 +46,7 @@ const getRegisterErrorMessage = (err: any) => {
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const registerStore = useAuthStore((state) => state.register);
   const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
 
   const [fullName, setFullName] = useState("");
@@ -54,7 +54,7 @@ export default function RegisterScreen() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [accountRole, setAccountRole] = useState<number>(USER_ROLES.Customer);
+  const [accountRole, setAccountRole] = useState<UserRole>(UserRole.Customer);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -113,40 +113,22 @@ export default function RegisterScreen() {
       setLoading(true);
       const trimmedEmail = email.trim();
 
-      await authService.register(
-        fullName.trim(),
-        trimmedEmail,
-        password,
-        phoneNumber.trim(),
-        accountRole,
-      );
+      // Register and auto-login handled by store
+      const success = await registerStore(fullName.trim(), trimmedEmail, password, phoneNumber.trim(), accountRole);
 
-      const loggedIn = await login(trimmedEmail, password);
-      const nextRoute =
-        loggedIn && accountRole === USER_ROLES.MUA
-          ? "/mua-onboarding"
-          : loggedIn
-            ? "/(tabs)/home"
-            : "/login";
-
-      if (Platform.OS === "web") {
-        window.alert("Đăng ký thành công. Chào mừng bạn đến với bBeauty!");
-        router.replace(nextRoute as any);
-        return;
+      if (success) {
+        // Redirection is handled by the useProtectedRoute hook!
+        if (Platform.OS === "web") {
+          window.alert("Đăng ký thành công. Chào mừng bạn đến với bBeauty!");
+        } else {
+          Alert.alert(
+            "Đăng ký thành công",
+            "Chào mừng bạn đến với B-Book!",
+          );
+        }
+      } else {
+        Alert.alert("Đăng ký thất bại", "Có lỗi xảy ra. Vui lòng thử lại.");
       }
-
-      Alert.alert(
-        "Đăng ký thành công",
-        loggedIn
-          ? "Chào mừng bạn đến với bBeauty!"
-          : "Tài khoản của bạn đã được tạo. Hãy đăng nhập để tiếp tục.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace(nextRoute as any),
-          },
-        ],
-      );
     } catch (err: any) {
       console.error("Register error:", err?.response?.data || err?.message || err);
       setError(getRegisterErrorMessage(err));
@@ -247,14 +229,14 @@ export default function RegisterScreen() {
                   <RoleOption
                     title="Khách hàng"
                     description="Tìm và đặt lịch Makeup Artist"
-                    active={accountRole === USER_ROLES.Customer}
-                    onPress={() => setAccountRole(USER_ROLES.Customer)}
+                    active={accountRole === UserRole.Customer}
+                    onPress={() => setAccountRole(UserRole.Customer)}
                   />
                   <RoleOption
                     title="Makeup Artist"
                     description="Nhận booking và đăng dịch vụ"
-                    active={accountRole === USER_ROLES.MUA}
-                    onPress={() => setAccountRole(USER_ROLES.MUA)}
+                    active={accountRole === UserRole.MUA}
+                    onPress={() => setAccountRole(UserRole.MUA)}
                   />
                 </View>
               </View>

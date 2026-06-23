@@ -8,6 +8,7 @@ import {
 } from "lucide-react-native";
 import { ActivityIndicator, Platform, View } from "react-native";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { BrandColors, Shadows } from "../../constants/theme";
 
 export default function TabsLayout() {
   const checkingAuth = useRequireAuth();
@@ -19,10 +20,10 @@ export default function TabsLayout() {
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#FFF6F8",
+          backgroundColor: BrandColors.bgPrimary,
         }}
       >
-        <ActivityIndicator size="large" color="#F55389" />
+        <ActivityIndicator size="large" color={BrandColors.accentPink} />
       </View>
     );
   }
@@ -49,23 +50,19 @@ export default function TabsLayout() {
 
           borderTopWidth: 0,
 
-          elevation: 14,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: -6 },
-          shadowOpacity: 0.12,
-          shadowRadius: 18,
+          ...Shadows.tabBar,
         },
 
         tabBarItemStyle:
           Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : undefined,
 
-        tabBarActiveTintColor: "#F06A8B",
+        tabBarActiveTintColor: BrandColors.accentPinkLight,
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: "Trang chủ",
           tabBarIcon: ({ color, size }) => <House color={color} size={size} />,
         }}
       />
@@ -73,7 +70,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: "Explore",
+          title: "Tìm kiếm",
           tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
         }}
       />
@@ -101,7 +98,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Tài khoản",
           tabBarIcon: ({ color, size }) => (
             <CircleUserRound color={color} size={size} />
           ),

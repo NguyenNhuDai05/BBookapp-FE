@@ -23,9 +23,11 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { userService } from "../../services/userService";
 import { useAuthStore } from "../../store/useAuthStore";
+import { UserRole } from "../../types/auth";
 
 // Định nghĩa đúng cấu trúc dữ liệu trả về từ Resource "users" trên MockAPI
 interface UserProfile {
@@ -41,7 +43,7 @@ interface UserProfile {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { becomeMUA, initialize, logout, user: authUser } = useAuthStore();
+  const { becomeMUA, initialize, logout, user: authUser, switchMode } = useAuthStore();
 
   // Các State lưu trữ trạng thái dữ liệu thực tế từ Server
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -135,7 +137,7 @@ export default function ProfileScreen() {
   };
 
   // Hàm render giao diện các dòng chức năng
-  const isMuaAccount = authUser?.role === 2 || authUser?.role === "MUA";
+  const isMuaAccount = authUser?.hasMuaProfile === true || authUser?.role === UserRole.MUA;
 
   const handleBecomeMUA = async () => {
     const runUpgrade = async () => {
@@ -249,8 +251,14 @@ export default function ProfileScreen() {
           style={styles.headerBanner}
         >
           <View style={styles.userInfoContainer}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarEmoji}>{user.avatar}</Text>
+            <View style={[styles.avatarCircle, { overflow: 'hidden' }]}>
+              {user.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('file')) ? (
+                <Image source={{ uri: user.avatar }} style={{ width: 76, height: 76, borderRadius: 38 }} />
+              ) : user.avatar ? (
+                <Text style={styles.avatarEmoji}>{user.avatar}</Text>
+              ) : (
+                <User size={40} color="#ff7c98" />
+              )}
             </View>
             <View style={styles.userTextDetails}>
               <Text style={styles.userName}>{user.name}</Text>
@@ -313,9 +321,12 @@ export default function ProfileScreen() {
             {isMuaAccount &&
               renderSettingRow(
                 <BriefcaseBusiness size={20} color="#ff7c98" />,
-                "Makeup Artist profile",
-                "Update portfolio, services, and styles",
-                () => router.push("/mua-onboarding" as any),
+                "Chuyển sang giao diện MUA",
+                "Quản lý lịch hẹn, dịch vụ và danh thu",
+                () => {
+                  switchMode('MUA');
+                  router.replace("/(mua)/dashboard" as any);
+                },
               )}
           </View>
         </View>

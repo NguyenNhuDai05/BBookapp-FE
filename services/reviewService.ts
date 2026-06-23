@@ -1,37 +1,28 @@
-import { api } from "./api";
+import { ApiReviewRepository } from '../repositories/ApiReviewRepository';
+import type { IReviewRepository } from '../repositories/IReviewRepository';
+import type { ReviewDto, CreateReviewRequest } from '../types/ReviewDto';
 
-export interface ReviewItem {
-  reviewId: string;
-  bookingId: string;
-  customerId: string;
-  customerName: string;
-  muaId: string;
-  rating: number;
-  comment?: string;
-  createdAt: string;
+class ReviewService {
+  private repository: IReviewRepository;
+
+  constructor(repository: IReviewRepository) {
+    this.repository = repository;
+  }
+
+  async getByMua(muaId: string): Promise<ReviewDto[]> {
+    return this.repository.getByMua(muaId);
+  }
+
+  async createForBooking(bookingId: string, rating: number, comment?: string): Promise<void> {
+    return this.repository.createForBooking({ bookingId, rating, comment });
+  }
+
+  async replyToReview(reviewId: string, replyContent: string): Promise<void> {
+    return this.repository.replyToReview(reviewId, replyContent);
+  }
 }
 
-interface BackendReview {
-  reviewId: string;
-  bookingId: string;
-  customerId: string;
-  customerName?: string;
-  muaId: string;
-  rating: number;
-  comment?: string;
-  createdAt: string;
-}
-
-const toReviewItem = (review: BackendReview): ReviewItem => ({
-  reviewId: review.reviewId,
-  bookingId: review.bookingId,
-  customerId: review.customerId,
-  customerName: review.customerName || "Khách hàng",
-  muaId: review.muaId,
-  rating: Number(review.rating || 0),
-  comment: review.comment,
-  createdAt: review.createdAt,
-});
+export const reviewService = new ReviewService(new ApiReviewRepository());
 
 export const formatReviewDate = (value: string) => {
   const date = new Date(value);
@@ -42,24 +33,4 @@ export const formatReviewDate = (value: string) => {
     month: "2-digit",
     year: "numeric",
   }).format(date);
-};
-
-export const reviewService = {
-  getByMua: async (muaId: string): Promise<ReviewItem[]> => {
-    const response = await api.get(`/Review/mua/${muaId}`);
-    const reviews: BackendReview[] = response.data;
-    return reviews.map(toReviewItem);
-  },
-
-  createForBooking: async (
-    bookingId: string,
-    rating: number,
-    comment?: string,
-  ): Promise<void> => {
-    await api.post("/Review", {
-      bookingId,
-      rating,
-      comment,
-    });
-  },
 };

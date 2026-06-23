@@ -1,672 +1,480 @@
+import React, { useState, useMemo } from 'react';
 import {
-  CalendarDays,
-  Check,
-  CheckCircle2,
-  MapPin,
-  RefreshCw,
-  Star,
-  WalletCards,
-  X,
-} from "lucide-react-native";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
   View,
-} from "react-native";
-import {
-  BookingItem,
-  BookingStatus,
-  bookingService,
-  formatBookingDate,
-  formatMoney,
-} from "../../services/bookingService";
-import { reviewService } from "../../services/reviewService";
-import { useAuthStore } from "../../store/useAuthStore";
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import { MapPin, Calendar, Clock, ArrowRight } from 'lucide-react-native';
+import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
+import { useUserBookings, useConfirmBookingCompletion } from '../../hooks/useBooking';
+import { BookingDto, BookingStatus } from '../../types/booking';
+import { BookingServiceList } from '../../components/BookingServiceList';
 
-const STATUS_META = {
-  Pending: { label: "Chờ duyệt", color: "#D86D9A", bg: "#FFF0F4" },
-  Approved: { label: "Đã duyệt", color: "#227A5C", bg: "#EAF8F1" },
-  Completed: { label: "Hoàn thành", color: "#3B6BB3", bg: "#EEF5FF" },
-  Cancelled: { label: "Đã từ chối", color: "#B34444", bg: "#FFF0F0" },
+type TabType = 'ALL' | 'COMPLETED' | 'PENDING' | 'CANCELLED';
+
+const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: string }> = {
+  PENDING: { label: 'Chờ xác nhận', color: '#FF9800', bg: '#FFF3E0' },
+  CONFIRMED: { label: 'Đã xác nhận', color: '#2196F3', bg: '#E3F2FD' },
+  IN_PROGRESS: { label: 'Đang thực hiện', color: '#9C27B0', bg: '#F3E5F5' },
+  WAITING_CUSTOMER: { label: 'Chờ bạn xác nhận', color: '#00BCD4', bg: '#E0F7FA' },
+  COMPLETED: { label: 'Hoàn thành', color: '#4CAF50', bg: '#E8F5E9' },
+  CANCELLED: { label: 'Đã hủy', color: '#F44336', bg: '#FFEBEE' },
+  REJECTED: { label: 'Từ chối', color: '#F44336', bg: '#FFEBEE' },
 };
 
-const isArtistRole = (role: unknown) => role === 2 || role === "MUA";
+export default function BookingsTab() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<TabType>('ALL');
+  const { data: bookings, isLoading, error, refetch, isRefetching } = useUserBookings();
+  const { mutate: confirmCompletion, isPending: isConfirming } = useConfirmBookingCompletion();
 
-export default function BookingScreen() {
-  const authUser = useAuthStore((state) => state.user);
-  const artistMode = isArtistRole(authUser?.role);
-
-  const [bookings, setBookings] = useState<BookingItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState("");
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [reviewTarget, setReviewTarget] = useState<BookingItem | null>(null);
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState("");
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
-
-  const loadBookings = useCallback(async () => {
-    try {
-      setError("");
-      const result = await bookingService.getBookings();
-      setBookings(result);
-    } catch (err: any) {
-      console.error("Load bookings error:", err?.response?.data || err?.message || err);
-      setError(
-        err?.response?.data?.message ||
-          err?.response?.data?.Message ||
-          "Không thể tải danh sách đặt lịch.",
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  const filteredBookings = useMemo(() => {
+    if (!bookings) return [];
+    switch (activeTab) {
+      case 'COMPLETED':
+        return bookings.filter(b => b.status === 'COMPLETED');
+      case 'PENDING':
+        return bookings.filter(b => b.status === 'PENDING' || b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS' || b.status === 'WAITING_CUSTOMER');
+      case 'CANCELLED':
+        return bookings.filter(b => b.status === 'CANCELLED');
+      case 'ALL':
+      default:
+        return bookings;
     }
-  }, []);
+  }, [bookings, activeTab]);
 
-  useEffect(() => {
-    loadBookings();
-  }, [loadBookings]);
-
-  const refresh = () => {
-    setRefreshing(true);
-    loadBookings();
-  };
-
-  const title = artistMode ? "Lịch khách đã đặt" : "Lịch sử đặt lịch";
-  const subtitle = artistMode
-    ? "Duyệt lịch mới, từ chối lịch không phù hợp và đánh dấu hoàn thành sau buổi makeup."
-    : "Theo dõi các lịch hẹn makeup đã tạo và trạng thái xử lý.";
-
-  const emptyCopy = artistMode
-    ? "Khi khách đặt lịch với bạn, booking sẽ xuất hiện tại đây."
-    : "Sau khi đặt lịch với Makeup Artist, booking sẽ xuất hiện tại đây.";
-
-  const sortedBookings = useMemo(
-    () =>
-      [...bookings].sort(
-        (a, b) =>
-          new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime(),
-      ),
-    [bookings],
-  );
-
-  const updateStatus = async (booking: BookingItem, status: BookingStatus) => {
-    try {
-      setUpdatingId(booking.id);
-      await bookingService.updateStatus(booking.id, status);
-      await loadBookings();
-    } catch (err: any) {
-      Alert.alert(
-        "Không thể cập nhật lịch",
-        err?.response?.data?.message ||
-          err?.response?.data?.Message ||
-          "Vui lòng thử lại sau.",
-      );
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const openReview = (booking: BookingItem) => {
-    setReviewTarget(booking);
-    setReviewRating(5);
-    setReviewComment("");
-  };
-
-  const submitReview = async () => {
-    if (!reviewTarget) return;
-
-    try {
-      setReviewSubmitting(true);
-      await reviewService.createForBooking(
-        reviewTarget.id,
-        reviewRating,
-        reviewComment.trim() || undefined,
-      );
-      setReviewTarget(null);
-      await loadBookings();
-      Alert.alert("Đã gửi đánh giá", "Cảm ơn bạn đã chia sẻ trải nghiệm.");
-    } catch (err: any) {
-      Alert.alert(
-        "Không thể gửi đánh giá",
-        err?.response?.data?.message ||
-          err?.response?.data?.Message ||
-          "Bạn chỉ có thể đánh giá lịch đã hoàn thành và chưa được đánh giá.",
-      );
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
-
-  if (loading) {
+  const renderTab = (type: TabType, label: string) => {
+    const isActive = activeTab === type;
     return (
-      <SafeAreaView style={styles.centerScreen}>
-        <ActivityIndicator size="large" color="#F55389" />
+      <TouchableOpacity
+        style={[styles.tab, isActive && styles.tabActive]}
+        onPress={() => setActiveTab(type)}
+        activeOpacity={0.8}
+      >
+        <Text style={[styles.tabText, isActive && styles.tabTextActive]}>{label}</Text>
+      </TouchableOpacity>
+    );
+  };
+
+  if (isLoading && !isRefetching) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <ActivityIndicator size="large" color={BrandColors.accentPink} />
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <Text style={styles.errorText}>Đã có lỗi xảy ra khi tải lịch hẹn.</Text>
+        <TouchableOpacity style={styles.retryBtn} onPress={() => refetch()}>
+          <Text style={styles.retryText}>Thử lại</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Lịch sử Booking</Text>
+      </View>
+
+      <View style={styles.tabsWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsContainer}>
+          {renderTab('ALL', 'Tất cả')}
+          {renderTab('COMPLETED', 'Hoàn thành')}
+          {renderTab('PENDING', 'Đang xử lý')}
+          {renderTab('CANCELLED', 'Đã hủy')}
+        </ScrollView>
+      </View>
+
       <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#F55389" />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={BrandColors.accentPink} />
         }
       >
-        <View style={styles.header}>
-          <View style={styles.headerIcon}>
-            <CalendarDays size={24} color="#F55389" />
-          </View>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.subtitle}>{subtitle}</Text>
-        </View>
-
-        {error ? (
-          <View style={styles.messageCard}>
-            <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity onPress={refresh} style={styles.retryButton}>
-              <RefreshCw size={15} color="#FFF" />
-              <Text style={styles.retryText}>Tải lại</Text>
-            </TouchableOpacity>
-          </View>
-        ) : null}
-
-        {!error && sortedBookings.length === 0 ? (
-          <View style={styles.messageCard}>
-            <WalletCards size={28} color="#F55389" />
-            <Text style={styles.emptyTitle}>Chưa có lịch hẹn nào</Text>
-            <Text style={styles.emptySubtitle}>{emptyCopy}</Text>
+        {filteredBookings.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>Chưa có lịch hẹn nào.</Text>
           </View>
         ) : (
-          <View style={styles.list}>
-            {sortedBookings.map((booking) => (
-              <BookingCard
-                key={booking.id}
-                booking={booking}
-                artistMode={artistMode}
-                updating={updatingId === booking.id}
-                onStatusChange={updateStatus}
-                onOpenReview={openReview}
-              />
-            ))}
-          </View>
+          filteredBookings.map(renderBookingCard)
         )}
       </ScrollView>
-
-      <ReviewModal
-        booking={reviewTarget}
-        rating={reviewRating}
-        comment={reviewComment}
-        submitting={reviewSubmitting}
-        onClose={() => setReviewTarget(null)}
-        onRatingChange={setReviewRating}
-        onCommentChange={setReviewComment}
-        onSubmit={submitReview}
-      />
     </SafeAreaView>
   );
-}
 
-function BookingCard({
-  booking,
-  artistMode,
-  updating,
-  onStatusChange,
-  onOpenReview,
-}: {
-  booking: BookingItem;
-  artistMode: boolean;
-  updating: boolean;
-  onStatusChange: (booking: BookingItem, status: BookingStatus) => void;
-  onOpenReview: (booking: BookingItem) => void;
-}) {
-  const status = STATUS_META[booking.status] || STATUS_META.Pending;
-  const title = artistMode ? booking.customerName || "Khách hàng" : booking.muaName;
-  const subtitle = artistMode ? booking.serviceName : booking.serviceName;
-  const canApprove = artistMode && booking.status === "Pending";
-  const canComplete = artistMode && booking.status === "Approved";
-  const canReview = !artistMode && booking.status === "Completed" && !booking.hasReview;
-
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardTopRow}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {title
-              .split(" ")
-              .filter(Boolean)
-              .slice(-2)
-              .map((word) => word[0])
-              .join("")
-              .toUpperCase() || (artistMode ? "KH" : "MA")}
-          </Text>
+  function renderBookingCard(booking: BookingDto) {
+    const statusInfo = STATUS_CONFIG[booking.status];
+    
+    return (
+      <View key={booking.id} style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View style={styles.muaInfo}>
+            <Image source={{ uri: booking.mua.avatarUrl }} style={styles.muaAvatar} />
+            <Text style={styles.muaName}>{booking.mua.name}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: statusInfo.bg }]}>
+            <Text style={[styles.statusText, { color: statusInfo.color }]}>{statusInfo.label}</Text>
+          </View>
         </View>
-        <View style={styles.cardTitleBlock}>
-          <Text style={styles.bookingName} numberOfLines={1}>
-            {title}
-          </Text>
-          <Text style={styles.serviceName} numberOfLines={1}>
-            {subtitle}
-          </Text>
-        </View>
-        <View style={[styles.statusPill, { backgroundColor: status.bg }]}>
-          <Text style={[styles.statusText, { color: status.color }]}>
-            {status.label}
-          </Text>
-        </View>
-      </View>
 
-      <View style={styles.infoRow}>
-        <CalendarDays size={15} color="#8D6674" />
-        <Text style={styles.infoText}>{formatBookingDate(booking.bookingDate)}</Text>
-      </View>
+        <View style={styles.divider} />
 
-      <View style={styles.infoRow}>
-        <MapPin size={15} color="#8D6674" />
-        <Text style={styles.infoText} numberOfLines={2}>
-          {booking.address || "Chưa có địa chỉ"}
-        </Text>
-      </View>
+        <BookingServiceList services={booking.services} />
 
-      {!!booking.note && (
-        <Text style={styles.noteText} numberOfLines={2}>
-          {booking.note}
-        </Text>
-      )}
-
-      <View style={styles.totalRow}>
-        <Text style={styles.totalLabel}>Tổng tiền</Text>
-        <Text style={styles.totalValue}>{formatMoney(booking.totalPrice)}</Text>
-      </View>
-
-      {artistMode && (canApprove || canComplete) ? (
-        <View style={styles.actionRow}>
-          {canApprove ? (
-            <>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.rejectButton]}
-                disabled={updating}
-                onPress={() => onStatusChange(booking, "Cancelled")}
-              >
-                <X size={16} color="#B34444" />
-                <Text style={styles.rejectText}>Từ chối</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.approveButton]}
-                disabled={updating}
-                onPress={() => onStatusChange(booking, "Approved")}
-              >
-                <Check size={16} color="#FFF" />
-                <Text style={styles.approveText}>Chấp nhận</Text>
-              </TouchableOpacity>
-            </>
-          ) : null}
-
-          {canComplete ? (
-            <TouchableOpacity
-              style={[styles.actionButton, styles.completeButton]}
-              disabled={updating}
-              onPress={() => onStatusChange(booking, "Completed")}
+        {booking.status === 'WAITING_CUSTOMER' && (
+          <View style={[styles.reviewBanner, { backgroundColor: '#E0F7FA' }]}>
+            <Text style={[styles.reviewBannerText, { color: '#006064' }]}>MUA đã hoàn tất dịch vụ. Vui lòng xác nhận để giải ngân tiền cọc.</Text>
+            <TouchableOpacity 
+              style={[styles.confirmBtn, isConfirming && { opacity: 0.5 }]}
+              onPress={() => confirmCompletion(booking.id)}
+              disabled={isConfirming}
             >
-              <CheckCircle2 size={16} color="#FFF" />
-              <Text style={styles.approveText}>Đánh dấu hoàn thành</Text>
+              <Text style={styles.confirmBtnText}>Xác nhận & Giải ngân</Text>
             </TouchableOpacity>
-          ) : null}
+          </View>
+        )}
+
+        <View style={styles.footerTotalsBlock}>
+          <View style={styles.footerTotalRow}>
+            <Text style={styles.totalLabel}>Tổng tiền:</Text>
+            <Text style={styles.price}>{booking.totalAmount.toLocaleString('vi-VN')}đ</Text>
+          </View>
+          <View style={styles.footerTotalRow}>
+            <Text style={styles.totalLabel}>Tổng dịch vụ:</Text>
+            <Text style={styles.serviceCount}>{booking.services.reduce((acc, s) => acc + s.participantsCount, 0)}</Text>
+          </View>
         </View>
-      ) : null}
 
-      {canReview ? (
-        <TouchableOpacity
-          style={[styles.actionButton, styles.reviewButton]}
-          onPress={() => onOpenReview(booking)}
-        >
-          <Star size={16} color="#FFF" fill="#FFF" />
-          <Text style={styles.approveText}>Đánh giá Makeup Artist</Text>
-        </TouchableOpacity>
-      ) : null}
-
-      {!artistMode && booking.hasReview ? (
-        <Text style={styles.reviewedText}>Bạn đã đánh giá lịch hẹn này.</Text>
-      ) : null}
-    </View>
-  );
-}
-
-function ReviewModal({
-  booking,
-  rating,
-  comment,
-  submitting,
-  onClose,
-  onRatingChange,
-  onCommentChange,
-  onSubmit,
-}: {
-  booking: BookingItem | null;
-  rating: number;
-  comment: string;
-  submitting: boolean;
-  onClose: () => void;
-  onRatingChange: (rating: number) => void;
-  onCommentChange: (comment: string) => void;
-  onSubmit: () => void;
-}) {
-  return (
-    <Modal visible={!!booking} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalBackdrop}>
-        <View style={styles.modalPanel}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Đánh giá Makeup Artist</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={20} color="#8D6674" />
+        <View style={styles.cardFooter}>
+          <View style={styles.leftActions}>
+            {booking.status === 'COMPLETED' && (
+              <TouchableOpacity 
+                disabled={booking.isReviewed}
+                onPress={() => {
+                  if (!booking.isReviewed) {
+                    router.push({
+                      pathname: '/booking/review',
+                      params: { id: booking.id, muaName: booking.mua.name }
+                    });
+                  }
+                }}
+              >
+                <Text style={[styles.reviewTextBtn, booking.isReviewed && styles.reviewedText]}>
+                  {booking.isReviewed ? 'Đã đánh giá' : 'Đánh giá'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={styles.rightActions}>
+            {(booking.status === 'COMPLETED' || booking.status === 'CANCELLED') && (
+              <TouchableOpacity style={styles.rebookBtn}>
+                <Text style={styles.rebookBtnText}>Đặt lại</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity 
+              style={styles.detailBtn}
+              onPress={() => router.push(`/booking/${booking.id}`)}
+            >
+              <Text style={styles.detailBtnText}>Chi tiết</Text>
+              <ArrowRight size={14} color={BrandColors.textDark} />
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.modalSubtitle} numberOfLines={2}>
-            {booking?.muaName} · {booking?.serviceName}
-          </Text>
-
-          <View style={styles.starRow}>
-            {[1, 2, 3, 4, 5].map((value) => (
-              <TouchableOpacity
-                key={value}
-                onPress={() => onRatingChange(value)}
-                style={styles.starButton}
-              >
-                <Star
-                  size={32}
-                  color="#F5A623"
-                  fill={value <= rating ? "#F5A623" : "transparent"}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <TextInput
-            value={comment}
-            onChangeText={onCommentChange}
-            placeholder="Chia sẻ cảm nhận của bạn..."
-            placeholderTextColor="#BCA7B4"
-            multiline
-            style={styles.reviewInput}
-          />
-
-          <TouchableOpacity
-            onPress={onSubmit}
-            disabled={submitting}
-            style={[styles.submitReviewButton, submitting && styles.disabledButton]}
-          >
-            {submitting ? (
-              <ActivityIndicator color="#FFF" />
-            ) : (
-              <Text style={styles.submitReviewText}>Gửi đánh giá</Text>
-            )}
-          </TouchableOpacity>
         </View>
       </View>
-    </Modal>
-  );
+    );
+  }
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF6F8" },
-  centerScreen: {
+  container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFF6F8",
+    backgroundColor: '#FAFAFA',
   },
-  scrollContent: { paddingBottom: 144 },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FAFAFA',
+  },
   header: {
-    paddingHorizontal: 22,
-    paddingTop: 18,
-    paddingBottom: 14,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    backgroundColor: '#FFF',
   },
-  headerIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 18,
-    backgroundColor: "#FFF0F4",
-    alignItems: "center",
-    justifyContent: "center",
+  headerTitle: {
+    fontFamily: Typography.bold,
+    fontSize: 22,
+    color: BrandColors.textDark,
   },
-  title: {
-    color: "#301726",
-    fontSize: 28,
-    fontWeight: "900",
-    marginTop: 14,
+  
+  tabsWrapper: {
+    backgroundColor: '#FFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
   },
-  subtitle: {
-    color: "#8D6674",
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 5,
-    fontWeight: "700",
+  tabsContainer: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    gap: Spacing.sm,
   },
-  list: { paddingHorizontal: 18, gap: 12 },
+  tab: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    borderRadius: Radius.full,
+    backgroundColor: '#F5F5F5',
+  },
+  tabActive: {
+    backgroundColor: BrandColors.bgPinkLight,
+  },
+  tabText: {
+    fontFamily: Typography.medium,
+    fontSize: 13,
+    color: BrandColors.textSecondary,
+  },
+  tabTextActive: {
+    color: BrandColors.accentPink,
+    fontFamily: Typography.bold,
+  },
+  
+  listContent: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: 100,
+  },
+  
+  emptyState: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontFamily: Typography.medium,
+    color: BrandColors.textSecondary,
+  },
+  errorText: {
+    fontFamily: Typography.medium,
+    color: BrandColors.textSecondary,
+    marginBottom: Spacing.md,
+  },
+  retryBtn: {
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.sm,
+    backgroundColor: BrandColors.accentPink,
+    borderRadius: Radius.lg,
+  },
+  retryText: {
+    color: '#FFF',
+    fontFamily: Typography.bold,
+  },
+  
   card: {
-    borderRadius: 22,
-    backgroundColor: "#FFF",
+    backgroundColor: '#FFF',
+    borderRadius: Radius.xl,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: "#F0E5EA",
-    padding: 15,
+    borderColor: '#F0F0F0',
+    ...Shadows.card,
   },
-  cardTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  avatar: {
-    width: 48,
-    height: 48,
+  muaInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  muaAvatar: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    backgroundColor: "#FFF0F4",
-    alignItems: "center",
-    justifyContent: "center",
+    marginRight: Spacing.sm,
+    backgroundColor: BrandColors.bgPrimary,
   },
-  avatarText: { color: "#F55389", fontSize: 15, fontWeight: "900" },
-  cardTitleBlock: { flex: 1, minWidth: 0 },
-  bookingName: { color: "#301726", fontSize: 15, fontWeight: "900" },
+  muaName: {
+    fontFamily: Typography.bold,
+    fontSize: 14,
+    color: BrandColors.textDark,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: Radius.sm,
+  },
+  statusText: {
+    fontFamily: Typography.bold,
+    fontSize: 11,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F5F5F5',
+    marginVertical: Spacing.md,
+  },
+  servicesList: {
+    marginBottom: Spacing.sm,
+  },
+  serviceRow: {
+    marginBottom: 4,
+  },
   serviceName: {
-    color: "#8D6674",
-    fontSize: 12,
-    fontWeight: "700",
-    marginTop: 3,
+    fontFamily: Typography.semiBold,
+    fontSize: 15,
+    color: BrandColors.textDark,
   },
-  statusPill: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+  logisticsCard: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
-  statusText: { fontSize: 11, fontWeight: "900" },
   infoRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-    marginTop: 13,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
   },
   infoText: {
     flex: 1,
-    color: "#4D2636",
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "700",
-  },
-  noteText: {
-    color: "#8D6674",
-    backgroundColor: "#FFF9FA",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-    fontSize: 12,
-    lineHeight: 17,
-    fontWeight: "700",
-    marginTop: 12,
-  },
-  totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: "#F6EFF2",
-    paddingTop: 13,
-    marginTop: 13,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  totalLabel: { color: "#8D6674", fontSize: 12, fontWeight: "900" },
-  totalValue: { color: "#F55389", fontSize: 15, fontWeight: "900" },
-  actionRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 14,
-  },
-  actionButton: {
-    minHeight: 42,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    flex: 1,
-  },
-  rejectButton: {
-    backgroundColor: "#FFF0F0",
-    borderWidth: 1,
-    borderColor: "#FFD5D5",
-  },
-  approveButton: { backgroundColor: "#227A5C" },
-  completeButton: { backgroundColor: "#3B6BB3" },
-  reviewButton: {
-    backgroundColor: "#F55389",
-    marginTop: 14,
-  },
-  rejectText: { color: "#B34444", fontSize: 13, fontWeight: "900" },
-  approveText: { color: "#FFF", fontSize: 13, fontWeight: "900" },
-  reviewedText: {
-    color: "#8D6674",
-    fontSize: 12,
-    fontWeight: "800",
-    marginTop: 12,
-  },
-  messageCard: {
-    marginHorizontal: 18,
-    marginTop: 14,
-    borderRadius: 22,
-    backgroundColor: "#FFF",
-    borderWidth: 1,
-    borderColor: "#F0E5EA",
-    padding: 20,
-    alignItems: "center",
-  },
-  emptyTitle: {
-    color: "#301726",
-    fontSize: 16,
-    fontWeight: "900",
-    marginTop: 12,
-  },
-  emptySubtitle: {
-    color: "#8D6674",
-    fontSize: 13,
-    lineHeight: 19,
-    fontWeight: "700",
-    textAlign: "center",
-    marginTop: 5,
-  },
-  errorText: {
-    color: "#B34444",
-    fontSize: 13,
-    lineHeight: 19,
-    fontWeight: "800",
-    textAlign: "center",
-  },
-  retryButton: {
-    marginTop: 14,
-    backgroundColor: "#F55389",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-  },
-  retryText: { color: "#FFF", fontSize: 13, fontWeight: "900" },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(48, 23, 38, 0.45)",
-    justifyContent: "flex-end",
-  },
-  modalPanel: {
-    backgroundColor: "#FFF",
-    borderTopLeftRadius: 26,
-    borderTopRightRadius: 26,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 34,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  modalTitle: { color: "#301726", fontSize: 18, fontWeight: "900" },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FFF0F4",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalSubtitle: {
-    color: "#8D6674",
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "700",
-    marginTop: 6,
-  },
-  starRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginTop: 18,
-    marginBottom: 16,
-  },
-  starButton: { padding: 4 },
-  reviewInput: {
-    minHeight: 110,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#F0E5EA",
-    backgroundColor: "#FFF9FA",
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    color: "#301726",
+    fontFamily: Typography.medium,
     fontSize: 14,
-    fontWeight: "700",
-    textAlignVertical: "top",
+    color: BrandColors.textDark,
+    lineHeight: 20,
   },
-  submitReviewButton: {
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: "#F55389",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 14,
+  addressBlock: {
+    flex: 1,
   },
-  disabledButton: { opacity: 0.65 },
-  submitReviewText: { color: "#FFF", fontSize: 15, fontWeight: "900" },
+  locationType: {
+    fontFamily: Typography.medium,
+    fontSize: 14,
+    color: BrandColors.textDark,
+    marginBottom: 2,
+  },
+  logisticsDivider: {
+    height: 1,
+    backgroundColor: '#F5F5F5',
+    marginVertical: Spacing.sm,
+  },
+  
+  reviewBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFF8E1', // light yellow
+    padding: Spacing.sm,
+    borderRadius: Radius.md,
+    marginBottom: Spacing.md,
+  },
+  reviewBannerText: {
+    fontFamily: Typography.medium,
+    fontSize: 12,
+    color: '#FF8F00',
+  },
+  reviewBtnText: {
+    fontFamily: Typography.bold,
+    fontSize: 12,
+    color: BrandColors.accentPink,
+  },
+  
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: Spacing.md,
+  },
+  leftActions: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  rightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  price: {
+    fontFamily: Typography.bold,
+    fontSize: 16,
+    color: BrandColors.accentRose,
+  },
+  detailBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  detailBtnText: {
+    fontFamily: Typography.semiBold,
+    fontSize: 13,
+    color: BrandColors.textDark,
+  },
+  rebookBtn: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    borderRadius: Radius.full,
+    backgroundColor: BrandColors.accentPink,
+  },
+  rebookBtnText: {
+    fontFamily: Typography.semiBold,
+    fontSize: 13,
+    color: '#FFF',
+  },
+  reviewTextBtn: {
+    fontFamily: Typography.semiBold,
+    fontSize: 14,
+    color: BrandColors.accentPink,
+  },
+  reviewedText: {
+    color: BrandColors.textMuted,
+  },
+  confirmBtn: {
+    backgroundColor: '#00BCD4',
+    borderRadius: Radius.md,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginTop: Spacing.sm,
+  },
+  confirmBtnText: {
+    fontFamily: Typography.bold,
+    fontSize: 14,
+    color: '#FFF',
+  },
+  footerTotalsBlock: {
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+    paddingTop: Spacing.md,
+    marginBottom: Spacing.xs,
+    gap: 4,
+  },
+  footerTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  totalLabel: {
+    fontFamily: Typography.medium,
+    fontSize: 14,
+    color: BrandColors.textLight,
+  },
+  serviceCount: {
+    fontFamily: Typography.semiBold,
+    fontSize: 14,
+    color: BrandColors.textDark,
+  },
 });

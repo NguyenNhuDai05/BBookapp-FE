@@ -1,115 +1,46 @@
-import { api } from "./api";
+import { IBookingRepository } from '../repositories/IBookingRepository';
+import { ApiBookingRepository } from '../repositories/ApiBookingRepository';
+import { BookingDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
 
-export type BookingStatus = "Pending" | "Approved" | "Completed" | "Cancelled";
+class BookingService {
+  private repository: IBookingRepository;
 
-export interface BookingCreateInput {
-  muaId: string;
-  serviceId: string;
-  bookingDate: string;
-  address: string;
-  note?: string;
+  constructor(repository: IBookingRepository) {
+    this.repository = repository;
+  }
+
+  async getAvailableTimeSlots(muaId: string, date: string): Promise<TimeSlotDto[]> {
+    return this.repository.getAvailableTimeSlots(muaId, date);
+  }
+
+  async createBooking(request: CreateBookingRequest): Promise<BookingDto> {
+    return this.repository.createBooking(request);
+  }
+
+  async getUserBookings(): Promise<BookingDto[]> {
+    return this.repository.getUserBookings();
+  }
+
+  async getBookingDetail(bookingId: string): Promise<BookingDto> {
+    return this.repository.getBookingDetail(bookingId);
+  }
+
+  async cancelBooking(request: CancelBookingRequest): Promise<BookingDto> {
+    return this.repository.cancelBooking(request);
+  }
+
+  async confirmBookingCompletion(bookingId: string): Promise<BookingDto> {
+    return this.repository.confirmBookingCompletion(bookingId);
+  }
+
+  async submitReview(request: ReviewCreateRequest): Promise<void> {
+    return this.repository.submitReview(request);
+  }
+
+  async replyToReview(reviewId: string, replyContent: string): Promise<void> {
+    return this.repository.replyToReview(reviewId, replyContent);
+  }
 }
 
-export interface BookingItem {
-  id: string;
-  customerId: string;
-  customerName?: string;
-  muaId: string;
-  muaName: string;
-  serviceId: string;
-  serviceName: string;
-  bookingDate: string;
-  address: string;
-  note?: string;
-  totalPrice: number;
-  status: BookingStatus;
-  hasReview: boolean;
-  createdAt: string;
-}
-
-interface BackendBooking {
-  bookingId: string;
-  customerId: string;
-  customerName?: string;
-  muaId: string;
-  muaName?: string;
-  serviceId: string;
-  serviceName?: string;
-  bookingDate: string;
-  address?: string;
-  note?: string;
-  totalPrice?: number;
-  status: number | string;
-  hasReview?: boolean;
-  createdAt: string;
-}
-
-const STATUS_LABELS: Record<number, BookingStatus> = {
-  0: "Pending",
-  1: "Approved",
-  2: "Completed",
-  3: "Cancelled",
-};
-
-export const formatMoney = (value: number) =>
-  `${new Intl.NumberFormat("vi-VN").format(value)}đ`;
-
-export const formatBookingDate = (value: string) => {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-};
-
-const toBookingItem = (booking: BackendBooking): BookingItem => ({
-  id: booking.bookingId,
-  customerId: booking.customerId,
-  customerName: booking.customerName,
-  muaId: booking.muaId,
-  muaName: booking.muaName || "Makeup Artist",
-  serviceId: booking.serviceId,
-  serviceName: booking.serviceName || "Dịch vụ trang điểm",
-  bookingDate: booking.bookingDate,
-  address: booking.address || "",
-  note: booking.note,
-  totalPrice: Number(booking.totalPrice || 0),
-  status:
-    typeof booking.status === "number"
-      ? STATUS_LABELS[booking.status] || "Pending"
-      : (booking.status as BookingStatus),
-  hasReview: Boolean(booking.hasReview),
-  createdAt: booking.createdAt,
-});
-
-export const bookingService = {
-  createBooking: async (input: BookingCreateInput): Promise<BookingItem> => {
-    const response = await api.post("/Booking", {
-      muaId: input.muaId,
-      serviceId: input.serviceId,
-      bookingDate: input.bookingDate,
-      address: input.address,
-      note: input.note,
-    });
-
-    return toBookingItem(response.data.booking || response.data.Booking);
-  },
-
-  getBookings: async (): Promise<BookingItem[]> => {
-    const response = await api.get("/Booking");
-    const bookings: BackendBooking[] = response.data;
-    return bookings.map(toBookingItem);
-  },
-
-  updateStatus: async (
-    bookingId: string,
-    status: BookingStatus,
-  ): Promise<void> => {
-    await api.put(`/Booking/${bookingId}/status`, { status });
-  },
-};
+// Instantiate with Real API instead of Mock
+export const bookingService = new BookingService(new ApiBookingRepository());

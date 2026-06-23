@@ -1,21 +1,36 @@
 import { Stack } from "expo-router";
-import "../global.css"; // Đảm bảo tệp CSS tổng của NativeWind v4 được kích hoạt trước tiên
+import "../global.css";
+import { BrandColors } from "../constants/theme";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useProtectedRoute } from '../hooks/useProtectedRoute';
+
+import { queryClient } from '../lib/queryClient';
 
 export default function RootLayout() {
+  const isReady = useProtectedRoute();
+
+  if (!isReady) return null; // or a splash screen
+
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="mua-onboarding" />
-      <Stack.Screen
-        name="mua-detail"
-        options={{
-          headerShown: true,
-          title: "Chi tiết Nghệ Sĩ",
-          headerTintColor: "#C71585",
-        }}
-      />
-    </Stack>
+    <QueryClientProvider client={queryClient}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+
+        <Stack.Screen
+          name="mua-detail"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="portfolio-detail"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </QueryClientProvider>
   );
 }

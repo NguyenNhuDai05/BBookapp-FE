@@ -41,7 +41,20 @@
           }
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow BBook to access your calendar to sync appointments."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/favicon.png",
+          "color": "#FF4D6D"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

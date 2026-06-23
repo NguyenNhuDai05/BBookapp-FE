@@ -82,7 +82,14 @@ export default function LoginScreen() {
     setLoading(false);
 
     if (success) {
-      goHome();
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?.role === 'MUA') {
+        router.replace('/(mua)/dashboard' as any);
+      } else if (currentUser?.role === 'ADMIN') {
+        router.replace('/(admin)/dashboard' as any);
+      } else {
+        goHome();
+      }
       return;
     }
 
@@ -191,6 +198,31 @@ export default function LoginScreen() {
                 <Text style={styles.switchText}>Chưa có tài khoản?</Text>
                 <Text style={styles.switchAction}> Đăng ký ngay</Text>
               </Pressable>
+
+              {/* MOCK TESTING HELPERS */}
+              <View style={styles.mockHelpers}>
+                <Text style={styles.mockHelperTitle}>Tài khoản Test (Chạm để điền)</Text>
+                <View style={styles.mockHelperRow}>
+                  <TouchableOpacity 
+                    style={styles.mockBtn} 
+                    onPress={() => { setEmail('customer@example.com'); setPassword('123456'); }}
+                  >
+                    <Text style={styles.mockBtnText}>Customer</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.mockBtn} 
+                    onPress={() => { setEmail('mua@example.com'); setPassword('123456'); }}
+                  >
+                    <Text style={styles.mockBtnText}>MUA</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.mockBtn} 
+                    onPress={() => { setEmail('admin@example.com'); setPassword('123456'); }}
+                  >
+                    <Text style={styles.mockBtnText}>Admin</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -358,4 +390,37 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: "row", justifyContent: "center", marginTop: 18 },
   switchText: { color: "#8D6674", fontWeight: "700" },
   switchAction: { color: "#F55389", fontWeight: "900" },
+  mockHelpers: {
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F0C4CD',
+    borderStyle: 'dashed',
+  },
+  mockHelperTitle: {
+    textAlign: 'center',
+    color: '#8D6674',
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: 12,
+  },
+  mockHelperRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  mockBtn: {
+    flex: 1,
+    backgroundColor: '#FFF0F4',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F3C9D2',
+  },
+  mockBtnText: {
+    color: '#C94473',
+    fontSize: 12,
+    fontWeight: '800',
+  }
 });

@@ -1,17 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-
-if (!apiUrl) {
-  throw new Error("EXPO_PUBLIC_API_URL is not configured.");
-}
-
-export const API_URL = apiUrl;
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.12:5261/api";
 
 export const api = axios.create({
   baseURL: API_URL,
-  timeout: 60000,
+  timeout: 15000,
 });
 
 api.interceptors.request.use(
