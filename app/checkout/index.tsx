@@ -5,14 +5,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { 
   ArrowLeft, MapPin, Calendar, Clock, Info, Trash2, Plus, Minus, 
-  Wallet, CreditCard, ShieldCheck, ArrowRight 
+  Wallet, CreditCard, ArrowRight
 } from 'lucide-react-native';
-import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
+import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
 import { useBookingStore } from '../../store/useBookingStore';
 import { useCreateBooking } from '../../hooks/useBooking';
 import { useMuaDetail } from '../../hooks/useMuaDetail';
 import { DatePickerSheet } from '../../components/booking/DatePickerSheet';
 import { TimePickerSheet } from '../../components/booking/TimePickerSheet';
+import { useWallet } from '../../hooks/useWallet';
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function CheckoutScreen() {
   const [timeSheetVisible, setTimeSheetVisible] = useState(false);
 
   const { mutate: createBooking, isPending } = useCreateBooking();
+  const { data: wallet, isLoading: walletLoading } = useWallet();
   const { muaInfo, loading: muaLoading } = useMuaDetail(draft.mua?.id || '');
 
   // If store is empty, go back
@@ -39,7 +41,7 @@ export default function CheckoutScreen() {
   }
 
   const serviceTotal = draft.services.reduce((sum, s) => sum + (s.price * s.participantsCount), 0);
-  const travelFee = 50000;
+  const travelFee = 0;
   const totalAmount = serviceTotal + travelFee;
   const depositAmount = totalAmount * 0.3;
 
@@ -48,6 +50,17 @@ export default function CheckoutScreen() {
   const handleCheckout = () => {
     if (!draft.date || !draft.time) {
       alert('Vui lòng chọn ngày và giờ!');
+      return;
+    }
+
+    // Avoid sending a booking request that the server must reject. The server
+    // still performs the authoritative balance check to protect against races.
+    const currentBalance = wallet?.balance || 0;
+    if (!walletLoading && currentBalance < depositAmount) {
+      router.push({
+        pathname: '/wallet/topup' as any,
+        params: { amount: String(Math.ceil(depositAmount - currentBalance)) },
+      });
       return;
     }
     
@@ -60,10 +73,19 @@ export default function CheckoutScreen() {
       note: draft.note,
       paymentMethod: draft.paymentMethod,
     }, {
-      onSuccess: () => {
-        router.push('/checkout/success');
+      onSuccess: (booking) => {
+        router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } });
       },
       onError: (err: any) => {
+        const payload = err.response?.data;
+        if (payload?.code === 'INSUFFICIENT_BALANCE' || payload?.Code === 'INSUFFICIENT_BALANCE') {
+          const missingAmount = payload.missingAmount ?? payload.MissingAmount;
+          router.push({
+            pathname: '/wallet/topup' as any,
+            params: { amount: String(Math.ceil(missingAmount || depositAmount)) },
+          });
+          return;
+        }
         const msg = err.response?.data?.message || err.response?.data?.Message || err.message;
         alert('Có lỗi xảy ra: ' + msg);
       }
@@ -256,24 +278,18 @@ export default function CheckoutScreen() {
         <Text style={styles.sectionTitlePlain}>Phương thức thanh toán</Text>
         
         <PaymentMethodItem 
-          title="Ví BeautyBook" 
-          subtitle="Số dư: 2.000.000đ"
+          title="Ví BBook"
+          subtitle={walletLoading ? 'Đang tải số dư...' : `Số dư: ${(wallet?.balance || 0).toLocaleString('vi-VN')}đ`}
           icon={<Wallet size={20} color={BrandColors.accentPink} />}
           isSelected={draft.paymentMethod === 'Ví BeautyBook'}
           onSelect={() => setPaymentMethod('Ví BeautyBook')}
         />
-        <PaymentMethodItem 
-          title="Ví MoMo" 
-          icon={<CreditCard size={20} color="#A50064" />}
-          isSelected={draft.paymentMethod === 'Ví MoMo'}
-          onSelect={() => setPaymentMethod('Ví MoMo')}
-        />
-        <PaymentMethodItem 
-          title="VNPay" 
-          icon={<CreditCard size={20} color="#005BAA" />}
-          isSelected={draft.paymentMethod === 'VNPay'}
-          onSelect={() => setPaymentMethod('VNPay')}
-        />
+        {(wallet?.balance || 0) < depositAmount && (
+          <TouchableOpacity style={styles.topUpBtn} onPress={() => router.push({ pathname: '/wallet/topup' as any, params: { amount: String(Math.ceil(depositAmount - (wallet?.balance || 0))) } })}>
+            <CreditCard size={20} color={BrandColors.accentPink} />
+            <Text style={styles.topUpBtnText}>Nạp phần còn thiếu qua PayOS</Text>
+          </TouchableOpacity>
+        )}
         
         <View style={styles.bottomPadding} />
       </ScrollView>
@@ -752,6 +768,8 @@ const styles = StyleSheet.create({
     color: BrandColors.textSecondary,
     marginTop: 2,
   },
+  topUpBtn: { flexDirection: 'row', gap: 10, alignItems: 'center', justifyContent: 'center', padding: Spacing.md, borderWidth: 1, borderColor: BrandColors.accentPink, borderRadius: Radius.xl, backgroundColor: '#FFF' },
+  topUpBtnText: { color: BrandColors.accentPink, fontFamily: Typography.bold, fontSize: 14 },
   radioBtn: {
     width: 20,
     height: 20,

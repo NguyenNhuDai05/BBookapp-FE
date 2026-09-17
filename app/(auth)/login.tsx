@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import { LockKeyhole, Mail, Sparkles } from "lucide-react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Eye, EyeOff, LockKeyhole, Mail, Sparkles } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,14 +19,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
 import { useAuthStore } from "../../store/useAuthStore";
 
-const authLogo = require("../../assets/images/logo-bbook.png");
+const authLogo = require("../../assets/images/B.png");
 
 export default function LoginScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ email?: string; registered?: string }>();
   const login = useAuthStore((state) => state.login);
   const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(params.email || "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
@@ -116,7 +117,7 @@ export default function LoginScreen() {
         >
           <View style={styles.content}>
             <View style={styles.brandBlock}>
-              <Image source={authLogo} style={styles.authLogo} resizeMode="cover" />
+              <Image source={authLogo} style={styles.authLogo} resizeMode="contain" />
             </View>
 
             <View style={styles.card}>
@@ -131,10 +132,18 @@ export default function LoginScreen() {
                 </Text>
               </View>
 
+              {params.registered === "1" ? (
+                <View style={styles.successBox}>
+                  <Text style={styles.successBoxText}>
+                    Đăng ký thành công. Vui lòng đăng nhập để tiếp tục.
+                  </Text>
+                </View>
+              ) : null}
+
               <AuthInput
                 icon={<Mail size={18} color="#E46B87" />}
                 label="Email"
-                placeholder="you@example.com"
+                placeholder="Nhập email"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -199,30 +208,6 @@ export default function LoginScreen() {
                 <Text style={styles.switchAction}> Đăng ký ngay</Text>
               </Pressable>
 
-              {/* MOCK TESTING HELPERS */}
-              <View style={styles.mockHelpers}>
-                <Text style={styles.mockHelperTitle}>Tài khoản Test (Chạm để điền)</Text>
-                <View style={styles.mockHelperRow}>
-                  <TouchableOpacity 
-                    style={styles.mockBtn} 
-                    onPress={() => { setEmail('customer@example.com'); setPassword('123456'); }}
-                  >
-                    <Text style={styles.mockBtnText}>Customer</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.mockBtn} 
-                    onPress={() => { setEmail('mua@example.com'); setPassword('123456'); }}
-                  >
-                    <Text style={styles.mockBtnText}>MUA</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.mockBtn} 
-                    onPress={() => { setEmail('admin@example.com'); setPassword('123456'); }}
-                  >
-                    <Text style={styles.mockBtnText}>Admin</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -252,6 +237,8 @@ function AuthInput({
   keyboardType = "default",
   error,
 }: AuthInputProps) {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   return (
     <View style={styles.inputWrap}>
       <Text style={styles.inputLabel}>{label}</Text>
@@ -262,11 +249,26 @@ function AuthInput({
           onChangeText={onChangeText}
           placeholder={placeholder}
           placeholderTextColor="#C99DA7"
-          secureTextEntry={secureTextEntry}
+          secureTextEntry={secureTextEntry && !isPasswordVisible}
           keyboardType={keyboardType}
           autoCapitalize="none"
           style={styles.input}
         />
+        {secureTextEntry ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isPasswordVisible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            hitSlop={10}
+            onPress={() => setIsPasswordVisible((visible) => !visible)}
+            style={styles.passwordToggle}
+          >
+            {isPasswordVisible ? (
+              <EyeOff size={20} color="#A66D7E" />
+            ) : (
+              <Eye size={20} color="#A66D7E" />
+            )}
+          </Pressable>
+        ) : null}
       </View>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
@@ -287,8 +289,8 @@ const styles = StyleSheet.create({
   brandBlock: {
     alignItems: "center",
     justifyContent: "center",
-    height: 88,
-    marginBottom: 16,
+    height: 138,
+    marginBottom: 12,
     overflow: "hidden",
   },
   authLogo: {
@@ -323,6 +325,15 @@ const styles = StyleSheet.create({
   badgeText: { color: "#C94473", fontSize: 12, fontWeight: "800" },
   title: { marginTop: 14, fontSize: 28, color: "#301726", fontWeight: "900" },
   subtitle: { marginTop: 5, color: "#8D6674", fontSize: 14, lineHeight: 20 },
+  successBox: {
+    borderRadius: 16,
+    padding: 12,
+    backgroundColor: "#F0FFF7",
+    borderWidth: 1,
+    borderColor: "#B9E7CE",
+    marginBottom: 14,
+  },
+  successBoxText: { color: "#287A4D", fontSize: 13, fontWeight: "800" },
   inputWrap: { marginBottom: 15 },
   inputLabel: {
     marginBottom: 7,
@@ -344,6 +355,11 @@ const styles = StyleSheet.create({
   },
   inputError: { borderColor: "#E54863", backgroundColor: "#FFF4F5" },
   input: { flex: 1, color: "#301726", fontSize: 15, fontWeight: "600" },
+  passwordToggle: {
+    padding: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   errorText: { color: "#D63E5B", fontSize: 12, fontWeight: "700", marginTop: 5 },
   primaryButton: {
     height: 56,
@@ -390,37 +406,4 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: "row", justifyContent: "center", marginTop: 18 },
   switchText: { color: "#8D6674", fontWeight: "700" },
   switchAction: { color: "#F55389", fontWeight: "900" },
-  mockHelpers: {
-    marginTop: 24,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#F0C4CD',
-    borderStyle: 'dashed',
-  },
-  mockHelperTitle: {
-    textAlign: 'center',
-    color: '#8D6674',
-    fontSize: 12,
-    fontWeight: '800',
-    marginBottom: 12,
-  },
-  mockHelperRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  mockBtn: {
-    flex: 1,
-    backgroundColor: '#FFF0F4',
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#F3C9D2',
-  },
-  mockBtnText: {
-    color: '#C94473',
-    fontSize: 12,
-    fontWeight: '800',
-  }
 });

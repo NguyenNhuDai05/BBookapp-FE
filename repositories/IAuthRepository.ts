@@ -15,7 +15,7 @@ export interface RegisterRequest {
 
 export interface IAuthRepository {
   login(request: LoginRequest): Promise<AuthResponseDto>;
-  register(request: RegisterRequest): Promise<AuthResponseDto>;
+  register(request: RegisterRequest): Promise<void>;
   getMe(): Promise<UserDto>;
   logout(): Promise<void>;
   becomeMua(): Promise<AuthResponseDto>;

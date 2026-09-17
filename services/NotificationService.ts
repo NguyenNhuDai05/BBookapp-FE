@@ -5,7 +5,8 @@ import { Platform } from 'react-native';
 // Set notification handler to show notification even when app is open
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
@@ -55,7 +56,10 @@ export class NotificationService {
           body: `Bạn có lịch hẹn với ${customerName} lúc ${startTime} hôm nay.`,
           data: { type: 'booking_reminder' },
         },
-        trigger: notificationDate,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: notificationDate,
+        },
       });
     }
 

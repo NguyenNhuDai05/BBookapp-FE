@@ -5,27 +5,27 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo-bbook.png",
-    "scheme": "BBookapp",
+    "scheme": "bbookapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "updates": {
+      "enabled": false,
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0,
+      "useEmbeddedUpdate": true
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/logo-bbook.png"
       },
-      "navigationBarColor": "#FFFFFF",
-      "navigationBarDividerColor": "#FFFFFF",
-      "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/logo-bbook.png"
     },
     "plugins": [
       "expo-router",
@@ -54,7 +54,11 @@
           "icon": "./assets/images/favicon.png",
           "color": "#FF4D6D"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-web-browser",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true,

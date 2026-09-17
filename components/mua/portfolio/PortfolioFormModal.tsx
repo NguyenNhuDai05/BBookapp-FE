@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView,
 import * as ImagePicker from 'expo-image-picker';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
 import { X } from 'lucide-react-native';
-import { saveImageToLocalDirectory } from '../../../utils/fileHelpers';
+import { uploadImage } from '../../../services/supabase';
 
 
 interface PortfolioFormModalProps {
@@ -55,10 +55,7 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
     try {
       const finalUrls = await Promise.all(
         imageUrls.map(async (img) => {
-          if (img.startsWith('file://')) {
-            return await saveImageToLocalDirectory(img);
-          }
-          return img;
+          return uploadImage(img);
         })
       );
       

@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { LockKeyhole, Mail, Phone, Sparkles, UserRound } from "lucide-react-native";
+import { Eye, EyeOff, LockKeyhole, Mail, Phone, Sparkles, UserRound } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -21,7 +21,7 @@ import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
 import { useAuthStore } from "../../store/useAuthStore";
 import { UserRole } from "../../types/auth";
 
-const authLogo = require("../../assets/images/logo-bbook.png");
+const authLogo = require("../../assets/images/B.png");
 
 const getRegisterErrorMessage = (err: any) => {
   const data = err?.response?.data;
@@ -54,7 +54,6 @@ export default function RegisterScreen() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [accountRole, setAccountRole] = useState<UserRole>(UserRole.Customer);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -113,19 +112,19 @@ export default function RegisterScreen() {
       setLoading(true);
       const trimmedEmail = email.trim();
 
-      // Register and auto-login handled by store
-      const success = await registerStore(fullName.trim(), trimmedEmail, password, phoneNumber.trim(), accountRole);
+      const success = await registerStore(
+        fullName.trim(),
+        trimmedEmail,
+        password,
+        phoneNumber.trim(),
+        UserRole.Customer,
+      );
 
       if (success) {
-        // Redirection is handled by the useProtectedRoute hook!
-        if (Platform.OS === "web") {
-          window.alert("Đăng ký thành công. Chào mừng bạn đến với bBeauty!");
-        } else {
-          Alert.alert(
-            "Đăng ký thành công",
-            "Chào mừng bạn đến với B-Book!",
-          );
-        }
+        router.replace({
+          pathname: "/(auth)/login",
+          params: { registered: "1", email: trimmedEmail },
+        } as any);
       } else {
         Alert.alert("Đăng ký thất bại", "Có lỗi xảy ra. Vui lòng thử lại.");
       }
@@ -158,7 +157,7 @@ export default function RegisterScreen() {
             contentContainerStyle={styles.scrollContent}
           >
             <View style={styles.brandBlock}>
-              <Image source={authLogo} style={styles.authLogo} resizeMode="cover" />
+              <Image source={authLogo} style={styles.authLogo} resizeMode="contain" />
             </View>
 
             <View style={styles.card}>
@@ -182,7 +181,7 @@ export default function RegisterScreen() {
               <AuthInput
                 icon={<UserRound size={18} color="#E46B87" />}
                 label="Họ và tên"
-                placeholder="Nguyễn Văn A"
+                placeholder="Nhập họ và tên"
                 value={fullName}
                 onChangeText={setFullName}
               />
@@ -190,7 +189,7 @@ export default function RegisterScreen() {
               <AuthInput
                 icon={<Mail size={18} color="#E46B87" />}
                 label="Email"
-                placeholder="you@example.com"
+                placeholder="Nhập email"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -199,7 +198,7 @@ export default function RegisterScreen() {
               <AuthInput
                 icon={<Phone size={18} color="#E46B87" />}
                 label="Số điện thoại"
-                placeholder="09xxxxxxxx"
+                placeholder="Nhập số điện thoại"
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
                 keyboardType="phone-pad"
@@ -208,7 +207,7 @@ export default function RegisterScreen() {
               <AuthInput
                 icon={<LockKeyhole size={18} color="#E46B87" />}
                 label="Mật khẩu"
-                placeholder="Tối thiểu 6 ký tự"
+                placeholder="Tạo mật khẩu"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -222,24 +221,6 @@ export default function RegisterScreen() {
                 onChangeText={setConfirmPassword}
                 secureTextEntry
               />
-
-              <View style={styles.roleGroup}>
-                <Text style={styles.inputLabel}>Loại tài khoản</Text>
-                <View style={styles.roleRow}>
-                  <RoleOption
-                    title="Khách hàng"
-                    description="Tìm và đặt lịch Makeup Artist"
-                    active={accountRole === UserRole.Customer}
-                    onPress={() => setAccountRole(UserRole.Customer)}
-                  />
-                  <RoleOption
-                    title="Makeup Artist"
-                    description="Nhận booking và đăng dịch vụ"
-                    active={accountRole === UserRole.MUA}
-                    onPress={() => setAccountRole(UserRole.MUA)}
-                  />
-                </View>
-              </View>
 
               <TouchableOpacity
                 activeOpacity={0.85}
@@ -303,33 +284,6 @@ type AuthInputProps = {
   keyboardType?: "default" | "email-address" | "phone-pad";
 };
 
-function RoleOption({
-  title,
-  description,
-  active,
-  onPress,
-}: {
-  title: string;
-  description: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      onPress={onPress}
-      style={[styles.roleOption, active && styles.roleOptionActive]}
-    >
-      <Text style={[styles.roleTitle, active && styles.roleTitleActive]}>
-        {title}
-      </Text>
-      <Text style={[styles.roleDescription, active && styles.roleDescriptionActive]}>
-        {description}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
 function AuthInput({
   icon,
   label,
@@ -339,6 +293,8 @@ function AuthInput({
   secureTextEntry,
   keyboardType = "default",
 }: AuthInputProps) {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   return (
     <View style={styles.inputWrap}>
       <Text style={styles.inputLabel}>{label}</Text>
@@ -349,11 +305,26 @@ function AuthInput({
           onChangeText={onChangeText}
           placeholder={placeholder}
           placeholderTextColor="#C99DA7"
-          secureTextEntry={secureTextEntry}
+          secureTextEntry={secureTextEntry && !isPasswordVisible}
           keyboardType={keyboardType}
           autoCapitalize="none"
           style={styles.input}
         />
+        {secureTextEntry ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={isPasswordVisible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            hitSlop={10}
+            onPress={() => setIsPasswordVisible((visible) => !visible)}
+            style={styles.passwordToggle}
+          >
+            {isPasswordVisible ? (
+              <EyeOff size={20} color="#A66D7E" />
+            ) : (
+              <Eye size={20} color="#A66D7E" />
+            )}
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
@@ -372,8 +343,8 @@ const styles = StyleSheet.create({
   brandBlock: {
     alignItems: "center",
     justifyContent: "center",
-    height: 88,
-    marginBottom: 22,
+    height: 138,
+    marginBottom: 12,
     overflow: "hidden",
   },
   authLogo: {
@@ -437,33 +408,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   input: { flex: 1, color: "#301726", fontSize: 15, fontWeight: "600" },
-  roleGroup: { marginBottom: 16 },
-  roleRow: { flexDirection: "row", gap: 10 },
-  roleOption: {
-    flex: 1,
-    minHeight: 78,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#F3C9D2",
-    backgroundColor: "#FFF9FA",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+  passwordToggle: {
+    padding: 4,
+    alignItems: "center",
     justifyContent: "center",
   },
-  roleOptionActive: {
-    borderColor: "#F55389",
-    backgroundColor: "#FFF0F4",
-  },
-  roleTitle: { color: "#4D2636", fontSize: 13, fontWeight: "900" },
-  roleTitleActive: { color: "#F55389" },
-  roleDescription: {
-    color: "#8D6674",
-    fontSize: 11,
-    lineHeight: 15,
-    marginTop: 4,
-    fontWeight: "700",
-  },
-  roleDescriptionActive: { color: "#6E3549" },
   primaryButton: {
     height: 56,
     borderRadius: 18,

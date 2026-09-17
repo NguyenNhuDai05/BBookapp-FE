@@ -116,16 +116,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ isLoading: true });
 
-      const res = await authService.register({ fullName, email, password, phone, role });
-
-      await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
-
-      set({
-        user: res.user,
-        isAuthenticated: true,
-        isLoading: false,
-        activeMode: res.user.hasMuaProfile ? 'CUSTOMER' : 'CUSTOMER',
-      });
+      await authService.register({ fullName, email, password, phone, role });
+      set({ isLoading: false });
 
       return true;
     } catch {
