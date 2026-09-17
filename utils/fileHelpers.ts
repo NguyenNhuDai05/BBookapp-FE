@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 export const saveImageToLocalDirectory = async (uri: string): Promise<string> => {
   if (!uri || !uri.startsWith('file://')) return uri; // Already a remote URL or invalid

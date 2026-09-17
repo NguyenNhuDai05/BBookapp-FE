@@ -1,8 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Bell, Sparkles } from 'lucide-react-native';
+import { Bell } from 'lucide-react-native';
 import React, { useState, useCallback } from 'react';
-import { ScrollView, StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SkeletonList } from '../../components/ui/SkeletonLoader';
 import { ErrorView } from '../../components/ui/ErrorView';
@@ -12,6 +12,8 @@ import { BrandColors, Radius, Spacing } from '../../constants/theme';
 import { Strings } from '../../constants/strings';
 import { PortfolioPost } from '../../components/mua/portfolio/PortfolioPost';
 import { useBookingStore } from '../../store/useBookingStore';
+
+const homeLogo = require('../../assets/images/LOGO_Finalllll.png');
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -74,10 +76,7 @@ export default function HomeScreen() {
         >
           <View style={styles.heroTop}>
             <View>
-              <View style={styles.logoBadge}>
-                <Sparkles size={14} color={BrandColors.accentPink} />
-                <Text style={styles.logoBadgeText}>BeautyBook</Text>
-              </View>
+              <Image source={homeLogo} style={styles.homeLogo} resizeMode="contain" />
               <Text style={styles.greeting}>
                 {Strings.homeGreeting(userName)}
               </Text>
@@ -167,20 +166,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  logoBadge: {
+  homeLogo: {
     alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: Radius.full,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-  },
-  logoBadgeText: {
-    color: BrandColors.accentPink,
-    fontSize: 12,
-    fontWeight: '900',
+    width: 70,
+    height: 54,
+    marginTop: -8,
+    marginLeft: -10,
   },
   bellCircle: {
     width: 42,

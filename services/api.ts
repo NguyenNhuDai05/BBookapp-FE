@@ -1,7 +1,17 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { Platform } from "react-native";
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.12:5261/api";
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+// On web, derive the API host from the URL used to open Expo. This avoids stale
+// LAN addresses breaking all requests whenever the development machine changes IP.
+const webApiUrl =
+  Platform.OS === "web" && typeof window !== "undefined"
+    ? `${window.location.protocol}//${window.location.hostname}:5261/api`
+    : undefined;
+
+export const API_URL = webApiUrl || configuredApiUrl || "http://localhost:5261/api";
 
 export const api = axios.create({
   baseURL: API_URL,

@@ -1,13 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CheckCircle, ShieldCheck, MapPin, Calendar, Clock, ChevronRight, Home, FileText } from 'lucide-react-native';
+import { CheckCircle, ShieldCheck, Clock, Home, FileText } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useBookingStore } from '../../store/useBookingStore';
+import { useBookingDetail } from '../../hooks/useBooking';
 
 export default function CheckoutSuccessScreen() {
   const router = useRouter();
+  const { bookingId } = useLocalSearchParams<{ bookingId?: string }>();
+  const { data: booking } = useBookingDetail(bookingId || '');
   const { draft, resetDraft } = useBookingStore();
 
   const handleGoHome = () => {
@@ -35,9 +38,10 @@ export default function CheckoutSuccessScreen() {
   }
 
   const serviceTotal = draft.services.reduce((sum, s) => sum + (s.price * s.participantsCount), 0);
-  const travelFee = 50000;
-  const totalAmount = serviceTotal + travelFee;
-  const depositAmount = totalAmount * 0.3;
+  const travelFee = booking?.travelFee || 0;
+  const totalAmount = booking?.totalAmount ?? serviceTotal;
+  const depositAmount = booking?.depositAmount ?? totalAmount * 0.3;
+  const remainingAmount = booking?.remainingAmount ?? totalAmount - depositAmount;
 
   return (
     <View style={styles.container}>
@@ -48,7 +52,7 @@ export default function CheckoutSuccessScreen() {
             <CheckCircle size={48} color="#00C853" fill="#E8F5E9" />
           </View>
           <Text style={styles.title}>Thanh toán thành công!</Text>
-          <Text style={styles.subtitle}>Mã đơn: BK1025 • Đã cọc {depositAmount.toLocaleString('vi-VN')}đ</Text>
+          <Text style={styles.subtitle}>Mã đơn: {bookingId ? bookingId.slice(0, 8).toUpperCase() : 'Đang cập nhật'} • Đã cọc {depositAmount.toLocaleString('vi-VN')}đ</Text>
         </View>
 
         {/* Shield Banner */}
@@ -106,7 +110,7 @@ export default function CheckoutSuccessScreen() {
           
           <View style={styles.remainingBox}>
             <Text style={styles.remainingLabel}>Cần thanh toán sau khi hoàn thành</Text>
-            <Text style={styles.remainingValue}>{(totalAmount - depositAmount).toLocaleString('vi-VN')}đ</Text>
+            <Text style={styles.remainingValue}>{remainingAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
         </View>
 

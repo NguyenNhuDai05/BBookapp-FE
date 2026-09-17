@@ -6,7 +6,7 @@ import { ServiceDto } from '../types/ServiceDto';
 export class ApiMuaRepository implements IMuaRepository {
   async getArtists(): Promise<ArtistDto[]> {
     try {
-      const { data } = await api.get('/Mua/search');
+      const { data } = await api.get('/Mua');
       return data.map((m: any) => ({
         id: m.muaId,
         name: m.fullName || 'Chuyên gia',

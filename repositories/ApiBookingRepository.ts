@@ -1,6 +1,6 @@
 import { api } from '../services/api';
 import { IBookingRepository } from './IBookingRepository';
-import { BookingDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus } from '../types/booking';
+import { BookingDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus, ReviewCreateRequest } from '../types/booking';
 
 export class ApiBookingRepository implements IBookingRepository {
   async getAvailableTimeSlots(muaId: string, date: string): Promise<TimeSlotDto[]> {
@@ -30,9 +30,14 @@ export class ApiBookingRepository implements IBookingRepository {
           participantsCount: s.participantsCount
         }))
       });
-      return this.mapToBookingDto(data);
+      return this.mapToBookingDto(data.booking || data.Booking || data);
     } catch (e: any) {
-      console.error('API Error creating booking:', e.response?.data || e.message);
+      const errorCode = e.response?.data?.code || e.response?.data?.Code;
+      // Insufficient balance is an expected business response handled by the
+      // checkout screen, not an application error that should flood the log.
+      if (errorCode !== 'INSUFFICIENT_BALANCE') {
+        console.error('API Error creating booking:', e.response?.data || e.message);
+      }
       throw e;
     }
   }
@@ -117,10 +122,12 @@ export class ApiBookingRepository implements IBookingRepository {
       serviceTotal: b.totalAmount || 0, // Simplified for now
       travelFee: 0,
       totalAmount: b.totalAmount || 0,
-      depositAmount: (b.totalAmount || 0) * 0.3,
-      remainingAmount: (b.totalAmount || 0) * 0.7,
+      depositAmount: b.depositAmount ?? (b.totalAmount || 0) * 0.3,
+      platformFeeAmount: b.platformFeeAmount ?? (b.totalAmount || 0) * 0.05,
+      muaEscrowAmount: b.muaEscrowAmount ?? (b.totalAmount || 0) * 0.25,
+      remainingAmount: b.remainingAmount ?? (b.totalAmount || 0) * 0.7,
       
-      paymentMethod: 'CASH', // Fallback
+      paymentMethod: 'Ví BBook',
       createdAt: b.createdAt || new Date().toISOString(),
       updatedAt: b.createdAt || new Date().toISOString(),
       isReviewed: b.hasReview || false

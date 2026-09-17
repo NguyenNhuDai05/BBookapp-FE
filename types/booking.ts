@@ -52,6 +52,8 @@ export interface BookingDto {
   travelFee: number;
   totalAmount: number;
   depositAmount: number;
+  platformFeeAmount?: number;
+  muaEscrowAmount?: number;
   remainingAmount: number;
   
   paymentMethod: string;

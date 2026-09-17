@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView,
 import * as ImagePicker from 'expo-image-picker';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
 import { X } from 'lucide-react-native';
-import { saveImageToLocalDirectory } from '../../../utils/fileHelpers';
+import { uploadImage } from '../../../services/supabase';
 
 
 interface ServiceFormModalProps {
@@ -59,9 +59,7 @@ export function ServiceFormModal({ visible, onClose, onSubmit, initialData }: Se
     setIsUploading(true);
     try {
       let finalImageUrl = imageUrl;
-      if (imageUrl && imageUrl.startsWith('file://')) {
-        finalImageUrl = await saveImageToLocalDirectory(imageUrl);
-      }
+      finalImageUrl = await uploadImage(imageUrl);
       
       onSubmit({
         name,

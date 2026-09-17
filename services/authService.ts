@@ -13,8 +13,8 @@ class AuthService {
     return this.repository.login(request);
   }
 
-  async register(request: RegisterRequest): Promise<AuthResponseDto> {
-    return this.repository.register(request);
+  async register(request: RegisterRequest): Promise<void> {
+    await this.repository.register(request);
   }
 
   async getMe(): Promise<UserDto> {

@@ -1,6 +1,6 @@
 import { api } from '../services/api';
 import type { IAuthRepository, LoginRequest, RegisterRequest } from './IAuthRepository';
-import type { AuthResponseDto, UserDto } from '../types/auth';
+import { UserRole, type AuthResponseDto, type UserDto } from '../types/auth';
 
 interface BackendTokenDto {
   token: string;
@@ -17,11 +17,11 @@ export class ApiAuthRepository implements IAuthRepository {
     return this.mapToAuthResponse(response.data);
   }
 
-  async register(request: RegisterRequest): Promise<AuthResponseDto> {
+  async register(request: RegisterRequest): Promise<void> {
     // Map string role to backend enum int
     let backendRole = 1; // Default to Customer
-    if (request.role === 'Admin') backendRole = 0;
-    if (request.role === 'MUA') backendRole = 2;
+    if (request.role === UserRole.Admin) backendRole = 0;
+    if (request.role === UserRole.MUA) backendRole = 2;
 
     const payload = {
       fullName: request.fullName,
@@ -31,15 +31,7 @@ export class ApiAuthRepository implements IAuthRepository {
       role: backendRole, // Map string -> int
     };
 
-    const response = await api.post<{message: string, user: any}>('/Auth/register', payload);
-    
-    // The backend returns a User object on register, not a TokenDto.
-    // We must automatically log in the user to get their JWT token!
-    if (request.password) {
-      return this.login({ email: request.email, password: request.password });
-    }
-
-    return this.mapToAuthResponse(response.data.user);
+    await api.post('/Auth/register', payload);
   }
 
   async getMe(): Promise<UserDto> {

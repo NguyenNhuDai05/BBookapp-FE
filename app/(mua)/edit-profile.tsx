@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Check, Camera, User, FileText, BadgeCheck } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
-import { saveImageToLocalDirectory } from '../../utils/fileHelpers';
+import { uploadImage } from '../../services/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile, useUpdateMuaProfile } from '../../hooks/useMuaProfile';
 
@@ -46,9 +46,7 @@ export default function EditProfileScreen() {
     }
     
     let finalAvatarUrl = avatar;
-    if (avatar && avatar.startsWith('file://')) {
-      finalAvatarUrl = await saveImageToLocalDirectory(avatar);
-    }
+    finalAvatarUrl = await uploadImage(avatar);
 
     
     updateProfile(

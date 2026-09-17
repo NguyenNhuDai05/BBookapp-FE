@@ -70,7 +70,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: "Tìm kiếm",
+          title: "Khám phá",
           tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
         }}
       />
