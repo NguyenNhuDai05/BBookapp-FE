@@ -9,7 +9,7 @@ import {
 } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
 import { useBookingStore } from '../../store/useBookingStore';
-import { useCreateBooking } from '../../hooks/useBooking';
+import { useCreateBooking, usePayBookingDeposit } from '../../hooks/useBooking';
 import { useMuaDetail } from '../../hooks/useMuaDetail';
 import { DatePickerSheet } from '../../components/booking/DatePickerSheet';
 import { TimePickerSheet } from '../../components/booking/TimePickerSheet';
@@ -24,7 +24,8 @@ export default function CheckoutScreen() {
   const [dateSheetVisible, setDateSheetVisible] = useState(false);
   const [timeSheetVisible, setTimeSheetVisible] = useState(false);
 
-  const { mutate: createBooking, isPending } = useCreateBooking();
+  const { mutateAsync: createBooking, isPending: isCreating } = useCreateBooking();
+  const { mutateAsync: payDeposit, isPending: isPaying } = usePayBookingDeposit();
   const { data: wallet, isLoading: walletLoading } = useWallet();
   const { muaInfo, loading: muaLoading } = useMuaDetail(draft.mua?.id || '');
 
@@ -43,53 +44,46 @@ export default function CheckoutScreen() {
   const serviceTotal = draft.services.reduce((sum, s) => sum + (s.price * s.participantsCount), 0);
   const travelFee = 0;
   const totalAmount = serviceTotal + travelFee;
-  const depositAmount = totalAmount * 0.3;
+  const estimatedDepositAmount = totalAmount * 0.3;
+  const isPending = isCreating || isPaying;
 
   const totalDuration = draft.services.reduce((sum, s) => sum + (s.durationMinutes * s.participantsCount), 0);
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!draft.date || !draft.time) {
       alert('Vui lòng chọn ngày và giờ!');
       return;
     }
 
-    // Avoid sending a booking request that the server must reject. The server
-    // still performs the authoritative balance check to protect against races.
-    const currentBalance = wallet?.balance || 0;
-    if (!walletLoading && currentBalance < depositAmount) {
-      router.push({
-        pathname: '/wallet/topup' as any,
-        params: { amount: String(Math.ceil(depositAmount - currentBalance)) },
+    try {
+      const booking = await createBooking({
+        muaId: draft.mua!.id,
+        services: draft.services.map(s => ({ serviceId: s.id, participantsCount: s.participantsCount })),
+        date: draft.date,
+        time: draft.time,
+        address: draft.address || '123 Nguyễn Huệ, Bến Nghé, Quận 1',
+        note: draft.note,
+        paymentMethod: draft.paymentMethod,
       });
-      return;
-    }
-    
-    createBooking({
-      muaId: draft.mua!.id,
-      services: draft.services.map(s => ({ serviceId: s.id, participantsCount: s.participantsCount })),
-      date: draft.date,
-      time: draft.time,
-      address: draft.address || '123 Nguyễn Huệ, Bến Nghé, Quận 1',
-      note: draft.note,
-      paymentMethod: draft.paymentMethod,
-    }, {
-      onSuccess: (booking) => {
-        router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } });
-      },
-      onError: (err: any) => {
-        const payload = err.response?.data;
-        if (payload?.code === 'INSUFFICIENT_BALANCE' || payload?.Code === 'INSUFFICIENT_BALANCE') {
-          const missingAmount = payload.missingAmount ?? payload.MissingAmount;
-          router.push({
-            pathname: '/wallet/topup' as any,
-            params: { amount: String(Math.ceil(missingAmount || depositAmount)) },
-          });
-          return;
-        }
-        const msg = err.response?.data?.message || err.response?.data?.Message || err.message;
-        alert('Có lỗi xảy ra: ' + msg);
+
+      const paidBooking = await payDeposit(booking.id);
+      if (paidBooking.status !== 'PENDING_CONFIRMATION' || paidBooking.paymentStatus !== 4) {
+        throw new Error('Thanh toán cọc chưa được xác nhận. Vui lòng kiểm tra lại booking.');
       }
-    });
+      router.push({ pathname: '/checkout/success', params: { bookingId: paidBooking.id } });
+    } catch (err: any) {
+      const payload = err.response?.data;
+      if (payload?.code === 'INSUFFICIENT_BALANCE' || payload?.Code === 'INSUFFICIENT_BALANCE') {
+        const missingAmount = payload.missingAmount ?? payload.MissingAmount;
+        router.push({
+          pathname: '/wallet/topup' as any,
+          params: { amount: String(Math.ceil(missingAmount || estimatedDepositAmount)) },
+        });
+        return;
+      }
+      const msg = payload?.message || payload?.Message || err.message;
+      alert('Có lỗi xảy ra: ' + msg);
+    }
   };
 
   return (
@@ -262,14 +256,14 @@ export default function CheckoutScreen() {
           
           <View style={styles.paymentSplit}>
             <View style={[styles.splitBox, styles.splitBoxActive]}>
-              <Text style={styles.splitBoxTitle}>ĐẶT CỌC (30%)</Text>
-              <Text style={styles.splitBoxSubtitle}>Thanh toán ngay</Text>
-              <Text style={styles.splitBoxAmount}>{depositAmount.toLocaleString('vi-VN')}đ</Text>
+              <Text style={styles.splitBoxTitle}>ĐẶT CỌC (DỰ KIẾN 30%)</Text>
+              <Text style={styles.splitBoxSubtitle}>Số chính xác do backend xác nhận</Text>
+              <Text style={styles.splitBoxAmount}>{estimatedDepositAmount.toLocaleString('vi-VN')}đ</Text>
             </View>
             <View style={styles.splitBox}>
-              <Text style={styles.splitBoxTitleMuted}>THANH TOÁN SAU (70%)</Text>
+              <Text style={styles.splitBoxTitleMuted}>THANH TOÁN SAU</Text>
               <Text style={styles.splitBoxSubtitle}>Sau khi hoàn thành</Text>
-              <Text style={styles.splitBoxAmountMuted}>{(totalAmount - depositAmount).toLocaleString('vi-VN')}đ</Text>
+              <Text style={styles.splitBoxAmountMuted}>{(totalAmount - estimatedDepositAmount).toLocaleString('vi-VN')}đ</Text>
             </View>
           </View>
         </View>
@@ -284,8 +278,8 @@ export default function CheckoutScreen() {
           isSelected={draft.paymentMethod === 'Ví BeautyBook'}
           onSelect={() => setPaymentMethod('Ví BeautyBook')}
         />
-        {(wallet?.balance || 0) < depositAmount && (
-          <TouchableOpacity style={styles.topUpBtn} onPress={() => router.push({ pathname: '/wallet/topup' as any, params: { amount: String(Math.ceil(depositAmount - (wallet?.balance || 0))) } })}>
+        {!walletLoading && (wallet?.balance || 0) < estimatedDepositAmount && (
+          <TouchableOpacity style={styles.topUpBtn} onPress={() => router.push({ pathname: '/wallet/topup' as any, params: { amount: String(Math.ceil(estimatedDepositAmount - (wallet?.balance || 0))) } })}>
             <CreditCard size={20} color={BrandColors.accentPink} />
             <Text style={styles.topUpBtnText}>Nạp phần còn thiếu qua PayOS</Text>
           </TouchableOpacity>
@@ -297,8 +291,8 @@ export default function CheckoutScreen() {
       {/* Footer */}
       <View style={styles.footer}>
         <View style={styles.footerInfo}>
-          <Text style={styles.footerLabel}>ĐẶT CỌC NGAY</Text>
-          <Text style={styles.footerAmount}>{depositAmount.toLocaleString('vi-VN')}đ</Text>
+          <Text style={styles.footerLabel}>ĐẶT CỌC DỰ KIẾN</Text>
+          <Text style={styles.footerAmount}>{estimatedDepositAmount.toLocaleString('vi-VN')}đ</Text>
         </View>
         <TouchableOpacity 
           style={styles.submitBtn} 

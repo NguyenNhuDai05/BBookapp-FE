@@ -1,5 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, Send } from "lucide-react-native";
+import { ArrowLeft, Send, ImagePlus, X } from "lucide-react-native";
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'expo-image';
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -28,6 +30,9 @@ export default function ChatRoomScreen() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roomInfo, setRoomInfo] = useState<any | null>(null);
+  const [replyTo, setReplyTo] = useState<MessageDto | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -95,6 +100,9 @@ export default function ChatRoomScreen() {
           }, 100);
         }
       });
+      signalRService.onMessageUpdated((msg: MessageDto) => {
+        setMessages(prev => prev.map(item => item.messageId === msg.messageId ? msg : item));
+      });
     };
 
     loadInitialData();
@@ -146,11 +154,28 @@ export default function ChatRoomScreen() {
   const sendMessage = async () => {
     if (!inputText.trim() || !id) return;
     try {
-      await chatService.sendMessage(id, inputText.trim());
+      await chatService.sendMessage(id, inputText.trim(), undefined, replyTo?.messageId);
       setInputText("");
+      setReplyTo(null);
     } catch (error) {
       console.error("Error sending message", error);
     }
+  };
+
+  const pickAndSendImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
+    if (result.canceled || !result.assets[0]) return;
+    setUploading(true);
+    try {
+      const url = await chatService.uploadImage(result.assets[0].uri);
+      await chatService.sendMessage(id, inputText.trim() || undefined, url, replyTo?.messageId);
+      setInputText(''); setReplyTo(null);
+    } finally { setUploading(false); }
+  };
+
+  const react = async (message: MessageDto, emoji: string) => {
+    const updated = await chatService.reactToMessage(id, message.messageId, emoji);
+    setMessages(prev => prev.map(item => item.messageId === updated.messageId ? updated : item));
   };
 
   // --- RENDER GIAO DIỆN TIN NHẮN THEO YÊU CẦU ---
@@ -189,13 +214,17 @@ export default function ChatRoomScreen() {
             <Text style={styles.senderNameLabel}>{otherPartyName}</Text>
           )}
 
-          <View
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onLongPress={() => setReplyTo(item)}
             style={[
               styles.messageBubble,
               isOwn ? styles.messageBubbleOwn : styles.messageBubbleOther,
             ]}
           >
-            <Text
+            {item.replyToMessageId && <View style={styles.replyPreview}><Text style={styles.replyPreviewText} numberOfLines={1}>{item.replyToContent || (item.replyToImageUrl ? '📷 Hình ảnh' : 'Tin nhắn')}</Text></View>}
+            {item.imageUrl && <Image source={{ uri: item.imageUrl }} style={styles.messageImage} contentFit="cover" />}
+            {!!item.content && <Text
               style={[
                 styles.messageText,
                 isOwn ? styles.messageTextOwn : styles.messageTextOther,
@@ -203,6 +232,7 @@ export default function ChatRoomScreen() {
             >
               {item.content}
             </Text>
+            }
             <Text
               style={[
                 styles.timestamp,
@@ -214,6 +244,10 @@ export default function ChatRoomScreen() {
                 minute: "2-digit",
               })}
             </Text>
+          </TouchableOpacity>
+          <View style={styles.reactionRow}>
+            {(item.reactions || []).map(reaction => <TouchableOpacity key={reaction.emoji} style={[styles.reactionBadge, reaction.reactedByMe && styles.reactionBadgeActive]} onPress={() => react(item, reaction.emoji)}><Text>{reaction.emoji} {reaction.count}</Text></TouchableOpacity>)}
+            <TouchableOpacity onPress={() => react(item, '❤️')}><Text style={styles.quickHeart}>♡</Text></TouchableOpacity>
           </View>
         </View>
       </View>
@@ -268,7 +302,11 @@ export default function ChatRoomScreen() {
         )}
 
         {/* Ô NHẬP TIN NHẮN */}
+        {replyTo && <View style={styles.replyBar}><View style={{ flex: 1 }}><Text style={styles.replyLabel}>Đang trả lời</Text><Text numberOfLines={1}>{replyTo.content || '📷 Hình ảnh'}</Text></View><TouchableOpacity onPress={() => setReplyTo(null)}><X size={20} /></TouchableOpacity></View>}
+        {showEmoji && <View style={styles.emojiPicker}>{['😀','😂','😍','❤️','🔥','👏','😢','👍'].map(emoji => <TouchableOpacity key={emoji} onPress={() => setInputText(v => v + emoji)}><Text style={styles.emojiItem}>{emoji}</Text></TouchableOpacity>)}</View>}
         <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={pickAndSendImage} disabled={uploading} style={styles.inputAction}><ImagePlus size={23} color={BrandColors.accentPink} /></TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowEmoji(v => !v)} style={styles.inputAction}><Text style={{ fontSize: 22 }}>😊</Text></TouchableOpacity>
           <TextInput
             style={styles.textInput}
             placeholder="Nhập tin nhắn..."
@@ -384,6 +422,13 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderRadius: 16,
   },
+  messageImage: { width: 210, height: 210, borderRadius: 12, marginBottom: 6 },
+  replyPreview: { borderLeftWidth: 3, borderLeftColor: '#E8436A', backgroundColor: 'rgba(255,255,255,0.22)', padding: 7, marginBottom: 6, borderRadius: 6 },
+  replyPreviewText: { fontSize: 12, color: '#666' },
+  reactionRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+  reactionBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 12, backgroundColor: '#F3F3F3', borderWidth: 1, borderColor: '#EEE' },
+  reactionBadgeActive: { borderColor: BrandColors.accentPink, backgroundColor: '#FFF0F5' },
+  quickHeart: { fontSize: 19, color: BrandColors.accentPink, paddingHorizontal: 4 },
   messageBubbleOwn: {
     backgroundColor: "#0084FF",
     borderBottomRightRadius: 4,
@@ -422,6 +467,11 @@ const styles = StyleSheet.create({
     borderTopColor: "#f0f0f0",
     backgroundColor: "#fff",
   },
+  inputAction: { padding: 6 },
+  replyBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, backgroundColor: '#F7F7F8', borderTopWidth: 1, borderTopColor: '#EEE' },
+  replyLabel: { color: BrandColors.accentPink, fontSize: 12, fontWeight: '700' },
+  emojiPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, padding: 12, borderTopWidth: 1, borderTopColor: '#EEE' },
+  emojiItem: { fontSize: 26 },
   textInput: {
     flex: 1,
     backgroundColor: "#f9f9f9",

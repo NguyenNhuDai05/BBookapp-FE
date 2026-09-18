@@ -17,6 +17,14 @@ class BookingService {
     return this.repository.createBooking(request);
   }
 
+  async payDeposit(bookingId: string): Promise<BookingDto> {
+    return this.repository.payDeposit(bookingId);
+  }
+
+  async disputeBooking(bookingId: string, reason: string): Promise<BookingDto> {
+    return this.repository.disputeBooking(bookingId, reason);
+  }
+
   async getUserBookings(): Promise<BookingDto[]> {
     return this.repository.getUserBookings();
   }

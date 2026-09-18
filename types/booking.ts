@@ -26,7 +26,27 @@ export interface TimeSlotDto {
   available: boolean;
 }
 
-export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'WAITING_CUSTOMER' | 'COMPLETED' | 'CANCELLED' | 'REJECTED';
+export type BookingStatus =
+  | 'PENDING_PAYMENT'
+  | 'PENDING_CONFIRMATION'
+  | 'CONFIRMED'
+  | 'REJECTED'
+  | 'IN_PROGRESS'
+  | 'WAITING_CUSTOMER'
+  | 'COMPLETED'
+  | 'DISPUTED'
+  | 'AUTO_COMPLETED'
+  | 'CANCELLED';
+
+export enum PaymentStatus {
+  UNPAID = 0,
+  PAID_LEGACY = 1,
+  REFUNDED = 2,
+  FAILED = 3,
+  DEPOSIT_HELD = 4,
+  RELEASED = 5,
+  FROZEN = 6,
+}
 
 export interface CustomerMinimalDto {
   id: string;
@@ -46,14 +66,16 @@ export interface BookingDto {
   locationType: 'AT_STUDIO' | 'HOME_SERVICE';
   note?: string;
   status: BookingStatus;
+  paymentStatus: PaymentStatus;
   rejectReason?: string;
   
   serviceTotal: number;
   travelFee: number;
   totalAmount: number;
+  depositRate: number;
   depositAmount: number;
-  platformFeeAmount?: number;
-  muaEscrowAmount?: number;
+  platformFeeAmount: number;
+  muaPayoutAmount: number;
   remainingAmount: number;
   
   paymentMethod: string;
@@ -68,8 +90,14 @@ export interface BookingDto {
   
   // Status timestamps
   confirmedAt?: string;
+  depositPaidAt?: string;
   startedAt?: string;
+  waitingCustomerAt?: string;
+  customerConfirmationDeadline?: string;
   completedAt?: string;
+  rejectedAt?: string;
+  disputedAt?: string;
+  disputeReason?: string;
 }
 
 export interface CreateBookingRequest {

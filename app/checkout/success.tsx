@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CheckCircle, ShieldCheck, Clock, Home, FileText } from 'lucide-react-native';
@@ -10,7 +10,7 @@ import { useBookingDetail } from '../../hooks/useBooking';
 export default function CheckoutSuccessScreen() {
   const router = useRouter();
   const { bookingId } = useLocalSearchParams<{ bookingId?: string }>();
-  const { data: booking } = useBookingDetail(bookingId || '');
+  const { data: booking, isLoading } = useBookingDetail(bookingId || '');
   const { draft, resetDraft } = useBookingStore();
 
   const handleGoHome = () => {
@@ -23,25 +23,35 @@ export default function CheckoutSuccessScreen() {
     router.replace('/(tabs)/bookings');
   };
 
-  // Safe fallback if draft is empty
-  if (!draft.mua) {
+  if (isLoading || !booking) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.center}>
-          <Text style={styles.title}>Thanh toán thành công!</Text>
-          <TouchableOpacity style={styles.primaryBtn} onPress={handleGoHome}>
-            <Text style={styles.primaryBtnText}>Về trang chủ</Text>
-          </TouchableOpacity>
+          <ActivityIndicator size="large" color={BrandColors.accentPink} />
+          <Text style={styles.subtitle}>Đang xác nhận khoản cọc...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
-  const serviceTotal = draft.services.reduce((sum, s) => sum + (s.price * s.participantsCount), 0);
-  const travelFee = booking?.travelFee || 0;
-  const totalAmount = booking?.totalAmount ?? serviceTotal;
-  const depositAmount = booking?.depositAmount ?? totalAmount * 0.3;
-  const remainingAmount = booking?.remainingAmount ?? totalAmount - depositAmount;
+  const travelFee = booking.travelFee;
+  const totalAmount = booking.totalAmount;
+  const depositAmount = booking.depositAmount;
+  const remainingAmount = booking.remainingAmount;
+
+  if (booking && (booking.status !== 'PENDING_CONFIRMATION' || booking.paymentStatus !== 4)) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.center}>
+          <Text style={styles.title}>Khoản cọc chưa được xác nhận</Text>
+          <Text style={styles.subtitle}>Vui lòng quay lại chi tiết booking để thanh toán cọc.</Text>
+          <TouchableOpacity style={styles.primaryBtn} onPress={() => router.replace(`/booking/${booking.id}`)}>
+            <Text style={styles.primaryBtnText}>Xem booking</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -70,7 +80,7 @@ export default function CheckoutSuccessScreen() {
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Chuyên gia</Text>
-            <Text style={styles.infoValue}>{draft.mua.name}</Text>
+            <Text style={styles.infoValue}>{booking.mua.name}</Text>
           </View>
           
           <View style={styles.infoRow}>
@@ -85,7 +95,7 @@ export default function CheckoutSuccessScreen() {
 
           <View style={styles.divider} />
           
-          {draft.services.map(s => (
+          {booking.services.map(s => (
             <View key={s.id} style={styles.serviceRow}>
               <Text style={styles.serviceName}>{s.participantsCount}x {s.name}</Text>
               <Text style={styles.servicePrice}>{(s.price * s.participantsCount).toLocaleString('vi-VN')}đ</Text>
@@ -104,10 +114,10 @@ export default function CheckoutSuccessScreen() {
           </View>
           
           <View style={styles.paidRow}>
-            <Text style={styles.paidLabel}>Đã cọc (30%)</Text>
+            <Text style={styles.paidLabel}>Đã cọc ({(booking.depositRate <= 1 ? booking.depositRate * 100 : booking.depositRate).toLocaleString('vi-VN')}%)</Text>
             <Text style={styles.paidValue}>- {depositAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
-          
+
           <View style={styles.remainingBox}>
             <Text style={styles.remainingLabel}>Cần thanh toán sau khi hoàn thành</Text>
             <Text style={styles.remainingValue}>{remainingAmount.toLocaleString('vi-VN')}đ</Text>

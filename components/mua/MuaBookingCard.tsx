@@ -24,26 +24,32 @@ export function MuaBookingCard({ booking, onPress }: MuaBookingCardProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return BrandColors.statusPending;
+      case 'PENDING_PAYMENT':
+      case 'PENDING_CONFIRMATION': return BrandColors.statusPending;
       case 'CONFIRMED': return BrandColors.statusConfirmed;
       case 'IN_PROGRESS': return BrandColors.statusCompleted;
       case 'WAITING_CUSTOMER': return '#00BCD4'; // Cyan
       case 'COMPLETED': return BrandColors.statusCompleted;
       case 'CANCELLED': 
       case 'REJECTED': return BrandColors.statusCancelled;
+      case 'DISPUTED': return BrandColors.statusCancelled;
+      case 'AUTO_COMPLETED': return BrandColors.statusCompleted;
       default: return BrandColors.textMuted;
     }
   };
 
-  const statusLabel = {
-    'PENDING': 'Chờ xác nhận',
+  const statusLabel = ({
+    'PENDING_PAYMENT': 'Chờ khách thanh toán cọc',
+    'PENDING_CONFIRMATION': 'Chờ xác nhận',
     'CONFIRMED': 'Đã xác nhận',
     'IN_PROGRESS': 'Đang thực hiện',
     'WAITING_CUSTOMER': 'Chờ khách xác nhận',
     'COMPLETED': 'Hoàn thành',
     'CANCELLED': 'Đã hủy',
-    'REJECTED': 'Từ chối'
-  }[booking.status] || booking.status;
+    'REJECTED': 'Từ chối',
+    'DISPUTED': 'Đang xử lý khiếu nại',
+    'AUTO_COMPLETED': 'Tự động hoàn thành'
+  } as Record<string, string>)[booking.status] || booking.status;
 
   return (
     <TouchableOpacity 
@@ -81,7 +87,7 @@ export function MuaBookingCard({ booking, onPress }: MuaBookingCardProps) {
         </View>
       </View>
 
-      {booking.status === 'PENDING' && (
+      {booking.status === 'PENDING_CONFIRMATION' && (
         <View style={styles.actions}>
           <TouchableOpacity 
             style={[styles.actionBtn, styles.rejectBtn]} 

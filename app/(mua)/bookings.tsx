@@ -19,9 +19,9 @@ export default function MuaBookingsScreen() {
   const { data: bookings = [], isLoading, refetch } = useAllBookings(muaId);
 
   const filteredBookings = bookings.filter((b) => {
-    if (activeTab === 'PENDING') return b.status === 'PENDING';
+    if (activeTab === 'PENDING') return b.status === 'PENDING_CONFIRMATION';
     if (activeTab === 'CONFIRMED') return b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS' || b.status === 'WAITING_CUSTOMER';
-    if (activeTab === 'HISTORY') return b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'REJECTED';
+    if (activeTab === 'HISTORY') return b.status === 'COMPLETED' || b.status === 'AUTO_COMPLETED' || b.status === 'CANCELLED' || b.status === 'REJECTED' || b.status === 'DISPUTED';
     return true;
   });
 

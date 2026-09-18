@@ -58,7 +58,7 @@ export default function MuaCompleteBookingScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={BrandColors.primary} />
+        <ActivityIndicator size="large" color={BrandColors.accentPink} />
       </SafeAreaView>
     );
   }

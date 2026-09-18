@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "129215624749",
+    "project_id": "bbook-c1ba3",
+    "storage_bucket": "bbook-c1ba3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:129215624749:android:b57cc7a5695e23f9e3aaa4",
+        "android_client_info": {
+          "package_name": "com.bbook.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWT1jQmWls6nP1lDpeJ8gIq3t8efj4bUE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
