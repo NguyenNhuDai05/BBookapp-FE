@@ -1,6 +1,6 @@
 import { api } from '../services/api';
 import { IBookingRepository } from './IBookingRepository';
-import { BookingDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus, ReviewCreateRequest } from '../types/booking';
+import { BookingDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus, PaymentStatus, ReviewCreateRequest } from '../types/booking';
 
 export class ApiBookingRepository implements IBookingRepository {
   async getAvailableTimeSlots(muaId: string, date: string): Promise<TimeSlotDto[]> {
@@ -40,6 +40,16 @@ export class ApiBookingRepository implements IBookingRepository {
       }
       throw e;
     }
+  }
+
+  async payDeposit(bookingId: string): Promise<BookingDto> {
+    const { data } = await api.post(`/Booking/${bookingId}/pay-deposit`);
+    return this.mapToBookingDto(data.booking || data.Booking || data);
+  }
+
+  async disputeBooking(bookingId: string, reason: string): Promise<BookingDto> {
+    const { data } = await api.put(`/Booking/${bookingId}/status`, { status: 9, reason });
+    return this.mapToBookingDto(data);
   }
 
   async getUserBookings(): Promise<BookingDto[]> {
@@ -117,37 +127,63 @@ export class ApiBookingRepository implements IBookingRepository {
       address: b.address || '',
       locationType: 'HOME_SERVICE', // Default fallback
       status: this.mapStatus(b.status),
+      paymentStatus: (b.paymentStatus ?? 0) as PaymentStatus,
       note: b.notes,
       
-      serviceTotal: b.totalAmount || 0, // Simplified for now
+      serviceTotal: b.totalAmount ?? 0, // Backend currently exposes the aggregate service total here
       travelFee: 0,
-      totalAmount: b.totalAmount || 0,
-      depositAmount: b.depositAmount ?? (b.totalAmount || 0) * 0.3,
-      platformFeeAmount: b.platformFeeAmount ?? (b.totalAmount || 0) * 0.05,
-      muaEscrowAmount: b.muaEscrowAmount ?? (b.totalAmount || 0) * 0.25,
-      remainingAmount: b.remainingAmount ?? (b.totalAmount || 0) * 0.7,
+      totalAmount: b.totalAmount ?? 0,
+      depositRate: b.depositRate ?? 0,
+      depositAmount: b.depositAmount ?? 0,
+      platformFeeAmount: b.platformFeeAmount ?? 0,
+      muaPayoutAmount: b.muaPayoutAmount ?? 0,
+      remainingAmount: b.remainingAmount ?? 0,
       
       paymentMethod: 'Ví BBook',
-      createdAt: b.createdAt || new Date().toISOString(),
-      updatedAt: b.createdAt || new Date().toISOString(),
-      isReviewed: b.hasReview || false
+      createdAt: b.createdAt ?? '',
+      updatedAt: b.updatedAt ?? '',
+      isReviewed: b.hasReview || false,
+      depositPaidAt: b.depositPaidAt,
+      confirmedAt: b.confirmedAt,
+      startedAt: b.startedAt,
+      waitingCustomerAt: b.waitingCustomerAt,
+      customerConfirmationDeadline: b.customerConfirmationDeadline,
+      completedAt: b.completedAt,
+      rejectedAt: b.rejectedAt,
+      cancelledAt: b.cancelledAt,
+      disputedAt: b.disputedAt,
+      disputeReason: b.disputeReason,
+      rejectReason: b.rejectReason,
+      cancelReason: b.cancelReason
     };
   }
 
   private mapStatus(statusRaw: any): BookingStatus {
     const statusMap: Record<number | string, BookingStatus> = {
-      0: 'PENDING',
+      0: 'PENDING_CONFIRMATION',
       1: 'CONFIRMED', // Approved in C#
       2: 'COMPLETED', // Completed in C#
       3: 'CANCELLED', // Cancelled in C#
       4: 'WAITING_CUSTOMER', // WaitingCustomer in C#
-      'Pending': 'PENDING',
+      5: 'PENDING_PAYMENT',
+      6: 'PENDING_CONFIRMATION',
+      7: 'REJECTED',
+      8: 'IN_PROGRESS',
+      9: 'DISPUTED',
+      10: 'AUTO_COMPLETED',
+      'Pending': 'PENDING_CONFIRMATION',
+      'PendingPayment': 'PENDING_PAYMENT',
+      'PendingConfirmation': 'PENDING_CONFIRMATION',
       'Approved': 'CONFIRMED',
       'Completed': 'COMPLETED',
       'Cancelled': 'CANCELLED',
-      'WaitingCustomer': 'WAITING_CUSTOMER'
+      'WaitingCustomer': 'WAITING_CUSTOMER',
+      'Rejected': 'REJECTED',
+      'InProgress': 'IN_PROGRESS',
+      'Disputed': 'DISPUTED',
+      'AutoCompleted': 'AUTO_COMPLETED'
     };
-    return statusMap[statusRaw] || 'PENDING';
+    return statusMap[statusRaw] || 'PENDING_PAYMENT';
   }
 
   async submitReview(request: ReviewCreateRequest): Promise<void> {

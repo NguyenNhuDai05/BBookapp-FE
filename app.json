@@ -17,11 +17,17 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.bbook.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/logo-bbook.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR"
+      ]
     },
     "web": {
       "output": "static",
@@ -52,7 +58,8 @@
         "expo-notifications",
         {
           "icon": "./assets/images/favicon.png",
-          "color": "#FF4D6D"
+          "color": "#FF4D6D",
+          "defaultChannel": "booking-reminders"
         }
       ],
       "expo-font",
@@ -63,6 +70,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "eea1bcb1-6a0f-4a5d-9b53-cb6fc0250ecd"
+      }
+    },
+    "owner": "bbook-app"
   }
 }

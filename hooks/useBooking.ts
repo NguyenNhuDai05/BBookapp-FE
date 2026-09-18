@@ -33,6 +33,32 @@ export const useCreateBooking = () => {
     onSuccess: () => {
       // Invalidate bookings list so it refreshes
       queryClient.invalidateQueries({ queryKey: ['userBookings'] });
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+    },
+  });
+};
+
+export const usePayBookingDeposit = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (bookingId: string) => bookingService.payDeposit(bookingId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['userBookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookingDetail', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+    },
+  });
+};
+
+export const useDisputeBooking = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ bookingId, reason }: { bookingId: string; reason: string }) =>
+      bookingService.disputeBooking(bookingId, reason),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['userBookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookingDetail', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['mua-bookings'] });
     },
   });
 };

@@ -11,27 +11,32 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
-import { MapPin, Calendar, Clock, ArrowRight } from 'lucide-react-native';
+import { ArrowRight } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useUserBookings, useConfirmBookingCompletion } from '../../hooks/useBooking';
 import { BookingDto, BookingStatus } from '../../types/booking';
 import { BookingServiceList } from '../../components/BookingServiceList';
+import { InternalBookingCalendar } from '../../components/booking/InternalBookingCalendar';
 
 type TabType = 'ALL' | 'COMPLETED' | 'PENDING' | 'CANCELLED';
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: string }> = {
-  PENDING: { label: 'Chờ xác nhận', color: '#FF9800', bg: '#FFF3E0' },
+  PENDING_PAYMENT: { label: 'Chờ thanh toán cọc', color: '#FF9800', bg: '#FFF3E0' },
+  PENDING_CONFIRMATION: { label: 'Chờ MUA xác nhận', color: '#FF9800', bg: '#FFF3E0' },
   CONFIRMED: { label: 'Đã xác nhận', color: '#2196F3', bg: '#E3F2FD' },
   IN_PROGRESS: { label: 'Đang thực hiện', color: '#9C27B0', bg: '#F3E5F5' },
   WAITING_CUSTOMER: { label: 'Chờ bạn xác nhận', color: '#00BCD4', bg: '#E0F7FA' },
   COMPLETED: { label: 'Hoàn thành', color: '#4CAF50', bg: '#E8F5E9' },
   CANCELLED: { label: 'Đã hủy', color: '#F44336', bg: '#FFEBEE' },
   REJECTED: { label: 'Từ chối', color: '#F44336', bg: '#FFEBEE' },
+  DISPUTED: { label: 'Đang xử lý khiếu nại', color: '#F44336', bg: '#FFEBEE' },
+  AUTO_COMPLETED: { label: 'Tự động hoàn thành', color: '#4CAF50', bg: '#E8F5E9' },
 };
 
 export default function BookingsTab() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const { data: bookings, isLoading, error, refetch, isRefetching } = useUserBookings();
   const { mutate: confirmCompletion, isPending: isConfirming } = useConfirmBookingCompletion();
 
@@ -39,9 +44,9 @@ export default function BookingsTab() {
     if (!bookings) return [];
     switch (activeTab) {
       case 'COMPLETED':
-        return bookings.filter(b => b.status === 'COMPLETED');
+        return bookings.filter(b => b.status === 'COMPLETED' || b.status === 'AUTO_COMPLETED');
       case 'PENDING':
-        return bookings.filter(b => b.status === 'PENDING' || b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS' || b.status === 'WAITING_CUSTOMER');
+        return bookings.filter(b => b.status === 'PENDING_PAYMENT' || b.status === 'PENDING_CONFIRMATION' || b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS' || b.status === 'WAITING_CUSTOMER' || b.status === 'DISPUTED');
       case 'CANCELLED':
         return bookings.filter(b => b.status === 'CANCELLED');
       case 'ALL':
@@ -97,13 +102,18 @@ export default function BookingsTab() {
         </ScrollView>
       </View>
 
+      <View style={styles.viewSwitch}>
+        <TouchableOpacity style={[styles.viewButton, viewMode === 'list' && styles.viewButtonActive]} onPress={() => setViewMode('list')}><Text style={[styles.viewButtonText, viewMode === 'list' && styles.viewButtonTextActive]}>Danh sách</Text></TouchableOpacity>
+        <TouchableOpacity style={[styles.viewButton, viewMode === 'calendar' && styles.viewButtonActive]} onPress={() => setViewMode('calendar')}><Text style={[styles.viewButtonText, viewMode === 'calendar' && styles.viewButtonTextActive]}>Lịch tháng</Text></TouchableOpacity>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={BrandColors.accentPink} />
         }
       >
-        {filteredBookings.length === 0 ? (
+        {viewMode === 'calendar' ? <InternalBookingCalendar bookings={bookings || []} viewAs="customer" /> : filteredBookings.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>Chưa có lịch hẹn nào.</Text>
           </View>
@@ -224,6 +234,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
+  viewSwitch: { flexDirection: 'row', marginHorizontal: Spacing.md, marginTop: Spacing.md, padding: 4, borderRadius: Radius.full, backgroundColor: '#EFEFEF' },
+  viewButton: { flex: 1, paddingVertical: 8, borderRadius: Radius.full, alignItems: 'center' },
+  viewButtonActive: { backgroundColor: '#FFF' },
+  viewButtonText: { fontFamily: Typography.medium, color: BrandColors.textMuted },
+  viewButtonTextActive: { fontFamily: Typography.bold, color: BrandColors.accentPink },
   tabsContainer: {
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,

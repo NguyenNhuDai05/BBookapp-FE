@@ -4,6 +4,7 @@ import { authService } from "../services/authService";
 import type { UserDto } from "../types/auth";
 import { UserRole } from "../types/auth";
 import { queryClient } from "../lib/queryClient";
+import { NotificationService } from "../services/NotificationService";
 
 const TOKEN_KEY = "user_jwt_token";
 
@@ -128,6 +129,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
+      await NotificationService.unregisterDevice();
       await authService.logout();
     } finally {
       await AsyncStorage.removeItem(TOKEN_KEY);

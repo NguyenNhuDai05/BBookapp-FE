@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
 import { X } from 'lucide-react-native';
 import { uploadImage } from '../../../services/supabase';
+import { useMuaServices } from '../../../hooks/useMuaServices';
 
 
 interface PortfolioFormModalProps {
@@ -19,6 +20,8 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [category, setCategory] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [serviceId, setServiceId] = useState<string | undefined>();
+  const { data: services = [] } = useMuaServices('me');
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -34,21 +37,13 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
     }
   };
 
-  useEffect(() => {
-    if (visible) {
-      if (initialData) {
-        setTitle(initialData.title || '');
-        setDescription(initialData.description || '');
-        setImageUrls(initialData.imageUrls || []);
-        setCategory(initialData.category || '');
-      } else {
-        setTitle('');
-        setDescription('');
-        setImageUrls([]);
-        setCategory('');
-      }
-    }
-  }, [visible, initialData]);
+  const resetForm = () => {
+    setTitle(initialData?.title || '');
+    setDescription(initialData?.description || '');
+    setImageUrls(initialData?.imageUrls || []);
+    setCategory(initialData?.category || '');
+    setServiceId(initialData?.serviceId || initialData?.service?.serviceId || initialData?.service?.id);
+  };
 
   const handleSubmit = async () => {
     setIsUploading(true);
@@ -64,7 +59,8 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
         description,
         imageUrls: finalUrls,
         category,
-        tags: category.split(',').map(t => t.trim()).filter(t => t.length > 0)
+        tags: category.split(',').map(t => t.trim()).filter(t => t.length > 0),
+        serviceId,
       });
       onClose();
     } catch (error) {
@@ -81,6 +77,7 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
       animationType="slide"
       transparent={true}
       onRequestClose={onClose}
+      onShow={resetForm}
     >
       <KeyboardAvoidingView 
         style={styles.modalOverlay}
@@ -106,6 +103,14 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
                 <TouchableOpacity style={[styles.imagePickerBtn, { width: 120, height: 160 }]} onPress={pickImage}>
                   <Text style={styles.imagePickerText}>+ Chọn ảnh</Text>
                 </TouchableOpacity>
+              </ScrollView>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Gắn dịch vụ vào bài viết</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <TouchableOpacity style={[styles.serviceChip, !serviceId && styles.serviceChipActive]} onPress={() => setServiceId(undefined)}><Text>Không gắn</Text></TouchableOpacity>
+                {services.map(service => <TouchableOpacity key={service.id} style={[styles.serviceChip, serviceId === service.id && styles.serviceChipActive]} onPress={() => setServiceId(service.id)}><Text numberOfLines={1}>{service.name || service.serviceName}</Text></TouchableOpacity>)}
               </ScrollView>
             </View>
 
@@ -239,6 +244,8 @@ const styles = StyleSheet.create({
     height: 80,
     textAlignVertical: 'top',
   },
+  serviceChip: { maxWidth: 170, paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.full, backgroundColor: '#F4F4F5', marginRight: 8, borderWidth: 1, borderColor: '#EEE' },
+  serviceChipActive: { backgroundColor: '#FFF0F5', borderColor: BrandColors.accentPink },
   modalFooter: {
     flexDirection: 'row',
     padding: Spacing.md,

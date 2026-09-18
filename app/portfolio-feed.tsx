@@ -1,16 +1,15 @@
-import React, { useRef, useEffect } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions, Modal, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, X, Send } from 'lucide-react-native';
 import { PortfolioPost } from '../components/mua/portfolio/PortfolioPost';
 import { useMuaPortfolio } from '../hooks/useMuaPortfolio';
 import { useMuaDetail } from '../hooks/useMuaDetail';
 import { useBookingStore } from '../store/useBookingStore';
 import { api } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
-
-const { height } = Dimensions.get('window');
 
 export default function CustomerPortfolioFeedScreen() {
   const router = useRouter();
@@ -19,17 +18,23 @@ export default function CustomerPortfolioFeedScreen() {
   const { muaInfo } = useMuaDetail(muaId as string);
   const setLastViewedPortfolioId = useBookingStore(s => s.setLastViewedPortfolioId);
   const queryClient = useQueryClient();
+  const [fullImage, setFullImage] = useState<string | null>(null);
+  const [commentItem, setCommentItem] = useState<any | null>(null);
+  const [comments, setComments] = useState<any[]>([]);
+  const [commentText, setCommentText] = useState('');
+  const [sendingComment, setSendingComment] = useState(false);
+  const { setMua, addService } = useBookingStore();
   const flatListRef = useRef<FlatList>(null);
 
   const hasScrolledRef = useRef(false);
 
-  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
       const item = viewableItems[0].item;
       setLastViewedPortfolioId(item.id || item.portfolioId);
     }
-  }).current;
-  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
+  }, [setLastViewedPortfolioId]);
+  const viewabilityConfig = useMemo(() => ({ itemVisiblePercentThreshold: 50 }), []);
 
   useEffect(() => {
     if (initialIndex !== undefined && portfolio && portfolio.length > 0 && !hasScrolledRef.current) {
@@ -68,16 +73,44 @@ export default function CustomerPortfolioFeedScreen() {
     }
   };
 
+  const openComments = async (item: any) => {
+    setCommentItem(item);
+    const { data } = await api.get(`/mua/portfolio/${item.id || item.portfolioId}/comments`);
+    setComments(data);
+  };
+
+  const sendComment = async () => {
+    if (!commentText.trim() || !commentItem) return;
+    setSendingComment(true);
+    try {
+      const { data } = await api.post(`/mua/portfolio/${commentItem.id || commentItem.portfolioId}/comments`, { content: commentText.trim() });
+      setComments(prev => [data, ...prev]);
+      setCommentText('');
+      queryClient.invalidateQueries({ queryKey: ['mua-portfolio', muaId] });
+    } finally { setSendingComment(false); }
+  };
+
+  const addPostService = (item: any) => {
+    const service = item.service;
+    if (!service) return;
+    setMua({ id: String(muaId), name: muaInfo?.name || 'MUA', avatarUrl: muaInfo?.avatar || '', rating: muaInfo?.rating || 0, reviewCount: muaInfo?.reviewCount || 0, location: '', yearsOfExp: 0 });
+    addService({ id: service.serviceId || service.id, name: service.serviceName || service.name, durationMinutes: service.durationMinutes, price: Number(service.price), participantsCount: 1, imageUrl: service.imageUrl, description: service.description });
+    Alert.alert('Đã thêm', 'Dịch vụ đã được thêm vào lịch đặt của bạn.');
+  };
+
   const renderItem = ({ item }: { item: any }) => (
     <PortfolioPost
       item={{
         ...item,
-        authorName: muaInfo?.brandName || muaInfo?.name || 'Chuyên gia',
-        authorAvatarUrl: muaInfo?.avatar || muaInfo?.avatarUrl || '',
+        authorName: muaInfo?.name || 'Chuyên gia',
+        authorAvatarUrl: muaInfo?.avatar || '',
         muaId: muaId
       }}
       onLike={() => handleLike(item)}
       onSave={() => handleSave(item)}
+      onComment={() => openComments(item)}
+      onImagePress={setFullImage}
+      onAddService={() => addPostService(item)}
       onAuthorPress={() => router.back()}
       // No onOptions since this is customer view
     />
@@ -106,6 +139,19 @@ export default function CustomerPortfolioFeedScreen() {
           { length: Dimensions.get('window').width + 200, offset: (Dimensions.get('window').width + 200) * index, index }
         )}
       />
+      <Modal visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
+        <View style={styles.imageModal}><TouchableOpacity style={styles.closeModal} onPress={() => setFullImage(null)}><X size={28} color="#FFF" /></TouchableOpacity>{fullImage && <Image source={{ uri: fullImage }} style={styles.fullImage} contentFit="contain" />}</View>
+      </Modal>
+      <Modal visible={!!commentItem} animationType="slide" transparent onRequestClose={() => setCommentItem(null)}>
+        <KeyboardAvoidingView style={styles.commentOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={styles.commentSheet}>
+            <View style={styles.commentHeader}><Text style={styles.commentTitle}>Bình luận</Text><TouchableOpacity onPress={() => setCommentItem(null)}><X size={24} /></TouchableOpacity></View>
+            <FlatList data={comments} keyExtractor={item => item.id} renderItem={({ item }) => <View style={styles.commentRow}><View style={styles.commentAvatar}><Text>{(item.userName || 'U')[0]}</Text></View><View style={styles.commentBubble}><Text style={styles.commentUser}>{item.userName || 'Người dùng'}</Text><Text>{item.content}</Text></View></View>} ListEmptyComponent={<Text style={styles.emptyComments}>Chưa có bình luận.</Text>} />
+            <View style={styles.emojiRow}>{['❤️','😍','😂','🔥','👏'].map(e => <TouchableOpacity key={e} onPress={() => setCommentText(v => v + e)}><Text style={styles.emoji}>{e}</Text></TouchableOpacity>)}</View>
+            <View style={styles.commentInputRow}><TextInput value={commentText} onChangeText={setCommentText} placeholder="Viết bình luận..." style={styles.commentInput}/><TouchableOpacity onPress={sendComment} disabled={sendingComment || !commentText.trim()}><Send size={22} color="#E8436A" /></TouchableOpacity></View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -132,4 +178,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#22152B',
   },
+  imageModal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.96)', justifyContent: 'center' },
+  fullImage: { width: '100%', height: '85%' },
+  closeModal: { position: 'absolute', top: 50, right: 20, zIndex: 2, padding: 8 },
+  commentOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
+  commentSheet: { height: '70%', backgroundColor: '#FFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 16 },
+  commentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#EEE' },
+  commentTitle: { fontSize: 18, fontWeight: '700' },
+  commentRow: { flexDirection: 'row', marginTop: 14, gap: 10 },
+  commentAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE5ED', alignItems: 'center', justifyContent: 'center' },
+  commentBubble: { flex: 1, backgroundColor: '#F7F7F8', borderRadius: 14, padding: 10 },
+  commentUser: { fontWeight: '700', marginBottom: 2 },
+  emptyComments: { textAlign: 'center', color: '#888', marginTop: 30 },
+  emojiRow: { flexDirection: 'row', gap: 18, paddingVertical: 10 },
+  emoji: { fontSize: 24 },
+  commentInputRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EEE', borderRadius: 22, paddingHorizontal: 14 },
+  commentInput: { flex: 1, minHeight: 44 },
 });

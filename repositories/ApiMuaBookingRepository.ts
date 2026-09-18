@@ -1,12 +1,13 @@
 import { api } from '../services/api';
 import type { IMuaBookingRepository } from './IMuaBookingRepository';
 import type { BookingDto, BookingStatus, SelectedServiceDto } from '../types/booking';
+import { PaymentStatus } from '../types/booking';
 
 export class ApiMuaBookingRepository implements IMuaBookingRepository {
   
   async getPendingBookings(muaId: string): Promise<BookingDto[]> {
     const allBookings = await this.getAllBookings(muaId);
-    return allBookings.filter(b => b.status === 'PENDING');
+    return allBookings.filter(b => b.status === 'PENDING_CONFIRMATION');
   }
 
   async getAllBookings(muaId: string): Promise<BookingDto[]> {
@@ -22,13 +23,16 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
 
   async updateBookingStatus(bookingId: string, status: BookingStatus, reason?: string): Promise<BookingDto> {
     const statusEnumValues: Record<BookingStatus, number> = {
-      'PENDING': 0,
+      'PENDING_PAYMENT': 5,
+      'PENDING_CONFIRMATION': 6,
       'CONFIRMED': 1, // Approved
-      'IN_PROGRESS': 1, // Map to Approved for now since C# doesn't have InProgress
+      'IN_PROGRESS': 8,
       'COMPLETED': 2, // Completed
       'CANCELLED': 3, // Cancelled
-      'REJECTED': 3, // Map to Cancelled
-      'WAITING_CUSTOMER': 4 // WaitingCustomer
+      'REJECTED': 7,
+      'WAITING_CUSTOMER': 4,
+      'DISPUTED': 9,
+      'AUTO_COMPLETED': 10,
     };
 
     const { data } = await api.put(`/Booking/${bookingId}/status`, {
@@ -62,7 +66,7 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
           if (bDate.getMonth() === currentMonth && bDate.getFullYear() === currentYear) {
             monthEarned += b.totalAmount;
           }
-        } else if (b.status === 'PENDING' || b.status === 'CONFIRMED') {
+        } else if (b.status === 'PENDING_CONFIRMATION' || b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS') {
           pendingEarned += b.totalAmount;
         }
       }
@@ -112,33 +116,61 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       address: b.address || '',
       locationType: 'HOME_SERVICE', // Default fallback
       status: this.mapStatus(b.status),
+      paymentStatus: (b.paymentStatus ?? 0) as PaymentStatus,
       note: b.notes,
       
-      serviceTotal: b.totalAmount || 0,
+      serviceTotal: b.totalAmount ?? 0,
       travelFee: 0,
-      totalAmount: b.totalAmount || 0,
-      depositAmount: (b.totalAmount || 0) * 0.3,
-      remainingAmount: (b.totalAmount || 0) * 0.7,
+      totalAmount: b.totalAmount ?? 0,
+      depositRate: b.depositRate ?? 0,
+      depositAmount: b.depositAmount ?? 0,
+      remainingAmount: b.remainingAmount ?? 0,
+      platformFeeAmount: b.platformFeeAmount ?? 0,
+      muaPayoutAmount: b.muaPayoutAmount ?? 0,
       
       paymentMethod: 'CASH',
-      createdAt: b.createdAt || new Date().toISOString(),
-      updatedAt: b.createdAt || new Date().toISOString()
+      createdAt: b.createdAt ?? '',
+      updatedAt: b.updatedAt ?? '',
+      depositPaidAt: b.depositPaidAt,
+      confirmedAt: b.confirmedAt,
+      startedAt: b.startedAt,
+      waitingCustomerAt: b.waitingCustomerAt,
+      customerConfirmationDeadline: b.customerConfirmationDeadline,
+      completedAt: b.completedAt,
+      rejectedAt: b.rejectedAt,
+      cancelledAt: b.cancelledAt,
+      disputedAt: b.disputedAt,
+      disputeReason: b.disputeReason,
+      rejectReason: b.rejectReason,
+      cancelReason: b.cancelReason
     };
   }
 
   private mapStatus(statusRaw: any): BookingStatus {
     const statusMap: Record<number | string, BookingStatus> = {
-      0: 'PENDING',
+      0: 'PENDING_CONFIRMATION',
       1: 'CONFIRMED', // Approved in C#
       2: 'COMPLETED', // Completed in C#
       3: 'CANCELLED', // Cancelled in C#
       4: 'WAITING_CUSTOMER', // WaitingCustomer in C#
-      'Pending': 'PENDING',
+      5: 'PENDING_PAYMENT',
+      6: 'PENDING_CONFIRMATION',
+      7: 'REJECTED',
+      8: 'IN_PROGRESS',
+      9: 'DISPUTED',
+      10: 'AUTO_COMPLETED',
+      'Pending': 'PENDING_CONFIRMATION',
+      'PendingPayment': 'PENDING_PAYMENT',
+      'PendingConfirmation': 'PENDING_CONFIRMATION',
       'Approved': 'CONFIRMED',
       'Completed': 'COMPLETED',
       'Cancelled': 'CANCELLED',
-      'WaitingCustomer': 'WAITING_CUSTOMER'
+      'WaitingCustomer': 'WAITING_CUSTOMER',
+      'Rejected': 'REJECTED',
+      'InProgress': 'IN_PROGRESS',
+      'Disputed': 'DISPUTED',
+      'AutoCompleted': 'AUTO_COMPLETED'
     };
-    return statusMap[statusRaw] || 'PENDING';
+    return statusMap[statusRaw] || 'PENDING_PAYMENT';
   }
 }

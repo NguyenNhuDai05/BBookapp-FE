@@ -1,28 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { ArrowLeft, MessageCircle, MapPin, Calendar, Clock, Copy, Info } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
-import { useBookingDetail } from '../../hooks/useBooking';
+import { useBookingDetail, useConfirmBookingCompletion, useDisputeBooking, usePayBookingDeposit } from '../../hooks/useBooking';
 import { BookingStatus } from '../../types/booking';
 import { BookingTimeline } from '../../components/BookingTimeline';
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: string }> = {
-  PENDING: { label: 'Chờ xác nhận', color: '#FF9800', bg: '#FFF3E0' },
+  PENDING_PAYMENT: { label: 'Chờ thanh toán cọc', color: '#FF9800', bg: '#FFF3E0' },
+  PENDING_CONFIRMATION: { label: 'Đang chờ MUA xác nhận', color: '#FF9800', bg: '#FFF3E0' },
   CONFIRMED: { label: 'Đã xác nhận', color: '#2196F3', bg: '#E3F2FD' },
   IN_PROGRESS: { label: 'Đang thực hiện', color: '#9C27B0', bg: '#F3E5F5' },
   COMPLETED: { label: 'Hoàn thành', color: '#4CAF50', bg: '#E8F5E9' },
   WAITING_CUSTOMER: { label: 'Chờ khách xác nhận', color: '#00BCD4', bg: '#E0F7FA' },
   CANCELLED: { label: 'Đã hủy', color: '#F44336', bg: '#FFEBEE' },
   REJECTED: { label: 'Từ chối', color: '#F44336', bg: '#FFEBEE' },
+  DISPUTED: { label: 'Đang chờ quản trị viên xử lý', color: '#F44336', bg: '#FFEBEE' },
+  AUTO_COMPLETED: { label: 'Tự động hoàn thành', color: '#4CAF50', bg: '#E8F5E9' },
 };
 
 export default function BookingDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: booking, isLoading, error } = useBookingDetail(id);
+  const { mutateAsync: payDeposit, isPending: isPaying } = usePayBookingDeposit();
+  const { mutate: confirmCompletion, isPending: isConfirming } = useConfirmBookingCompletion();
+  const { mutate: disputeBooking, isPending: isDisputing } = useDisputeBooking();
+  const [showDispute, setShowDispute] = useState(false);
+  const [disputeReason, setDisputeReason] = useState('');
 
   if (isLoading) {
     return (
@@ -45,6 +53,28 @@ export default function BookingDetailScreen() {
 
   const statusInfo = STATUS_CONFIG[booking.status];
 
+  const handlePayDeposit = async () => {
+    try {
+      const paid = await payDeposit(booking.id);
+      if (paid.status === 'PENDING_CONFIRMATION' && paid.paymentStatus === 4) {
+        router.push({ pathname: '/checkout/success', params: { bookingId: paid.id } });
+      }
+    } catch (err: any) {
+      const payload = err.response?.data;
+      if (payload?.code === 'INSUFFICIENT_BALANCE' || payload?.Code === 'INSUFFICIENT_BALANCE') {
+        const missingAmount = payload.missingAmount ?? payload.MissingAmount;
+        router.push({ pathname: '/wallet/topup' as any, params: { amount: String(Math.ceil(missingAmount || 0)) } });
+        return;
+      }
+      Alert.alert('Không thể thanh toán cọc', payload?.message || payload?.Message || err.message);
+    }
+  };
+
+  const handleDispute = () => {
+    if (!disputeReason.trim()) return Alert.alert('Thiếu nội dung', 'Vui lòng nhập nội dung khiếu nại.');
+    disputeBooking({ bookingId: booking.id, reason: disputeReason.trim() }, { onSuccess: () => setShowDispute(false) });
+  };
+
   return (
     <View style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.header}>
@@ -59,6 +89,10 @@ export default function BookingDetailScreen() {
 
 
         <BookingTimeline booking={booking} />
+
+        <View style={[styles.statusBanner, { backgroundColor: statusInfo.bg }]}>
+          <Text style={[styles.statusBannerText, { color: statusInfo.color }]}>{statusInfo.label}</Text>
+        </View>
 
         {/* Booking ID & MUA */}
         <View style={styles.card}>
@@ -90,17 +124,17 @@ export default function BookingDetailScreen() {
           <Text style={styles.sectionTitle}>Thời gian & Địa điểm</Text>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
-            <Calendar size={18} color={BrandColors.primary} />
+            <Calendar size={18} color={BrandColors.accentPink} />
             <Text style={styles.infoText}>Ngày: {booking.date}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
-            <Clock size={18} color={BrandColors.primary} />
+            <Clock size={18} color={BrandColors.accentPink} />
             <Text style={styles.infoText}>Giờ hẹn: {booking.time}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
-            <MapPin size={18} color={BrandColors.primary} />
+            <MapPin size={18} color={BrandColors.accentPink} />
             <View style={styles.addressBlock}>
               <Text style={styles.locationType}>
                 {booking.locationType === 'AT_STUDIO' ? 'Làm tại Studio' : 'Làm tận nơi'}
@@ -161,9 +195,22 @@ export default function BookingDetailScreen() {
             <Text style={styles.paymentLabel}>Cần thanh toán sau</Text>
             <Text style={styles.paymentValueRemaining}>{booking.remainingAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
+          <View style={styles.paymentRow}>
+            <Text style={styles.paymentLabel}>Phí BeautyBook</Text>
+            <Text style={styles.paymentValueTotal}>{booking.platformFeeAmount.toLocaleString('vi-VN')}đ</Text>
+          </View>
         </View>
+        {showDispute && booking.status === 'WAITING_CUSTOMER' && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Nội dung khiếu nại</Text>
+            <TextInput style={styles.disputeInput} value={disputeReason} onChangeText={setDisputeReason} multiline placeholder="Mô tả vấn đề cần quản trị viên xử lý" />
+            <TouchableOpacity style={styles.primaryBtn} onPress={handleDispute} disabled={isDisputing}>
+              <Text style={styles.actionBtnText}>{isDisputing ? 'Đang gửi...' : 'Gửi khiếu nại'}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         {/* Actions for COMPLETED or CANCELLED */}
-        {(booking.status === 'COMPLETED' || booking.status === 'CANCELLED') && (
+        {(booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED') && (
           <View style={[styles.card, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm }]}>
             <TouchableOpacity 
               style={[styles.reviewBtn, booking.isReviewed && styles.reviewedBtn]}
@@ -186,7 +233,20 @@ export default function BookingDetailScreen() {
       </ScrollView>
 
       {/* Cancel Action */}
-      {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
+      {booking.status === 'PENDING_PAYMENT' && (
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.primaryBtn} onPress={handlePayDeposit} disabled={isPaying}>
+            <Text style={styles.actionBtnText}>{isPaying ? 'Đang thanh toán...' : 'Thanh toán cọc'}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      {booking.status === 'WAITING_CUSTOMER' && (
+        <View style={styles.footerRow}>
+          <TouchableOpacity style={styles.cancelBtnFlex} onPress={() => setShowDispute(true)}><Text style={styles.cancelBtnText}>Khiếu nại</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.primaryBtnFlex} disabled={isConfirming} onPress={() => confirmCompletion(booking.id)}><Text style={styles.actionBtnText}>Xác nhận hoàn thành</Text></TouchableOpacity>
+        </View>
+      )}
+      {(booking.status === 'PENDING_CONFIRMATION' || booking.status === 'CONFIRMED') && (
         <View style={styles.footer}>
           <TouchableOpacity 
             style={styles.cancelBtn}
@@ -356,7 +416,7 @@ const styles = StyleSheet.create({
   locationType: {
     fontFamily: Typography.semiBold,
     fontSize: 13,
-    color: BrandColors.primary,
+    color: BrandColors.accentPink,
     marginBottom: 2,
   },
   noteText: {
@@ -394,7 +454,7 @@ const styles = StyleSheet.create({
   serviceQty: {
     fontFamily: Typography.medium,
     fontSize: 14,
-    color: BrandColors.primary,
+    color: BrandColors.accentPink,
   },
   servicePriceHighlight: {
     fontFamily: Typography.bold,
@@ -460,6 +520,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#FFF',
   },
+  primaryBtn: { backgroundColor: BrandColors.accentPink, paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
+  footerRow: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFF', padding: Spacing.md, flexDirection: 'row', gap: Spacing.sm, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
+  cancelBtnFlex: { flex: 1, borderWidth: 1, borderColor: '#F44336', paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
+  primaryBtnFlex: { flex: 1, backgroundColor: BrandColors.accentPink, paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
+  disputeInput: { minHeight: 90, borderWidth: 1, borderColor: '#E0E0E0', borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md, textAlignVertical: 'top' },
   reviewBtn: {
     flex: 1,
     backgroundColor: '#FFF',

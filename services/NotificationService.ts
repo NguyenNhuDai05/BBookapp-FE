@@ -1,8 +1,42 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import * as Calendar from 'expo-calendar';
 import { Platform } from 'react-native';
+import { api } from './api';
 
-// Set notification handler to show notification even when app is open
+const STORED_EXPO_PUSH_TOKEN_KEY = 'expo_push_token';
+
+export const ANDROID_NOTIFICATION_CHANNELS = {
+  default: 'default',
+  bookingReminders: 'booking-reminders',
+  chat: 'chat',
+  payments: 'payments',
+} as const;
+
+async function configureAndroidNotificationChannels(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+
+  await Promise.all([
+    Notifications.setNotificationChannelAsync(ANDROID_NOTIFICATION_CHANNELS.default, {
+      name: 'Thông báo chung',
+      importance: Notifications.AndroidImportance.HIGH,
+    }),
+    Notifications.setNotificationChannelAsync(ANDROID_NOTIFICATION_CHANNELS.bookingReminders, {
+      name: 'Nhắc lịch',
+      importance: Notifications.AndroidImportance.HIGH,
+    }),
+    Notifications.setNotificationChannelAsync(ANDROID_NOTIFICATION_CHANNELS.chat, {
+      name: 'Tin nhắn',
+      importance: Notifications.AndroidImportance.HIGH,
+    }),
+    Notifications.setNotificationChannelAsync(ANDROID_NOTIFICATION_CHANNELS.payments, {
+      name: 'Thanh toán',
+      importance: Notifications.AndroidImportance.HIGH,
+    }),
+  ]);
+}
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -12,73 +46,71 @@ Notifications.setNotificationHandler({
   }),
 });
 
+export async function registerForPushNotificationsAsync(): Promise<string | null> {
+  if (Platform.OS === 'web') return null;
+
+  try {
+    await configureAndroidNotificationChannels();
+
+    if (!Device.isDevice) {
+      console.warn('Push notifications require a physical device.');
+      return null;
+    }
+
+    const currentPermission = await Notifications.getPermissionsAsync();
+    const finalPermission = currentPermission.status === 'granted'
+      ? currentPermission
+      : await Notifications.requestPermissionsAsync();
+
+    if (finalPermission.status !== 'granted') return null;
+
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId
+      ?? Constants.easConfig?.projectId;
+
+    if (!projectId) {
+      console.error('EAS projectId is missing; push token registration was skipped.');
+      return null;
+    }
+
+    const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+    await AsyncStorage.setItem(STORED_EXPO_PUSH_TOKEN_KEY, token);
+    return token;
+  } catch (error: unknown) {
+    console.warn('Unable to obtain an Expo push token.', error);
+    return null;
+  }
+}
+
 export class NotificationService {
-  static async requestPermissions() {
-    const { status: notifStatus } = await Notifications.requestPermissionsAsync();
-    const { status: calStatus } = await Calendar.requestCalendarPermissionsAsync();
-    return notifStatus === 'granted' && calStatus === 'granted';
-  }
+  static async registerDevice(): Promise<string | null> {
+    const token = await registerForPushNotificationsAsync();
+    if (!token) return null;
 
-  static async getDefaultCalendarId(): Promise<string | null> {
-    const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-    if (Platform.OS === 'ios') {
-      const defaultCalendar = await Calendar.getDefaultCalendarAsync();
-      return defaultCalendar.id;
-    } else {
-      // Android: find a primary calendar or the first one
-      const primaryCalendar = calendars.find(c => c.isPrimary);
-      return primaryCalendar ? primaryCalendar.id : (calendars.length > 0 ? calendars[0].id : null);
-    }
-  }
-
-  static async scheduleBookingReminders(
-    customerName: string, 
-    bookingDate: string, 
-    startTime: string,
-    services: string
-  ) {
-    // 1. Parse date and time
-    // bookingDate: "YYYY-MM-DD", startTime: "HH:mm:ss"
-    const startDateTimeStr = `${bookingDate}T${startTime}`;
-    const startDate = new Date(startDateTimeStr);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 1); // Mock 1 hour duration
-
-    // 2. Schedule Push Notification (1 hour before)
-    const notificationDate = new Date(startDate);
-    notificationDate.setHours(notificationDate.getHours() - 1);
-
-    if (notificationDate > new Date()) {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Sắp đến lịch hẹn Makeup! 💄",
-          body: `Bạn có lịch hẹn với ${customerName} lúc ${startTime} hôm nay.`,
-          data: { type: 'booking_reminder' },
-        },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: notificationDate,
-        },
+    try {
+      await api.post('/Notification/device-token', {
+        expoPushToken: token,
+        platform: Platform.OS,
+        deviceName: Constants.deviceName ?? undefined,
       });
+      return token;
+    } catch (error: unknown) {
+      console.warn('Unable to register the push token with BBook.', error);
+      return null;
     }
+  }
 
-    // 3. Add to Device Calendar
-    const calendarId = await this.getDefaultCalendarId();
-    if (calendarId) {
-      try {
-        await Calendar.createEventAsync(calendarId, {
-          title: `MakeUp: ${customerName}`,
-          startDate,
-          endDate,
-          timeZone: 'Asia/Ho_Chi_Minh',
-          notes: `Khách hàng: ${customerName}\nDịch vụ: ${services}`,
-          alarms: [{ relativeOffset: -60 }] // Alert 60 mins before
-        });
-        console.log("Calendar event created successfully");
-      } catch (e) {
-        console.error("Failed to create calendar event", e);
-      }
+  static async unregisterDevice(): Promise<void> {
+    const token = await AsyncStorage.getItem(STORED_EXPO_PUSH_TOKEN_KEY);
+    if (!token) return;
+
+    try {
+      await api.delete('/Notification/device-token', {
+        data: { expoPushToken: token },
+      });
+    } catch (error: unknown) {
+      console.warn('Unable to deactivate the push token with BBook.', error);
+    } finally {
+      await AsyncStorage.removeItem(STORED_EXPO_PUSH_TOKEN_KEY);
     }
   }
 }

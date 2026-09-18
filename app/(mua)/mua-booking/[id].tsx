@@ -41,6 +41,8 @@ export default function MuaBookingDetailScreen() {
     updateStatus({ bookingId: booking.id, status: 'CONFIRMED' });
   };
 
+  const handleStart = () => updateStatus({ bookingId: booking.id, status: 'IN_PROGRESS' });
+
   const handleReject = () => {
     if (!showRejectInput) {
       setShowRejectInput(true);
@@ -55,25 +57,31 @@ export default function MuaBookingDetailScreen() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return BrandColors.statusPending;
+      case 'PENDING_PAYMENT':
+      case 'PENDING_CONFIRMATION': return BrandColors.statusPending;
       case 'CONFIRMED': return BrandColors.statusConfirmed;
       case 'IN_PROGRESS': return BrandColors.statusCompleted;
       case 'WAITING_CUSTOMER': return '#00BCD4'; // Cyan
       case 'COMPLETED': return BrandColors.statusCompleted;
       case 'CANCELLED': 
       case 'REJECTED': return BrandColors.statusCancelled;
+      case 'DISPUTED': return BrandColors.statusCancelled;
+      case 'AUTO_COMPLETED': return BrandColors.statusCompleted;
       default: return BrandColors.textMuted;
     }
   };
 
   const statusLabel = {
-    'PENDING': 'Chờ xác nhận',
+    'PENDING_PAYMENT': 'Chờ khách thanh toán cọc',
+    'PENDING_CONFIRMATION': 'Chờ xác nhận',
     'CONFIRMED': 'Đã xác nhận',
     'IN_PROGRESS': 'Đang thực hiện',
     'WAITING_CUSTOMER': 'Chờ khách xác nhận',
     'COMPLETED': 'Hoàn thành',
     'CANCELLED': 'Khách đã hủy',
-    'REJECTED': 'Đã từ chối'
+    'REJECTED': 'Đã từ chối',
+    'DISPUTED': 'Đang chờ quản trị viên xử lý',
+    'AUTO_COMPLETED': 'Tự động hoàn thành'
   }[booking.status] || booking.status;
 
   return (
@@ -89,6 +97,10 @@ export default function MuaBookingDetailScreen() {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content}>
 
         <BookingTimeline booking={booking} />
+
+        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(booking.status) + '20' }]}>
+          <Text style={[styles.statusText, { color: getStatusColor(booking.status) }]}>{statusLabel}</Text>
+        </View>
 
         {/* Customer Info */}
         <View style={styles.section}>
@@ -117,17 +129,17 @@ export default function MuaBookingDetailScreen() {
             <Text style={styles.sectionTitle}>Thời gian & Địa điểm</Text>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
-              <CalendarIcon size={18} color={BrandColors.primary} />
+              <CalendarIcon size={18} color={BrandColors.accentPink} />
               <Text style={styles.infoText}>Ngày: {booking.date}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
-              <Clock size={18} color={BrandColors.primary} />
+              <Clock size={18} color={BrandColors.accentPink} />
               <Text style={styles.infoText}>Giờ hẹn: {booking.time}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
-              <MapPin size={18} color={BrandColors.primary} />
+              <MapPin size={18} color={BrandColors.accentPink} />
               <View style={styles.addressBlock}>
                 <Text style={styles.locationType}>
                   {booking.locationType === 'AT_STUDIO' ? 'Làm tại Studio' : 'Làm tận nơi'}
@@ -202,11 +214,19 @@ export default function MuaBookingDetailScreen() {
               <Text style={styles.priceLabelRemaining}>Cần thu thêm</Text>
               <Text style={styles.priceValueRemaining}>{booking.remainingAmount.toLocaleString()}đ</Text>
             </View>
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>Phí BeautyBook</Text>
+              <Text style={styles.priceValue}>{booking.platformFeeAmount.toLocaleString()}đ</Text>
+            </View>
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabelBold}>MUA nhận khi giải ngân</Text>
+              <Text style={styles.priceValueBold}>{booking.muaPayoutAmount.toLocaleString()}đ</Text>
+            </View>
           </View>
         </View>
 
         {/* Reject Reason input */}
-        {showRejectInput && booking.status === 'PENDING' && (
+        {showRejectInput && booking.status === 'PENDING_CONFIRMATION' && (
           <View style={styles.rejectContainer}>
             <Text style={styles.rejectLabel}>Lý do từ chối:</Text>
             <TextInput
@@ -222,7 +242,7 @@ export default function MuaBookingDetailScreen() {
           </View>
         )}
         {/* Actions - moved inside ScrollView to ensure visibility */}
-        {booking.status === 'PENDING' && (
+        {booking.status === 'PENDING_CONFIRMATION' && (
           <View style={[styles.bottomBar, { backgroundColor: 'transparent', borderTopWidth: 0 }]}>
             <TouchableOpacity 
               style={[styles.actionBtn, styles.rejectBtn]} 
@@ -246,7 +266,16 @@ export default function MuaBookingDetailScreen() {
           </View>
         )}
 
-        {(booking.status === 'CONFIRMED' || booking.status === 'IN_PROGRESS') && (
+        {booking.status === 'CONFIRMED' && (
+          <View style={[styles.bottomBar, { backgroundColor: 'transparent', borderTopWidth: 0 }]}>
+            <TouchableOpacity style={[styles.actionBtn, styles.acceptBtn]} onPress={handleStart} disabled={isUpdating}>
+              <CheckCircle size={20} color="#FFF" />
+              <Text style={styles.actionBtnText}>Bắt đầu dịch vụ</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {booking.status === 'IN_PROGRESS' && (
           <View style={[styles.bottomBar, { backgroundColor: 'transparent', borderTopWidth: 0 }]}>
             <TouchableOpacity 
               style={[styles.actionBtn, styles.completeBtn]} 
@@ -283,14 +312,14 @@ const styles = StyleSheet.create({
   infoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   infoText: { flex: 1, fontFamily: Typography.medium, fontSize: 15, color: BrandColors.textDark, lineHeight: 22 },
   addressBlock: { flex: 1 },
-  locationType: { fontFamily: Typography.semiBold, fontSize: 13, color: BrandColors.primary, marginBottom: 2 },
+  locationType: { fontFamily: Typography.semiBold, fontSize: 13, color: BrandColors.accentPink, marginBottom: 2 },
   divider: { height: 1, backgroundColor: BrandColors.borderLight, marginVertical: Spacing.sm },
   serviceRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: Spacing.xs, alignItems: 'center' },
   serviceRowBorder: { borderTopWidth: 1, borderTopColor: BrandColors.borderLight, paddingTop: Spacing.sm, marginTop: Spacing.sm },
   serviceItemLeft: { flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: Spacing.sm },
   serviceImage: { width: 48, height: 48, borderRadius: Radius.md, marginRight: Spacing.sm },
   serviceName: { fontFamily: Typography.semiBold, fontSize: 15, color: BrandColors.textDark, flexShrink: 1 },
-  serviceQty: { fontFamily: Typography.medium, fontSize: 14, color: BrandColors.primary },
+  serviceQty: { fontFamily: Typography.medium, fontSize: 14, color: BrandColors.accentPink },
   servicePriceHighlight: { fontFamily: Typography.bold, fontSize: 16, color: BrandColors.accentPink },
   noteText: { flex: 1, fontFamily: Typography.regular, fontSize: 15, color: BrandColors.textDark, fontStyle: 'italic' },
   priceRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
@@ -314,6 +343,6 @@ const styles = StyleSheet.create({
   completeBtn: { backgroundColor: BrandColors.accentRose },
   actionBtnText: { fontFamily: Typography.bold, fontSize: 15, color: '#FFF' },
   errorText: { fontFamily: Typography.medium, fontSize: 16, color: BrandColors.accentRose, marginBottom: Spacing.md },
-  backBtn: { paddingHorizontal: 20, paddingVertical: 10, backgroundColor: BrandColors.primary, borderRadius: Radius.full },
+  backBtn: { paddingHorizontal: 20, paddingVertical: 10, backgroundColor: BrandColors.accentPink, borderRadius: Radius.full },
   backBtnText: { fontFamily: Typography.bold, color: '#FFF' }
 });

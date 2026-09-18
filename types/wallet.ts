@@ -1,4 +1,10 @@
-export type TopUpStatus = 0 | 1 | 2 | 3 | 4;
+export enum TopUpStatus {
+  Pending = 0,
+  Paid = 1,
+  Cancelled = 2,
+  Failed = 3,
+  Expired = 4,
+}
 
 export interface WalletTransactionDto {
   transactionId: string;
@@ -20,6 +26,8 @@ export interface WalletDto {
 
 export interface WalletTopUpDto {
   topUpId: string;
+  userId: string;
+  walletId: string;
   amount: number;
   provider: number;
   providerOrderCode: number;

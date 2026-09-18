@@ -6,11 +6,15 @@ export const useWallet = () => useQuery({
   queryFn: walletService.getWallet,
 });
 
+export const useTopUps = () => useQuery({
+  queryKey: ['walletTopUps'],
+  queryFn: walletService.getTopUps,
+});
+
 export const useCreateTopUp = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ amount, returnUrl, cancelUrl }: { amount: number; returnUrl: string; cancelUrl: string }) =>
-      walletService.createTopUp(amount, returnUrl, cancelUrl),
+    mutationFn: ({ amount }: { amount: number }) => walletService.createTopUp(amount),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['walletTopUps'] }),
   });
 };

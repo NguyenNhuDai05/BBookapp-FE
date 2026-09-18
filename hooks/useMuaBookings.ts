@@ -33,22 +33,6 @@ export const useUpdateBookingStatus = (muaId: string) => {
       queryClient.invalidateQueries({ queryKey: ['mua-earnings'] });
       queryClient.invalidateQueries({ queryKey: ['userBookings'] });
 
-      // Nếu MUA chấp nhận đơn -> Tự động thêm vào Calendar & Hẹn giờ Push Notification
-      if (variables.status === 'CONFIRMED' && data) {
-        import('../services/NotificationService').then(({ NotificationService }) => {
-          NotificationService.requestPermissions().then((granted) => {
-            if (granted) {
-              const servicesStr = data.services.map(s => s.name).join(', ');
-              NotificationService.scheduleBookingReminders(
-                data.customer.name,
-                data.date,
-                data.time,
-                servicesStr
-              );
-            }
-          });
-        });
-      }
     },
   });
 };

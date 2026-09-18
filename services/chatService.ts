@@ -16,7 +16,12 @@ export interface MessageDto {
     messageId: string;
     chatRoomId: string;
     senderId: string;
-    content: string;
+    content?: string;
+    imageUrl?: string;
+    replyToMessageId?: string;
+    replyToContent?: string;
+    replyToImageUrl?: string;
+    reactions: { emoji: string; count: number; reactedByMe: boolean }[];
     sentAt: string;
     isRead: boolean;
 }
@@ -37,9 +42,21 @@ export const chatService = {
         return response.data;
     },
 
-    sendMessage: async (roomId: string, content: string) => {
-        const response = await api.post<MessageDto>(`/chat/rooms/${roomId}/messages`, { content });
+    sendMessage: async (roomId: string, content?: string, imageUrl?: string, replyToMessageId?: string) => {
+        const response = await api.post<MessageDto>(`/chat/rooms/${roomId}/messages`, { content, imageUrl, replyToMessageId });
         return response.data;
+    },
+
+    reactToMessage: async (roomId: string, messageId: string, emoji: string) => {
+        const response = await api.post<MessageDto>(`/chat/rooms/${roomId}/messages/${messageId}/reaction`, { emoji });
+        return response.data;
+    },
+
+    uploadImage: async (uri: string) => {
+        const form = new FormData();
+        form.append('file', { uri, name: `chat-${Date.now()}.jpg`, type: 'image/jpeg' } as any);
+        const response = await api.post<{ url: string }>('/Upload/image', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+        return response.data.url;
     },
     
     joinRoomGroup: async (roomId: string, connectionId: string) => {

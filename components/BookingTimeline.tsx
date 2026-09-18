@@ -25,7 +25,7 @@ export function BookingTimeline({ booking }: BookingTimelineProps) {
       id: 'confirmed',
       title: isCancelled ? (booking.status === 'REJECTED' ? 'Từ chối lúc' : 'Đã hủy lúc') : 'MUA xác nhận lúc',
       time: isCancelled ? (booking.cancelledAt || booking.updatedAt) : booking.confirmedAt,
-      isActive: isCancelled || !!booking.confirmedAt || booking.status === 'CONFIRMED' || booking.status === 'IN_PROGRESS' || booking.status === 'WAITING_CUSTOMER' || booking.status === 'COMPLETED',
+      isActive: isCancelled || !!booking.confirmedAt || booking.status === 'CONFIRMED' || booking.status === 'IN_PROGRESS' || booking.status === 'WAITING_CUSTOMER' || booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED',
       isCancelled: isCancelled,
       icon: isCancelled ? XCircle : ClipboardCheck,
     },
@@ -36,7 +36,7 @@ export function BookingTimeline({ booking }: BookingTimelineProps) {
       id: 'started',
       title: 'Thực hiện lúc',
       time: booking.startedAt,
-      isActive: !!booking.startedAt || booking.status === 'IN_PROGRESS' || booking.status === 'WAITING_CUSTOMER' || booking.status === 'COMPLETED',
+      isActive: !!booking.startedAt || booking.status === 'IN_PROGRESS' || booking.status === 'WAITING_CUSTOMER' || booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED',
       isCancelled: false,
       icon: Briefcase,
     });
@@ -44,7 +44,7 @@ export function BookingTimeline({ booking }: BookingTimelineProps) {
       id: 'completed',
       title: 'Hoàn thành lúc',
       time: booking.completedAt,
-      isActive: !!booking.completedAt || booking.status === 'COMPLETED',
+      isActive: !!booking.completedAt || booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED',
       isCancelled: false,
       icon: CheckCircle,
     });

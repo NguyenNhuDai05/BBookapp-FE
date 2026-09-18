@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, FlatList, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
-import { Heart, Send, Bookmark, MoreVertical } from 'lucide-react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, FlatList } from 'react-native';
+import { Heart, MessageCircle, Bookmark, MoreVertical, Plus } from 'lucide-react-native';
 import { BrandColors } from '../../../constants/theme';
 
 const { width } = Dimensions.get('window');
@@ -13,6 +13,9 @@ interface PortfolioPostProps {
   onShare?: () => void;
   onOptions?: () => void;
   onAuthorPress?: () => void;
+  onComment?: () => void;
+  onImagePress?: (uri: string) => void;
+  onAddService?: () => void;
 }
 
 export const PortfolioPost: React.FC<PortfolioPostProps> = ({
@@ -22,20 +25,23 @@ export const PortfolioPost: React.FC<PortfolioPostProps> = ({
   onShare,
   onOptions,
   onAuthorPress,
+  onComment,
+  onImagePress,
+  onAddService,
 }) => {
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const authorName = item.authorName || 'Chuyên gia';
   const authorAvatar = item.authorAvatarUrl || item.authorAvatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200';
 
-  const onScroll = (e) => {
+  const onScroll = (e: any) => {
     const scrollPosition = e.nativeEvent.contentOffset.x;
     const index = Math.round(scrollPosition / width);
     setActiveIndex(index);
   };
 
   let images = item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls : (item.imageUrl ? [item.imageUrl] : []);
-  images = images.filter((uri) => uri && uri.trim().length > 0);
+  images = images.filter((uri: string) => uri && uri.trim().length > 0);
 
   return (
     <View style={styles.container}>
@@ -70,7 +76,9 @@ export const PortfolioPost: React.FC<PortfolioPostProps> = ({
             onScroll={onScroll}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item: uri }) => (
-              <Image source={{ uri }} style={[styles.image, { width }]} resizeMode="cover" />
+              <TouchableOpacity activeOpacity={0.95} onPress={() => onImagePress?.(uri)}>
+                <Image source={{ uri }} style={[styles.image, { width }]} resizeMode="cover" />
+              </TouchableOpacity>
             )}
           />
         ) : (
@@ -78,7 +86,7 @@ export const PortfolioPost: React.FC<PortfolioPostProps> = ({
         )}
         {images.length > 1 && (
           <View style={styles.pagination} pointerEvents="none">
-            {images.map((_, i) => (
+            {images.map((_: string, i: number) => (
               <View key={i} style={[styles.dot, i === activeIndex && styles.activeDot]} />
             ))}
           </View>
@@ -91,8 +99,8 @@ export const PortfolioPost: React.FC<PortfolioPostProps> = ({
           <TouchableOpacity onPress={onLike} style={styles.actionIcon}>
             <Heart size={24} color={item.isLiked ? BrandColors.accentPink : "#22152B"} fill={item.isLiked ? BrandColors.accentPink : "transparent"} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={onShare} style={styles.actionIcon}>
-            <Send size={24} color="#22152B" />
+          <TouchableOpacity onPress={onComment} style={styles.actionIcon}>
+            <MessageCircle size={24} color="#22152B" />
           </TouchableOpacity>
         </View>
         <TouchableOpacity onPress={onSave} style={styles.actionIcon}>
@@ -103,6 +111,20 @@ export const PortfolioPost: React.FC<PortfolioPostProps> = ({
       {/* Content */}
       <View style={styles.contentContainer}>
         <Text style={styles.likesText}>{(item.likesCount || 0).toLocaleString('vi-VN')} lượt thích</Text>
+        <TouchableOpacity onPress={onComment}>
+          <Text style={styles.commentsText}>Xem {item.commentsCount || 0} bình luận</Text>
+        </TouchableOpacity>
+        {item.service && (
+          <View style={styles.serviceCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.serviceName}>{item.service.serviceName || item.service.name}</Text>
+              <Text style={styles.servicePrice}>{Number(item.service.price || 0).toLocaleString('vi-VN')}đ</Text>
+            </View>
+            <TouchableOpacity style={styles.addServiceButton} onPress={onAddService}>
+              <Plus size={16} color="#FFF" /><Text style={styles.addServiceText}>Thêm dịch vụ</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         
         <View style={styles.captionContainer}>
           <Text style={styles.captionText}>
@@ -114,7 +136,7 @@ export const PortfolioPost: React.FC<PortfolioPostProps> = ({
 
         {(item.tags && item.tags.length > 0) && (
           <Text style={styles.tagsText}>
-            {item.tags.map((t) => "#" + t.replace(/\s+/g, '')).join(' ')}
+            {item.tags.map((t: string) => "#" + t.replace(/\s+/g, '')).join(' ')}
           </Text>
         )}
 
@@ -220,6 +242,12 @@ const styles = StyleSheet.create({
     color: '#22152B',
     marginBottom: 6,
   },
+  commentsText: { color: '#8E8E8E', fontSize: 13, marginBottom: 8 },
+  serviceCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF4F7', borderRadius: 14, padding: 12, marginBottom: 10 },
+  serviceName: { fontSize: 14, fontWeight: '700', color: '#22152B' },
+  servicePrice: { fontSize: 13, color: BrandColors.accentPink, fontWeight: '700', marginTop: 2 },
+  addServiceButton: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: BrandColors.accentPink, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 8 },
+  addServiceText: { color: '#FFF', fontSize: 12, fontWeight: '700' },
   captionContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -235,7 +263,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   tagsText: {
-    color: BrandColors.primary,
+    color: BrandColors.accentPink,
     fontSize: 14,
     marginBottom: 6,
   },

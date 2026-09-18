@@ -7,6 +7,7 @@ export type MessageReceivedCallback = (message: any) => void;
 class SignalRService {
     private connection: signalR.HubConnection | null = null;
     private onMessageReceivedCallbacks: MessageReceivedCallback[] = [];
+    private onMessageUpdatedCallbacks: MessageReceivedCallback[] = [];
 
     public async connect() {
         if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
@@ -28,6 +29,7 @@ class SignalRService {
         this.connection.on('ReceiveMessage', (message) => {
             this.onMessageReceivedCallbacks.forEach(cb => cb(message));
         });
+        this.connection.on('MessageUpdated', (message) => this.onMessageUpdatedCallbacks.forEach(cb => cb(message)));
 
         try {
             await this.connection.start();
@@ -49,6 +51,8 @@ class SignalRService {
     public offMessageReceived(callback: MessageReceivedCallback) {
         this.onMessageReceivedCallbacks = this.onMessageReceivedCallbacks.filter(cb => cb !== callback);
     }
+    public onMessageUpdated(callback: MessageReceivedCallback) { this.onMessageUpdatedCallbacks.push(callback); }
+    public offMessageUpdated(callback: MessageReceivedCallback) { this.onMessageUpdatedCallbacks = this.onMessageUpdatedCallbacks.filter(cb => cb !== callback); }
 
     public async disconnect() {
         if (this.connection) {

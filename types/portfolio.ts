@@ -8,6 +8,8 @@ export interface PortfolioItemDto {
   order: number;
   createdAt: string;
   updatedAt: string;
+  serviceId?: string;
+  service?: import('./ServiceDto').ServiceDto;
 }
 
 export type CreatePortfolioItemRequest = Omit<PortfolioItemDto, 'id' | 'createdAt' | 'updatedAt' | 'isCover' | 'order'>;
