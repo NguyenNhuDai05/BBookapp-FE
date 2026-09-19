@@ -46,6 +46,21 @@ export enum PaymentStatus {
   DEPOSIT_HELD = 4,
   RELEASED = 5,
   FROZEN = 6,
+  REFUND_PENDING = 7,
+}
+
+export type BookingPaymentStatus = 'CREATED' | 'PENDING' | 'PAID' | 'FAILED' | 'EXPIRED' | 'REFUND_PENDING' | 'REFUNDED';
+
+export interface BookingPaymentDto {
+  paymentId: string;
+  bookingId: string;
+  orderCode: number;
+  amount: number;
+  status: BookingPaymentStatus;
+  checkoutUrl: string;
+  qrCode?: string;
+  expiresAt: string;
+  paidAt?: string;
 }
 
 export interface CustomerMinimalDto {
@@ -98,6 +113,7 @@ export interface BookingDto {
   rejectedAt?: string;
   disputedAt?: string;
   disputeReason?: string;
+  paymentExpiresAt?: string;
 }
 
 export interface CreateBookingRequest {

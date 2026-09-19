@@ -1,6 +1,6 @@
 import { IBookingRepository } from '../repositories/IBookingRepository';
 import { ApiBookingRepository } from '../repositories/ApiBookingRepository';
-import { BookingDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
+import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
 
 class BookingService {
   private repository: IBookingRepository;
@@ -17,8 +17,8 @@ class BookingService {
     return this.repository.createBooking(request);
   }
 
-  async payDeposit(bookingId: string): Promise<BookingDto> {
-    return this.repository.payDeposit(bookingId);
+  async createDepositPayment(bookingId: string): Promise<BookingPaymentDto> {
+    return this.repository.createDepositPayment(bookingId);
   }
 
   async disputeBooking(bookingId: string, reason: string): Promise<BookingDto> {

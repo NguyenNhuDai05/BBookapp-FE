@@ -77,6 +77,10 @@ export class ApiAuthRepository implements IAuthRepository {
     return this.mapToAuthResponse(response.data);
   }
 
+  async deleteAccount(): Promise<void> {
+    await api.delete('/User/me');
+  }
+
   private mapToAuthResponse(data: BackendTokenDto): AuthResponseDto {
     const expiration = new Date(data.expiration).getTime();
     return {

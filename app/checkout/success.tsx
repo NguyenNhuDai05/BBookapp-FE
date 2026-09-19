@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,12 +6,25 @@ import { CheckCircle, ShieldCheck, Clock, Home, FileText } from 'lucide-react-na
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useBookingStore } from '../../store/useBookingStore';
 import { useBookingDetail } from '../../hooks/useBooking';
+import * as WebBrowser from 'expo-web-browser';
 
 export default function CheckoutSuccessScreen() {
   const router = useRouter();
   const { bookingId } = useLocalSearchParams<{ bookingId?: string }>();
-  const { data: booking, isLoading } = useBookingDetail(bookingId || '');
+  const { data: booking, isLoading } = useBookingDetail(bookingId || '', true);
   const { draft, resetDraft } = useBookingStore();
+
+  useEffect(() => {
+    // expo-web-browser returns void here (including on web), so chaining
+    // `.catch()` crashes the payment-result screen after returning from payOS.
+    // A synchronous guard is enough and remains safe on Android when there is
+    // no in-app browser session left to dismiss.
+    try {
+      WebBrowser.dismissBrowser();
+    } catch {
+      // The checkout result is still determined by the backend webhook/polling.
+    }
+  }, []);
 
   const handleGoHome = () => {
     resetDraft();
@@ -39,12 +52,13 @@ export default function CheckoutSuccessScreen() {
   const depositAmount = booking.depositAmount;
   const remainingAmount = booking.remainingAmount;
 
-  if (booking && (booking.status !== 'PENDING_CONFIRMATION' || booking.paymentStatus !== 4)) {
+  if (booking && booking.paymentStatus !== 4) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.center}>
-          <Text style={styles.title}>Khoản cọc chưa được xác nhận</Text>
-          <Text style={styles.subtitle}>Vui lòng quay lại chi tiết booking để thanh toán cọc.</Text>
+          <ActivityIndicator size="large" color={BrandColors.accentPink} />
+          <Text style={styles.title}>Đang chờ payOS xác nhận</Text>
+          <Text style={styles.subtitle}>Bạn có thể chờ tại đây hoặc mở chi tiết booking để kiểm tra sau.</Text>
           <TouchableOpacity style={styles.primaryBtn} onPress={() => router.replace(`/booking/${booking.id}`)}>
             <Text style={styles.primaryBtnText}>Xem booking</Text>
           </TouchableOpacity>
@@ -70,7 +84,7 @@ export default function CheckoutSuccessScreen() {
           <ShieldCheck size={24} color={BrandColors.accentPink} />
           <View style={styles.shieldTextWrapper}>
             <Text style={styles.shieldTitle}>Bảo vệ số tiền cọc</Text>
-            <Text style={styles.shieldText}>BeautyBook giữ tiền cọc của bạn an toàn cho đến khi dịch vụ hoàn tất.</Text>
+            <Text style={styles.shieldText}>Khoản cọc đã được ghi nhận cho booking và sẽ được đối soát trước khi chi trả cho MUA.</Text>
           </View>
         </View>
 

@@ -1,9 +1,9 @@
-import { BookingDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
+import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
 
 export interface IBookingRepository {
   getAvailableTimeSlots(muaId: string, date: string): Promise<TimeSlotDto[]>;
   createBooking(request: CreateBookingRequest): Promise<BookingDto>;
-  payDeposit(bookingId: string): Promise<BookingDto>;
+  createDepositPayment(bookingId: string): Promise<BookingPaymentDto>;
   disputeBooking(bookingId: string, reason: string): Promise<BookingDto>;
   getUserBookings(): Promise<BookingDto[]>;
   getBookingDetail(bookingId: string): Promise<BookingDto>;

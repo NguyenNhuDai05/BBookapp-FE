@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Clock,
   ArrowLeft,
+  Trash2,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -32,7 +33,8 @@ import { useMuaProfile } from "../../hooks/useMuaProfile";
 
 export default function MuaSettingsScreen() {
   const router = useRouter();
-  const { user: authUser, logout, switchMode } = useAuthStore();
+  const { user: authUser, logout, deleteAccount, switchMode } = useAuthStore();
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const muaId = "me";
 
   // Fetch MUA data from backend
@@ -78,6 +80,34 @@ export default function MuaSettingsScreen() {
     switchMode('CUSTOMER');
     // Return to the customer tabs layout
     router.replace("/(tabs)/profile" as any);
+  };
+
+  const performAccountDeletion = async () => {
+    if (isDeletingAccount) return;
+    try {
+      setIsDeletingAccount(true);
+      await deleteAccount();
+      router.replace("/(auth)/login" as any);
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || "Không thể xóa tài khoản. Vui lòng thử lại.";
+      if (Platform.OS === "web") window.alert(message);
+      else Alert.alert("Chưa thể xóa tài khoản", message);
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    if (isDeletingAccount) return;
+    const warning = "Tài khoản MUA và dữ liệu cá nhân sẽ bị xóa vĩnh viễn. Bạn cần hoàn tất booking, hoàn tiền và doanh thu chờ đối soát trước khi xóa.";
+    if (Platform.OS === "web") {
+      if (window.confirm(warning)) void performAccountDeletion();
+      return;
+    }
+    Alert.alert("Xóa tài khoản", warning, [
+      { text: "Hủy", style: "cancel" },
+      { text: "Xóa tài khoản", style: "destructive", onPress: () => void performAccountDeletion() },
+    ]);
   };
 
   const renderSettingRow = (
@@ -243,6 +273,13 @@ export default function MuaSettingsScreen() {
 
         <View style={[styles.sectionContainer, { marginBottom: 30 }]}>
           <View style={styles.cardWrapper}>
+            {renderSettingRow(
+              isDeletingAccount ? <ActivityIndicator color="#F5446A" /> : <Trash2 size={20} color="#F5446A" />,
+              isDeletingAccount ? "Đang xóa tài khoản..." : "Xóa tài khoản",
+              "Xóa vĩnh viễn tài khoản và dữ liệu cá nhân",
+              handleDeleteAccount,
+              true,
+            )}
             {renderSettingRow(
               <LogOut size={20} color="#F5446A" />,
               "Đăng xuất tài khoản",

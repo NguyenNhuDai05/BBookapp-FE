@@ -17,11 +17,14 @@ export const useUserBookings = () => {
   });
 };
 
-export const useBookingDetail = (bookingId: string) => {
+export const useBookingDetail = (bookingId: string, pollUntilPaid = false) => {
   return useQuery({
     queryKey: ['bookingDetail', bookingId],
     queryFn: () => bookingService.getBookingDetail(bookingId),
     enabled: !!bookingId,
+    refetchInterval: pollUntilPaid
+      ? query => query.state.data?.paymentStatus === 4 ? false : 2000
+      : false,
   });
 };
 
@@ -41,11 +44,10 @@ export const useCreateBooking = () => {
 export const usePayBookingDeposit = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (bookingId: string) => bookingService.payDeposit(bookingId),
+    mutationFn: (bookingId: string) => bookingService.createDepositPayment(bookingId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['userBookings'] });
-      queryClient.invalidateQueries({ queryKey: ['bookingDetail', data.id] });
-      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['bookingDetail', data.bookingId] });
     },
   });
 };

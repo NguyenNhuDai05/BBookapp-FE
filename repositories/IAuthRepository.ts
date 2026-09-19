@@ -20,4 +20,5 @@ export interface IAuthRepository {
   getMe(): Promise<UserDto>;
   logout(): Promise<void>;
   becomeMua(): Promise<AuthResponseDto>;
+  deleteAccount(): Promise<void>;
 }

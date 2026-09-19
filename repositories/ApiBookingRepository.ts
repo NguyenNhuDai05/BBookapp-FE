@@ -1,6 +1,6 @@
 import { api } from '../services/api';
 import { IBookingRepository } from './IBookingRepository';
-import { BookingDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus, PaymentStatus, ReviewCreateRequest } from '../types/booking';
+import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus, PaymentStatus, ReviewCreateRequest } from '../types/booking';
 
 export class ApiBookingRepository implements IBookingRepository {
   async getAvailableTimeSlots(muaId: string, date: string): Promise<TimeSlotDto[]> {
@@ -42,9 +42,19 @@ export class ApiBookingRepository implements IBookingRepository {
     }
   }
 
-  async payDeposit(bookingId: string): Promise<BookingDto> {
-    const { data } = await api.post(`/Booking/${bookingId}/pay-deposit`);
-    return this.mapToBookingDto(data.booking || data.Booking || data);
+  async createDepositPayment(bookingId: string): Promise<BookingPaymentDto> {
+    const { data } = await api.post(`/Booking/${bookingId}/deposit-payment`);
+    return {
+      paymentId: data.paymentId,
+      bookingId: data.bookingId,
+      orderCode: data.orderCode,
+      amount: data.amount,
+      status: this.mapPaymentAttemptStatus(data.status),
+      checkoutUrl: data.checkoutUrl,
+      qrCode: data.qrCode,
+      expiresAt: data.expiresAt,
+      paidAt: data.paidAt,
+    };
   }
 
   async disputeBooking(bookingId: string, reason: string): Promise<BookingDto> {
@@ -139,7 +149,7 @@ export class ApiBookingRepository implements IBookingRepository {
       muaPayoutAmount: b.muaPayoutAmount ?? 0,
       remainingAmount: b.remainingAmount ?? 0,
       
-      paymentMethod: 'Ví BBook',
+      paymentMethod: 'payOS',
       createdAt: b.createdAt ?? '',
       updatedAt: b.updatedAt ?? '',
       isReviewed: b.hasReview || false,
@@ -153,9 +163,19 @@ export class ApiBookingRepository implements IBookingRepository {
       cancelledAt: b.cancelledAt,
       disputedAt: b.disputedAt,
       disputeReason: b.disputeReason,
+      paymentExpiresAt: b.paymentExpiresAt,
       rejectReason: b.rejectReason,
       cancelReason: b.cancelReason
     };
+  }
+
+  private mapPaymentAttemptStatus(status: number | string): BookingPaymentDto['status'] {
+    const map: Record<number | string, BookingPaymentDto['status']> = {
+      0: 'CREATED', 1: 'PENDING', 2: 'PAID', 3: 'FAILED', 4: 'EXPIRED', 5: 'REFUND_PENDING', 6: 'REFUNDED',
+      Created: 'CREATED', Pending: 'PENDING', Paid: 'PAID', Failed: 'FAILED', Expired: 'EXPIRED',
+      RefundPending: 'REFUND_PENDING', Refunded: 'REFUNDED',
+    };
+    return map[status] || 'PENDING';
   }
 
   private mapStatus(statusRaw: any): BookingStatus {
