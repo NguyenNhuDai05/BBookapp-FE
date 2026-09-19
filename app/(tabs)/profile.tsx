@@ -11,6 +11,7 @@ import {
   LogOut,
   ShieldCheck,
   User,
+  Trash2,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -43,12 +44,13 @@ interface UserProfile {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { initialize, logout, user: authUser, switchMode } = useAuthStore();
+  const { initialize, logout, deleteAccount, user: authUser, switchMode } = useAuthStore();
 
   // Các State lưu trữ trạng thái dữ liệu thực tế từ Server
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const fetchProfileFromServer = useCallback(async () => {
     try {
@@ -134,6 +136,34 @@ export default function ProfileScreen() {
         },
       ],
     );
+  };
+
+  const performAccountDeletion = async () => {
+    if (isDeletingAccount) return;
+    try {
+      setIsDeletingAccount(true);
+      await deleteAccount();
+      router.replace("/login" as any);
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || "Không thể xóa tài khoản. Vui lòng thử lại.";
+      if (Platform.OS === "web") window.alert(message);
+      else Alert.alert("Chưa thể xóa tài khoản", message);
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    if (isDeletingAccount) return;
+    const warning = "Tài khoản và dữ liệu cá nhân sẽ bị xóa vĩnh viễn. Lịch sử giao dịch cần thiết cho đối soát có thể được lưu ở dạng ẩn danh. Hành động này không thể hoàn tác.";
+    if (Platform.OS === "web") {
+      if (window.confirm(warning)) void performAccountDeletion();
+      return;
+    }
+    Alert.alert("Xóa tài khoản", warning, [
+      { text: "Hủy", style: "cancel" },
+      { text: "Xóa tài khoản", style: "destructive", onPress: () => void performAccountDeletion() },
+    ]);
   };
 
   // Hàm render giao diện các dòng chức năng
@@ -342,6 +372,13 @@ export default function ProfileScreen() {
 
         <View style={[styles.sectionContainer, { marginBottom: 30 }]}>
           <View style={styles.cardWrapper}>
+            {renderSettingRow(
+              isDeletingAccount ? <ActivityIndicator color="#F5446A" /> : <Trash2 size={20} color="#F5446A" />,
+              isDeletingAccount ? "Đang xóa tài khoản..." : "Xóa tài khoản",
+              "Xóa vĩnh viễn tài khoản và dữ liệu cá nhân",
+              handleDeleteAccount,
+              true,
+            )}
             {renderSettingRow(
               <LogOut size={20} color="#F5446A" />,
               "Đăng xuất tài khoản",

@@ -28,7 +28,7 @@ export default function CancelSuccessScreen() {
         <View style={styles.refundBox}>
           <Text style={styles.refundTitle}>Thông báo hoàn tiền</Text>
           <Text style={styles.refundText}>
-            Do bạn hủy trước 24h, số tiền cọc <Text style={styles.bold}>{booking?.depositAmount?.toLocaleString('vi-VN')}đ</Text> sẽ được hoàn lại vào Ví BeautyBook trong vòng 24h.
+            Yêu cầu hoàn tiền cọc <Text style={styles.bold}>{booking?.depositAmount?.toLocaleString('vi-VN')}đ</Text> đã được ghi nhận và sẽ được trả về tài khoản thanh toán sau khi đối soát.
           </Text>
         </View>
       </View>

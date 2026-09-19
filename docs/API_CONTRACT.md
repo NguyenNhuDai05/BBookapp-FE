@@ -46,7 +46,8 @@ Portfolio reorder, cover, visibility, and pin endpoints do not exist. The fronte
 | Method | Path | Authentication |
 | --- | --- | --- |
 | POST | `/Booking/create` | Bearer JWT |
-| POST | `/Booking/{id}/pay-deposit` | Bearer JWT; booking customer |
+| POST | `/Booking/{id}/deposit-payment` | Bearer JWT; creates/reuses a payOS payment link for the booking deposit |
+| POST | `/Booking/payos/webhook` | Anonymous; verified payOS webhook updates payment and booking status |
 | GET | `/Booking?viewAs=customer|mua` | Bearer JWT |
 | GET | `/Booking/{id}` | Bearer JWT; participant |
 | PUT | `/Booking/{id}/status` | Bearer JWT; transition permissions apply |

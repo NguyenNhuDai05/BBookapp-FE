@@ -40,7 +40,7 @@ const initialDraft: BookingDraft = {
   time: '',
   address: '',
   note: '',
-  paymentMethod: 'Ví BeautyBook',
+  paymentMethod: 'payOS',
 };
 
 export const useBookingStore = create<BookingStore>((set, get) => ({

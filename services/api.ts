@@ -11,7 +11,10 @@ const webApiUrl =
     ? `${window.location.protocol}//${window.location.hostname}:5261/api`
     : undefined;
 
-export const API_URL = webApiUrl || configuredApiUrl || "http://localhost:5261/api";
+// An explicit build/runtime URL must win on every platform. Previously web
+// always replaced the configured production URL with `<current-host>:5261`,
+// which made deployed/test builds call a developer LAN backend.
+export const API_URL = configuredApiUrl || webApiUrl || "http://localhost:5261/api";
 
 export const api = axios.create({
   baseURL: API_URL,

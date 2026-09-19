@@ -32,6 +32,10 @@ class AuthService {
   async becomeMua(): Promise<AuthResponseDto> {
     return this.repository.becomeMua();
   }
+
+  async deleteAccount(): Promise<void> {
+    return this.repository.deleteAccount();
+  }
 }
 
 // Export a singleton instance using the REAL API repository

@@ -8,6 +8,7 @@ import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constan
 import { useBookingDetail, useConfirmBookingCompletion, useDisputeBooking, usePayBookingDeposit } from '../../hooks/useBooking';
 import { BookingStatus } from '../../types/booking';
 import { BookingTimeline } from '../../components/BookingTimeline';
+import * as WebBrowser from 'expo-web-browser';
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: string }> = {
   PENDING_PAYMENT: { label: 'Chờ thanh toán cọc', color: '#FF9800', bg: '#FFF3E0' },
@@ -55,17 +56,12 @@ export default function BookingDetailScreen() {
 
   const handlePayDeposit = async () => {
     try {
-      const paid = await payDeposit(booking.id);
-      if (paid.status === 'PENDING_CONFIRMATION' && paid.paymentStatus === 4) {
-        router.push({ pathname: '/checkout/success', params: { bookingId: paid.id } });
-      }
+      const payment = await payDeposit(booking.id);
+      if (!payment.checkoutUrl) throw new Error('payOS không trả về đường dẫn thanh toán.');
+      await WebBrowser.openBrowserAsync(payment.checkoutUrl);
+      router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } });
     } catch (err: any) {
       const payload = err.response?.data;
-      if (payload?.code === 'INSUFFICIENT_BALANCE' || payload?.Code === 'INSUFFICIENT_BALANCE') {
-        const missingAmount = payload.missingAmount ?? payload.MissingAmount;
-        router.push({ pathname: '/wallet/topup' as any, params: { amount: String(Math.ceil(missingAmount || 0)) } });
-        return;
-      }
       Alert.alert('Không thể thanh toán cọc', payload?.message || payload?.Message || err.message);
     }
   };

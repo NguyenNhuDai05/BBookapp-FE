@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { 
   ArrowLeft, MapPin, Calendar, Clock, Info, Trash2, Plus, Minus, 
-  Wallet, CreditCard, ArrowRight
+  QrCode, ArrowRight
 } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
 import { useBookingStore } from '../../store/useBookingStore';
@@ -13,12 +14,11 @@ import { useCreateBooking, usePayBookingDeposit } from '../../hooks/useBooking';
 import { useMuaDetail } from '../../hooks/useMuaDetail';
 import { DatePickerSheet } from '../../components/booking/DatePickerSheet';
 import { TimePickerSheet } from '../../components/booking/TimePickerSheet';
-import { useWallet } from '../../hooks/useWallet';
 
 export default function CheckoutScreen() {
   const router = useRouter();
   const { 
-    draft, setDate, setTime, updateServiceParticipantsCount, removeService, setPaymentMethod 
+    draft, setDate, setTime, updateServiceParticipantsCount, removeService
   } = useBookingStore();
   
   const [dateSheetVisible, setDateSheetVisible] = useState(false);
@@ -26,7 +26,6 @@ export default function CheckoutScreen() {
 
   const { mutateAsync: createBooking, isPending: isCreating } = useCreateBooking();
   const { mutateAsync: payDeposit, isPending: isPaying } = usePayBookingDeposit();
-  const { data: wallet, isLoading: walletLoading } = useWallet();
   const { muaInfo, loading: muaLoading } = useMuaDetail(draft.mua?.id || '');
 
   // If store is empty, go back
@@ -66,21 +65,15 @@ export default function CheckoutScreen() {
         paymentMethod: draft.paymentMethod,
       });
 
-      const paidBooking = await payDeposit(booking.id);
-      if (paidBooking.status !== 'PENDING_CONFIRMATION' || paidBooking.paymentStatus !== 4) {
-        throw new Error('Thanh toán cọc chưa được xác nhận. Vui lòng kiểm tra lại booking.');
+      const payment = await payDeposit(booking.id);
+      if (!payment.checkoutUrl) {
+        throw new Error('payOS không trả về đường dẫn thanh toán.');
       }
-      router.push({ pathname: '/checkout/success', params: { bookingId: paidBooking.id } });
+
+      await WebBrowser.openBrowserAsync(payment.checkoutUrl);
+      router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } });
     } catch (err: any) {
       const payload = err.response?.data;
-      if (payload?.code === 'INSUFFICIENT_BALANCE' || payload?.Code === 'INSUFFICIENT_BALANCE') {
-        const missingAmount = payload.missingAmount ?? payload.MissingAmount;
-        router.push({
-          pathname: '/wallet/topup' as any,
-          params: { amount: String(Math.ceil(missingAmount || estimatedDepositAmount)) },
-        });
-        return;
-      }
       const msg = payload?.message || payload?.Message || err.message;
       alert('Có lỗi xảy ra: ' + msg);
     }
@@ -272,18 +265,12 @@ export default function CheckoutScreen() {
         <Text style={styles.sectionTitlePlain}>Phương thức thanh toán</Text>
         
         <PaymentMethodItem 
-          title="Ví BBook"
-          subtitle={walletLoading ? 'Đang tải số dư...' : `Số dư: ${(wallet?.balance || 0).toLocaleString('vi-VN')}đ`}
-          icon={<Wallet size={20} color={BrandColors.accentPink} />}
-          isSelected={draft.paymentMethod === 'Ví BeautyBook'}
-          onSelect={() => setPaymentMethod('Ví BeautyBook')}
+          title="Chuyển khoản QR qua payOS"
+          subtitle="Thanh toán trực tiếp tiền cọc cho booking này"
+          icon={<QrCode size={20} color={BrandColors.accentPink} />}
+          isSelected
+          onSelect={() => undefined}
         />
-        {!walletLoading && (wallet?.balance || 0) < estimatedDepositAmount && (
-          <TouchableOpacity style={styles.topUpBtn} onPress={() => router.push({ pathname: '/wallet/topup' as any, params: { amount: String(Math.ceil(estimatedDepositAmount - (wallet?.balance || 0))) } })}>
-            <CreditCard size={20} color={BrandColors.accentPink} />
-            <Text style={styles.topUpBtnText}>Nạp phần còn thiếu qua PayOS</Text>
-          </TouchableOpacity>
-        )}
         
         <View style={styles.bottomPadding} />
       </ScrollView>

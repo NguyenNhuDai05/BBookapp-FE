@@ -17,6 +17,7 @@ interface AuthState {
   loginWithGoogleToken: (idToken: string) => Promise<boolean>;
   becomeMUA: () => Promise<boolean>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   register: (fullName: string, email: string, password?: string, phone?: string, role?: UserRole) => Promise<boolean>;
   activeMode: 'CUSTOMER' | 'MUA';
   switchMode: (mode: 'CUSTOMER' | 'MUA') => void;
@@ -153,6 +154,24 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: false,
         activeMode: 'CUSTOMER',
       });
+    }
+  },
+
+  deleteAccount: async () => {
+    set({ isLoading: true });
+    try {
+      await authService.deleteAccount();
+      await AsyncStorage.clear();
+      queryClient.clear();
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        activeMode: 'CUSTOMER',
+      });
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
     }
   },
 }));
