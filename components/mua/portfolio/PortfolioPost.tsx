@@ -91,6 +91,24 @@ export const PortfolioPost: React.FC<PortfolioPostProps> = ({
             ))}
           </View>
         )}
+        {item.service && (
+          <TouchableOpacity
+            style={styles.serviceOverlay}
+            activeOpacity={0.9}
+            onPress={onAddService}
+          >
+            <View style={styles.serviceOverlayText}>
+              <Text style={styles.serviceOverlayLabel}>DỊCH VỤ</Text>
+              <Text style={styles.serviceOverlayName} numberOfLines={1}>
+                {item.service.serviceName || item.service.name}
+              </Text>
+            </View>
+            <Text style={styles.serviceOverlayPrice}>
+              {Number(item.service.price || 0).toLocaleString('vi-VN')}đ
+            </Text>
+            <Plus size={16} color={BrandColors.accentPink} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Actions */}
@@ -114,18 +132,6 @@ export const PortfolioPost: React.FC<PortfolioPostProps> = ({
         <TouchableOpacity onPress={onComment}>
           <Text style={styles.commentsText}>Xem {item.commentsCount || 0} bình luận</Text>
         </TouchableOpacity>
-        {item.service && (
-          <View style={styles.serviceCard}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.serviceName}>{item.service.serviceName || item.service.name}</Text>
-              <Text style={styles.servicePrice}>{Number(item.service.price || 0).toLocaleString('vi-VN')}đ</Text>
-            </View>
-            <TouchableOpacity style={styles.addServiceButton} onPress={onAddService}>
-              <Plus size={16} color="#FFF" /><Text style={styles.addServiceText}>Thêm dịch vụ</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        
         <View style={styles.captionContainer}>
           <Text style={styles.captionText}>
             <Text style={styles.authorNameInline}>{authorName} </Text>
@@ -200,6 +206,29 @@ const styles = StyleSheet.create({
   image: {
     height: '100%',
   },
+  serviceOverlay: {
+    position: 'absolute',
+    right: 12,
+    bottom: 14,
+    maxWidth: '82%',
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 24,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255,255,255,0.94)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  serviceOverlayText: { flexShrink: 1 },
+  serviceOverlayLabel: { fontSize: 9, color: '#8E8E8E', fontWeight: '700' },
+  serviceOverlayName: { fontSize: 12, color: BrandColors.accentPink, fontWeight: '700' },
+  serviceOverlayPrice: { fontSize: 12, color: '#22152B', fontWeight: '800' },
   pagination: {
     position: 'absolute',
     bottom: 10,
@@ -243,11 +272,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   commentsText: { color: '#8E8E8E', fontSize: 13, marginBottom: 8 },
-  serviceCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF4F7', borderRadius: 14, padding: 12, marginBottom: 10 },
-  serviceName: { fontSize: 14, fontWeight: '700', color: '#22152B' },
-  servicePrice: { fontSize: 13, color: BrandColors.accentPink, fontWeight: '700', marginTop: 2 },
-  addServiceButton: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: BrandColors.accentPink, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 8 },
-  addServiceText: { color: '#FFF', fontSize: 12, fontWeight: '700' },
   captionContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',

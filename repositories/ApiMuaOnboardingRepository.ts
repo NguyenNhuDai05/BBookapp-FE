@@ -1,34 +1,25 @@
 import { api } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IMuaOnboardingRepository } from './IMuaOnboardingRepository';
 import type { MuaDraft } from '../types/onboarding';
 
 export class ApiMuaOnboardingRepository implements IMuaOnboardingRepository {
+  private draftKey(userId: string): string {
+    return `mua_onboarding_draft:${userId}`;
+  }
+
   async saveDraft(userId: string, draft: MuaDraft): Promise<void> {
-    try {
-      await api.post('/Mua/onboarding/draft', { userId, ...draft });
-    } catch (e) {
-      console.error('Failed to save draft', e);
-      throw e;
-    }
+    await AsyncStorage.setItem(this.draftKey(userId), JSON.stringify(draft));
   }
 
   async getDraft(userId: string): Promise<MuaDraft | null> {
-    try {
-      const { data } = await api.get(`/Mua/onboarding/draft/${userId}`);
-      return data;
-    } catch (e) {
-      return null;
-    }
+    const stored = await AsyncStorage.getItem(this.draftKey(userId));
+    return stored ? JSON.parse(stored) as MuaDraft : null;
   }
 
   async submitApplication(userId: string, draft: MuaDraft): Promise<{ success: boolean; applicationId: string }> {
-    try {
-      const { data } = await api.post('/Mua/onboarding/submit', { userId, ...draft });
-      return { success: true, applicationId: data.applicationId || 'unknown' };
-    } catch (e) {
-      console.error('Failed to submit application', e);
-      throw e;
-    }
+    await AsyncStorage.removeItem(this.draftKey(userId));
+    throw new Error('Legacy MUA draft submission is not supported. Use the current MUA application flow.');
   }
 
   async uploadPortfolioImage(localUri: string): Promise<string> {

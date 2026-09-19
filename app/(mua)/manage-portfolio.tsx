@@ -1,12 +1,11 @@
-﻿import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions, Modal, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, Edit2, Trash2, EyeOff, Eye, Pin } from 'lucide-react-native';
+import { ChevronLeft, Edit2, Trash2 } from 'lucide-react-native';
 import { PortfolioPost } from '../../components/mua/portfolio/PortfolioPost';
 import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioFormModal';
 import { useMuaPortfolio } from '../../hooks/useMuaPortfolio';
-import { api } from '../../services/api';
 import { useQueryClient } from '@tanstack/react-query';
 
 const { height } = Dimensions.get('window');
@@ -14,7 +13,7 @@ const { height } = Dimensions.get('window');
 export default function PortfolioFeedScreen() {
   const router = useRouter();
   const { initialIndex } = useLocalSearchParams();
-  const { data: portfolio } = useMuaPortfolio('me');
+  const { data: portfolio, deleteItem, toggleLike, toggleSave } = useMuaPortfolio('me');
   const queryClient = useQueryClient();
   const flatListRef = useRef<FlatList>(null);
 
@@ -45,8 +44,7 @@ export default function PortfolioFeedScreen() {
 
   const handleLike = async (item: any) => {
     try {
-      await api.post('/mua/portfolio/' + (item.id || item.portfolioId) + '/like');
-      queryClient.invalidateQueries({ queryKey: ['mua-portfolio', 'me'] });
+      await toggleLike(item.id || item.portfolioId);
     } catch (e) {
       console.log('Like failed', e);
     }
@@ -54,8 +52,7 @@ export default function PortfolioFeedScreen() {
 
   const handleSave = async (item: any) => {
     try {
-      await api.post('/mua/portfolio/' + (item.id || item.portfolioId) + '/save');
-      queryClient.invalidateQueries({ queryKey: ['mua-portfolio', 'me'] });
+      await toggleSave(item.id || item.portfolioId);
     } catch (e) {
       console.log('Save failed', e);
     }
@@ -76,28 +73,11 @@ export default function PortfolioFeedScreen() {
       { text: 'Hủy', style: 'cancel' },
       { text: 'Xóa', style: 'destructive', onPress: async () => {
           try {
-            await api.delete('/mua/portfolio/' + (selectedPost.id || selectedPost.portfolioId));
-            queryClient.invalidateQueries({ queryKey: ['mua-portfolio', 'me'] });
+            await deleteItem(selectedPost.id || selectedPost.portfolioId);
             setOptionsVisible(false);
           } catch (e) { console.log('Delete failed', e); }
       }}
     ]);
-  };
-
-  const handleToggleVisibility = async () => {
-    try {
-      await api.put('/mua/portfolio/' + (selectedPost.id || selectedPost.portfolioId) + '/visibility');
-      queryClient.invalidateQueries({ queryKey: ['mua-portfolio', 'me'] });
-      setOptionsVisible(false);
-    } catch (e) { console.log('Visibility failed', e); }
-  };
-
-  const handleTogglePin = async () => {
-    try {
-      await api.put('/mua/portfolio/' + (selectedPost.id || selectedPost.portfolioId) + '/pin');
-      queryClient.invalidateQueries({ queryKey: ['mua-portfolio', 'me'] });
-      setOptionsVisible(false);
-    } catch (e) { console.log('Pin failed', e); }
   };
 
   const renderItem = ({ item }: { item: any }) => (
@@ -137,16 +117,6 @@ export default function PortfolioFeedScreen() {
             <TouchableOpacity style={styles.optionBtn} onPress={handleEdit}>
               <Edit2 size={24} color="#22152B" />
               <Text style={styles.optionText}>Chỉnh sửa bài viết</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.optionBtn} onPress={handleTogglePin}>
-              <Pin size={24} color="#22152B" />
-              <Text style={styles.optionText}>{selectedPost?.isPinned ? 'Bỏ ghim bài viết' : 'Ghim bài viết lên đầu'}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.optionBtn} onPress={handleToggleVisibility}>
-              {selectedPost?.isHidden ? <Eye size={24} color="#22152B" /> : <EyeOff size={24} color="#22152B" />}
-              <Text style={styles.optionText}>{selectedPost?.isHidden ? 'Hiện bài viết' : 'Ẩn bài viết (Chỉ mình tôi)'}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity style={[styles.optionBtn, styles.deleteBtn]} onPress={handleDelete}>

@@ -13,6 +13,10 @@ class AuthService {
     return this.repository.login(request);
   }
 
+  async loginWithGoogle(idToken: string): Promise<AuthResponseDto> {
+    return this.repository.loginWithGoogle(idToken);
+  }
+
   async register(request: RegisterRequest): Promise<void> {
     await this.repository.register(request);
   }

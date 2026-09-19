@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useRouter, useSegments } from 'expo-router';
+import { useRootNavigationState, useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '../store/useAuthStore';
 import { UserRole } from '../types/auth';
 
@@ -7,17 +7,24 @@ export function useProtectedRoute() {
   const { user, isAuthenticated, initialize } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
+  const rootNavigationState = useRootNavigationState();
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     // Initialize auth state on mount
     initialize().finally(() => {
-      setIsReady(true);
+      if (isMounted) setIsReady(true);
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, [initialize]);
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady || !rootNavigationState?.key) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     
@@ -54,7 +61,7 @@ export function useProtectedRoute() {
         }
       }
     }
-  }, [user, isAuthenticated, segments, isReady, router]);
+  }, [user, isAuthenticated, segments, isReady, rootNavigationState?.key, router]);
 
   return isReady;
 }

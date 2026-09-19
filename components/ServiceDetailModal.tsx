@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, ScrollView, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, ScrollView, Dimensions } from 'react-native';
 import { useBookingStore } from '../store/useBookingStore';
 import { BrandColors } from '../constants/theme';
 import { ArrowLeft, Share2, Minus, Plus, ImageIcon } from 'lucide-react-native';
@@ -20,7 +20,6 @@ export default function ServiceDetailModal({ visible, onClose, service, mua }: S
   const insets = useSafeAreaInsets();
   const draft = useBookingStore(state => state.draft);
   const updateServiceParticipantsCount = useBookingStore(state => state.updateServiceParticipantsCount);
-  const removeService = useBookingStore(state => state.removeService);
   const addService = useBookingStore(state => state.addService);
 
   // Find current quantity in cart
@@ -33,9 +32,9 @@ export default function ServiceDetailModal({ visible, onClose, service, mua }: S
 
   // Reset local quantity when modal opens
   useEffect(() => {
-    if (visible) {
-      setLocalQuantity(1);
-    }
+    if (!visible) return;
+    const timeoutId = setTimeout(() => setLocalQuantity(1), 0);
+    return () => clearTimeout(timeoutId);
   }, [visible]);
 
   if (!service) return null;

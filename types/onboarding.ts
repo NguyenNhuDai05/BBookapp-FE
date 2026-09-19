@@ -42,6 +42,6 @@ export interface MuaApplicationRequestDto {
 }
 
 export interface MuaApplicationResponseDto {
-  profile: any;
+  profile: MuaApplicationRequestDto;
   status: string;
 }

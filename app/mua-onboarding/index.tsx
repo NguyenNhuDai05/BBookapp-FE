@@ -52,7 +52,7 @@ export default function MuaPitchPage() {
               Elevate Your Beauty Business
             </Text>
             <Text style={styles.heroSubtitle}>
-              Join Vietnam's premium beauty marketplace. Manage bookings, grow your clientele, and build your digital portfolio.
+              Join Vietnam&apos;s premium beauty marketplace. Manage bookings, grow your clientele, and build your digital portfolio.
             </Text>
           </View>
         </View>

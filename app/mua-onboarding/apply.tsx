@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   View, Text, ScrollView, TouchableOpacity, Alert, 
-  KeyboardAvoidingView, Platform, TextInput, ActivityIndicator, StyleSheet
+  KeyboardAvoidingView, Platform, TextInput, ActivityIndicator, StyleSheet, TextInputProps
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react-native';
@@ -10,6 +10,52 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSubmitApplication } from '../../hooks/useMuaOnboarding';
 import { useAuthStore } from '../../store/useAuthStore';
 import type { MuaApplicationRequestDto } from '../../types/onboarding';
+
+interface ApplicationInputFieldProps {
+  label: string;
+  value?: string;
+  field: keyof MuaApplicationRequestDto;
+  placeholder: string;
+  error?: string;
+  multiline?: boolean;
+  keyboardType?: TextInputProps['keyboardType'];
+  optional?: boolean;
+  onChange: (field: keyof MuaApplicationRequestDto, value: string) => void;
+}
+
+function ApplicationInputField({
+  label,
+  value,
+  field,
+  placeholder,
+  error,
+  multiline = false,
+  keyboardType = 'default',
+  optional = false,
+  onChange,
+}: ApplicationInputFieldProps) {
+  return (
+    <View style={styles.inputContainer}>
+      <View style={styles.inputHeader}>
+        <Text style={styles.inputLabel}>{label}</Text>
+        {optional && <Text style={styles.optionalText}>Optional</Text>}
+      </View>
+      <View style={[styles.inputWrapper, error && styles.inputWrapperError]}>
+        <TextInput
+          style={[styles.textInput, multiline && styles.textInputMultiline]}
+          placeholder={placeholder}
+          placeholderTextColor="#666666"
+          value={value || ''}
+          onChangeText={(text) => onChange(field, text)}
+          multiline={multiline}
+          keyboardType={keyboardType}
+          selectionColor="#E11D48"
+        />
+      </View>
+      {error && <Text style={styles.errorText}>{error}</Text>}
+    </View>
+  );
+}
 
 export default function MuaApplyScreen() {
   const router = useRouter();
@@ -69,33 +115,6 @@ export default function MuaApplyScreen() {
     });
   };
 
-  const InputField = ({ 
-    label, value, field, placeholder, multiline = false, keyboardType = 'default', optional = false 
-  }: { 
-    label: string, value: string | undefined, field: keyof MuaApplicationRequestDto, 
-    placeholder: string, multiline?: boolean, keyboardType?: any, optional?: boolean 
-  }) => (
-    <View style={styles.inputContainer}>
-      <View style={styles.inputHeader}>
-        <Text style={styles.inputLabel}>{label}</Text>
-        {optional && <Text style={styles.optionalText}>Optional</Text>}
-      </View>
-      <View style={[styles.inputWrapper, errors[field] && styles.inputWrapperError]}>
-        <TextInput
-          style={[styles.textInput, multiline && styles.textInputMultiline]}
-          placeholder={placeholder}
-          placeholderTextColor="#666666"
-          value={value ? value.toString() : ''}
-          onChangeText={(text) => handleUpdate(field, text)}
-          multiline={multiline}
-          keyboardType={keyboardType}
-          selectionColor="#E11D48"
-        />
-      </View>
-      {errors[field] && <Text style={styles.errorText}>{errors[field]}</Text>}
-    </View>
-  );
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -132,27 +151,33 @@ export default function MuaApplyScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Personal Details</Text>
             
-            <InputField 
+            <ApplicationInputField
               label="Business/Display Name" 
               field="displayName" 
               value={form.displayName} 
               placeholder="e.g. Nguyen Thao Makeup" 
+              error={errors.displayName}
+              onChange={handleUpdate}
             />
 
-            <InputField 
+            <ApplicationInputField
               label="City" 
               field="city" 
               value={form.city} 
               placeholder="e.g. Ho Chi Minh" 
+              error={errors.city}
+              onChange={handleUpdate}
             />
 
-            <InputField 
+            <ApplicationInputField
               label="Phone Number" 
               field="phoneNumber" 
               value={form.phoneNumber || ''} 
               placeholder="e.g. 0901234567" 
               keyboardType="phone-pad"
               optional
+              error={errors.phoneNumber}
+              onChange={handleUpdate}
             />
           </View>
 
@@ -161,37 +186,45 @@ export default function MuaApplyScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Professional Info</Text>
 
-            <InputField 
+            <ApplicationInputField
               label="Years of Experience" 
               field="experienceYears" 
               value={form.experienceYears ? form.experienceYears.toString() : ''} 
               placeholder="e.g. 3" 
               keyboardType="number-pad"
               optional
+              error={errors.experienceYears}
+              onChange={handleUpdate}
             />
 
-            <InputField 
+            <ApplicationInputField
               label="Specialization" 
               field="specialization" 
               value={form.specialization || ''} 
               placeholder="e.g. Bridal, Editorial, Party" 
               optional
+              error={errors.specialization}
+              onChange={handleUpdate}
             />
 
-            <InputField 
+            <ApplicationInputField
               label="Professional Bio" 
               field="bio" 
               value={form.bio} 
               placeholder="Tell clients about your unique style and background..." 
               multiline
+              error={errors.bio}
+              onChange={handleUpdate}
             />
 
-            <InputField 
+            <ApplicationInputField
               label="Social Portfolio" 
               field="socialLinks" 
               value={form.socialLinks || ''} 
               placeholder="Instagram/Facebook link" 
               optional
+              error={errors.socialLinks}
+              onChange={handleUpdate}
             />
           </View>
 

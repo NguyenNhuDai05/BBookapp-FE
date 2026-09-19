@@ -13,16 +13,6 @@ export class ApiReviewRepository implements IReviewRepository {
     }
   }
 
-  async getRecentReviews(): Promise<ReviewDto[]> {
-    try {
-      const { data } = await api.get('/Reviews/recent');
-      return data;
-    } catch (e) {
-      console.error('Failed to get recent reviews', e);
-      return [];
-    }
-  }
-
   async createForBooking(request: { bookingId: string; rating: number; comment?: string }): Promise<void> {
     try {
       await api.post(`/Review/booking/${request.bookingId}`, {

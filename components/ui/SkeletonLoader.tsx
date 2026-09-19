@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import { BrandColors, Radius, Spacing } from '../../constants/theme';
 
@@ -15,7 +15,7 @@ export function SkeletonLoader({
   borderRadius = Radius.md,
   style,
 }: SkeletonLoaderProps) {
-  const shimmerAnim = useRef(new Animated.Value(0)).current;
+  const shimmerAnim = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
     const animation = Animated.loop(

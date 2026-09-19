@@ -58,6 +58,7 @@ export const BrandColors = {
 
   // Verified badge
   verified: '#4ADE80',
+  background: '#FFF6F8',
 } as const;
 
 // ─── TYPOGRAPHY ──────────────────────────────────────────────
@@ -78,6 +79,7 @@ export const Spacing = {
   base: 16,
   lg: 24,
   xl: 32,
+  xxl: 40,
 } as const;
 
 // ─── BORDER RADIUS ──────────────────────────────────────────
@@ -93,6 +95,20 @@ export const Radius = {
 
 // ─── SHADOW PRESETS ─────────────────────────────────────────
 export const Shadows = {
+  sm: {
+    shadowColor: '#22152B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: '#22152B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
+  },
   card: {
     shadowColor: '#22152B',
     shadowOffset: { width: 0, height: 4 },

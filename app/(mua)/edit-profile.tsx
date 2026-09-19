@@ -26,14 +26,17 @@ export default function EditProfileScreen() {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      setAvatar(profile.avatarUrl || '');
-      setName(profile.name || profile.brandName || user?.name || '');
-      setBio(profile.bio || '');
-    } else if (user) {
-      setAvatar('');
-      setName(user.name || '');
-    }
+    const timeoutId = setTimeout(() => {
+      if (profile) {
+        setAvatar(profile.avatarUrl || '');
+        setName(profile.name || profile.brandName || user?.name || '');
+        setBio(profile.bio || '');
+      } else if (user) {
+        setAvatar('');
+        setName(user.name || '');
+      }
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [profile, user]);
 
   const { mutate: updateProfile, isPending } = useUpdateMuaProfile();

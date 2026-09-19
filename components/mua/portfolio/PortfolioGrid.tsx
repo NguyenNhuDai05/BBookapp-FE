@@ -3,17 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'r
 import { Image } from 'expo-image';
 import { PortfolioItemDto } from '../../../types/portfolio';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
-import { Star, Trash2, ArrowUp, ArrowDown } from 'lucide-react-native';
+import { Star, Trash2 } from 'lucide-react-native';
 
 interface PortfolioGridProps {
   items: PortfolioItemDto[];
-  onSetCover: (id: string) => void;
   onDelete: (id: string) => void;
-  onMoveUp: (index: number) => void;
-  onMoveDown: (index: number) => void;
 }
 
-export function PortfolioGrid({ items, onSetCover, onDelete, onMoveUp, onMoveDown }: PortfolioGridProps) {
+export function PortfolioGrid({ items, onDelete }: PortfolioGridProps) {
   const { width } = useWindowDimensions();
   const isDesktop = width > 768;
   const numColumns = isDesktop ? 6 : 3;
@@ -69,19 +66,6 @@ export function PortfolioGrid({ items, onSetCover, onDelete, onMoveUp, onMoveDow
             </View>
           )}
 
-          {/* Reorder actions can be optional or handled differently, but we'll overlay them at bottom if needed. For now, Instagram doesn't have reordering easily visible, but since it's a management view, we can put small arrows at the bottom */}
-          <View style={styles.bottomOverlay}>
-             {index > 0 && (
-                <TouchableOpacity style={styles.actionBtn} onPress={() => onMoveUp(index)}>
-                  <ArrowUp size={14} color="#FFF" />
-                </TouchableOpacity>
-             )}
-             {index < items.length - 1 && (
-                <TouchableOpacity style={styles.actionBtn} onPress={() => onMoveDown(index)}>
-                  <ArrowDown size={14} color="#FFF" />
-                </TouchableOpacity>
-             )}
-          </View>
         </View>
       ))}
     </View>
@@ -148,16 +132,4 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: Radius.sm,
   },
-  bottomOverlay: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    flexDirection: 'row',
-    gap: 4,
-  },
-  actionBtn: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 4,
-    borderRadius: Radius.sm,
-  }
 });

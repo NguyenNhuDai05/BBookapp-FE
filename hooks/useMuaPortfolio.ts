@@ -43,18 +43,14 @@ export function useMuaPortfolio(muaId: string) {
     }
   });
 
-  const reorderMutation = useMutation({
-    mutationFn: (itemIds: string[]) => portfolioService.reorderItems(muaId, itemIds),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
-    },
+  const likeMutation = useMutation({
+    mutationFn: (itemId: string) => portfolioService.toggleLike(itemId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] }),
   });
 
-  const setCoverMutation = useMutation({
-    mutationFn: (itemId: string) => portfolioService.setCoverPhoto(muaId, itemId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
-    },
+  const saveMutation = useMutation({
+    mutationFn: (itemId: string) => portfolioService.toggleSave(itemId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] }),
   });
 
   return {
@@ -64,8 +60,7 @@ export function useMuaPortfolio(muaId: string) {
     updateItem: updateMutation.mutateAsync,
     deleteItem: deleteMutation.mutateAsync,
     isDeleting: deleteMutation.isPending,
-    reorderItems: reorderMutation.mutateAsync,
-    setCoverPhoto: setCoverMutation.mutateAsync,
-    isSettingCover: setCoverMutation.isPending,
+    toggleLike: likeMutation.mutateAsync,
+    toggleSave: saveMutation.mutateAsync,
   };
 }
