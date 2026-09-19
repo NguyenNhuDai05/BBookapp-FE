@@ -1,27 +1,21 @@
 import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 
 export function useRequireAuth() {
   const router = useRouter();
   const initialize = useAuthStore((state) => state.initialize);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const routerRef = useRef(router);
-  const initializeRef = useRef(initialize);
-
-  routerRef.current = router;
-  initializeRef.current = initialize;
-
   useEffect(() => {
     let isMounted = true;
 
     const checkAuth = async () => {
-      const isAuthenticated = await initializeRef.current();
+      const isAuthenticated = await initialize();
 
       if (!isMounted) return;
 
       if (!isAuthenticated) {
-        routerRef.current.replace("/login" as any);
+        router.replace("/login" as any);
         return;
       }
 
@@ -33,7 +27,7 @@ export function useRequireAuth() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialize, router]);
 
   return checkingAuth;
 }

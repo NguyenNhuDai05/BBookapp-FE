@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { api } from './api';
 
@@ -14,7 +13,45 @@ export const ANDROID_NOTIFICATION_CHANNELS = {
   payments: 'payments',
 } as const;
 
-async function configureAndroidNotificationChannels(): Promise<void> {
+type NotificationsModule = typeof import('expo-notifications');
+
+let notificationHandlerConfigured = false;
+
+/**
+ * Remote notifications cannot even be imported in Expo Go on Android since
+ * SDK 53. Load the native module lazily so the rest of the app can still run
+ * in Expo Go; a development/production build continues to get full push
+ * notification support.
+ */
+async function getNotifications(): Promise<NotificationsModule | null> {
+  if (
+    Platform.OS === 'web'
+    || (Platform.OS === 'android'
+      && Constants.executionEnvironment === ExecutionEnvironment.StoreClient)
+  ) {
+    return null;
+  }
+
+  const notifications = await import('expo-notifications');
+
+  if (!notificationHandlerConfigured) {
+    notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+    notificationHandlerConfigured = true;
+  }
+
+  return notifications;
+}
+
+async function configureAndroidNotificationChannels(
+  Notifications: NotificationsModule,
+): Promise<void> {
   if (Platform.OS !== 'android') return;
 
   await Promise.all([
@@ -37,20 +74,12 @@ async function configureAndroidNotificationChannels(): Promise<void> {
   ]);
 }
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
-
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
-  if (Platform.OS === 'web') return null;
-
   try {
-    await configureAndroidNotificationChannels();
+    const Notifications = await getNotifications();
+    if (!Notifications) return null;
+
+    await configureAndroidNotificationChannels(Notifications);
 
     if (!Device.isDevice) {
       console.warn('Push notifications require a physical device.');
@@ -111,6 +140,32 @@ export class NotificationService {
       console.warn('Unable to deactivate the push token with BBook.', error);
     } finally {
       await AsyncStorage.removeItem(STORED_EXPO_PUSH_TOKEN_KEY);
+    }
+  }
+
+  static async addNavigationListener(
+    onUrl: (url: string) => void,
+  ): Promise<() => void> {
+    try {
+      const Notifications = await getNotifications();
+      if (!Notifications) return () => undefined;
+
+      const openNotification = (notification: import('expo-notifications').Notification) => {
+        const url = notification.request.content.data?.url;
+        if (typeof url === 'string') onUrl(url);
+      };
+
+      const lastResponse = Notifications.getLastNotificationResponse();
+      if (lastResponse?.notification) openNotification(lastResponse.notification);
+
+      const subscription = Notifications.addNotificationResponseReceivedListener(
+        response => openNotification(response.notification),
+      );
+
+      return () => subscription.remove();
+    } catch (error: unknown) {
+      console.warn('Unable to listen for notification responses.', error);
+      return () => undefined;
     }
   }
 }

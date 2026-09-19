@@ -102,7 +102,7 @@ export interface BookingDto {
 
 export interface CreateBookingRequest {
   muaId: string;
-  services: Array<{ serviceId: string; participantsCount: number }>;
+  services: { serviceId: string; participantsCount: number }[];
   date: string;
   time: string;
   address: string;

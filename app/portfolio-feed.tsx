@@ -8,7 +8,7 @@ import { PortfolioPost } from '../components/mua/portfolio/PortfolioPost';
 import { useMuaPortfolio } from '../hooks/useMuaPortfolio';
 import { useMuaDetail } from '../hooks/useMuaDetail';
 import { useBookingStore } from '../store/useBookingStore';
-import { api } from '../services/api';
+import { portfolioService } from '../services/portfolioService';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function CustomerPortfolioFeedScreen() {
@@ -23,6 +23,7 @@ export default function CustomerPortfolioFeedScreen() {
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState('');
   const [sendingComment, setSendingComment] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<any | null>(null);
   const { setMua, addService } = useBookingStore();
   const flatListRef = useRef<FlatList>(null);
 
@@ -57,7 +58,7 @@ export default function CustomerPortfolioFeedScreen() {
 
   const handleLike = async (item: any) => {
     try {
-      await api.post('/mua/portfolio/' + (item.id || item.portfolioId) + '/like');
+      await portfolioService.toggleLike(item.id || item.portfolioId);
       queryClient.invalidateQueries({ queryKey: ['mua-portfolio', muaId] });
     } catch (e) {
       console.log('Like failed', e);
@@ -66,7 +67,7 @@ export default function CustomerPortfolioFeedScreen() {
 
   const handleSave = async (item: any) => {
     try {
-      await api.post('/mua/portfolio/' + (item.id || item.portfolioId) + '/save');
+      await portfolioService.toggleSave(item.id || item.portfolioId);
       queryClient.invalidateQueries({ queryKey: ['mua-portfolio', muaId] });
     } catch (e) {
       console.log('Save failed', e);
@@ -75,7 +76,7 @@ export default function CustomerPortfolioFeedScreen() {
 
   const openComments = async (item: any) => {
     setCommentItem(item);
-    const { data } = await api.get(`/mua/portfolio/${item.id || item.portfolioId}/comments`);
+    const data = await portfolioService.getComments(item.id || item.portfolioId);
     setComments(data);
   };
 
@@ -83,9 +84,15 @@ export default function CustomerPortfolioFeedScreen() {
     if (!commentText.trim() || !commentItem) return;
     setSendingComment(true);
     try {
-      const { data } = await api.post(`/mua/portfolio/${commentItem.id || commentItem.portfolioId}/comments`, { content: commentText.trim() });
-      setComments(prev => [data, ...prev]);
+      if (replyingTo) {
+        const data = await portfolioService.replyToComment(commentItem.id || commentItem.portfolioId, replyingTo.id, commentText.trim());
+        setComments(prev => prev.map(comment => comment.id === replyingTo.id ? { ...comment, replies: [...(comment.replies || []), data] } : comment));
+      } else {
+        const data = await portfolioService.addComment(commentItem.id || commentItem.portfolioId, commentText.trim());
+        setComments(prev => [data, ...prev]);
+      }
       setCommentText('');
+      setReplyingTo(null);
       queryClient.invalidateQueries({ queryKey: ['mua-portfolio', muaId] });
     } finally { setSendingComment(false); }
   };
@@ -146,7 +153,8 @@ export default function CustomerPortfolioFeedScreen() {
         <KeyboardAvoidingView style={styles.commentOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.commentSheet}>
             <View style={styles.commentHeader}><Text style={styles.commentTitle}>Bình luận</Text><TouchableOpacity onPress={() => setCommentItem(null)}><X size={24} /></TouchableOpacity></View>
-            <FlatList data={comments} keyExtractor={item => item.id} renderItem={({ item }) => <View style={styles.commentRow}><View style={styles.commentAvatar}><Text>{(item.userName || 'U')[0]}</Text></View><View style={styles.commentBubble}><Text style={styles.commentUser}>{item.userName || 'Người dùng'}</Text><Text>{item.content}</Text></View></View>} ListEmptyComponent={<Text style={styles.emptyComments}>Chưa có bình luận.</Text>} />
+            <FlatList data={comments} keyExtractor={item => item.id} renderItem={({ item }) => <View style={styles.commentRow}><View style={styles.commentAvatar}><Text>{(item.userName || 'U')[0]}</Text></View><View style={styles.commentBubble}><Text style={styles.commentUser}>{item.userName || 'Người dùng'}</Text><Text>{item.content}</Text><TouchableOpacity onPress={() => setReplyingTo(item)}><Text style={styles.replyAction}>Trả lời</Text></TouchableOpacity>{(item.replies || []).map((reply: any) => <View key={reply.id} style={styles.replyRow}><Text style={styles.commentUser}>{reply.userName || 'Người dùng'}</Text><Text>{reply.content}</Text></View>)}</View></View>} ListEmptyComponent={<Text style={styles.emptyComments}>Chưa có bình luận.</Text>} />
+            {replyingTo ? <View style={styles.replyingBanner}><Text style={styles.replyingText}>Đang trả lời {replyingTo.userName || 'người dùng'}</Text><TouchableOpacity onPress={() => setReplyingTo(null)}><X size={16} /></TouchableOpacity></View> : null}
             <View style={styles.emojiRow}>{['❤️','😍','😂','🔥','👏'].map(e => <TouchableOpacity key={e} onPress={() => setCommentText(v => v + e)}><Text style={styles.emoji}>{e}</Text></TouchableOpacity>)}</View>
             <View style={styles.commentInputRow}><TextInput value={commentText} onChangeText={setCommentText} placeholder="Viết bình luận..." style={styles.commentInput}/><TouchableOpacity onPress={sendComment} disabled={sendingComment || !commentText.trim()}><Send size={22} color="#E8436A" /></TouchableOpacity></View>
           </View>
@@ -189,6 +197,10 @@ const styles = StyleSheet.create({
   commentAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE5ED', alignItems: 'center', justifyContent: 'center' },
   commentBubble: { flex: 1, backgroundColor: '#F7F7F8', borderRadius: 14, padding: 10 },
   commentUser: { fontWeight: '700', marginBottom: 2 },
+  replyAction: { color: '#E8436A', fontWeight: '600', fontSize: 12, marginTop: 6 },
+  replyRow: { marginTop: 8, marginLeft: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: '#FFD4E1' },
+  replyingBanner: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#FFF2F6', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginTop: 8 },
+  replyingText: { color: '#6C5360', fontSize: 12 },
   emptyComments: { textAlign: 'center', color: '#888', marginTop: 30 },
   emojiRow: { flexDirection: 'row', gap: 18, paddingVertical: 10 },
   emoji: { fontSize: 24 },

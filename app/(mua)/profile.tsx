@@ -28,7 +28,7 @@ import {
   Trash2,
   X,
   User,
-} from 'lucide-react-native';
+ Plus } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile } from '../../hooks/useMuaProfile';
@@ -39,7 +39,6 @@ import { ServiceFormModal } from '../../components/mua/services/ServiceFormModal
 import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioFormModal';
 import ReviewTabContent from '../../components/mua/ReviewTabContent';
 import { BrandColors } from '../../constants/theme';
-import { Plus } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -128,9 +127,9 @@ export default function MuaProfilePremiumScreen() {
   };
 
   React.useEffect(() => {
-    if (params.tab) {
-      setActiveTab(String(params.tab));
-    }
+    if (!params.tab) return;
+    const timeoutId = setTimeout(() => setActiveTab(String(params.tab)), 0);
+    return () => clearTimeout(timeoutId);
   }, [params.tab]);
 
   const displayAvatar = profile?.avatarUrl || '';
@@ -153,7 +152,8 @@ export default function MuaProfilePremiumScreen() {
       
       {/* Top Header */}
       <View style={styles.header}>
-        <View style={{ width: 24 }} /> {/* Placeholder for back arrow if needed */}
+        {/* Placeholder for back arrow if needed */}
+        <View style={{ width: 24 }} />
         <Text style={styles.headerTitle}>Hồ sơ chuyên gia</Text>
         <TouchableOpacity onPress={handleOpenSettings} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
           <Menu size={24} color="#C42A64" />

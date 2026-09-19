@@ -17,7 +17,6 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -25,6 +24,7 @@ import {
   View,
   Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { userService } from "../../services/userService";
 import { useAuthStore } from "../../store/useAuthStore";
 import { UserRole } from "../../types/auth";
@@ -43,7 +43,7 @@ interface UserProfile {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { becomeMUA, initialize, logout, user: authUser, switchMode } = useAuthStore();
+  const { initialize, logout, user: authUser, switchMode } = useAuthStore();
 
   // Các State lưu trữ trạng thái dữ liệu thực tế từ Server
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
-  }, [authUser?.email]);
+  }, [authUser]);
 
   useEffect(() => {
     let isMounted = true;
@@ -140,24 +140,11 @@ export default function ProfileScreen() {
   const isMuaAccount = authUser?.hasMuaProfile === true || authUser?.role === UserRole.MUA;
 
   const handleBecomeMUA = async () => {
-    const runUpgrade = async () => {
-      const success = await becomeMUA();
-      if (success) {
-        router.push("/mua-onboarding" as any);
-        return;
-      }
-
-      if (Platform.OS === "web") {
-        window.alert("Không thể chuyển tài khoản thành Makeup Artist. Vui lòng thử lại.");
-        return;
-      }
-
-      Alert.alert("Chưa thể chuyển tài khoản", "Vui lòng thử lại sau.");
-    };
+    const openApplication = () => router.push("/mua-onboarding" as any);
 
     if (Platform.OS === "web") {
       if (window.confirm("Bạn muốn đăng ký tài khoản này thành Makeup Artist?")) {
-        await runUpgrade();
+        openApplication();
       }
       return;
     }
@@ -167,7 +154,7 @@ export default function ProfileScreen() {
       "Tài khoản của bạn sẽ được chuyển sang Makeup Artist và có thể đăng dịch vụ.",
       [
         { text: "Hủy", style: "cancel" },
-        { text: "Tiếp tục", onPress: runUpgrade },
+        { text: "Tiếp tục", onPress: openApplication },
       ],
     );
   };
@@ -303,8 +290,9 @@ export default function ProfileScreen() {
             )}
             {renderSettingRow(
               <Heart size={20} color="#ff7c98" />,
-              "Nghệ sĩ yêu thích",
-              "Danh sách các Makeup Artist bạn đã lưu",
+              "Yêu thích",
+              "Bài viết đã thả tim và đã lưu",
+              () => router.push("/favorites" as any),
             )}
             {renderSettingRow(
               <CreditCard size={20} color="#ff7c98" />,

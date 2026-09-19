@@ -1,6 +1,6 @@
 import { api } from '../services/api';
 import { IPortfolioRepository } from './IPortfolioRepository';
-import { PortfolioItemDto, CreatePortfolioItemRequest } from '../types/portfolio';
+import { PortfolioItemDto, CreatePortfolioItemRequest, PortfolioCommentDto } from '../types/portfolio';
 import { useAuthStore } from '../store/useAuthStore';
 
 export class ApiPortfolioRepository implements IPortfolioRepository {
@@ -35,11 +35,32 @@ export class ApiPortfolioRepository implements IPortfolioRepository {
     await api.delete(`/mua/portfolio/${id}`);
   }
 
-  async reorderItems(muaId: string, itemIds: string[]): Promise<void> {
-    await api.put(`/mua/portfolio/reorder`, { itemIds });
+  async toggleLike(id: string): Promise<void> {
+    await api.post(`/Mua/portfolio/${id}/like`);
   }
 
-  async setCoverPhoto(muaId: string, itemId: string): Promise<void> {
-    await api.put(`/mua/portfolio/${itemId}/cover`);
+  async toggleSave(id: string): Promise<void> {
+    await api.post(`/Mua/portfolio/${id}/save`);
   }
+
+  async getComments(id: string): Promise<PortfolioCommentDto[]> {
+    const response = await api.get<PortfolioCommentDto[]>(`/Mua/portfolio/${id}/comments`);
+    return response.data;
+  }
+
+  async addComment(id: string, content: string): Promise<PortfolioCommentDto> {
+    const response = await api.post<PortfolioCommentDto>(`/Mua/portfolio/${id}/comments`, { content });
+    return response.data;
+  }
+
+  async replyToComment(id: string, commentId: string, content: string): Promise<PortfolioCommentDto> {
+    const response = await api.post<PortfolioCommentDto>(`/Mua/portfolio/${id}/comments/${commentId}/replies`, { content });
+    return response.data;
+  }
+
+  async getFavorites(type: 'liked' | 'saved'): Promise<PortfolioItemDto[]> {
+    const response = await api.get<PortfolioItemDto[]>('/Mua/portfolio/favorites', { params: { type } });
+    return response.data;
+  }
+
 }

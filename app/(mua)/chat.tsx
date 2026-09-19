@@ -23,7 +23,8 @@ export default function MUAChatScreen() {
   };
 
   useEffect(() => {
-    fetchRooms();
+    const timeoutId = setTimeout(() => void fetchRooms(), 0);
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const renderItem = ({ item }: { item: ChatRoomDto }) => {

@@ -3,7 +3,12 @@ import { ServiceDto } from './ServiceDto';
 export interface PortfolioImageDto {
   id: string;
   url: string;
+  imageUrl?: string;
+  image?: string;
+  imageUrls?: string[];
   title?: string;
+  description?: string;
+  tags?: string[];
 }
 
 export interface ArtistDto {

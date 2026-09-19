@@ -8,8 +8,25 @@ interface BackendTokenDto {
   userId: string;
   fullName: string;
   email: string;
-  role: string;
+  role: number | string;
+  hasMuaProfile: boolean;
 }
+
+interface BackendUserDto {
+  userId: string;
+  fullName?: string;
+  email?: string;
+  avatarUrl?: string;
+  role: number | string;
+  hasMuaProfile: boolean;
+  createdAt: string;
+}
+
+const mapBackendRole = (role: number | string): UserRole => {
+  if (role === 0 || String(role).toUpperCase() === 'ADMIN') return UserRole.Admin;
+  if (role === 2 || String(role).toUpperCase() === 'MUA') return UserRole.MUA;
+  return UserRole.Customer;
+};
 
 export class ApiAuthRepository implements IAuthRepository {
   async login(request: LoginRequest): Promise<AuthResponseDto> {
@@ -17,18 +34,18 @@ export class ApiAuthRepository implements IAuthRepository {
     return this.mapToAuthResponse(response.data);
   }
 
-  async register(request: RegisterRequest): Promise<void> {
-    // Map string role to backend enum int
-    let backendRole = 1; // Default to Customer
-    if (request.role === UserRole.Admin) backendRole = 0;
-    if (request.role === UserRole.MUA) backendRole = 2;
+  async loginWithGoogle(idToken: string): Promise<AuthResponseDto> {
+    const response = await api.post<BackendTokenDto>('/Auth/google', { idToken });
+    return this.mapToAuthResponse(response.data);
+  }
 
+  async register(request: RegisterRequest): Promise<void> {
     const payload = {
       fullName: request.fullName,
       email: request.email,
       password: request.password,
       phoneNumber: request.phone, // Map phone -> phoneNumber
-      role: backendRole, // Map string -> int
+      role: 1,
     };
 
     await api.post('/Auth/register', payload);
@@ -36,17 +53,18 @@ export class ApiAuthRepository implements IAuthRepository {
 
   async getMe(): Promise<UserDto> {
     // UserController has GET /api/user/profile
-    const response = await api.get('/user/profile');
+    const response = await api.get<BackendUserDto>('/User/profile');
     const data = response.data;
     return {
-      id: data.id || data.userId,
-      name: data.fullName || data.name,
-      email: data.email,
-      role: data.role,
-      avatar: data.avatar,
+      id: data.userId,
+      name: data.fullName || '',
+      email: data.email || '',
+      role: mapBackendRole(data.role),
+      avatar: data.avatarUrl,
+      avatarUrl: data.avatarUrl,
       hasMuaProfile: data.hasMuaProfile,
-      createdAt: data.createdAt || new Date().toISOString()
-    } as UserDto;
+      createdAt: data.createdAt,
+    };
   }
 
   async logout(): Promise<void> {
@@ -59,19 +77,20 @@ export class ApiAuthRepository implements IAuthRepository {
     return this.mapToAuthResponse(response.data);
   }
 
-  private mapToAuthResponse(data: any): AuthResponseDto {
+  private mapToAuthResponse(data: BackendTokenDto): AuthResponseDto {
+    const expiration = new Date(data.expiration).getTime();
     return {
       accessToken: data.token,
       refreshToken: '', // Backend doesn't support refresh tokens yet
-      expiresIn: 3600,
+      expiresIn: Number.isNaN(expiration) ? 0 : Math.max(0, Math.floor((expiration - Date.now()) / 1000)),
       user: {
-        id: data.userId || data.id,
+        id: data.userId,
         name: data.fullName,
         email: data.email,
-        role: data.role,
+        role: mapBackendRole(data.role),
         hasMuaProfile: data.hasMuaProfile,
         createdAt: new Date().toISOString()
-      } as UserDto
+      },
     };
   }
 }

@@ -21,10 +21,7 @@ const LOGO_WIDTH = isWeb ? SCREEN_WIDTH * 0.35 : SCREEN_WIDTH * 0.8;
 export default function SplashScreen() {
   const router = useRouter();
   const initialize = useAuthStore((state) => state.initialize);
-  const routerRef = useRef(router);
   const hasStartedRef = useRef(false);
-
-  routerRef.current = router;
 
   useEffect(() => {
     if (hasStartedRef.current) return;
@@ -70,14 +67,14 @@ export default function SplashScreen() {
           if (isAuthSuccess) {
             const currentUser = useAuthStore.getState().user;
             if (currentUser?.role === 'MUA') {
-              routerRef.current.replace("/(mua)/dashboard" as any);
+              router.replace("/(mua)/dashboard" as any);
             } else if (currentUser?.role === 'ADMIN') {
-              routerRef.current.replace("/(admin)/dashboard" as any);
+              router.replace("/(admin)/dashboard" as any);
             } else {
-              routerRef.current.replace("/(tabs)/home" as any);
+              router.replace("/(tabs)/home" as any);
             }
           } else {
-            routerRef.current.replace("/(auth)/login" as any);
+            router.replace("/(auth)/login" as any);
           }
         }, remainingTime);
       }
@@ -89,7 +86,7 @@ export default function SplashScreen() {
       isMounted = false;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [initialize]);
+  }, [initialize, router]);
 
   return (
     <LinearGradient

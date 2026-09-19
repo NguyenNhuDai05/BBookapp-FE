@@ -78,7 +78,7 @@ export const uploadImage = async (uri: string): Promise<string> => {
     form.append('file', { uri, name: fileName, type: contentType } as any);
   }
 
-  const response = await api.post<{ url: string }>('/Uploads/image', form);
+  const response = await api.post<{ url: string }>('/Upload/image', form);
   const returnedUrl = response.data.url;
   if (/^https?:\/\//i.test(returnedUrl)) return returnedUrl;
   return `${API_URL.replace(/\/api\/?$/, '')}${returnedUrl}`;

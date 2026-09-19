@@ -57,13 +57,17 @@ export class ApiMuaRepository implements IMuaRepository {
       
       return data.map((s: any) => ({
         id: s.serviceId,
+        serviceId: s.serviceId,
         name: s.serviceName || s.name,
         serviceName: s.serviceName,
         description: s.description,
         durationMinutes: s.durationMinutes,
         price: s.price,
-        categoryId: s.categoryId,
-        imageUrl: s.imageUrl
+        category: s.category || '',
+        travelAvailable: Boolean(s.travelAvailable),
+        visibility: s.visibility !== false,
+        status: s.status || 'ACTIVE',
+        imageUrl: s.imageUrl,
       }));
     } catch (e) {
       return [];

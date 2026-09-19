@@ -247,7 +247,7 @@ export default function MuaDetailScreen() {
                     )}
                     {lastViewedPortfolioId === item.id && (
                       <View style={{
-                        ...StyleSheet.absoluteFillObject,
+                        ...StyleSheet.absoluteFill,
                         backgroundColor: 'rgba(0,0,0,0.4)',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -608,4 +608,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-

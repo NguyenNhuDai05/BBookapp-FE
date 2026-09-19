@@ -91,8 +91,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   loginWithGoogleToken: async (idToken: string) => {
-    // Mock implementation for now
-    return true;
+    try {
+      set({ isLoading: true });
+      const res = await authService.loginWithGoogle(idToken);
+      await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
+      set({
+        user: res.user,
+        isAuthenticated: true,
+        isLoading: false,
+        activeMode: 'CUSTOMER',
+      });
+      return true;
+    } catch {
+      set({ isLoading: false });
+      return false;
+    }
   },
 
   becomeMUA: async () => {

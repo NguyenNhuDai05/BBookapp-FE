@@ -21,7 +21,7 @@ export default function MuaManagementScreen() {
   const [editingService, setEditingService] = useState<any>(null);
 
   const { data: services = [], isLoading: isLoadingServices } = useMuaServices(muaId);
-  const { data: portfolio = [], isLoading: isLoadingPortfolio, deleteItem, setCoverPhoto, reorderItems } = useMuaPortfolio(muaId);
+  const { data: portfolio = [], isLoading: isLoadingPortfolio, deleteItem } = useMuaPortfolio(muaId);
   const deleteService = useDeleteService(muaId);
   const createService = useCreateService(muaId);
   const updateService = useUpdateService(muaId);
@@ -50,24 +50,6 @@ export default function MuaManagementScreen() {
 
   const handleDeleteService = (serviceId: string) => {
     deleteService.mutate(serviceId);
-  };
-
-  const handleMoveUp = (index: number) => {
-    if (index === 0) return;
-    const newOrder = [...portfolio];
-    const temp = newOrder[index];
-    newOrder[index] = newOrder[index - 1];
-    newOrder[index - 1] = temp;
-    reorderItems(newOrder.map(i => i.id));
-  };
-
-  const handleMoveDown = (index: number) => {
-    if (index === portfolio.length - 1) return;
-    const newOrder = [...portfolio];
-    const temp = newOrder[index];
-    newOrder[index] = newOrder[index + 1];
-    newOrder[index + 1] = temp;
-    reorderItems(newOrder.map(i => i.id));
   };
 
   return (
@@ -126,10 +108,7 @@ export default function MuaManagementScreen() {
             ) : (
               <PortfolioGrid 
                 items={portfolio}
-                onSetCover={(id) => setCoverPhoto(id)}
                 onDelete={(id) => deleteItem(id)}
-                onMoveUp={handleMoveUp}
-                onMoveDown={handleMoveDown}
               />
             )}
           </>

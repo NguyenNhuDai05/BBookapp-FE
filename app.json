@@ -59,7 +59,7 @@
         {
           "icon": "./assets/images/favicon.png",
           "color": "#FF4D6D",
-          "defaultChannel": "booking-reminders"
+          "defaultChannel": "default"
         }
       ],
       "expo-font",

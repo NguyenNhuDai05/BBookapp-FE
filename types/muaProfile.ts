@@ -17,6 +17,7 @@ export interface PayoutTransactionDto {
 export interface MuaProfileDto {
   id: string;
   name: string;
+  brandName?: string;
   avatarUrl?: string;
   verificationStatus: VerificationStatus;
   rejectionReason?: string;

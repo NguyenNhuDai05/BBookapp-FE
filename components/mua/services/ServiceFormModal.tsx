@@ -36,7 +36,8 @@ export function ServiceFormModal({ visible, onClose, onSubmit, initialData }: Se
   };
 
   useEffect(() => {
-    if (visible) {
+    if (!visible) return;
+    const timeoutId = setTimeout(() => {
       if (initialData) {
         setName(initialData.name || initialData.serviceName || '');
         setDescription(initialData.description || '');
@@ -52,7 +53,8 @@ export function ServiceFormModal({ visible, onClose, onSubmit, initialData }: Se
         setImageUrl('');
         setTags('');
       }
-    }
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [visible, initialData]);
 
   const handleSubmit = async () => {
