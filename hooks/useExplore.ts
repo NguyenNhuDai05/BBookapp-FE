@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getFeed } from '../services/feedService';
+import { getFeed, type FeedItem } from '../services/feedService';
 import { muaService } from '../services/muaService';
 
 export type ExploreFeedItem = {
@@ -16,19 +16,16 @@ export type ExploreFeedItem = {
 
 export const useExplore = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const query = useQuery({
-    queryKey: ['customer-explore'],
-    queryFn: async () => {
-      const [artistsResult, feedResult] = await Promise.allSettled([
-        muaService.getArtists(),
-        getFeed(1, 20),
-      ]);
-      const artists = artistsResult.status === 'fulfilled' ? artistsResult.value : [];
-      const rawFeed = feedResult.status === 'fulfilled' ? feedResult.value : [];
-      if (artistsResult.status === 'rejected' && feedResult.status === 'rejected') {
-        throw new Error('Không thể tải dữ liệu khám phá');
-      }
-      const feed: ExploreFeedItem[] = (Array.isArray(rawFeed) ? rawFeed : []).map((item: any) => ({
+  const artistsQuery = useQuery({
+    queryKey: ['customer-explore', 'artists'],
+    queryFn: () => muaService.getArtists(),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+  const feedQuery = useQuery({
+    queryKey: ['customer-explore', 'feed'],
+    queryFn: () => getFeed(1, 20),
+    select: (rawFeed): ExploreFeedItem[] => rawFeed.map((item: FeedItem) => ({
         id: item.portfolioId,
         muaId: item.muaId,
         title: item.title || item.tags?.[0] || 'Phong cách nổi bật',
@@ -37,31 +34,45 @@ export const useExplore = () => {
         authorName: item.authorName || 'Makeup Artist',
         likesCount: item.likesCount || 0,
         tags: item.tags || [],
-      }));
-      return { artists, feed };
-    },
+      })),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
 
   const artists = useMemo(() => {
     const keyword = searchQuery.trim().toLocaleLowerCase('vi');
-    if (!keyword) return query.data?.artists || [];
-    return (query.data?.artists || []).filter((artist) =>
+    if (!keyword) return artistsQuery.data || [];
+    return (artistsQuery.data || []).filter((artist) =>
       [artist.name, artist.city, ...artist.specialties].some((value) =>
         value?.toLocaleLowerCase('vi').includes(keyword),
       ),
     );
-  }, [query.data?.artists, searchQuery]);
+  }, [artistsQuery.data, searchQuery]);
+
+  const feed = useMemo(() => {
+    const keyword = searchQuery.trim().toLocaleLowerCase('vi');
+    if (!keyword) return feedQuery.data || [];
+    return (feedQuery.data || []).filter((item) =>
+      [item.title, item.authorName, ...item.tags].some((value) =>
+        value?.toLocaleLowerCase('vi').includes(keyword),
+      ),
+    );
+  }, [feedQuery.data, searchQuery]);
+
+  const refetch = async () => {
+    await Promise.allSettled([artistsQuery.refetch(), feedQuery.refetch()]);
+  };
 
   return {
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
+    isLoading: artistsQuery.isLoading && feedQuery.isLoading,
+    isRefreshing: artistsQuery.isRefetching || feedQuery.isRefetching,
+    artistsError: artistsQuery.error,
+    feedError: feedQuery.error,
+    isFullError: artistsQuery.isError && feedQuery.isError,
+    refetch,
     searchQuery,
     setSearchQuery,
     artists,
-    feed: query.data?.feed || [],
+    feed,
   };
 };

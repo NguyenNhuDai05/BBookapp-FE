@@ -1,14 +1,33 @@
 import { api } from "./api";
 
-export type FeedItem = Record<string, any>;
+export type FeedItem = {
+  id?: string;
+  portfolioId: string;
+  muaId: string;
+  authorId?: string;
+  title: string;
+  imageUrls: string[];
+  authorName: string;
+  authorAvatar?: string;
+  description?: string;
+  likesCount: number;
+  commentsCount?: number;
+  savesCount?: number;
+  isLiked?: boolean;
+  isSaved?: boolean;
+  tags: string[];
+  createdAt?: string;
+  service?: unknown;
+};
 
 const unwrapFeed = (payload: unknown): FeedItem[] => {
   if (Array.isArray(payload)) return payload;
   if (!payload || typeof payload !== 'object') return [];
 
-  const response = payload as Record<string, unknown>;
+  const response = payload as { data?: unknown; items?: unknown; results?: unknown };
   for (const key of ['data', 'items', 'results']) {
-    if (Array.isArray(response[key])) return response[key] as FeedItem[];
+    const value = response[key as keyof typeof response];
+    if (Array.isArray(value)) return value as FeedItem[];
   }
   return [];
 };

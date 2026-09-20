@@ -42,11 +42,11 @@ export default function MuaManagementScreen() {
     setIsServiceModalVisible(true);
   };
 
-  const handleSaveService = (data: any) => {
+  const handleSaveService = async (data: any) => {
     if (editingService) {
-      updateService.mutate({ serviceId: editingService.id, updates: data });
+      await updateService.mutateAsync({ serviceId: editingService.id || editingService.serviceId, updates: data });
     } else {
-      createService.mutate(data);
+      await createService.mutateAsync(data);
     }
   };
 

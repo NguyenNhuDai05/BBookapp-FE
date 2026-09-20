@@ -7,7 +7,6 @@ import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../constan
 import { useAuthStore } from '../../store/useAuthStore';
 
 const unavailable = [
-  {title:'Hoàn tiền',subtitle:'Chưa có API danh sách và chi tiết',icon:RotateCcw},
   {title:'MUA và tài khoản',subtitle:'Chưa có API danh sách quản trị',icon:Users},
   {title:'Booking',subtitle:'Chưa có API danh sách quản trị',icon:CalendarClock},
 ];
@@ -22,6 +21,7 @@ export default function AdminDashboard(){
     <View style={styles.security}><ShieldCheck size={22} color={BrandColors.statusConfirmed}/><View style={{flex:1}}><Text style={styles.securityTitle}>Khu vực vận hành bảo mật</Text><Text style={styles.securityText}>Các thao tác tài chính luôn sử dụng trạng thái xác nhận từ backend.</Text></View></View>
     <Text style={styles.section}>Vận hành</Text>
     <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/payouts' as any)} activeOpacity={.8}><View style={styles.icon}><Banknote size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Chi trả MUA</Text><Text style={styles.cardText}>Xử lý hàng đợi payout thủ công</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
+    <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/refunds' as any)} activeOpacity={.8}><View style={styles.icon}><RotateCcw size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Hoàn tiền customer</Text><Text style={styles.cardText}>Xử lý và đối soát các khoản hoàn</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
     <Text style={styles.section}>Chưa khả dụng</Text>
     {unavailable.map(item=><View key={item.title} style={[styles.card,styles.disabled]}><View style={[styles.icon,styles.disabledIcon]}><item.icon size={23} color={BrandColors.textMuted}/></View><View style={styles.copy}><Text style={styles.disabledTitle}>{item.title}</Text><Text style={styles.cardText}>{item.subtitle}</Text></View><View style={styles.badge}><Text style={styles.badgeText}>Chưa khả dụng</Text></View></View>)}
   </ScrollView></SafeAreaView>;

@@ -18,6 +18,8 @@ export interface ArtistDto {
   coverImage: string;
   rating: number;
   reviewCount: number;
+  completedBookingsCount: number;
+  minPrice: number | null;
   yearsExperience: number;
   city: string;
   bio: string;

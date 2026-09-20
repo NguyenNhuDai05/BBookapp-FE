@@ -7,13 +7,14 @@ import * as ImagePicker from 'expo-image-picker';
 import { BrandColors, Spacing, Typography, Radius } from '../../../constants/theme';
 import { useBookingDetail } from '../../../hooks/useBooking';
 import { useUpdateBookingStatus } from '../../../hooks/useMuaBookings';
+import { getApiError } from '../../../services/api';
 
 export default function MuaCompleteBookingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   
   const { data: booking, isLoading } = useBookingDetail(id);
-  const { mutate: updateStatus, isPending } = useUpdateBookingStatus(booking?.mua.id || 'me');
+  const { mutateAsync: updateStatus, isPending } = useUpdateBookingStatus(booking?.mua.id || 'me');
 
   const [images, setImages] = useState<string[]>([]);
 
@@ -35,24 +36,20 @@ export default function MuaCompleteBookingScreen() {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    if (isPending) return;
     if (images.length === 0) {
       Alert.alert('Bắt buộc', 'Vui lòng tải lên ít nhất 1 hình ảnh kết quả makeup để hoàn thành đơn!');
       return;
     }
     
-    // For MVP: We just update the status to COMPLETED
-    // In a real app, we would upload these images to S3/Cloudinary first
-    updateStatus(
-      { bookingId: id, status: 'WAITING_CUSTOMER' },
-      {
-        onSuccess: () => {
-          Alert.alert('Thành công', 'Đã tải lên bằng chứng. Vui lòng chờ khách hàng xác nhận để hoàn tất đơn và nhận thanh toán!', [
-            { text: 'OK', onPress: () => router.replace('/(mua)/bookings') }
-          ]);
-        }
-      }
-    );
+    try {
+      await updateStatus({ bookingId: id, status: 'WAITING_CUSTOMER' });
+      Alert.alert('Thành công', 'Đã gửi xác nhận hoàn thành. Vui lòng chờ khách hàng xác nhận để nhận thanh toán.');
+      router.replace('/(mua)/bookings');
+    } catch (error) {
+      Alert.alert('Không thể hoàn thành', getApiError(error).message);
+    }
   };
 
   if (isLoading) {

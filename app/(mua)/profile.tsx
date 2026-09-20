@@ -39,6 +39,8 @@ import { ServiceFormModal } from '../../components/mua/services/ServiceFormModal
 import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioFormModal';
 import ReviewTabContent from '../../components/mua/ReviewTabContent';
 import { BrandColors } from '../../constants/theme';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { getApiError } from '../../services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -82,7 +84,7 @@ export default function MuaProfilePremiumScreen() {
   
   // Real API calls
   const { data: profile, refetch: refetchProfile } = useMuaProfile('me');
-  const { data: portfolio, refetch: refetchPortfolio, createItem: createPortfolioItem, updateItem: updatePortfolioItem, deleteItem: deletePortfolioItem } = useMuaPortfolio('me');
+  const { data: portfolio, refetch: refetchPortfolio, createItem: createPortfolioItem, updateItem: updatePortfolioItem, deleteItem: deletePortfolioItem, isDeleting: isDeletingPortfolio } = useMuaPortfolio('me');
   const { data: services, refetch: refetchServices } = useMuaServices('me');
   const { data: reviews, isLoading: isReviewsLoading, refetch: refetchReviews } = useReviews(profile?.id || '');
   const createService = useCreateService('me');
@@ -94,6 +96,8 @@ export default function MuaProfilePremiumScreen() {
   const [selectedService, setSelectedService] = useState<any>(null);
   const [isServiceOptionsVisible, setIsServiceOptionsVisible] = useState(false);
   const [isPortfolioOptionsVisible, setIsPortfolioOptionsVisible] = useState(false);
+  const [deleteServiceVisible, setDeleteServiceVisible] = useState(false);
+  const [deletePortfolioVisible, setDeletePortfolioVisible] = useState(false);
 
   const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
   const [editingPortfolioItem, setEditingPortfolioItem] = useState<any>(null);
@@ -107,6 +111,32 @@ export default function MuaProfilePremiumScreen() {
   const handlePortfolioOptions = (item: any) => {
     setSelectedPortfolioItem(item);
     setIsPortfolioOptionsVisible(true);
+  };
+
+  const confirmDeleteService = async () => {
+    const id = selectedService?.serviceId || selectedService?.id;
+    if (!id || deleteService.isPending) return;
+    try {
+      await deleteService.mutateAsync(id);
+      setDeleteServiceVisible(false);
+      setSelectedService(null);
+      Alert.alert('Thành công', 'Đã xóa dịch vụ.');
+    } catch (error) {
+      Alert.alert('Không thể xóa', getApiError(error).message || 'Dịch vụ có thể đã được sử dụng trong booking.');
+    }
+  };
+
+  const confirmDeletePortfolio = async () => {
+    const id = selectedPortfolioItem?.portfolioId || selectedPortfolioItem?.id;
+    if (!id || isDeletingPortfolio) return;
+    try {
+      await deletePortfolioItem(id);
+      setDeletePortfolioVisible(false);
+      setSelectedPortfolioItem(null);
+      Alert.alert('Thành công', 'Đã xóa tác phẩm.');
+    } catch (error) {
+      Alert.alert('Không thể xóa', getApiError(error).message);
+    }
   };
 
 
@@ -461,11 +491,11 @@ export default function MuaProfilePremiumScreen() {
       <ServiceFormModal 
         visible={isServiceModalVisible}
         onClose={() => { setIsServiceModalVisible(false); setEditingService(null); }}
-        onSubmit={(data) => {
+        onSubmit={async (data) => {
           if (editingService) {
-            updateService.mutate({ serviceId: editingService.id || editingService.serviceId, updates: data });
+            await updateService.mutateAsync({ serviceId: editingService.id || editingService.serviceId, updates: data });
           } else {
-            createService.mutate(data);
+            await createService.mutateAsync(data);
           }
         }}
         initialData={editingService}
@@ -499,22 +529,7 @@ export default function MuaProfilePremiumScreen() {
               
               <TouchableOpacity style={[styles.optionBtn, styles.deleteBtn]} onPress={() => {
                 setIsServiceOptionsVisible(false);
-                Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn xóa dịch vụ này?', [
-                  { text: 'Hủy', style: 'cancel' },
-                  { text: 'Xóa', style: 'destructive', onPress: () => {
-                    const idToDelete = selectedService?.serviceId || selectedService?.id;
-                    deleteService.mutate(idToDelete, {
-                      onSuccess: () => {
-                        Alert.alert('Thành công', 'Đã xóa dịch vụ.');
-                        setSelectedService(null);
-                      },
-                      onError: (error) => {
-                        console.log('Delete Service Error:', error);
-                        Alert.alert('Lỗi', 'Không thể xóa dịch vụ này vì nó đã được sử dụng trong lịch đặt chỗ (Booking).');
-                      }
-                    });
-                  } }
-                ]);
+                setDeleteServiceVisible(true);
               }}>
                 <Trash2 size={24} color="#E8436A" />
                 <Text style={[styles.optionText, { color: '#E8436A' }]}>Xóa dịch vụ</Text>
@@ -537,20 +552,7 @@ export default function MuaProfilePremiumScreen() {
               
               <TouchableOpacity style={[styles.optionBtn, styles.deleteBtn]} onPress={() => {
                 setIsPortfolioOptionsVisible(false);
-                Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn xóa tác phẩm này khỏi Portfolio?', [
-                  { text: 'Hủy', style: 'cancel' },
-                  { text: 'Xóa', style: 'destructive', onPress: async () => {
-                    const idToDelete = selectedPortfolioItem?.portfolioId || selectedPortfolioItem?.id;
-                    try {
-                      await deletePortfolioItem(idToDelete);
-                      Alert.alert('Thành công', 'Đã xóa tác phẩm.');
-                      setSelectedPortfolioItem(null);
-                    } catch (error) {
-                      console.error('Delete Portfolio Error:', error);
-                      Alert.alert('Lỗi', 'Không thể xóa tác phẩm này.');
-                    }
-                  } }
-                ]);
+                setDeletePortfolioVisible(true);
               }}>
                 <Trash2 size={24} color="#E8436A" />
                 <Text style={[styles.optionText, { color: '#E8436A' }]}>Xóa tác phẩm</Text>
@@ -558,6 +560,9 @@ export default function MuaProfilePremiumScreen() {
             </View>
           </TouchableOpacity>
         </Modal>
+
+        <ConfirmDialog visible={deleteServiceVisible} title="Xóa dịch vụ" message="Bạn có chắc chắn muốn xóa dịch vụ này?" confirmLabel="Xóa" destructive loading={deleteService.isPending} onCancel={() => { setDeleteServiceVisible(false); setSelectedService(null); }} onConfirm={confirmDeleteService}/>
+        <ConfirmDialog visible={deletePortfolioVisible} title="Xóa tác phẩm" message="Bạn có chắc chắn muốn xóa tác phẩm này khỏi Portfolio?" confirmLabel="Xóa" destructive loading={isDeletingPortfolio} onCancel={() => { setDeletePortfolioVisible(false); setSelectedPortfolioItem(null); }} onConfirm={confirmDeletePortfolio}/>
 
       </SafeAreaView>
   );

@@ -130,9 +130,9 @@ export default function CheckoutScreen() {
       if (apiError.isNetworkError && createdBookingId) {
         Alert.alert(
           'Chưa thể xác nhận trạng thái thanh toán',
-          'Booking đã được tạo nhưng kết nối bị gián đoạn. Vui lòng kiểm tra lại trạng thái booking trước khi tạo yêu cầu thanh toán mới.',
-          [{ text: 'Kiểm tra booking', onPress: () => router.replace(`/booking/${createdBookingId}`) }],
+          'Booking đã được tạo nhưng kết nối bị gián đoạn. Ứng dụng sẽ mở booking để bạn kiểm tra trạng thái trước khi tạo yêu cầu thanh toán mới.',
         );
+        router.replace(`/booking/${createdBookingId}`);
       } else {
         Alert.alert('Không thể tiếp tục', apiError.message || 'Vui lòng thử lại sau.');
       }

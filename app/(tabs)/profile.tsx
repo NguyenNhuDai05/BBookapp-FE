@@ -326,8 +326,9 @@ export default function ProfileScreen() {
             )}
             {renderSettingRow(
               <CreditCard size={20} color="#ff7c98" />,
-              "Ví & Phương thức thanh toán",
-              "Quản lý thẻ ngân hàng, tài khoản ví",
+              "Tài khoản nhận hoàn tiền",
+              "Khai báo tài khoản ngân hàng để nhận tiền hoàn",
+              () => router.push("/refund-destination" as any),
             )}
             {!isMuaAccount &&
               renderSettingRow(

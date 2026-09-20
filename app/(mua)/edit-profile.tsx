@@ -48,7 +48,7 @@ export default function EditProfileScreen() {
     return () => clearTimeout(timeoutId);
   }, [profile, user]);
 
-  const { mutate: updateProfile, isPending } = useUpdateMuaProfile();
+  const { mutateAsync: updateProfile, isPending } = useUpdateMuaProfile();
   const isSaving = isPending || isUploading;
   const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && experienceYears === String(profile?.experienceYears || '') && specialization === (profile?.specialization || '') && socialLinks === (profile?.socialLinks || '');
 
@@ -62,25 +62,14 @@ export default function EditProfileScreen() {
     setIsUploading(true);
     try {
       const finalAvatarUrl = await uploadImage(avatar);
-      updateProfile(
-        { displayName: name, bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceYears: Number(experienceYears) || 0, specialization, socialLinks },
-        {
-          onSuccess: () => {
-            setIsUploading(false);
-            updateUser({ name, avatarUrl: finalAvatarUrl });
-            Alert.alert('Thành công', 'Đã lưu thông tin hồ sơ', [
-              { text: 'OK', onPress: () => router.back() }
-            ]);
-          },
-          onError: () => {
-            setIsUploading(false);
-            setFormError('Không thể lưu hồ sơ, vui lòng thử lại.');
-          }
-        }
-      );
+      await updateProfile({ displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceYears: Number(experienceYears) || 0, specialization, socialLinks });
+      updateUser({ name: name.trim(), avatarUrl: finalAvatarUrl });
+      Alert.alert('Thành công', 'Đã lưu thông tin hồ sơ.');
+      router.back();
     } catch {
+      setFormError('Không thể lưu hồ sơ. Vui lòng kiểm tra kết nối và thử lại.');
+    } finally {
       setIsUploading(false);
-      setFormError('Không thể tải ảnh lên. Vui lòng thử lại.');
     }
   };
 

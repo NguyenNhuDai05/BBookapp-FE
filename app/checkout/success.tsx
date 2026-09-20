@@ -54,14 +54,37 @@ export default function CheckoutSuccessScreen() {
 
   if (booking && booking.paymentStatus !== 4) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={BrandColors.accentPink} />
-          <Text style={styles.title}>Đang chờ payOS xác nhận</Text>
-          <Text style={styles.subtitle}>Bạn có thể chờ tại đây hoặc mở chi tiết booking để kiểm tra sau.</Text>
-          <TouchableOpacity style={styles.primaryBtn} onPress={() => router.replace(`/booking/${booking.id}`)}>
-            <Text style={styles.primaryBtnText}>Xem booking</Text>
-          </TouchableOpacity>
+      <SafeAreaView style={styles.waitingScreen}>
+        <View style={styles.waitingContent}>
+          <View style={styles.waitingCard}>
+            <View style={styles.waitingIcon}>
+              <ActivityIndicator size="large" color={BrandColors.accentPink} />
+            </View>
+            <Text style={styles.waitingEyebrow}>ĐANG XỬ LÝ THANH TOÁN</Text>
+            <Text style={styles.waitingTitle}>Đang xác nhận tiền cọc</Text>
+            <Text style={styles.waitingSubtitle}>
+              payOS đang gửi kết quả thanh toán về BeautyBook. Quá trình này thường chỉ mất vài giây.
+            </Text>
+
+            <View style={styles.waitingNotice}>
+              <Clock size={18} color="#A85B16" />
+              <Text style={styles.waitingNoticeText}>
+                Bạn có thể rời màn hình này. Trạng thái booking sẽ tự động cập nhật khi giao dịch được xác nhận.
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.waitingPrimaryBtn}
+              activeOpacity={0.85}
+              onPress={() => router.replace(`/booking/${booking.id}`)}
+            >
+              <FileText size={18} color="#FFF" />
+              <Text style={styles.primaryBtnText}>Xem chi tiết booking</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.waitingSecondaryBtn} onPress={handleGoHome}>
+              <Text style={styles.waitingSecondaryBtnText}>Về trang chủ</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -206,6 +229,102 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.xl,
+  },
+  waitingScreen: {
+    flex: 1,
+    backgroundColor: BrandColors.bgPrimary,
+  },
+  waitingContent: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+  },
+  waitingCard: {
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
+    alignItems: 'center',
+    backgroundColor: BrandColors.bgCard,
+    borderRadius: Radius.xl,
+    borderWidth: 1,
+    borderColor: BrandColors.borderLight,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    ...Shadows.elevated,
+  },
+  waitingIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: BrandColors.bgPink,
+    marginBottom: Spacing.lg,
+  },
+  waitingEyebrow: {
+    fontFamily: Typography.extraBold,
+    fontSize: 12,
+    letterSpacing: 1.2,
+    color: BrandColors.accentPink,
+    marginBottom: Spacing.sm,
+  },
+  waitingTitle: {
+    fontFamily: Typography.extraBold,
+    fontSize: 24,
+    lineHeight: 31,
+    color: BrandColors.textDark,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+  },
+  waitingSubtitle: {
+    fontFamily: Typography.regular,
+    fontSize: 15,
+    lineHeight: 22,
+    color: BrandColors.textBody,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+  },
+  waitingNotice: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    backgroundColor: '#FFF8EC',
+    marginBottom: Spacing.lg,
+  },
+  waitingNoticeText: {
+    flex: 1,
+    fontFamily: Typography.medium,
+    fontSize: 13,
+    lineHeight: 19,
+    color: '#7A4A1F',
+  },
+  waitingPrimaryBtn: {
+    width: '100%',
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    backgroundColor: BrandColors.accentPink,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    ...Shadows.soft,
+  },
+  waitingSecondaryBtn: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.sm,
+  },
+  waitingSecondaryBtnText: {
+    fontFamily: Typography.bold,
+    fontSize: 14,
+    color: BrandColors.textSecondary,
   },
   scrollContent: {
     padding: Spacing.xl,
