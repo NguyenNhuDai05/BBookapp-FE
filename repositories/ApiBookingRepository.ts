@@ -1,25 +1,29 @@
 import { api } from '../services/api';
 import { IBookingRepository } from './IBookingRepository';
-import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus, PaymentStatus, ReviewCreateRequest } from '../types/booking';
+import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus, ReviewCreateRequest } from '../types/booking';
+import { mapBookingPaymentStatus, mapBookingStatus, mapPaymentStatus, mapRefundSummary } from '../utils/bookingStatus';
 
 export class ApiBookingRepository implements IBookingRepository {
-  async getAvailableTimeSlots(muaId: string, date: string): Promise<TimeSlotDto[]> {
-    // For MVP: Allow selecting any time between 08:00 and 20:00
-    const slots: TimeSlotDto[] = [];
-    for (let i = 8; i <= 20; i++) {
-      slots.push({ time: `${i.toString().padStart(2, '0')}:00`, available: true });
-      if (i < 20) {
-        slots.push({ time: `${i.toString().padStart(2, '0')}:30`, available: true });
+  async getAvailableTimeSlots(muaId: string, date: string, durationMinutes: number): Promise<TimeSlotDto[]> {
+    const { data } = await api.get<unknown>(`/Mua/${muaId}/availability`, {
+      params: { date, duration: durationMinutes },
+    });
+
+    if (!Array.isArray(data)) throw new Error('Dữ liệu giờ trống không hợp lệ.');
+
+    return data.map((value) => {
+      const time = String(value).slice(0, 5);
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+        throw new Error('Dữ liệu giờ trống không hợp lệ.');
       }
-    }
-    // Simulate a slight network delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return slots;
+      return { time, available: true };
+    });
   }
 
   async createBooking(request: CreateBookingRequest): Promise<BookingDto> {
     try {
       const { data } = await api.post('/Booking/create', {
+        idempotencyKey: request.idempotencyKey,
         muaId: request.muaId,
         bookingDate: request.date,
         startTime: `${request.time}:00`,
@@ -73,16 +77,13 @@ export class ApiBookingRepository implements IBookingRepository {
   }
 
   async cancelBooking(request: CancelBookingRequest): Promise<BookingDto> {
-    try {
-      const { data } = await api.put(`/Booking/${request.bookingId}/status`, {
-        status: 3, // 3 corresponds to BookingStatus.Cancelled in C#
-        reason: request.reason
-      });
-      return this.mapToBookingDto(data);
-    } catch (e: any) {
-      console.error('API Error cancelling booking:', e.response?.data || e.message);
-      throw e;
-    }
+    const { data } = await api.put(`/Booking/${request.bookingId}/status`, {
+      status: 3, // 3 corresponds to BookingStatus.Cancelled in C#
+      reason: request.note?.trim()
+        ? `${request.reason}: ${request.note.trim()}`
+        : request.reason
+    });
+    return this.mapToBookingDto(data);
   }
 
   async confirmBookingCompletion(bookingId: string): Promise<BookingDto> {
@@ -136,8 +137,8 @@ export class ApiBookingRepository implements IBookingRepository {
       time: timeStr,
       address: b.address || '',
       locationType: 'HOME_SERVICE', // Default fallback
-      status: this.mapStatus(b.status),
-      paymentStatus: (b.paymentStatus ?? 0) as PaymentStatus,
+      status: mapBookingStatus(b.status),
+      paymentStatus: mapPaymentStatus(b.paymentStatus),
       note: b.notes,
       
       serviceTotal: b.totalAmount ?? 0, // Backend currently exposes the aggregate service total here
@@ -165,45 +166,17 @@ export class ApiBookingRepository implements IBookingRepository {
       disputeReason: b.disputeReason,
       paymentExpiresAt: b.paymentExpiresAt,
       rejectReason: b.rejectReason,
-      cancelReason: b.cancelReason
+      cancellationReason: b.cancellationReason,
+      cancellationPolicyRule: b.cancellationPolicyRule,
+      cancellationRefundPercentage: b.cancellationRefundPercentage,
+      cancellationRefundAmount: b.cancellationRefundAmount,
+      cancellationAppointmentAtUtc: b.cancellationAppointmentAtUtc,
+      refund: mapRefundSummary(b.refund),
     };
   }
 
   private mapPaymentAttemptStatus(status: number | string): BookingPaymentDto['status'] {
-    const map: Record<number | string, BookingPaymentDto['status']> = {
-      0: 'CREATED', 1: 'PENDING', 2: 'PAID', 3: 'FAILED', 4: 'EXPIRED', 5: 'REFUND_PENDING', 6: 'REFUNDED',
-      Created: 'CREATED', Pending: 'PENDING', Paid: 'PAID', Failed: 'FAILED', Expired: 'EXPIRED',
-      RefundPending: 'REFUND_PENDING', Refunded: 'REFUNDED',
-    };
-    return map[status] || 'PENDING';
-  }
-
-  private mapStatus(statusRaw: any): BookingStatus {
-    const statusMap: Record<number | string, BookingStatus> = {
-      0: 'PENDING_CONFIRMATION',
-      1: 'CONFIRMED', // Approved in C#
-      2: 'COMPLETED', // Completed in C#
-      3: 'CANCELLED', // Cancelled in C#
-      4: 'WAITING_CUSTOMER', // WaitingCustomer in C#
-      5: 'PENDING_PAYMENT',
-      6: 'PENDING_CONFIRMATION',
-      7: 'REJECTED',
-      8: 'IN_PROGRESS',
-      9: 'DISPUTED',
-      10: 'AUTO_COMPLETED',
-      'Pending': 'PENDING_CONFIRMATION',
-      'PendingPayment': 'PENDING_PAYMENT',
-      'PendingConfirmation': 'PENDING_CONFIRMATION',
-      'Approved': 'CONFIRMED',
-      'Completed': 'COMPLETED',
-      'Cancelled': 'CANCELLED',
-      'WaitingCustomer': 'WAITING_CUSTOMER',
-      'Rejected': 'REJECTED',
-      'InProgress': 'IN_PROGRESS',
-      'Disputed': 'DISPUTED',
-      'AutoCompleted': 'AUTO_COMPLETED'
-    };
-    return statusMap[statusRaw] || 'PENDING_PAYMENT';
+    return mapBookingPaymentStatus(status);
   }
 
   async submitReview(request: ReviewCreateRequest): Promise<void> {

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { muaProfileService } from '../services/muaProfileService';
 import type { PayoutSettingsDto } from '../types/muaProfile';
+import { MUA_ELIGIBILITY_QUERY_KEY } from './useMuaEligibility';
 
 export const useMuaProfile = (muaId: string) => {
   return useQuery({
@@ -18,6 +19,7 @@ export const useUpdateMuaProfile = () => {
       queryClient.refetchQueries({ queryKey: ['mua-profile'] });
       queryClient.refetchQueries({ queryKey: ['feed'] });
       queryClient.refetchQueries({ queryKey: ['mua'] });
+      queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
     },
   });
 };

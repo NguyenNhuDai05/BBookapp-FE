@@ -36,9 +36,11 @@ export type BookingStatus =
   | 'COMPLETED'
   | 'DISPUTED'
   | 'AUTO_COMPLETED'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'UNKNOWN';
 
 export enum PaymentStatus {
+  UNKNOWN = -1,
   UNPAID = 0,
   PAID_LEGACY = 1,
   REFUNDED = 2,
@@ -47,9 +49,28 @@ export enum PaymentStatus {
   RELEASED = 5,
   FROZEN = 6,
   REFUND_PENDING = 7,
+  PARTIALLY_REFUNDED = 8,
+  FORFEITED = 9,
 }
 
-export type BookingPaymentStatus = 'CREATED' | 'PENDING' | 'PAID' | 'FAILED' | 'EXPIRED' | 'REFUND_PENDING' | 'REFUNDED';
+export type BookingPaymentStatus = 'CREATED' | 'PENDING' | 'PAID' | 'FAILED' | 'EXPIRED' | 'REFUND_PENDING' | 'REFUNDED' | 'PARTIALLY_REFUNDED' | 'FORFEITED' | 'UNKNOWN';
+
+export type RefundStatus = 'PENDING' | 'MANUAL_ACTION_REQUIRED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'UNKNOWN';
+
+export interface RefundSummaryDto {
+  refundId: string;
+  amount: number;
+  status: RefundStatus;
+  reasonCode?: number | string;
+  reason?: string;
+  providerReference?: string;
+  createdAt?: string;
+  processingAt?: string;
+  completedAt?: string;
+  failedAt?: string;
+  failureCode?: string;
+  failureMessage?: string;
+}
 
 export interface BookingPaymentDto {
   paymentId: string;
@@ -98,8 +119,12 @@ export interface BookingDto {
   updatedAt: string;
   
   // For cancelled bookings
-  cancelReason?: string;
-  cancelNote?: string;
+  cancellationReason?: string;
+  cancellationPolicyRule?: string;
+  cancellationRefundPercentage?: number;
+  cancellationRefundAmount?: number;
+  cancellationAppointmentAtUtc?: string;
+  refund?: RefundSummaryDto;
   cancelledAt?: string;
   isReviewed?: boolean;
   
@@ -117,6 +142,7 @@ export interface BookingDto {
 }
 
 export interface CreateBookingRequest {
+  idempotencyKey: string;
   muaId: string;
   services: { serviceId: string; participantsCount: number }[];
   date: string;

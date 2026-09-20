@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { SelectedServiceDto, MuaMinimalDto } from '../types/booking';
+import type { BookingDto, SelectedServiceDto, MuaMinimalDto } from '../types/booking';
 
 interface BookingDraft {
   mua: MuaMinimalDto | null;
@@ -26,6 +26,7 @@ interface BookingStore {
   setAddress: (address: string) => void;
   setNote: (note: string) => void;
   setPaymentMethod: (method: string) => void;
+  startRebooking: (booking: Pick<BookingDto, 'mua' | 'services'>) => void;
   resetDraft: () => void;
   
   // Selectors/Computed
@@ -49,7 +50,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
   setLastViewedPortfolioId: (id) => set({ lastViewedPortfolioId: id }),
 
-  setMua: (mua) => set((state) => ({ draft: { ...state.draft, mua } })),
+  setMua: (mua) => set((state) => ({ draft: { ...state.draft, mua, time: '' } })),
   
   addService: (service) => set((state) => {
     const existing = state.draft.services.find(s => s.id === service.id);
@@ -57,6 +58,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       return {
         draft: {
           ...state.draft,
+          time: '',
           services: state.draft.services.map(s => 
             s.id === service.id ? { ...s, participantsCount: s.participantsCount + service.participantsCount } : s
           )
@@ -64,7 +66,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       };
     }
     return {
-      draft: { ...state.draft, services: [...state.draft.services, service] }
+      draft: { ...state.draft, services: [...state.draft.services, service], time: '' }
     };
   }),
 
@@ -73,6 +75,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       return {
         draft: {
           ...state.draft,
+          time: '',
           services: state.draft.services.filter(s => s.id !== serviceId)
         }
       };
@@ -80,6 +83,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
     return {
       draft: {
         ...state.draft,
+        time: '',
         services: state.draft.services.map(s =>
           s.id === serviceId ? { ...s, participantsCount } : s
         )
@@ -90,7 +94,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   removeService: (serviceId) => set((state) => ({
     draft: {
       ...state.draft,
-      services: state.draft.services.filter(s => s.id !== serviceId)
+      services: state.draft.services.filter(s => s.id !== serviceId),
+      time: '',
     }
   })),
 
@@ -99,6 +104,14 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   setAddress: (address) => set((state) => ({ draft: { ...state.draft, address } })),
   setNote: (note) => set((state) => ({ draft: { ...state.draft, note } })),
   setPaymentMethod: (paymentMethod) => set((state) => ({ draft: { ...state.draft, paymentMethod } })),
+
+  startRebooking: (booking) => set({
+    draft: {
+      ...initialDraft,
+      mua: { ...booking.mua },
+      services: booking.services.map(service => ({ ...service })),
+    },
+  }),
   
   resetDraft: () => set({ draft: initialDraft }),
 

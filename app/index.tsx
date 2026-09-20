@@ -65,11 +65,11 @@ export default function SplashScreen() {
           if (!isMounted) return;
 
           if (isAuthSuccess) {
-            const currentUser = useAuthStore.getState().user;
-            if (currentUser?.role === 'MUA') {
-              router.replace("/(mua)/dashboard" as any);
-            } else if (currentUser?.role === 'ADMIN') {
+            const { user: currentUser, activeMode } = useAuthStore.getState();
+            if (currentUser?.role === 'ADMIN') {
               router.replace("/(admin)/dashboard" as any);
+            } else if (activeMode === 'MUA' && (currentUser?.role === 'MUA' || currentUser?.hasMuaProfile)) {
+              router.replace("/(mua)/dashboard" as any);
             } else {
               router.replace("/(tabs)/home" as any);
             }

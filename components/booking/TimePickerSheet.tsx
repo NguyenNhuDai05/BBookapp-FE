@@ -4,20 +4,30 @@ import { X } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAvailableTimeSlots } from '../../hooks/useBooking';
+import { getApiError } from '../../services/api';
 
 interface TimePickerSheetProps {
   visible: boolean;
   onClose: () => void;
   muaId: string;
   date: string;
+  durationMinutes: number;
   selectedTime: string;
   onSelectTime: (time: string) => void;
 }
 
-export function TimePickerSheet({ 
-  visible, onClose, muaId, date, selectedTime, onSelectTime 
+export function TimePickerSheet({
+  visible, onClose, muaId, date, durationMinutes, selectedTime, onSelectTime
 }: TimePickerSheetProps) {
-  const { data: timeSlots, isLoading, isError } = useAvailableTimeSlots(muaId, date);
+  const { data: timeSlots, error, isLoading, isFetching, isError, refetch } = useAvailableTimeSlots(muaId, date, durationMinutes);
+  const [openedAt] = React.useState(() => Date.now());
+
+  const isPastSlot = (time: string) => {
+    if (!date) return true;
+    const [year, month, day] = date.split('-').map(Number);
+    const [hour, minute] = time.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute, 0, 0).getTime() <= openedAt;
+  };
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -40,22 +50,32 @@ export function TimePickerSheet({
 
             {isError && (
               <View style={styles.centerBox}>
-                <Text style={styles.errorText}>Không thể tải danh sách giờ trống.</Text>
+                <Text style={styles.errorText}>{getApiError(error).message || 'Không thể tải danh sách giờ trống.'}</Text>
+                <TouchableOpacity style={styles.retryButton} onPress={() => refetch()} disabled={isFetching}>
+                  <Text style={styles.retryText}>{isFetching ? 'Đang thử lại...' : 'Thử lại'}</Text>
+                </TouchableOpacity>
               </View>
             )}
 
-            {!isLoading && !isError && timeSlots && (
+            {!isLoading && !isError && timeSlots?.length === 0 && (
+              <View style={styles.centerBox}>
+                <Text style={styles.emptyText}>Không còn giờ trống phù hợp trong ngày này.</Text>
+              </View>
+            )}
+
+            {!isLoading && !isFetching && !isError && timeSlots && timeSlots.length > 0 && (
               <View style={styles.grid}>
                 {timeSlots.map((slot) => {
                   const isSelected = selectedTime === slot.time;
+                  const isDisabled = !slot.available || isPastSlot(slot.time);
                   return (
                     <TouchableOpacity
                       key={slot.time}
-                      disabled={!slot.available}
+                      disabled={isDisabled}
                       style={[
                         styles.timeBox,
                         isSelected && styles.timeBoxSelected,
-                        !slot.available && styles.timeBoxDisabled
+                        isDisabled && styles.timeBoxDisabled
                       ]}
                       onPress={() => {
                         onSelectTime(slot.time);
@@ -65,7 +85,7 @@ export function TimePickerSheet({
                       <Text style={[
                         styles.timeText,
                         isSelected && styles.timeTextSelected,
-                        !slot.available && styles.timeTextDisabled
+                        isDisabled && styles.timeTextDisabled
                       ]}>
                         {slot.time}
                       </Text>
@@ -128,6 +148,22 @@ const styles = StyleSheet.create({
   errorText: {
     fontFamily: Typography.medium,
     color: BrandColors.accentPink,
+  },
+  emptyText: {
+    fontFamily: Typography.medium,
+    color: BrandColors.textMuted,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: Spacing.md,
+    borderRadius: Radius.full,
+    backgroundColor: BrandColors.accentPink,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+  },
+  retryText: {
+    fontFamily: Typography.semiBold,
+    color: '#FFF',
   },
   grid: {
     flexDirection: 'row',

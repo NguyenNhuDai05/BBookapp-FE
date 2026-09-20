@@ -81,7 +81,8 @@ export default function MuaBookingDetailScreen() {
     'CANCELLED': 'Khách đã hủy',
     'REJECTED': 'Đã từ chối',
     'DISPUTED': 'Đang chờ quản trị viên xử lý',
-    'AUTO_COMPLETED': 'Tự động hoàn thành'
+    'AUTO_COMPLETED': 'Tự động hoàn thành',
+    'UNKNOWN': 'Trạng thái không xác định'
   }[booking.status] || booking.status;
 
   return (

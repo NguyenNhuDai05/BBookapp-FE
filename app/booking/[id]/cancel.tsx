@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, AlertTriangle } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../../constants/theme';
 import { useBookingDetail, useCancelBooking } from '../../../hooks/useBooking';
+import { formatVnd } from '../../../utils/bookingStatus';
+import { getApiError } from '../../../services/api';
 
 const CANCEL_REASONS = [
   'Thay đổi đột xuất',
@@ -22,6 +24,8 @@ export default function CancelBookingScreen() {
 
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [note, setNote] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const submitLockRef = useRef(false);
 
   if (isFetching || !booking) {
     return (
@@ -31,24 +35,38 @@ export default function CancelBookingScreen() {
     );
   }
 
-  const handleCancel = () => {
-    if (!selectedReason) {
-      alert('Vui lòng chọn lý do hủy.');
-      return;
-    }
-    
+  const submitCancellation = () => {
+    if (isPending || submitLockRef.current) return;
+    submitLockRef.current = true;
     cancelBooking({
       bookingId: booking.id,
       reason: selectedReason,
-      note: note
+      note,
     }, {
       onSuccess: () => {
+        setShowConfirmation(false);
         router.replace(`/booking/${booking.id}/cancel-success`);
       },
-      onError: (err) => {
-        alert('Có lỗi xảy ra: ' + err.message);
+      onError: (error) => {
+        submitLockRef.current = false;
+        setShowConfirmation(false);
+        const apiError = getApiError(error);
+        const isUncertainResult = apiError.isNetworkError || apiError.message.startsWith('Chưa thể xác minh kết quả hủy booking');
+        Alert.alert(
+          isUncertainResult ? 'Chưa xác minh được kết quả' : 'Không thể hủy booking',
+          apiError.message || 'Vui lòng thử lại sau.',
+        );
       }
     });
+  };
+
+  const handleCancel = () => {
+    if (!selectedReason) {
+      Alert.alert('Chưa chọn lý do', 'Vui lòng chọn lý do hủy.');
+      return;
+    }
+
+    setShowConfirmation(true);
   };
 
   return (
@@ -103,8 +121,10 @@ export default function CancelBookingScreen() {
 
         <View style={styles.policyBox}>
           <Text style={styles.policyTitle}>Chính sách hủy đơn</Text>
-          <Text style={styles.policyText}>• Hủy miễn phí trước 24h so với giờ thực hiện.</Text>
-          <Text style={styles.policyText}>• Sau thời gian này, bạn có thể bị trừ một phần tiền cọc tùy thuộc vào thỏa thuận của MUA.</Text>
+          <Text style={styles.policyText}>• Bạn có thể hủy trước khi dịch vụ bắt đầu.</Text>
+          <Text style={styles.policyText}>• Tiền cọc: {formatVnd(booking.depositAmount)}.</Text>
+          <Text style={styles.policyText}>• Mức hoàn thực tế được backend xác định theo trạng thái và thời điểm hủy.</Text>
+          <Text style={styles.policyText}>• Nếu có khoản hoàn, hệ thống sẽ hiển thị số tiền và trạng thái xử lý sau khi hủy thành công.</Text>
         </View>
       </ScrollView>
 
@@ -124,6 +144,47 @@ export default function CancelBookingScreen() {
           )}
         </TouchableOpacity>
       </View>
+
+      <Modal
+        visible={showConfirmation}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => !isPending && setShowConfirmation(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard} accessibilityViewIsModal>
+            <View style={styles.modalIcon}>
+              <AlertTriangle size={28} color="#E65100" />
+            </View>
+            <Text style={styles.modalTitle}>Xác nhận hủy booking</Text>
+            <Text style={styles.modalText}>Bạn có chắc muốn hủy booking này?</Text>
+            <View style={styles.modalSummary}>
+              <Text style={styles.modalSummaryLabel}>Tiền cọc</Text>
+              <Text style={styles.modalSummaryValue}>{formatVnd(booking.depositAmount)}</Text>
+            </View>
+            <Text style={styles.modalHint}>
+              Mức hoàn và số tiền hoàn sẽ được hệ thống xác định theo chính sách tại thời điểm hủy. Khoản hoàn không được đảm bảo về tài khoản ngay lập tức.
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalBackButton}
+                onPress={() => setShowConfirmation(false)}
+                disabled={isPending}
+              >
+                <Text style={styles.modalBackText}>Quay lại</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalConfirmButton, isPending && styles.primaryBtnDisabled]}
+                onPress={submitCancellation}
+                disabled={isPending}
+              >
+                {isPending ? <ActivityIndicator color="#FFF" /> : <Text style={styles.modalConfirmText}>Xác nhận hủy</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -306,4 +367,78 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FFF',
   },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(24, 18, 22, 0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.xl,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 420,
+    backgroundColor: '#FFF',
+    borderRadius: Radius.xl,
+    padding: Spacing.xl,
+  },
+  modalIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF3E0',
+    marginBottom: Spacing.md,
+  },
+  modalTitle: {
+    fontFamily: Typography.bold,
+    fontSize: 19,
+    color: BrandColors.textDark,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontFamily: Typography.regular,
+    fontSize: 14,
+    color: BrandColors.textSecondary,
+    textAlign: 'center',
+    marginTop: Spacing.sm,
+  },
+  modalSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: BrandColors.bgPinkLight,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginTop: Spacing.lg,
+  },
+  modalSummaryLabel: { fontFamily: Typography.medium, fontSize: 14, color: BrandColors.textSecondary },
+  modalSummaryValue: { fontFamily: Typography.bold, fontSize: 16, color: BrandColors.accentPink },
+  modalHint: {
+    fontFamily: Typography.regular,
+    fontSize: 13,
+    lineHeight: 19,
+    color: BrandColors.textSecondary,
+    marginTop: Spacing.md,
+  },
+  modalActions: { flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.xl },
+  modalBackButton: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: Radius.full,
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBackText: { fontFamily: Typography.bold, fontSize: 14, color: BrandColors.textDark },
+  modalConfirmButton: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: Radius.full,
+    backgroundColor: '#F44336',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalConfirmText: { fontFamily: Typography.bold, fontSize: 14, color: '#FFF' },
 });

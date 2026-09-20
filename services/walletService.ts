@@ -7,11 +7,6 @@ export const walletService = {
     return data;
   },
 
-  async createTopUp(amount: number): Promise<WalletTopUpDto> {
-    const { data } = await api.post('/Wallet/topups', { amount });
-    return data;
-  },
-
   async getTopUps(): Promise<WalletTopUpDto[]> {
     const { data } = await api.get('/Wallet/topups');
     return data;

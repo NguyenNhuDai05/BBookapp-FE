@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { 
-  ArrowLeft, MapPin, Calendar, Clock, Info, Trash2, Plus, Minus, 
+  ArrowLeft, MapPin, Calendar, Clock, Trash2, Plus, Minus, Sparkles,
   QrCode, ArrowRight
 } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
@@ -14,15 +15,35 @@ import { useCreateBooking, usePayBookingDeposit } from '../../hooks/useBooking';
 import { useMuaDetail } from '../../hooks/useMuaDetail';
 import { DatePickerSheet } from '../../components/booking/DatePickerSheet';
 import { TimePickerSheet } from '../../components/booking/TimePickerSheet';
+import { AddressPickerSheet } from '../../components/booking/AddressPickerSheet';
+import { getApiError } from '../../services/api';
+
+function createLocalBookingDate(date: string, time: string) {
+  const [year, month, day] = date.split('-').map(Number);
+  const [hour, minute] = time.split(':').map(Number);
+  return new Date(year, month - 1, day, hour, minute, 0, 0);
+}
+
+function formatDuration(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  if (!hours) return `${remainingMinutes} phút`;
+  if (!remainingMinutes) return `${hours} giờ`;
+  return `${hours} giờ ${remainingMinutes} phút`;
+}
 
 export default function CheckoutScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { 
-    draft, setDate, setTime, updateServiceParticipantsCount, removeService
+    draft, setAddress, setDate, setTime, updateServiceParticipantsCount, removeService
   } = useBookingStore();
   
   const [dateSheetVisible, setDateSheetVisible] = useState(false);
   const [timeSheetVisible, setTimeSheetVisible] = useState(false);
+  const [addressSheetVisible, setAddressSheetVisible] = useState(false);
+  const checkoutAttemptRef = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
+  const checkoutInFlightRef = useRef(false);
 
   const { mutateAsync: createBooking, isPending: isCreating } = useCreateBooking();
   const { mutateAsync: payDeposit, isPending: isPaying } = usePayBookingDeposit();
@@ -44,26 +65,58 @@ export default function CheckoutScreen() {
   const travelFee = 0;
   const totalAmount = serviceTotal + travelFee;
   const estimatedDepositAmount = totalAmount * 0.3;
+  const estimatedRemainingAmount = totalAmount - estimatedDepositAmount;
   const isPending = isCreating || isPaying;
 
   const totalDuration = draft.services.reduce((sum, s) => sum + (s.durationMinutes * s.participantsCount), 0);
+  const isFormValid = Boolean(draft.address.trim() && draft.date && draft.time && draft.services.length > 0);
+  const expectedEndTime = draft.time
+    ? new Date(createLocalBookingDate(draft.date || '2000-01-01', draft.time).getTime() + totalDuration * 60_000)
+      .toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+    : '';
+
+  const handleDateSelect = (date: string) => {
+    setDate(date);
+    setTime('');
+  };
 
   const handleCheckout = async () => {
-    if (!draft.date || !draft.time) {
-      alert('Vui lòng chọn ngày và giờ!');
+    if (checkoutInFlightRef.current) return;
+    if (!draft.address.trim() || !draft.date || !draft.time || draft.services.length === 0) {
+      Alert.alert('Chưa đủ thông tin', 'Vui lòng chọn địa chỉ, ngày, giờ và ít nhất một dịch vụ.');
       return;
     }
 
+    if (createLocalBookingDate(draft.date, draft.time).getTime() <= Date.now()) {
+      Alert.alert('Thời gian không hợp lệ', 'Vui lòng chọn thời gian thực hiện trong tương lai.');
+      return;
+    }
+
+    let createdBookingId: string | undefined;
+    checkoutInFlightRef.current = true;
     try {
-      const booking = await createBooking({
+      const bookingRequest = {
         muaId: draft.mua!.id,
         services: draft.services.map(s => ({ serviceId: s.id, participantsCount: s.participantsCount })),
         date: draft.date,
         time: draft.time,
-        address: draft.address || '123 Nguyễn Huệ, Bến Nghé, Quận 1',
+        address: draft.address,
         note: draft.note,
         paymentMethod: draft.paymentMethod,
+      };
+      const fingerprint = JSON.stringify(bookingRequest);
+      if (checkoutAttemptRef.current?.fingerprint !== fingerprint) {
+        checkoutAttemptRef.current = {
+          fingerprint,
+          idempotencyKey: Crypto.randomUUID(),
+        };
+      }
+
+      const booking = await createBooking({
+        ...bookingRequest,
+        idempotencyKey: checkoutAttemptRef.current.idempotencyKey,
       });
+      createdBookingId = booking.id;
 
       const payment = await payDeposit(booking.id);
       if (!payment.checkoutUrl) {
@@ -72,10 +125,19 @@ export default function CheckoutScreen() {
 
       await WebBrowser.openBrowserAsync(payment.checkoutUrl);
       router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } });
-    } catch (err: any) {
-      const payload = err.response?.data;
-      const msg = payload?.message || payload?.Message || err.message;
-      alert('Có lỗi xảy ra: ' + msg);
+    } catch (error: unknown) {
+      const apiError = getApiError(error);
+      if (apiError.isNetworkError && createdBookingId) {
+        Alert.alert(
+          'Chưa thể xác nhận trạng thái thanh toán',
+          'Booking đã được tạo nhưng kết nối bị gián đoạn. Vui lòng kiểm tra lại trạng thái booking trước khi tạo yêu cầu thanh toán mới.',
+          [{ text: 'Kiểm tra booking', onPress: () => router.replace(`/booking/${createdBookingId}`) }],
+        );
+      } else {
+        Alert.alert('Không thể tiếp tục', apiError.message || 'Vui lòng thử lại sau.');
+      }
+    } finally {
+      checkoutInFlightRef.current = false;
     }
   };
 
@@ -85,16 +147,11 @@ export default function CheckoutScreen() {
         <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()}>
           <ArrowLeft size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Đặt lịch với {draft.mua.name.split(' ')[0]}</Text>
-        <Text style={styles.stepText}>Bước 2/4</Text>
+        <Text style={styles.headerTitle} numberOfLines={1}>Đặt lịch với {draft.mua.name.split(' ')[0]}</Text>
+        <View style={styles.headerSpacer} />
       </SafeAreaView>
-      
-      {/* Progress Line */}
-      <View style={styles.progressLineContainer}>
-        <View style={styles.progressLineFill} />
-      </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: 112 + insets.bottom }]} showsVerticalScrollIndicator={false}>
         {/* Professional MUA Info Card */}
         <View style={styles.muaCard}>
           {muaLoading ? (
@@ -122,35 +179,33 @@ export default function CheckoutScreen() {
           )}
         </View>
 
-        {/* 1. Address */}
-        <Text style={styles.sectionTitle}>
-          <View style={styles.stepCircle}><Text style={styles.stepCircleText}>1</Text></View>
-          Địa chỉ thực hiện
-        </Text>
+        <View style={styles.sectionHeading}>
+          <MapPin size={20} color={BrandColors.textDark} />
+          <Text style={styles.sectionHeadingText}>Địa chỉ thực hiện</Text>
+        </View>
         <View style={styles.card}>
           <View style={styles.addressRow}>
             <View style={styles.iconBox}>
               <MapPin size={20} color={BrandColors.accentPink} />
             </View>
-            <Text style={styles.addressText}>
-              123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh
+            <Text style={[styles.addressText, !draft.address && styles.addressPlaceholder]}>
+              {draft.address || 'Chọn địa điểm bạn muốn sử dụng dịch vụ'}
             </Text>
-            <TouchableOpacity>
-              <Text style={styles.changeText}>Thay đổi</Text>
+            <TouchableOpacity onPress={() => setAddressSheetVisible(true)} hitSlop={8}>
+              <Text style={styles.changeText}>{draft.address ? 'Thay đổi' : 'Chọn'}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* 2. Date & Time */}
-        <Text style={styles.sectionTitle}>
-          <View style={styles.stepCircle}><Text style={styles.stepCircleText}>2</Text></View>
-          Chọn ngày & giờ
-        </Text>
+        <View style={styles.sectionHeading}>
+          <Calendar size={20} color={BrandColors.textDark} />
+          <Text style={styles.sectionHeadingText}>Chọn ngày & giờ</Text>
+        </View>
         <View style={styles.dateTimeRow}>
           <TouchableOpacity style={styles.pickerBox} onPress={() => setDateSheetVisible(true)}>
             <View style={styles.pickerHeader}>
               <Calendar size={14} color={BrandColors.accentPink} />
-              <Text style={styles.pickerLabel}>NGÀY THỰC HIỆN</Text>
+              <Text style={styles.pickerLabel}>Ngày thực hiện</Text>
             </View>
             <Text style={styles.pickerValue}>
               {draft.date 
@@ -168,7 +223,7 @@ export default function CheckoutScreen() {
           >
             <View style={styles.pickerHeader}>
               <Clock size={14} color={BrandColors.accentPink} />
-              <Text style={styles.pickerLabel}>GIỜ BẮT ĐẦU</Text>
+              <Text style={styles.pickerLabel}>Giờ bắt đầu</Text>
             </View>
             <Text style={[styles.pickerValue, !draft.date && { color: '#BDBDBD' }]}>
               {draft.time || 'Chọn giờ'} ▾
@@ -176,19 +231,21 @@ export default function CheckoutScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.infoBanner}>
-          <Info size={16} color={BrandColors.accentPink} />
-          <Text style={styles.infoBannerText}>
-            Tổng thời gian dự kiến: {totalDuration > 60 ? `${Math.floor(totalDuration/60)} giờ ` : ''}{totalDuration % 60 !== 0 ? `${totalDuration % 60} phút` : ''} ({totalDuration} phút)
-          </Text>
+        <View style={styles.durationCard}>
+          <View style={styles.durationIcon}><Clock size={18} color={BrandColors.accentPink} /></View>
+          <View style={styles.durationCopy}>
+            <Text style={styles.durationLabel}>Thời gian dự kiến</Text>
+            <Text style={styles.durationValue}>
+              {draft.time ? `${draft.time} – ${expectedEndTime} · ` : ''}{formatDuration(totalDuration)}
+            </Text>
+          </View>
         </View>
 
-        {/* 3. Services */}
         <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitle}>
-            <View style={styles.stepCircle}><Text style={styles.stepCircleText}>3</Text></View>
-            Dịch vụ đã chọn
-          </Text>
+          <View style={styles.sectionHeadingInline}>
+            <Sparkles size={20} color={BrandColors.textDark} />
+            <Text style={styles.sectionHeadingText}>Dịch vụ đã chọn</Text>
+          </View>
           <TouchableOpacity style={styles.addMoreBtn} onPress={() => router.back()}>
             <Text style={styles.addMoreText}>+ Thêm dịch vụ</Text>
           </TouchableOpacity>
@@ -206,7 +263,10 @@ export default function CheckoutScreen() {
             <View style={styles.serviceFooter}>
               <View style={styles.serviceMeta}>
                 <Text style={styles.servicePrice}>{(service.price || 0).toLocaleString('vi-VN')}đ</Text>
-                <Text style={styles.serviceMetaText}>⏱ {service.durationMinutes} phút</Text>
+                <View style={styles.serviceDurationRow}>
+                  <Clock size={13} color={BrandColors.textSecondary} />
+                  <Text style={styles.serviceMetaText}>{service.durationMinutes} phút</Text>
+                </View>
               </View>
               
               <View style={styles.quantityControl}>
@@ -235,29 +295,37 @@ export default function CheckoutScreen() {
             <Text style={styles.summaryLabel}>Tổng tiền dịch vụ</Text>
             <Text style={styles.summaryValue}>{serviceTotal.toLocaleString('vi-VN')}đ</Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Phí di chuyển <Info size={12} color="#BDBDBD" /></Text>
-            <Text style={styles.summaryValue}>{travelFee.toLocaleString('vi-VN')}đ</Text>
-          </View>
-          
+
           <View style={styles.divider} />
-          
+
           <View style={styles.summaryRowTotal}>
             <Text style={styles.totalLabelText}>Tổng thanh toán</Text>
             <Text style={styles.totalValueText}>{totalAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
-          
-          <View style={styles.paymentSplit}>
-            <View style={[styles.splitBox, styles.splitBoxActive]}>
-              <Text style={styles.splitBoxTitle}>ĐẶT CỌC (DỰ KIẾN 30%)</Text>
-              <Text style={styles.splitBoxSubtitle}>Số chính xác do backend xác nhận</Text>
-              <Text style={styles.splitBoxAmount}>{estimatedDepositAmount.toLocaleString('vi-VN')}đ</Text>
+
+          <View style={styles.divider} />
+
+          <View style={styles.depositSummary}>
+            <View style={styles.paymentTimingRow}>
+              <View style={styles.paymentTimingCopy}>
+                <Text style={styles.paymentTimingEyebrow}>Thanh toán hôm nay</Text>
+                <View style={styles.depositLabelRow}>
+                  <Text style={styles.paymentTimingLabel}>Đặt cọc</Text>
+                  <View style={styles.depositBadge}><Text style={styles.depositBadgeText}>30%</Text></View>
+                </View>
+              </View>
+              <Text style={styles.depositAmount} numberOfLines={1}>{estimatedDepositAmount.toLocaleString('vi-VN')}đ</Text>
             </View>
-            <View style={styles.splitBox}>
-              <Text style={styles.splitBoxTitleMuted}>THANH TOÁN SAU</Text>
-              <Text style={styles.splitBoxSubtitle}>Sau khi hoàn thành</Text>
-              <Text style={styles.splitBoxAmountMuted}>{(totalAmount - estimatedDepositAmount).toLocaleString('vi-VN')}đ</Text>
+
+            <View style={styles.paymentTimingRow}>
+              <View style={styles.paymentTimingCopy}>
+                <Text style={styles.paymentTimingEyebrow}>Thanh toán sau</Text>
+                <Text style={styles.paymentTimingHint}>Sau khi hoàn thành dịch vụ</Text>
+              </View>
+              <Text style={styles.remainingAmount} numberOfLines={1}>{estimatedRemainingAmount.toLocaleString('vi-VN')}đ</Text>
             </View>
+
+            <Text style={styles.depositHelp}>Bạn chỉ cần thanh toán 30% để giữ lịch.</Text>
           </View>
         </View>
 
@@ -265,32 +333,31 @@ export default function CheckoutScreen() {
         <Text style={styles.sectionTitlePlain}>Phương thức thanh toán</Text>
         
         <PaymentMethodItem 
-          title="Chuyển khoản QR qua payOS"
-          subtitle="Thanh toán trực tiếp tiền cọc cho booking này"
+          title="Chuyển khoản QR"
+          subtitle="Thanh toán an toàn qua payOS"
           icon={<QrCode size={20} color={BrandColors.accentPink} />}
           isSelected
           onSelect={() => undefined}
         />
-        
-        <View style={styles.bottomPadding} />
+        <Text style={styles.paymentMethodHelp}>Quét QR bằng ứng dụng ngân hàng của bạn</Text>
       </ScrollView>
 
       {/* Footer */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, Spacing.md) }]}>
         <View style={styles.footerInfo}>
-          <Text style={styles.footerLabel}>ĐẶT CỌC DỰ KIẾN</Text>
-          <Text style={styles.footerAmount}>{estimatedDepositAmount.toLocaleString('vi-VN')}đ</Text>
+          <Text style={styles.footerLabel}>Cần thanh toán</Text>
+          <Text style={styles.footerAmount} numberOfLines={1}>{estimatedDepositAmount.toLocaleString('vi-VN')}đ</Text>
         </View>
         <TouchableOpacity 
-          style={styles.submitBtn} 
+          style={[styles.submitBtn, (!isFormValid || isPending) && styles.submitBtnDisabled]}
           onPress={handleCheckout}
-          disabled={isPending}
+          disabled={!isFormValid || isPending}
         >
           {isPending ? (
-            <ActivityIndicator color="#FFF" />
+            <Text style={styles.submitBtnText} numberOfLines={1}>Đang tạo thanh toán...</Text>
           ) : (
             <>
-              <Text style={styles.submitBtnText}>Xác nhận và thanh toán</Text>
+              <Text style={styles.submitBtnText} numberOfLines={1}>Xác nhận và thanh toán</Text>
               <ArrowRight size={16} color="#FFF" />
             </>
           )}
@@ -301,17 +368,28 @@ export default function CheckoutScreen() {
         visible={dateSheetVisible} 
         onClose={() => setDateSheetVisible(false)} 
         selectedDate={draft.date}
-        onSelectDate={setDate}
+        onSelectDate={handleDateSelect}
       />
       
-      <TimePickerSheet 
-        visible={timeSheetVisible} 
-        onClose={() => setTimeSheetVisible(false)} 
-        muaId={draft.mua.id}
-        date={draft.date}
-        selectedTime={draft.time}
-        onSelectTime={setTime}
-      />
+      {timeSheetVisible ? (
+        <TimePickerSheet
+          visible
+          onClose={() => setTimeSheetVisible(false)}
+          muaId={draft.mua.id}
+          date={draft.date}
+          durationMinutes={totalDuration}
+          selectedTime={draft.time}
+          onSelectTime={setTime}
+        />
+      ) : null}
+      {addressSheetVisible ? (
+        <AddressPickerSheet
+          visible
+          value={draft.address}
+          onClose={() => setAddressSheetVisible(false)}
+          onSelectAddress={setAddress}
+        />
+      ) : null}
     </View>
   );
 }
@@ -347,35 +425,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: 20,
+    paddingVertical: Spacing.sm,
     backgroundColor: '#FFF',
+    borderBottomWidth: 1,
+    borderBottomColor: BrandColors.borderDivider,
   },
-  headerBtn: { padding: Spacing.xs },
+  headerBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerSpacer: { width: 40, height: 40 },
   headerTitle: {
-    fontFamily: Typography.bold,
-    fontSize: 16,
-    color: BrandColors.textDark,
-  },
-  stepText: {
+    flex: 1,
+    textAlign: 'center',
     fontFamily: Typography.semiBold,
-    fontSize: 14,
-    color: BrandColors.accentPink,
-  },
-  progressLineContainer: {
-    height: 4,
-    backgroundColor: '#F5F5F5',
-    width: '100%',
-  },
-  progressLineFill: {
-    height: '100%',
-    width: '50%',
-    backgroundColor: BrandColors.accentPink,
+    fontSize: 20,
+    color: BrandColors.textDark,
   },
   
   scrollContent: {
-    padding: Spacing.xl,
-    paddingBottom: 100,
+    paddingHorizontal: 20,
+    paddingTop: Spacing.lg,
   },
   
   muaCard: {
@@ -437,38 +505,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.md,
+    marginTop: 28,
+    marginBottom: 14,
   },
-  sectionTitle: {
-    fontFamily: Typography.bold,
-    fontSize: 16,
-    color: BrandColors.textDark,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.md,
-  },
+  sectionHeading: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: 28, marginBottom: 14 },
+  sectionHeadingInline: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  sectionHeadingText: { fontFamily: Typography.semiBold, fontSize: 19, color: BrandColors.textDark },
   sectionTitlePlain: {
-    fontFamily: Typography.bold,
-    fontSize: 16,
+    fontFamily: Typography.semiBold,
+    fontSize: 19,
     color: BrandColors.textDark,
-    marginTop: Spacing.xl,
-    marginBottom: Spacing.md,
-  },
-  stepCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: BrandColors.accentPink,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-  },
-  stepCircleText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontFamily: Typography.bold,
+    marginTop: 28,
+    marginBottom: 14,
   },
   addMoreBtn: {
     borderWidth: 1,
@@ -485,9 +533,11 @@ const styles = StyleSheet.create({
   
   card: {
     backgroundColor: '#FFF',
-    borderRadius: Radius.xl,
-    padding: Spacing.md,
+    borderRadius: Radius.base,
+    padding: Spacing.base,
     marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: BrandColors.borderLight,
   },
   addressRow: {
     flexDirection: 'row',
@@ -509,6 +559,7 @@ const styles = StyleSheet.create({
     color: BrandColors.textDark,
     lineHeight: 20,
   },
+  addressPlaceholder: { color: BrandColors.textMuted },
   changeText: {
     fontFamily: Typography.semiBold,
     fontSize: 13,
@@ -524,8 +575,10 @@ const styles = StyleSheet.create({
   pickerBox: {
     flex: 1,
     backgroundColor: '#FFF',
-    borderRadius: Radius.xl,
-    padding: Spacing.md,
+    borderRadius: Radius.base,
+    padding: Spacing.base,
+    borderWidth: 1,
+    borderColor: BrandColors.borderLight,
   },
   pickerHeader: {
     flexDirection: 'row',
@@ -535,9 +588,8 @@ const styles = StyleSheet.create({
   pickerLabel: {
     fontFamily: Typography.semiBold,
     fontSize: 11,
-    color: BrandColors.accentPink,
+    color: BrandColors.textSecondary,
     marginLeft: 6,
-    letterSpacing: 0.5,
   },
   pickerValue: {
     fontFamily: Typography.bold,
@@ -545,19 +597,11 @@ const styles = StyleSheet.create({
     color: BrandColors.textDark,
   },
   
-  infoBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: BrandColors.bgPinkLight,
-    padding: Spacing.sm,
-    borderRadius: Radius.lg,
-  },
-  infoBannerText: {
-    fontFamily: Typography.medium,
-    fontSize: 13,
-    color: BrandColors.textDark,
-    marginLeft: 8,
-  },
+  durationCard: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.md, padding: Spacing.md, borderRadius: Radius.base, backgroundColor: BrandColors.bgPinkLight },
+  durationIcon: { width: 38, height: 38, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center', backgroundColor: BrandColors.bgCard, marginRight: Spacing.md },
+  durationCopy: { flex: 1 },
+  durationLabel: { fontFamily: Typography.regular, fontSize: 12, color: BrandColors.textMuted },
+  durationValue: { marginTop: 2, fontFamily: Typography.semiBold, fontSize: 14, color: BrandColors.textDark },
   
   serviceCard: {
     backgroundColor: '#FFF',
@@ -575,13 +619,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: BrandColors.textDark,
   },
-  serviceCat: {
-    fontFamily: Typography.regular,
-    fontSize: 13,
-    color: BrandColors.textSecondary,
-    marginTop: 2,
-    marginBottom: Spacing.sm,
-  },
   serviceFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -592,11 +629,11 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
   },
+  serviceDurationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   serviceMetaText: {
     fontFamily: Typography.medium,
     fontSize: 12,
     color: BrandColors.textSecondary,
-    marginBottom: 4,
   },
   servicePrice: {
     fontFamily: Typography.bold,
@@ -630,107 +667,86 @@ const styles = StyleSheet.create({
   
   summaryCard: {
     backgroundColor: '#FFF',
-    borderRadius: Radius.xl,
-    padding: Spacing.lg,
+    borderRadius: Radius.lg,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: BrandColors.borderDivider,
+    shadowColor: BrandColors.textDark,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginBottom: 0,
   },
   summaryLabel: {
     fontFamily: Typography.regular,
-    fontSize: 14,
+    fontSize: 15,
     color: BrandColors.textSecondary,
   },
   summaryValue: {
     fontFamily: Typography.semiBold,
-    fontSize: 14,
+    fontSize: 15,
     color: BrandColors.textDark,
   },
   divider: {
     height: 1,
-    backgroundColor: '#F5F5F5',
-    marginVertical: Spacing.md,
+    backgroundColor: BrandColors.borderDivider,
+    marginVertical: 14,
   },
   summaryRowTotal: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: 0,
   },
   totalLabelText: {
     fontFamily: Typography.bold,
-    fontSize: 16,
+    fontSize: 17,
     color: BrandColors.textDark,
   },
   totalValueText: {
     fontFamily: Typography.bold,
-    fontSize: 18,
+    fontSize: 20,
     color: BrandColors.accentPink,
   },
-  paymentSplit: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  splitBox: {
-    flex: 1,
-    padding: Spacing.md,
-    borderRadius: Radius.lg,
-    backgroundColor: '#FAFAFA',
-  },
-  splitBoxActive: {
-    backgroundColor: BrandColors.bgPinkLight,
-  },
-  splitBoxTitle: {
-    fontFamily: Typography.bold,
-    fontSize: 11,
-    color: BrandColors.accentPink,
-    marginBottom: 2,
-  },
-  splitBoxTitleMuted: {
-    fontFamily: Typography.bold,
-    fontSize: 11,
-    color: BrandColors.textSecondary,
-    marginBottom: 2,
-  },
-  splitBoxSubtitle: {
-    fontFamily: Typography.regular,
-    fontSize: 11,
-    color: BrandColors.textSecondary,
-    marginBottom: 8,
-  },
-  splitBoxAmount: {
-    fontFamily: Typography.bold,
-    fontSize: 15,
-    color: BrandColors.accentPink,
-  },
-  splitBoxAmountMuted: {
-    fontFamily: Typography.bold,
-    fontSize: 15,
-    color: BrandColors.textDark,
-  },
+  depositSummary: { gap: 14 },
+  paymentTimingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md },
+  paymentTimingCopy: { flex: 1, minWidth: 0 },
+  paymentTimingEyebrow: { fontFamily: Typography.medium, fontSize: 12, color: BrandColors.textMuted, marginBottom: 3 },
+  depositLabelRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  paymentTimingLabel: { fontFamily: Typography.semiBold, fontSize: 15, color: BrandColors.textDark },
+  paymentTimingHint: { fontFamily: Typography.regular, fontSize: 13, color: BrandColors.textSecondary },
+  depositBadge: { borderRadius: Radius.full, paddingHorizontal: 8, paddingVertical: 2, backgroundColor: BrandColors.bgPink },
+  depositBadgeText: { fontFamily: Typography.bold, fontSize: 11, color: BrandColors.accentPink },
+  depositAmount: { flexShrink: 0, fontFamily: Typography.bold, fontSize: 20, color: BrandColors.accentPink },
+  remainingAmount: { flexShrink: 0, fontFamily: Typography.bold, fontSize: 17, color: BrandColors.textDark },
+  depositHelp: { fontFamily: Typography.regular, fontSize: 12, color: BrandColors.textMuted, lineHeight: 17 },
   
   paymentMethodCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF',
-    padding: Spacing.md,
-    borderRadius: Radius.xl,
-    marginBottom: Spacing.sm,
+    minHeight: 76,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.base,
     borderWidth: 1,
     borderColor: 'transparent',
   },
   paymentMethodCardSelected: {
     borderColor: BrandColors.accentPink,
-    backgroundColor: BrandColors.bgPinkLight,
+    backgroundColor: '#FFF',
   },
   paymentMethodIcon: {
     width: 40,
     height: 40,
-    borderRadius: Radius.lg,
-    backgroundColor: '#F5F5F5',
+    borderRadius: Radius.md,
+    backgroundColor: BrandColors.bgPinkLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -739,8 +755,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   paymentMethodTitle: {
-    fontFamily: Typography.bold,
-    fontSize: 15,
+    fontFamily: Typography.semiBold,
+    fontSize: 16,
     color: BrandColors.textDark,
   },
   paymentMethodSubtitle: {
@@ -749,8 +765,6 @@ const styles = StyleSheet.create({
     color: BrandColors.textSecondary,
     marginTop: 2,
   },
-  topUpBtn: { flexDirection: 'row', gap: 10, alignItems: 'center', justifyContent: 'center', padding: Spacing.md, borderWidth: 1, borderColor: BrandColors.accentPink, borderRadius: Radius.xl, backgroundColor: '#FFF' },
-  topUpBtnText: { color: BrandColors.accentPink, fontFamily: Typography.bold, fontSize: 14 },
   radioBtn: {
     width: 20,
     height: 20,
@@ -769,8 +783,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: BrandColors.accentPink,
   },
-  
-  bottomPadding: { height: 40 },
+  paymentMethodHelp: { marginTop: Spacing.sm, fontFamily: Typography.regular, fontSize: 12, color: BrandColors.textMuted },
   
   footer: {
     position: 'absolute',
@@ -778,41 +791,51 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#FFF',
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: 20,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
+    shadowColor: BrandColors.textDark,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 12,
   },
   footerInfo: {
-    flex: 1,
+    flexShrink: 0,
+    maxWidth: 108,
   },
   footerLabel: {
     fontFamily: Typography.semiBold,
-    fontSize: 11,
+    fontSize: 12,
     color: BrandColors.textSecondary,
-    letterSpacing: 0.5,
   },
   footerAmount: {
     fontFamily: Typography.bold,
-    fontSize: 20,
+    fontSize: 21,
     color: BrandColors.textDark,
+    marginTop: 2,
   },
   submitBtn: {
+    flex: 1,
     flexDirection: 'row',
     backgroundColor: BrandColors.accentPink,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: 14,
-    borderRadius: Radius.full,
+    minHeight: 50,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.base,
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
+    marginLeft: Spacing.md,
   },
+  submitBtnDisabled: { opacity: 0.68 },
   submitBtnText: {
     fontFamily: Typography.bold,
-    fontSize: 15,
+    fontSize: 14,
     color: '#FFF',
   },
 });

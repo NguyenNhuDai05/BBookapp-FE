@@ -21,6 +21,7 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: s
   REJECTED: { label: 'Từ chối', color: '#F44336', bg: '#FFEBEE' },
   DISPUTED: { label: 'Đang chờ quản trị viên xử lý', color: '#F44336', bg: '#FFEBEE' },
   AUTO_COMPLETED: { label: 'Tự động hoàn thành', color: '#4CAF50', bg: '#E8F5E9' },
+  UNKNOWN: { label: 'Trạng thái không xác định', color: '#616161', bg: '#F5F5F5' },
 };
 
 export default function BookingDetailScreen() {

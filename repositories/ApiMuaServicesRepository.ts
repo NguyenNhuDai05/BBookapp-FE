@@ -11,6 +11,7 @@ interface BackendServiceDto {
   price: number;
   imageUrl?: string;
   tags?: string[];
+  isActive?: boolean;
 }
 
 const mapService = (service: BackendServiceDto): ServiceDto => ({
@@ -23,27 +24,21 @@ const mapService = (service: BackendServiceDto): ServiceDto => ({
   price: service.price,
   imageUrl: service.imageUrl,
   tags: service.tags || [],
+  status: service.isActive === false ? 'INACTIVE' : 'ACTIVE',
+  visibility: service.isActive !== false,
 });
 
 export class ApiMuaServicesRepository implements IMuaServicesRepository {
   async getServices(muaId: string): Promise<ServiceDto[]> {
-    try {
-      let id = muaId;
-      if (id === 'me') {
-        const user = useAuthStore.getState().user;
-        if (!user) return [];
-        id = user.id;
-      }
-      const response = await api.get<BackendServiceDto[]>(`/Mua/${id}/service`);
-      return (response.data || []).map(mapService);
-    } catch (error) {
-      console.error('Error fetching services:', error);
-      return [];
-    }
+    const endpoint = muaId === 'me' ? '/Mua/service/me' : `/Mua/${muaId}/service`;
+    const response = await api.get<BackendServiceDto[]>(endpoint);
+    return (response.data || []).map(mapService);
   }
 
   async createService(muaId: string, data: CreateServiceRequest): Promise<ServiceDto> {
-    const response = await api.post<{ service: BackendServiceDto }>(`/Mua/${muaId}/service`, data);
+    const id = muaId === 'me' ? useAuthStore.getState().user?.id : muaId;
+    if (!id) throw new Error('Not authenticated');
+    const response = await api.post<{ service: BackendServiceDto }>(`/Mua/${id}/service`, data);
     return mapService(response.data.service);
   }
 
@@ -54,6 +49,10 @@ export class ApiMuaServicesRepository implements IMuaServicesRepository {
 
   async deleteService(id: string): Promise<void> {
     await api.delete(`/Mua/service/${id}`);
+  }
+
+  async setActive(id: string, isActive: boolean): Promise<void> {
+    await api.patch(`/Mua/service/${id}/active`, { isActive });
   }
 }
 

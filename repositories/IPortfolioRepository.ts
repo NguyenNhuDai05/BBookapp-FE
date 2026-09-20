@@ -5,6 +5,7 @@ export interface IPortfolioRepository {
   createItem(muaId: string, item: CreatePortfolioItemRequest): Promise<PortfolioItemDto>;
   updateItem(itemId: string, updates: Partial<CreatePortfolioItemRequest>): Promise<PortfolioItemDto>;
   deleteItem(itemId: string): Promise<void>;
+  setVisibility(itemId: string, isHidden: boolean): Promise<void>;
   toggleLike(itemId: string): Promise<void>;
   toggleSave(itemId: string): Promise<void>;
   getComments(itemId: string): Promise<PortfolioCommentDto[]>;

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
 import { ServiceDto } from '../../../types/ServiceDto';
-import { Edit2, Archive, Trash2, EyeOff } from 'lucide-react-native';
+import { Edit2, Archive, Trash2, EyeOff, RotateCcw } from 'lucide-react-native';
 
 interface ServiceListProps {
   services: ServiceDto[];
@@ -24,7 +24,7 @@ export function ServiceList({ services, onEdit, onArchive, onDelete }: ServiceLi
   return (
     <View style={styles.list}>
       {services.map((service: any) => (
-        <View key={service.id || service.serviceId} style={[styles.card, service.status === 'ARCHIVED' && styles.cardArchived]}>
+        <View key={service.id || service.serviceId} style={[styles.card, service.status !== 'ACTIVE' && styles.cardArchived]}>
           <View style={styles.cardHeader}>
             <View style={styles.titleRow}>
               <Text style={styles.name}>{service.name}</Text>
@@ -37,7 +37,7 @@ export function ServiceList({ services, onEdit, onArchive, onDelete }: ServiceLi
           
           <View style={styles.meta}>
             <View style={styles.tag}>
-              <Text style={styles.tagText}>{service.category}</Text>
+              <Text style={styles.tagText}>{service.status === 'ACTIVE' ? 'Đang hoạt động' : 'Đang tạm ẩn'}</Text>
             </View>
             <Text style={styles.duration}>{"\u23F1\uFE0F"} {service.durationMinutes} {"ph\u00FAt"}</Text>
             {service.travelAvailable ? (
@@ -50,12 +50,10 @@ export function ServiceList({ services, onEdit, onArchive, onDelete }: ServiceLi
               <Edit2 size={16} color={BrandColors.textDark} />
               <Text style={styles.actionText}>Sửa</Text>
             </TouchableOpacity>
-            {service.status !== 'ARCHIVED' && (
-              <TouchableOpacity style={styles.actionBtn} onPress={() => onArchive(service.id || service.serviceId)}>
-                <Archive size={16} color={BrandColors.statusPending} />
-                <Text style={[styles.actionText, { color: BrandColors.statusPending }]}>Lưu trữ</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity style={styles.actionBtn} onPress={() => onArchive(service.id || service.serviceId)}>
+              {service.status === 'ACTIVE' ? <Archive size={16} color={BrandColors.statusPending} /> : <RotateCcw size={16} color={BrandColors.statusConfirmed} />}
+              <Text style={[styles.actionText, { color: service.status === 'ACTIVE' ? BrandColors.statusPending : BrandColors.statusConfirmed }]}>{service.status === 'ACTIVE' ? 'Tạm ẩn' : 'Kích hoạt'}</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.actionBtn} onPress={() => onDelete(service.id || service.serviceId)}>
               <Trash2 size={16} color={BrandColors.statusCancelled} />
               <Text style={[styles.actionText, { color: BrandColors.statusCancelled }]}>Xóa</Text>

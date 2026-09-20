@@ -3,15 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Check, Camera, User, FileText, BadgeCheck } from 'lucide-react-native';
+import { ArrowLeft, Check, Camera, User, FileText, MapPin, Phone, Sparkles } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { uploadImage } from '../../services/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile, useUpdateMuaProfile } from '../../hooks/useMuaProfile';
 
-
-const MOCK_AVATAR = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200';
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -23,6 +21,12 @@ export default function EditProfileScreen() {
   const [avatar, setAvatar] = useState('');
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [city, setCity] = useState('');
+  const [experienceYears, setExperienceYears] = useState('');
+  const [specialization, setSpecialization] = useState('');
+  const [socialLinks, setSocialLinks] = useState('');
+  const [formError, setFormError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -31,6 +35,11 @@ export default function EditProfileScreen() {
         setAvatar(profile.avatarUrl || '');
         setName(profile.name || profile.brandName || user?.name || '');
         setBio(profile.bio || '');
+        setPhoneNumber(profile.phoneNumber || '');
+        setCity(profile.city || '');
+        setExperienceYears(String(profile.experienceYears || ''));
+        setSpecialization(profile.specialization || '');
+        setSocialLinks(profile.socialLinks || '');
       } else if (user) {
         setAvatar('');
         setName(user.name || '');
@@ -41,31 +50,38 @@ export default function EditProfileScreen() {
 
   const { mutate: updateProfile, isPending } = useUpdateMuaProfile();
   const isSaving = isPending || isUploading;
+  const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && experienceYears === String(profile?.experienceYears || '') && specialization === (profile?.specialization || '') && socialLinks === (profile?.socialLinks || '');
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập tên hiển thị');
+      setFormError('Vui lòng nhập tên hiển thị.');
       return;
     }
+    setFormError('');
     
-    let finalAvatarUrl = avatar;
-    finalAvatarUrl = await uploadImage(avatar);
-
-    
-    updateProfile(
-      { displayName: name, bio, avatarUrl: finalAvatarUrl },
-      {
-        onSuccess: () => {
-          updateUser({ name, avatarUrl: finalAvatarUrl });
-          Alert.alert('Thành công', 'Đã lưu thông tin hồ sơ', [
-            { text: 'OK', onPress: () => router.push({ pathname: '/(mua)/profile', params: { tab: 'Portfolio' } } as any) }
-          ]);
-        },
-        onError: () => {
-          Alert.alert('Lỗi', 'Không thể lưu hồ sơ, vui lòng thử lại.');
+    setIsUploading(true);
+    try {
+      const finalAvatarUrl = await uploadImage(avatar);
+      updateProfile(
+        { displayName: name, bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceYears: Number(experienceYears) || 0, specialization, socialLinks },
+        {
+          onSuccess: () => {
+            setIsUploading(false);
+            updateUser({ name, avatarUrl: finalAvatarUrl });
+            Alert.alert('Thành công', 'Đã lưu thông tin hồ sơ', [
+              { text: 'OK', onPress: () => router.back() }
+            ]);
+          },
+          onError: () => {
+            setIsUploading(false);
+            setFormError('Không thể lưu hồ sơ, vui lòng thử lại.');
+          }
         }
-      }
-    );
+      );
+    } catch {
+      setIsUploading(false);
+      setFormError('Không thể tải ảnh lên. Vui lòng thử lại.');
+    }
   };
 
   const handleChangeAvatar = async () => {
@@ -101,11 +117,11 @@ export default function EditProfileScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => router.push({ pathname: '/(mua)/profile', params: { tab: 'Portfolio' } } as any)}>
+        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} accessibilityLabel="Quay lại">
           <ArrowLeft size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chỉnh sửa trang</Text>
-        <TouchableOpacity style={styles.headerBtn} onPress={handleSave} disabled={isSaving}>
+        <TouchableOpacity style={styles.headerBtn} onPress={handleSave} disabled={isSaving || isUnchanged} accessibilityLabel="Lưu thay đổi">
           {isSaving ? (
             <ActivityIndicator size="small" color={BrandColors.accentPink} />
           ) : (
@@ -172,19 +188,22 @@ export default function EditProfileScreen() {
               />
             </View>
             
-            <View style={styles.verificationBox}>
-              <BadgeCheck size={24} color="#1DA1F2" />
-              <View style={styles.verificationTexts}>
-                <Text style={styles.verificationTitle}>Xác minh tài khoản</Text>
-                <Text style={styles.verificationDesc}>Tài khoản của bạn đã được xác minh. Khách hàng có thể tin tưởng vào dịch vụ của bạn.</Text>
-              </View>
-            </View>
+            {formError ? <Text style={styles.formError}>{formError}</Text> : null}
+            <ProfileInput icon={<Phone size={16} color={BrandColors.textMuted}/>} label="Số điện thoại" value={phoneNumber} onChangeText={setPhoneNumber} keyboardType="phone-pad" />
+            <ProfileInput icon={<MapPin size={16} color={BrandColors.textMuted}/>} label="Thành phố / khu vực" value={city} onChangeText={setCity} />
+            <ProfileInput icon={<Sparkles size={16} color={BrandColors.textMuted}/>} label="Số năm kinh nghiệm" value={experienceYears} onChangeText={value => setExperienceYears(value.replace(/\D/g, ''))} keyboardType="number-pad" />
+            <ProfileInput icon={<Sparkles size={16} color={BrandColors.textMuted}/>} label="Chuyên môn / phong cách" value={specialization} onChangeText={setSpecialization} />
+            <ProfileInput icon={<FileText size={16} color={BrandColors.textMuted}/>} label="Instagram / Facebook" value={socialLinks} onChangeText={setSocialLinks} autoCapitalize="none" keyboardType="url" />
 
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+function ProfileInput({ icon, label, ...props }: { icon: React.ReactNode; label: string } & React.ComponentProps<typeof TextInput>) {
+  return <View style={styles.inputGroup}><View style={styles.labelRow}>{icon}<Text style={styles.label}>{label}</Text></View><TextInput style={styles.input} placeholderTextColor={BrandColors.textMuted} {...props}/></View>;
 }
 
 const styles = StyleSheet.create({
@@ -305,6 +324,7 @@ const styles = StyleSheet.create({
     color: BrandColors.textMuted,
     marginTop: Spacing.xs,
   },
+  formError: { color: BrandColors.statusCancelled, fontFamily: Typography.regular, fontSize: 12, marginBottom: Spacing.md },
   verificationBox: {
     flexDirection: 'row',
     alignItems: 'center',

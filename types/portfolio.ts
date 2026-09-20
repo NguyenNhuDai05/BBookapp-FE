@@ -20,6 +20,7 @@ export interface PortfolioItemDto {
   savesCount?: number;
   isLiked?: boolean;
   isSaved?: boolean;
+  isHidden?: boolean;
 }
 
 export type CreatePortfolioItemRequest = Omit<PortfolioItemDto, 'id' | 'createdAt' | 'updatedAt' | 'isCover' | 'order'>;

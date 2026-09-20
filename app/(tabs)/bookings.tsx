@@ -17,6 +17,7 @@ import { useUserBookings, useConfirmBookingCompletion } from '../../hooks/useBoo
 import { BookingDto, BookingStatus } from '../../types/booking';
 import { BookingServiceList } from '../../components/BookingServiceList';
 import { InternalBookingCalendar } from '../../components/booking/InternalBookingCalendar';
+import { useBookingStore } from '../../store/useBookingStore';
 
 type TabType = 'ALL' | 'COMPLETED' | 'PENDING' | 'CANCELLED';
 
@@ -31,6 +32,7 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: s
   REJECTED: { label: 'Từ chối', color: '#F44336', bg: '#FFEBEE' },
   DISPUTED: { label: 'Đang xử lý khiếu nại', color: '#F44336', bg: '#FFEBEE' },
   AUTO_COMPLETED: { label: 'Tự động hoàn thành', color: '#4CAF50', bg: '#E8F5E9' },
+  UNKNOWN: { label: 'Trạng thái không xác định', color: '#616161', bg: '#F5F5F5' },
 };
 
 export default function BookingsTab() {
@@ -39,6 +41,12 @@ export default function BookingsTab() {
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const { data: bookings, isLoading, error, refetch, isRefetching } = useUserBookings();
   const { mutate: confirmCompletion, isPending: isConfirming } = useConfirmBookingCompletion();
+  const startRebooking = useBookingStore(state => state.startRebooking);
+
+  const handleRebook = (booking: BookingDto) => {
+    startRebooking(booking);
+    router.push('/checkout');
+  };
 
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
@@ -189,7 +197,12 @@ export default function BookingsTab() {
           </View>
           <View style={styles.rightActions}>
             {(booking.status === 'COMPLETED' || booking.status === 'CANCELLED') && (
-              <TouchableOpacity style={styles.rebookBtn}>
+              <TouchableOpacity
+                style={styles.rebookBtn}
+                onPress={() => handleRebook(booking)}
+                accessibilityRole="button"
+                accessibilityLabel={`Đặt lại dịch vụ với ${booking.mua.name}`}
+              >
                 <Text style={styles.rebookBtnText}>Đặt lại</Text>
               </TouchableOpacity>
             )}

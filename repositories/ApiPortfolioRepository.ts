@@ -5,20 +5,19 @@ import { useAuthStore } from '../store/useAuthStore';
 
 export class ApiPortfolioRepository implements IPortfolioRepository {
   async getPortfolio(muaId: string): Promise<PortfolioItemDto[]> {
-    try {
-      let id = muaId;
-      if (id === 'me') {
-        const user = useAuthStore.getState().user;
-        if (!user) return [];
-        id = user.id;
-      }
-      const endpoint = `/mua/${id}/portfolio`;
-      const response = await api.get(endpoint);
-      return response.data || [];
-    } catch (error) {
-      console.error('Error fetching portfolio:', error);
-      return [];
-    }
+    if (muaId === 'me' && !useAuthStore.getState().user) return [];
+    const endpoint = muaId === 'me' ? '/Mua/portfolio/me' : `/Mua/${muaId}/portfolio`;
+    const response = await api.get(endpoint);
+    return (response.data || []).map((item: any) => ({
+        ...item,
+        id: item.id || item.portfolioId,
+        imageUrl: item.imageUrl || item.imageUrls?.[0] || '',
+        imageUrls: item.imageUrls || [],
+        category: item.category || (item.tags || []).join(', '),
+        isCover: Boolean(item.isCover || item.isPinned),
+        order: Number(item.order || 0),
+        updatedAt: item.updatedAt || item.createdAt,
+    }));
   }
 
   async createItem(muaId: string, data: CreatePortfolioItemRequest): Promise<PortfolioItemDto> {
@@ -33,6 +32,10 @@ export class ApiPortfolioRepository implements IPortfolioRepository {
 
   async deleteItem(id: string): Promise<void> {
     await api.delete(`/mua/portfolio/${id}`);
+  }
+
+  async setVisibility(id: string, isHidden: boolean): Promise<void> {
+    await api.patch(`/Mua/portfolio/${id}/visibility`, { isHidden });
   }
 
   async toggleLike(id: string): Promise<void> {
