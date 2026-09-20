@@ -1,266 +1,31 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
-import { Image } from 'expo-image';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Sparkles, TrendingUp, CalendarDays, ShieldCheck } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BriefcaseBusiness, CalendarCheck2, ChevronRight, Images, X } from 'lucide-react-native';
+import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../constants/theme';
 
-const { width, height } = Dimensions.get('window');
+const benefits = [
+  { icon: BriefcaseBusiness, title: 'Quản lý dịch vụ dễ dàng', text: 'Chủ động giá, thời lượng và nội dung dịch vụ.' },
+  { icon: Images, title: 'Portfolio chuyên nghiệp', text: 'Giới thiệu phong cách và những tác phẩm nổi bật.' },
+  { icon: CalendarCheck2, title: 'Nhận và quản lý lịch đặt', text: 'Theo dõi yêu cầu và lịch làm việc trong một nơi.' },
+];
 
 export default function MuaPitchPage() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <ScrollView 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        bounces={false}
-      >
-        {/* Premium Hero Section */}
-        <View style={styles.heroContainer}>
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1516975080661-412140c94297?q=80&w=1000' }} 
-            style={styles.heroImage} 
-            contentFit="cover" 
-          />
-          <LinearGradient
-            colors={['rgba(0,0,0,0.4)', 'rgba(0,0,0,0.1)', '#121212']}
-            locations={[0, 0.4, 1]}
-            style={styles.heroGradient}
-          />
-          
-          {/* Back Button */}
-          <View style={[styles.backButtonContainer, { top: Math.max(insets.top, 20) }]}>
-            <TouchableOpacity 
-              onPress={() => router.back()}
-              style={styles.backButton}
-            >
-              <ArrowLeft size={22} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Hero Content */}
-          <View style={styles.heroContent}>
-            <View style={styles.badge}>
-              <Sparkles size={14} color="#FFD166" />
-              <Text style={styles.badgeText}>FOR PROFESSIONALS</Text>
-            </View>
-            <Text style={styles.heroTitle}>
-              Elevate Your Beauty Business
-            </Text>
-            <Text style={styles.heroSubtitle}>
-              Join Vietnam&apos;s premium beauty marketplace. Manage bookings, grow your clientele, and build your digital portfolio.
-            </Text>
-          </View>
-        </View>
-
-        {/* Value Proposition Grid */}
-        <View style={styles.featuresContainer}>
-          <Text style={styles.featuresTitle}>Why Partner With Us?</Text>
-          
-          <View style={styles.grid}>
-            <FeatureCard 
-              icon={<TrendingUp size={24} color="#E11D48" />}
-              title="Grow Revenue"
-              description="Reach thousands of high-intent clients looking for your style."
-            />
-            <FeatureCard 
-              icon={<CalendarDays size={24} color="#E11D48" />}
-              title="Flexible Hours"
-              description="You are the boss. Set your own schedule and pricing."
-            />
-            <FeatureCard 
-              icon={<Sparkles size={24} color="#E11D48" />}
-              title="Premium Tools"
-              description="A beautiful digital portfolio that showcases your artistry."
-            />
-            <FeatureCard 
-              icon={<ShieldCheck size={24} color="#E11D48" />}
-              title="Secure Payouts"
-              description="Guaranteed payments straight to your bank account."
-            />
-          </View>
-        </View>
-      </ScrollView>
-
-      {/* Floating CTA */}
-      <LinearGradient
-        colors={['rgba(18,18,18,0)', 'rgba(18,18,18,0.9)', '#121212']}
-        style={[styles.floatingCtaContainer, { paddingBottom: Math.max(insets.bottom, 24) }]}
-      >
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => router.push('/mua-onboarding/apply')}
-          style={styles.primaryButton}
-        >
-          <Text style={styles.primaryButtonText}>Get Started Now</Text>
-        </TouchableOpacity>
-      </LinearGradient>
-    </View>
-  );
+  return <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+    <View style={styles.topbar}><TouchableOpacity onPress={() => router.back()} style={styles.iconButton} accessibilityLabel="Để sau"><X size={23} color={BrandColors.textDark}/></TouchableOpacity></View>
+    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <View style={styles.heroArt}><View style={styles.logoCircle}><Image source={require('../../assets/images/logo-bbook.png')} style={styles.logo} resizeMode="contain"/></View><View style={styles.sparkleOne}/><View style={styles.sparkleTwo}/></View>
+      <Text style={styles.eyebrow}>DÀNH CHO CHUYÊN GIA LÀM ĐẸP</Text>
+      <Text style={styles.title}>Trở thành Makeup Artist{`\n`}cùng BeautyBook</Text>
+      <Text style={styles.subtitle}>Xây dựng hồ sơ, giới thiệu dịch vụ và kết nối với khách hàng phù hợp.</Text>
+      <View style={styles.benefits}>{benefits.map(({ icon: Icon, title, text }) => <View key={title} style={styles.benefit}><View style={styles.benefitIcon}><Icon size={21} color={BrandColors.accentRose}/></View><View style={styles.benefitCopy}><Text style={styles.benefitTitle}>{title}</Text><Text style={styles.benefitText}>{text}</Text></View></View>)}</View>
+    </ScrollView>
+    <View style={styles.footer}><TouchableOpacity style={styles.primary} onPress={() => router.push('/mua-onboarding/apply')} activeOpacity={0.84}><Text style={styles.primaryText}>Bắt đầu tạo hồ sơ</Text><ChevronRight size={20} color="#FFF"/></TouchableOpacity><TouchableOpacity style={styles.secondary} onPress={() => router.back()}><Text style={styles.secondaryText}>Để sau</Text></TouchableOpacity></View>
+  </SafeAreaView>;
 }
 
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
-  <View style={styles.featureCard}>
-    <View style={styles.iconContainer}>
-      {icon}
-    </View>
-    <Text style={styles.featureTitle}>{title}</Text>
-    <Text style={styles.featureDescription}>{description}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-  },
-  scrollContent: {
-    paddingBottom: 120,
-  },
-  heroContainer: {
-    width: width,
-    height: height * 0.65,
-    position: 'relative',
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-  heroGradient: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  backButtonContainer: {
-    position: 'absolute',
-    width: '100%',
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-  },
-  heroContent: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 1,
-    marginLeft: 6,
-  },
-  heroTitle: {
-    color: '#FFFFFF',
-    fontSize: 42,
-    fontWeight: 'bold',
-    lineHeight: 46,
-    marginBottom: 16,
-  },
-  heroSubtitle: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '500',
-  },
-  featuresContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    backgroundColor: '#121212',
-  },
-  featuresTitle: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 24,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  featureCard: {
-    width: '48%',
-    backgroundColor: '#1E1E1E',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#2A2A2A',
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(225, 29, 72, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  featureTitle: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  featureDescription: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  floatingCtaContainer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    paddingHorizontal: 24,
-    paddingTop: 40,
-  },
-  primaryButton: {
-    width: '100%',
-    backgroundColor: '#E11D48',
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#E11D48',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
-  },
+  safe:{flex:1,backgroundColor:BrandColors.bgPrimary},topbar:{height:52,paddingHorizontal:Spacing.md,alignItems:'flex-end',justifyContent:'center'},iconButton:{width:44,height:44,borderRadius:22,backgroundColor:BrandColors.bgCard,alignItems:'center',justifyContent:'center',borderWidth:1,borderColor:BrandColors.borderLight},content:{paddingHorizontal:Spacing.lg,paddingBottom:20},heroArt:{height:158,marginTop:6,marginBottom:Spacing.lg,borderRadius:Radius.xl,backgroundColor:BrandColors.bgPinkSoft,alignItems:'center',justifyContent:'center',overflow:'hidden'},logoCircle:{width:110,height:110,borderRadius:55,backgroundColor:'#FFF',alignItems:'center',justifyContent:'center',...Shadows.soft},logo:{width:94,height:94},sparkleOne:{position:'absolute',width:54,height:54,borderRadius:27,backgroundColor:'rgba(245,83,137,.16)',left:20,top:18},sparkleTwo:{position:'absolute',width:72,height:72,borderRadius:36,backgroundColor:'rgba(255,255,255,.55)',right:-12,bottom:-16},eyebrow:{fontFamily:Typography.bold,fontSize:11,letterSpacing:1,color:BrandColors.accentRose,textAlign:'center'},title:{fontFamily:Typography.extraBold,fontSize:28,lineHeight:35,color:BrandColors.textDark,textAlign:'center',marginTop:8},subtitle:{fontFamily:Typography.regular,fontSize:15,lineHeight:22,color:BrandColors.textBody,textAlign:'center',marginTop:10,paddingHorizontal:8},benefits:{marginTop:Spacing.lg,gap:10},benefit:{minHeight:74,backgroundColor:'#FFF',borderRadius:Radius.base,padding:Spacing.md,flexDirection:'row',alignItems:'center',borderWidth:1,borderColor:BrandColors.borderLight},benefitIcon:{width:42,height:42,borderRadius:Radius.md,backgroundColor:BrandColors.bgPink,alignItems:'center',justifyContent:'center'},benefitCopy:{flex:1,marginLeft:12},benefitTitle:{fontFamily:Typography.bold,fontSize:14,color:BrandColors.textDark},benefitText:{fontFamily:Typography.regular,fontSize:12,lineHeight:17,color:BrandColors.textMuted,marginTop:2},footer:{paddingHorizontal:Spacing.lg,paddingTop:10,backgroundColor:BrandColors.bgPrimary},primary:{minHeight:52,borderRadius:Radius.base,backgroundColor:BrandColors.accentRose,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:6},primaryText:{fontFamily:Typography.bold,fontSize:16,color:'#FFF'},secondary:{minHeight:44,alignItems:'center',justifyContent:'center'},secondaryText:{fontFamily:Typography.semiBold,fontSize:14,color:BrandColors.textBody},
 });

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { muaBookingService } from '../services/muaBookingService';
 import type { BookingStatus } from '../types/booking';
+import { getApiError } from '../services/api';
 
 export const usePendingBookings = (muaId: string) => {
   return useQuery({
@@ -34,13 +35,20 @@ export const useUpdateBookingStatus = (muaId: string) => {
       queryClient.invalidateQueries({ queryKey: ['userBookings'] });
 
     },
+    onError: (error, variables) => {
+      if (getApiError(error).status !== 409) return;
+      queryClient.invalidateQueries({ queryKey: ['mua-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookingDetail', variables.bookingId] });
+      queryClient.invalidateQueries({ queryKey: ['userBookings'] });
+    },
   });
 };
 
 export const useEarningsSnapshot = (muaId: string) => {
   return useQuery({
     queryKey: ['mua-earnings', muaId],
-    queryFn: () => muaBookingService.getEarningsSnapshot(muaId),
+    queryFn: () => muaBookingService.getEarningsSnapshot(),
     staleTime: 5 * 60 * 1000, // 5 min
+    retry: false,
   });
 };

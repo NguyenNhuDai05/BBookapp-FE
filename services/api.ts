@@ -18,8 +18,41 @@ export const API_URL = configuredApiUrl || webApiUrl || "http://localhost:5261/a
 
 export const api = axios.create({
   baseURL: API_URL,
-  timeout: 15000,
+  timeout: 25000,
 });
+
+let unauthorizedHandler: (() => void | Promise<void>) | undefined;
+let isHandlingUnauthorized = false;
+let hasPendingUnauthorized = false;
+
+const runUnauthorizedHandler = async () => {
+  if (isHandlingUnauthorized || !unauthorizedHandler) return;
+  isHandlingUnauthorized = true;
+  hasPendingUnauthorized = false;
+  try {
+    await unauthorizedHandler();
+  } finally {
+    isHandlingUnauthorized = false;
+  }
+};
+
+export const setUnauthorizedHandler = (handler?: () => void | Promise<void>) => {
+  unauthorizedHandler = handler;
+  if (handler && hasPendingUnauthorized) void runUnauthorizedHandler();
+};
+
+export const getApiError = (error: unknown) => {
+  if (!axios.isAxiosError(error)) {
+    return { status: undefined, code: undefined, message: error instanceof Error ? error.message : 'Đã xảy ra lỗi.' , isNetworkError: false };
+  }
+  const payload = error.response?.data as { code?: string; Code?: string; message?: string; Message?: string; title?: string } | undefined;
+  return {
+    status: error.response?.status,
+    code: payload?.code ?? payload?.Code,
+    message: payload?.message ?? payload?.Message ?? payload?.title ?? (error.code === 'ECONNABORTED' ? 'Kết nối mất nhiều thời gian hơn dự kiến.' : error.message),
+    isNetworkError: !error.response || error.code === 'ECONNABORTED',
+  };
+};
 
 api.interceptors.request.use(
   async (config) => {
@@ -32,4 +65,21 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error),
+);
+
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    if (error.response?.status === 401) {
+      const token = await AsyncStorage.getItem("user_jwt_token");
+      if (token) {
+        if (unauthorizedHandler) await runUnauthorizedHandler();
+        else {
+          await AsyncStorage.removeItem("user_jwt_token");
+          hasPendingUnauthorized = true;
+        }
+      }
+    }
+    return Promise.reject(error);
+  },
 );

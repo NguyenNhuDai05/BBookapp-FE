@@ -3,14 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'r
 import { Image } from 'expo-image';
 import { PortfolioItemDto } from '../../../types/portfolio';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
-import { Star, Trash2 } from 'lucide-react-native';
+import { Eye, EyeOff, Star, Trash2 } from 'lucide-react-native';
 
 interface PortfolioGridProps {
   items: PortfolioItemDto[];
   onDelete: (id: string) => void;
+  onToggleVisibility?: (id: string, isHidden: boolean) => void;
 }
 
-export function PortfolioGrid({ items, onDelete }: PortfolioGridProps) {
+export function PortfolioGrid({ items, onDelete, onToggleVisibility }: PortfolioGridProps) {
   const { width } = useWindowDimensions();
   const isDesktop = width > 768;
   const numColumns = isDesktop ? 6 : 3;
@@ -51,6 +52,9 @@ export function PortfolioGrid({ items, onDelete }: PortfolioGridProps) {
           
           {/* Overlay Actions */}
           <View style={styles.overlayActions}>
+            <TouchableOpacity style={styles.visibilityBtn} onPress={() => onToggleVisibility?.(item.id, !item.isHidden)} accessibilityLabel={item.isHidden ? 'Hiện tác phẩm' : 'Ẩn tác phẩm'}>
+              {item.isHidden ? <Eye size={14} color="#FFF"/> : <EyeOff size={14} color="#FFF"/>}
+            </TouchableOpacity>
             <TouchableOpacity 
               style={styles.deleteBtn} 
               onPress={() => onDelete(item.id)}
@@ -65,6 +69,7 @@ export function PortfolioGrid({ items, onDelete }: PortfolioGridProps) {
               <Text style={styles.coverText}>Ảnh bìa</Text>
             </View>
           )}
+          <View style={[styles.visibilityBadge, item.isHidden && styles.hiddenBadge]}><Text style={styles.visibilityText}>{item.isHidden ? 'Ẩn' : 'Công khai'}</Text></View>
 
         </View>
       ))}
@@ -126,10 +131,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 4,
+    flexDirection: 'row', gap: 4,
   },
+  visibilityBtn: { backgroundColor:'rgba(48,23,38,.72)', padding:4, borderRadius:Radius.sm },
   deleteBtn: {
     backgroundColor: 'rgba(255, 0, 0, 0.7)',
     padding: 4,
     borderRadius: Radius.sm,
   },
+  visibilityBadge:{position:'absolute',left:4,bottom:4,backgroundColor:BrandColors.statusConfirmed,paddingHorizontal:5,paddingVertical:2,borderRadius:Radius.sm},
+  hiddenBadge:{backgroundColor:BrandColors.textMuted},
+  visibilityText:{fontFamily:Typography.bold,fontSize:8,color:'#FFF'},
 });

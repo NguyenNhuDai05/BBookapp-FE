@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
 import { X } from 'lucide-react-native';
 import { uploadImage } from '../../../services/supabase';
 import { useMuaServices } from '../../../hooks/useMuaServices';
+import { getApiError } from '../../../services/api';
 
+const MAX_DESCRIPTION_LENGTH = 2000;
 
 interface PortfolioFormModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => void | Promise<void>;
   initialData?: any;
 }
 
@@ -54,7 +56,7 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
         })
       );
       
-      onSubmit({
+      await onSubmit({
         title,
         description,
         imageUrls: finalUrls,
@@ -64,8 +66,8 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
       });
       onClose();
     } catch (error) {
-      console.error('Error uploading portfolio images', error);
-      alert('Lỗi tải ảnh lên, vui lòng thử lại');
+      console.error('Error saving portfolio', error);
+      Alert.alert('Không thể lưu portfolio', getApiError(error).message);
     } finally {
       setIsUploading(false);
     }
@@ -134,8 +136,10 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
                 placeholder="Cảm hứng hoặc thông tin chi tiết..."
                 multiline
                 numberOfLines={3}
+                maxLength={MAX_DESCRIPTION_LENGTH}
                 placeholderTextColor={BrandColors.textMuted}
               />
+              <Text style={styles.characterCount}>{description.length}/{MAX_DESCRIPTION_LENGTH}</Text>
             </View>
 
             <View style={styles.inputGroup}>
@@ -243,6 +247,13 @@ const styles = StyleSheet.create({
   textArea: {
     height: 80,
     textAlignVertical: 'top',
+  },
+  characterCount: {
+    marginTop: Spacing.xs,
+    textAlign: 'right',
+    color: BrandColors.textMuted,
+    fontFamily: Typography.regular,
+    fontSize: 12,
   },
   serviceChip: { maxWidth: 170, paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.full, backgroundColor: '#F4F4F5', marginRight: 8, borderWidth: 1, borderColor: '#EEE' },
   serviceChipActive: { backgroundColor: '#FFF0F5', borderColor: BrandColors.accentPink },

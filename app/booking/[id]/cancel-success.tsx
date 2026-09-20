@@ -1,15 +1,65 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CheckCircle, Home, FileText } from 'lucide-react-native';
+import { AlertTriangle, CheckCircle, Home, FileText, RefreshCw } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
 import { useBookingDetail } from '../../../hooks/useBooking';
+import { formatVnd, getRefundPresentation } from '../../../utils/bookingStatus';
+import { PaymentStatus } from '../../../types/booking';
 
 export default function CancelSuccessScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: booking } = useBookingDetail(id);
+  const { data: booking, isLoading, isError, refetch, isFetching } = useBookingDetail(id);
+  const isCancelled = booking?.status === 'CANCELLED';
+  const refundPresentation = isCancelled
+    ? getRefundPresentation(booking.paymentStatus, booking.refund, booking.cancellationRefundAmount)
+    : undefined;
+  const hasRefundAmount = (booking?.cancellationRefundAmount ?? booking?.refund?.amount ?? 0) > 0;
+
+  if (isLoading && !booking) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.stateContainer}>
+          <ActivityIndicator size="large" color={BrandColors.accentPink} />
+          <Text style={styles.stateText}>Đang xác minh kết quả hủy booking...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (isError && !booking) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.stateContainer}>
+          <AlertTriangle size={52} color="#E65100" />
+          <Text style={styles.stateTitle}>Chưa thể xác minh kết quả hủy booking</Text>
+          <Text style={styles.stateText}>Vui lòng kiểm tra kết nối và thử lại.</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => refetch()} disabled={isFetching}>
+            {isFetching ? <ActivityIndicator color="#FFF" /> : <RefreshCw size={18} color="#FFF" />}
+            <Text style={styles.retryText}>Thử lại</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!isCancelled) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.stateContainer}>
+          <AlertTriangle size={52} color="#E65100" />
+          <Text style={styles.stateTitle}>Chưa xác nhận booking đã được hủy</Text>
+          <Text style={styles.stateText}>Trạng thái hiện tại chưa phải đã hủy. Hãy tải lại để nhận trạng thái mới nhất.</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => refetch()} disabled={isFetching}>
+            {isFetching ? <ActivityIndicator color="#FFF" /> : <RefreshCw size={18} color="#FFF" />}
+            <Text style={styles.retryText}>Tải lại trạng thái</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -19,18 +69,26 @@ export default function CancelSuccessScreen() {
         </View>
         <Text style={styles.title}>Hủy đơn thành công</Text>
         
-        {booking && (
-          <Text style={styles.subtitle}>
-            Đơn đặt lịch <Text style={styles.bold}>{booking.id}</Text> với chuyên gia <Text style={styles.bold}>{booking.mua.name}</Text> đã được hủy.
-          </Text>
-        )}
+        <Text style={styles.subtitle}>
+          Đơn đặt lịch <Text style={styles.bold}>{booking.id}</Text> với chuyên gia <Text style={styles.bold}>{booking.mua.name}</Text> đã được hủy.
+        </Text>
 
-        <View style={styles.refundBox}>
-          <Text style={styles.refundTitle}>Thông báo hoàn tiền</Text>
-          <Text style={styles.refundText}>
-            Yêu cầu hoàn tiền cọc <Text style={styles.bold}>{booking?.depositAmount?.toLocaleString('vi-VN')}đ</Text> đã được ghi nhận và sẽ được trả về tài khoản thanh toán sau khi đối soát.
-          </Text>
-        </View>
+        {refundPresentation && (
+          <View style={styles.refundBox}>
+            <Text style={styles.refundTitle}>{refundPresentation.label}</Text>
+            <Text style={styles.refundRow}>Tiền cọc: <Text style={styles.bold}>{formatVnd(booking.depositAmount)}</Text></Text>
+            {hasRefundAmount && booking.cancellationRefundPercentage !== undefined && (
+              <Text style={styles.refundRow}>Mức hoàn: <Text style={styles.bold}>{booking.cancellationRefundPercentage}%</Text></Text>
+            )}
+            {hasRefundAmount && (
+              <Text style={styles.refundRow}>
+                {booking.refund?.status === 'COMPLETED' || booking.paymentStatus === PaymentStatus.REFUNDED || booking.paymentStatus === PaymentStatus.PARTIALLY_REFUNDED ? 'Số tiền đã hoàn' : 'Hoàn dự kiến'}:{' '}
+                <Text style={styles.bold}>{formatVnd(booking.refund?.amount ?? booking.cancellationRefundAmount ?? 0)}</Text>
+              </Text>
+            )}
+            <Text style={styles.refundText}>{refundPresentation.description}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.footer}>
@@ -57,6 +115,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.xl,
+  },
+  stateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  stateTitle: {
+    fontFamily: Typography.bold,
+    fontSize: 19,
+    color: BrandColors.textDark,
+    textAlign: 'center',
+    marginTop: Spacing.lg,
+  },
+  stateText: {
+    fontFamily: Typography.regular,
+    fontSize: 14,
+    color: BrandColors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginTop: Spacing.sm,
+  },
+  retryButton: {
+    minWidth: 140,
+    minHeight: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: BrandColors.accentPink,
+    borderRadius: Radius.full,
+    marginTop: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
+  },
+  retryText: {
+    fontFamily: Typography.bold,
+    fontSize: 14,
+    color: '#FFF',
   },
   iconWrapper: {
     marginBottom: Spacing.lg,
@@ -97,6 +193,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: BrandColors.textDark,
     lineHeight: 20,
+  },
+  refundRow: {
+    fontFamily: Typography.regular,
+    fontSize: 14,
+    color: BrandColors.textDark,
+    marginBottom: 6,
   },
 
   footer: {

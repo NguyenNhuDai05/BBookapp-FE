@@ -474,11 +474,11 @@ export default function MuaProfilePremiumScreen() {
       <PortfolioFormModal 
         visible={isPortfolioModalVisible}
         onClose={() => { setIsPortfolioModalVisible(false); setEditingPortfolioItem(null); }}
-        onSubmit={(data) => {
+        onSubmit={async (data) => {
           if (editingPortfolioItem) {
-            updatePortfolioItem({ id: editingPortfolioItem.id || editingPortfolioItem.portfolioId, updates: data });
+            await updatePortfolioItem({ id: editingPortfolioItem.id || editingPortfolioItem.portfolioId, updates: data });
           } else {
-            createPortfolioItem(data);
+            await createPortfolioItem(data);
           }
         }}
         initialData={editingPortfolioItem}

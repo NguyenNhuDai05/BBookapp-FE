@@ -5,4 +5,5 @@ export interface IMuaServicesRepository {
   createService(muaId: string, service: CreateServiceRequest): Promise<ServiceDto>;
   updateService(serviceId: string, updates: UpdateServiceRequest): Promise<ServiceDto>;
   deleteService(serviceId: string): Promise<void>;
+  setActive(serviceId: string, isActive: boolean): Promise<void>;
 }

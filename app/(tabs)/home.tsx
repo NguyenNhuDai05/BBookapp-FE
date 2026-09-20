@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const authUser = useAuthStore((s) => s.user);
   const setLastViewedPortfolioId = useBookingStore(s => s.setLastViewedPortfolioId);
-  const { setMua, addService } = useBookingStore();
+  const { draft, setMua, addService, resetDraft } = useBookingStore();
   const queryClient = useQueryClient();
   const liked = useFavoriteFeedStore(s => s.liked);
   const saved = useFavoriteFeedStore(s => s.saved);
@@ -118,8 +118,11 @@ export default function HomeScreen() {
   const addPostService = (item: any) => {
     const service = item.service;
     if (!service) return;
+    const muaId = String(item.muaId || item.authorId || '');
+    if (!muaId) return;
+    if (draft.mua && draft.mua.id !== muaId) resetDraft();
     setMua({
-      id: String(item.muaId || item.authorId || ''),
+      id: muaId,
       name: item.authorName || 'Chuyên gia',
       avatarUrl: item.authorAvatarUrl || item.authorAvatar || '',
       rating: Number(item.rating || 0),
@@ -136,7 +139,17 @@ export default function HomeScreen() {
       imageUrl: service.imageUrl,
       description: service.description,
     });
-    Alert.alert('Đã thêm dịch vụ', 'Dịch vụ đã được thêm vào lịch đặt của bạn.');
+    setLastViewedPortfolioId(postId(item));
+    router.push('/checkout');
+  };
+
+  const openPostOptions = () => {
+    Alert.alert('Tùy chọn bài viết', 'Các thao tác này cần backend hỗ trợ.', [
+      { text: 'Báo cáo bài viết' },
+      { text: 'Chặn người dùng' },
+      { text: 'Ẩn bài viết' },
+      { text: 'Hủy', style: 'cancel' },
+    ]);
   };
 
   if (feedLoading && !refreshing) {
@@ -160,7 +173,7 @@ export default function HomeScreen() {
     );
   }
 
-  const posts = feedData?.pages?.flatMap((page: any) => page.data || page.Data || page) || [];
+  const posts = feedData?.pages?.flat() || [];
 
   const renderHeader = () => {
     return (
@@ -201,9 +214,15 @@ export default function HomeScreen() {
           data={posts}
           keyExtractor={(item, index) => item.portfolioId ? item.portfolioId.toString() : index.toString()}
           ListHeaderComponent={renderHeader}
+          ListEmptyComponent={
+            <View style={styles.emptyFeed}>
+              <Text style={styles.emptyFeedTitle}>Chưa có bài viết phù hợp</Text>
+              <Text style={styles.emptyFeedText}>Kéo xuống để làm mới hoặc quay lại sau nhé.</Text>
+            </View>
+          }
           renderItem={({ item }) => {
             const id = postId(item);
-            const displayItem = {
+            const displayItem: any = {
               ...item,
               isLiked: Boolean(liked[id]) || item.isLiked,
               isSaved: Boolean(saved[id]) || item.isSaved,
@@ -214,6 +233,7 @@ export default function HomeScreen() {
               onLike={() => handleLike(displayItem)}
               onSave={() => handleSave(displayItem)}
               onComment={() => openComments(displayItem)}
+              onOptions={openPostOptions}
               onImagePress={setFullImage}
               onAddService={() => addPostService(displayItem)}
               onAuthorPress={() => {
@@ -402,6 +422,9 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
+  emptyFeed: { alignItems: 'center', paddingHorizontal: 32, paddingVertical: 56 },
+  emptyFeedTitle: { color: BrandColors.textDark, fontSize: 17, fontWeight: '800' },
+  emptyFeedText: { color: BrandColors.textMuted, fontSize: 13, lineHeight: 20, marginTop: 7, textAlign: 'center' },
   imageModal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.96)', justifyContent: 'center' },
   fullImage: { width: '100%', height: '88%' },
   closeModal: { position: 'absolute', top: 48, right: 18, zIndex: 2, padding: 10 },

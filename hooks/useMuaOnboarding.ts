@@ -3,6 +3,7 @@ import { muaApplicationService } from '../services/muaOnboardingService';
 import type { MuaApplicationRequestDto } from '../types/onboarding';
 import { useAuthStore } from '../store/useAuthStore';
 import { UserRole } from '../types/auth';
+import { MUA_ELIGIBILITY_QUERY_KEY } from './useMuaEligibility';
 
 export const useSubmitApplication = () => {
   const queryClient = useQueryClient();
@@ -25,7 +26,8 @@ export const useSubmitApplication = () => {
       // profile has been created/updated.
       await useAuthStore.getState().initialize();
       // Invalidate queries so that the user's new DRAFT MUA profile is fetched
-      await queryClient.invalidateQueries({ queryKey: ['muaProfile', 'me'] });
+      await queryClient.invalidateQueries({ queryKey: ['mua-profile', 'me'] });
+      await queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
     },
   });
 };

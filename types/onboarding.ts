@@ -39,6 +39,7 @@ export interface MuaApplicationRequestDto {
   experienceYears?: number;
   specialization?: string;
   socialLinks?: string;
+  avatarUrl?: string;
 }
 
 export interface MuaApplicationResponseDto {

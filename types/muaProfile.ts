@@ -22,6 +22,11 @@ export interface MuaProfileDto {
   verificationStatus: VerificationStatus;
   rejectionReason?: string;
   bio?: string;
+  phoneNumber?: string;
+  city?: string;
+  experienceYears?: number;
+  specialization?: string;
+  socialLinks?: string;
   reviewCount?: number;
   rating?: number;
 }
@@ -30,4 +35,9 @@ export interface MuaUpdateDto {
   displayName?: string;
   bio?: string;
   avatarUrl?: string;
+  phoneNumber?: string;
+  city?: string;
+  experienceYears?: number;
+  specialization?: string;
+  socialLinks?: string;
 }

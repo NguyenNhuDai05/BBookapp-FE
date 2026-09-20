@@ -1,5 +1,6 @@
 import { Stack, router } from "expo-router";
 import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import "../global.css";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useProtectedRoute } from '../hooks/useProtectedRoute';
@@ -7,10 +8,20 @@ import { useProtectedRoute } from '../hooks/useProtectedRoute';
 import { queryClient } from '../lib/queryClient';
 import { useAuthStore } from '../store/useAuthStore';
 import { NotificationService } from '../services/NotificationService';
+import { setUnauthorizedHandler } from '../services/api';
+import { AppErrorBoundary } from '../components/AppErrorBoundary';
 
 export default function RootLayout() {
-  useProtectedRoute();
+  const canRenderRoute = useProtectedRoute();
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+
+  // Register synchronously before child screens can start protected queries.
+  // This closes the startup race where an expired persisted JWT could trigger
+  // several 401 responses before an effect had installed the handler.
+  setUnauthorizedHandler(async () => {
+    await useAuthStore.getState().expireSession();
+    router.replace('/(auth)/login');
+  });
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -33,12 +44,19 @@ export default function RootLayout() {
     };
   }, [isAuthenticated]);
 
+  if (!canRenderRoute) {
+    return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF6F8' }}><ActivityIndicator size="large" color="#F55389" /></View>;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Stack screenOptions={{ headerShown: false }}>
+      <AppErrorBoundary>
+       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(mua)" />
+        <Stack.Screen name="(admin)" />
 
         <Stack.Screen
           name="mua-detail"
@@ -52,7 +70,8 @@ export default function RootLayout() {
             headerShown: false,
           }}
         />
-      </Stack>
+       </Stack>
+      </AppErrorBoundary>
     </QueryClientProvider>
   );
 }

@@ -1,7 +1,8 @@
 import { api } from '../services/api';
 import type { IMuaBookingRepository } from './IMuaBookingRepository';
 import type { BookingDto, BookingStatus, SelectedServiceDto } from '../types/booking';
-import { PaymentStatus } from '../types/booking';
+import { mapBookingStatus, mapPaymentStatus, mapRefundSummary } from '../utils/bookingStatus';
+import type { MuaEarningsDto, MuaReceivableDto } from '../types/earnings';
 
 export class ApiMuaBookingRepository implements IMuaBookingRepository {
   
@@ -11,14 +12,11 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
   }
 
   async getAllBookings(muaId: string): Promise<BookingDto[]> {
-    try {
-      // The backend returns all bookings for the currently authenticated MUA
-      const { data } = await api.get('/Booking?viewAs=mua');
-      return data.map((b: any) => this.mapToBookingDto(b));
-    } catch (e) {
-      console.error('Error fetching MUA bookings:', e);
-      return [];
-    }
+    // The backend returns all bookings for the currently authenticated MUA.
+    // Let React Query receive failures instead of presenting 401/network errors
+    // as a legitimate empty booking list.
+    const { data } = await api.get('/Booking?viewAs=mua');
+    return data.map((b: any) => this.mapToBookingDto(b));
   }
 
   async updateBookingStatus(bookingId: string, status: BookingStatus, reason?: string): Promise<BookingDto> {
@@ -33,7 +31,10 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       'WAITING_CUSTOMER': 4,
       'DISPUTED': 9,
       'AUTO_COMPLETED': 10,
+      'UNKNOWN': -1,
     };
+
+    if (statusEnumValues[status] < 0) throw new Error('Không thể cập nhật trạng thái booking không xác định.');
 
     const { data } = await api.put(`/Booking/${bookingId}/status`, {
       status: statusEnumValues[status],
@@ -43,42 +44,25 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
     return this.mapToBookingDto(data);
   }
 
-  async getEarningsSnapshot(muaId: string): Promise<{ today: number; month: number; pending: number }> {
-    try {
-      const allBookings = await this.getAllBookings(muaId);
-      
-      const now = new Date();
-      const todayStr = now.toISOString().substring(0, 10);
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-
-      let todayEarned = 0;
-      let monthEarned = 0;
-      let pendingEarned = 0;
-
-      for (const b of allBookings) {
-        if (b.status === 'COMPLETED') {
-          const bDate = new Date(b.date); // b.date is YYYY-MM-DD
-          
-          if (b.date === todayStr) {
-            todayEarned += b.totalAmount;
-          }
-          if (bDate.getMonth() === currentMonth && bDate.getFullYear() === currentYear) {
-            monthEarned += b.totalAmount;
-          }
-        } else if (b.status === 'PENDING_CONFIRMATION' || b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS') {
-          pendingEarned += b.totalAmount;
-        }
-      }
-
-      return {
-        today: todayEarned,
-        month: monthEarned,
-        pending: pendingEarned
-      };
-    } catch (e) {
-      return { today: 0, month: 0, pending: 0 };
+  async getEarningsSnapshot(): Promise<MuaEarningsDto> {
+    const { data } = await api.get<MuaEarningsDto>('/mua/earnings');
+    const totals = [data.onHoldTotal, data.availableTotal, data.frozenTotal, data.payoutPendingTotal, data.paidOutTotal];
+    if (totals.some(value => typeof value !== 'number') || !Array.isArray(data.receivables)) {
+      throw new Error('Dữ liệu doanh thu không hợp lệ.');
     }
+
+    const receivables: MuaReceivableDto[] = data.receivables.map((item) => ({
+      ...item,
+      grossAmount: Number(item.grossAmount),
+      platformFeeAmount: Number(item.platformFeeAmount),
+      netAmount: Number(item.netAmount),
+    }));
+
+    if (receivables.some(item => !Number.isFinite(item.grossAmount) || !Number.isFinite(item.platformFeeAmount) || !Number.isFinite(item.netAmount))) {
+      throw new Error('Dữ liệu khoản thu không hợp lệ.');
+    }
+
+    return { ...data, receivables };
   }
 
   private mapToBookingDto(b: any): BookingDto {
@@ -115,8 +99,8 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       time: timeStr,
       address: b.address || '',
       locationType: 'HOME_SERVICE', // Default fallback
-      status: this.mapStatus(b.status),
-      paymentStatus: (b.paymentStatus ?? 0) as PaymentStatus,
+      status: mapBookingStatus(b.status),
+      paymentStatus: mapPaymentStatus(b.paymentStatus),
       note: b.notes,
       
       serviceTotal: b.totalAmount ?? 0,
@@ -142,35 +126,13 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       disputedAt: b.disputedAt,
       disputeReason: b.disputeReason,
       rejectReason: b.rejectReason,
-      cancelReason: b.cancelReason
+      cancellationReason: b.cancellationReason,
+      cancellationPolicyRule: b.cancellationPolicyRule,
+      cancellationRefundPercentage: b.cancellationRefundPercentage,
+      cancellationRefundAmount: b.cancellationRefundAmount,
+      cancellationAppointmentAtUtc: b.cancellationAppointmentAtUtc,
+      refund: mapRefundSummary(b.refund),
     };
   }
 
-  private mapStatus(statusRaw: any): BookingStatus {
-    const statusMap: Record<number | string, BookingStatus> = {
-      0: 'PENDING_CONFIRMATION',
-      1: 'CONFIRMED', // Approved in C#
-      2: 'COMPLETED', // Completed in C#
-      3: 'CANCELLED', // Cancelled in C#
-      4: 'WAITING_CUSTOMER', // WaitingCustomer in C#
-      5: 'PENDING_PAYMENT',
-      6: 'PENDING_CONFIRMATION',
-      7: 'REJECTED',
-      8: 'IN_PROGRESS',
-      9: 'DISPUTED',
-      10: 'AUTO_COMPLETED',
-      'Pending': 'PENDING_CONFIRMATION',
-      'PendingPayment': 'PENDING_PAYMENT',
-      'PendingConfirmation': 'PENDING_CONFIRMATION',
-      'Approved': 'CONFIRMED',
-      'Completed': 'COMPLETED',
-      'Cancelled': 'CANCELLED',
-      'WaitingCustomer': 'WAITING_CUSTOMER',
-      'Rejected': 'REJECTED',
-      'InProgress': 'IN_PROGRESS',
-      'Disputed': 'DISPUTED',
-      'AutoCompleted': 'AUTO_COMPLETED'
-    };
-    return statusMap[statusRaw] || 'PENDING_PAYMENT';
-  }
 }

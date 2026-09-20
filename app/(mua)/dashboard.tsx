@@ -1,15 +1,18 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandColors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useEarningsSnapshot, usePendingBookings, useAllBookings } from '../../hooks/useMuaBookings';
-import { useMuaProfile } from '../../hooks/useMuaProfile';
 import { useMuaServices } from '../../hooks/useMuaServices';
 import { useMuaPortfolio } from '../../hooks/useMuaPortfolio';
 import { MuaBookingCard } from '../../components/mua/MuaBookingCard';
 import { useRouter } from 'expo-router';
-import { Bell } from 'lucide-react-native';
+import { Bell, BriefcaseBusiness, CalendarClock, Images } from 'lucide-react-native';
+import { useMuaEligibility } from '../../hooks/useMuaEligibility';
+import { MuaCompletionCard } from '../../components/mua/MuaCompletionCard';
+import { ErrorView } from '../../components/ui/ErrorView';
+import { getApiError } from '../../services/api';
 
 export default function MuaDashboard() {
   const { user } = useAuthStore();
@@ -17,13 +20,13 @@ export default function MuaDashboard() {
   
   const muaId = "me";
 
-  const { data: earnings, isLoading: earningsLoading, refetch: refetchEarnings } = useEarningsSnapshot(muaId);
+  const { data: earnings, error: earningsError, isLoading: earningsLoading, isError: earningsIsError, refetch: refetchEarnings } = useEarningsSnapshot(muaId);
   const { data: pendingBookings = [], isLoading: bookingsLoading, refetch: refetchBookings } = usePendingBookings(muaId);
   const { data: allBookings = [] } = useAllBookings(muaId);
   
-  const { data: profile } = useMuaProfile(muaId);
-  const { data: services = [] } = useMuaServices(muaId);
-  const { data: portfolio = [] } = useMuaPortfolio(muaId);
+  useMuaServices(muaId);
+  useMuaPortfolio(muaId);
+  const { data: eligibility, isError: eligibilityError, refetch: refetchEligibility } = useMuaEligibility();
 
   // In-app Notification Badge for today's bookings
   const todayBookings = useMemo(() => {
@@ -31,20 +34,12 @@ export default function MuaDashboard() {
     return allBookings.filter(b => (b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS') && b.date === todayStr);
   }, [allBookings]);
 
-  // Profile Completion Calculation
-  let completionScore = 0;
-  if (profile?.verificationStatus === 'APPROVED') completionScore += 30;
-  if (profile?.avatarUrl) completionScore += 10;
-  if (portfolio.some((p: any) => p.isCover)) completionScore += 10;
-  if (portfolio.length >= 5) completionScore += 20;
-  if (services.filter((s: any) => s.status === 'ACTIVE').length >= 3) completionScore += 20;
-  if (profile?.bio) completionScore += 10;
-
   const refreshing = earningsLoading || bookingsLoading;
 
   const onRefresh = () => {
     refetchEarnings();
     refetchBookings();
+    refetchEligibility();
   };
 
   return (
@@ -68,36 +63,37 @@ export default function MuaDashboard() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.earningsCard}>
-          <View style={styles.earningsRow}>
-            <View style={styles.earningsBox}>
-              <Text style={styles.earningsLabel}>Doanh thu tháng này</Text>
-              <Text style={styles.earningsAmount}>
-                {earnings?.month ? earnings.month.toLocaleString('vi-VN') : '0'}đ
-              </Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.earningsBox}>
-              <Text style={styles.earningsLabel}>Chờ xác nhận</Text>
-              <Text style={styles.earningsCount}>{earnings?.pending || 0}</Text>
-            </View>
-          </View>
+        {eligibilityError ? <ErrorView message="Không thể tải trạng thái hồ sơ" onRetry={refetchEligibility} /> : eligibility ? <View style={styles.completionWrap}><MuaCompletionCard eligibility={eligibility} compact onContinue={() => router.push('/mua-onboarding/setup')} /></View> : null}
+
+        <View style={styles.quickActions}>
+          <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(mua)/services')}><BriefcaseBusiness size={21} color={BrandColors.accentRose}/><Text style={styles.quickText}>Dịch vụ</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(mua)/services?tab=PORTFOLIO')}><Images size={21} color={BrandColors.accentRose}/><Text style={styles.quickText}>Portfolio</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(mua)/working-hours')}><CalendarClock size={21} color={BrandColors.accentRose}/><Text style={styles.quickText}>Giờ làm</Text></TouchableOpacity>
         </View>
 
-        <View style={styles.completionCard}>
-          <View style={styles.completionHeader}>
-            <Text style={styles.completionTitle}>Hoàn thiện hồ sơ</Text>
-            <Text style={styles.completionScore}>{completionScore}%</Text>
-          </View>
-          <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: `${completionScore}%` }]} />
-          </View>
-          <Text style={styles.completionHint}>
-            {completionScore < 100 
-              ? 'Hoàn thiện hồ sơ 100% để tăng gấp đôi tỷ lệ được khách hàng đặt lịch.'
-              : 'Hồ sơ của bạn rất tuyệt vời! Sẵn sàng nhận lịch đặt.'}
-          </Text>
-        </View>
+        {earningsIsError ? (
+          <ErrorView message={getApiError(earningsError).message || 'Không thể tải doanh thu.'} onRetry={() => refetchEarnings()} />
+        ) : (
+          <TouchableOpacity style={styles.earningsCard} activeOpacity={0.85} onPress={() => router.push('/(mua)/earnings' as any)}>
+            {earningsLoading || !earnings ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <View style={styles.earningsRow}>
+                <View style={styles.earningsBox}>
+                  <Text style={styles.earningsLabel}>Có thể rút</Text>
+                  <Text style={styles.earningsAmount}>{earnings.availableTotal.toLocaleString('vi-VN')}đ</Text>
+                </View>
+                <View style={styles.divider} />
+                <View style={styles.earningsBox}>
+                  <Text style={styles.earningsLabel}>Đang giữ</Text>
+                  <Text style={styles.earningsCount}>{earnings.onHoldTotal.toLocaleString('vi-VN')}đ</Text>
+                </View>
+              </View>
+            )}
+            {earnings && earnings.payoutPendingTotal > 0 ? <Text style={styles.payoutPending}>{earnings.payoutPendingTotal.toLocaleString('vi-VN')}đ đang chờ chi trả</Text> : null}
+            {earnings ? <Text style={styles.earningsLink}>Xem thu nhập và rút tiền ›</Text> : null}
+          </TouchableOpacity>
+        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Yêu cầu mới nhất ({pendingBookings.length})</Text>
@@ -151,6 +147,10 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
     ...Shadows.card,
   },
+  completionWrap: { marginBottom: Spacing.md },
+  quickActions: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.lg },
+  quickAction: { flex: 1, minHeight: 72, borderRadius: Radius.md, backgroundColor: '#FFF', borderWidth: 1, borderColor: BrandColors.borderLight, alignItems: 'center', justifyContent: 'center', gap: 6 },
+  quickText: { fontFamily: Typography.semiBold, fontSize: 12, color: BrandColors.textDark },
   earningsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -181,6 +181,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#FFF',
   },
+  payoutPending: { fontFamily: Typography.semiBold, fontSize: 12, color: '#FFF', marginTop: Spacing.md },
+  earningsLink: { fontFamily: Typography.bold, fontSize: 12, color: '#FFF', marginTop: Spacing.sm, textAlign: 'right' },
   completionCard: {
     backgroundColor: '#FFF',
     borderRadius: Radius.lg,

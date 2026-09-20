@@ -9,8 +9,8 @@ class BookingService {
     this.repository = repository;
   }
 
-  async getAvailableTimeSlots(muaId: string, date: string): Promise<TimeSlotDto[]> {
-    return this.repository.getAvailableTimeSlots(muaId, date);
+  async getAvailableTimeSlots(muaId: string, date: string, durationMinutes: number): Promise<TimeSlotDto[]> {
+    return this.repository.getAvailableTimeSlots(muaId, date, durationMinutes);
   }
 
   async createBooking(request: CreateBookingRequest): Promise<BookingDto> {

@@ -7,6 +7,7 @@ import { queryClient } from "../lib/queryClient";
 import { NotificationService } from "../services/NotificationService";
 
 const TOKEN_KEY = "user_jwt_token";
+const ACTIVE_MODE_KEY = "bbook_active_mode";
 
 interface AuthState {
   user: UserDto | null;
@@ -17,6 +18,7 @@ interface AuthState {
   loginWithGoogleToken: (idToken: string) => Promise<boolean>;
   becomeMUA: () => Promise<boolean>;
   logout: () => Promise<void>;
+  expireSession: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   register: (fullName: string, email: string, password?: string, phone?: string, role?: UserRole) => Promise<boolean>;
   activeMode: 'CUSTOMER' | 'MUA';
@@ -24,20 +26,30 @@ interface AuthState {
   updateUser: (user: Partial<UserDto>) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
   isLoading: false,
   activeMode: 'CUSTOMER',
 
-  switchMode: (mode) => set({ activeMode: mode }),
+  switchMode: (mode) => {
+    const user = get().user;
+    const hasMuaAccess = user?.role === UserRole.MUA || user?.hasMuaProfile === true;
+    const nextMode = mode === 'MUA' && !hasMuaAccess ? 'CUSTOMER' : mode;
+    set({ activeMode: nextMode });
+    void AsyncStorage.setItem(ACTIVE_MODE_KEY, nextMode);
+  },
   updateUser: (updatedUser) => set((state) => ({ user: state.user ? { ...state.user, ...updatedUser } : null })),
 
   initialize: async () => {
     try {
-      const token = await AsyncStorage.getItem(TOKEN_KEY);
+      const [token, storedMode] = await Promise.all([
+        AsyncStorage.getItem(TOKEN_KEY),
+        AsyncStorage.getItem(ACTIVE_MODE_KEY),
+      ]);
 
       if (!token) {
+        await AsyncStorage.removeItem(ACTIVE_MODE_KEY);
         set({
           user: null,
           isAuthenticated: false,
@@ -49,15 +61,16 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       const user = await authService.getMe();
 
+      const hasMuaAccess = user.role === UserRole.MUA || user.hasMuaProfile === true;
       set({
         user,
         isAuthenticated: true,
-        activeMode: user.hasMuaProfile ? 'CUSTOMER' : 'CUSTOMER', // Default to customer on launch even if MUA
+        activeMode: storedMode === 'MUA' && hasMuaAccess ? 'MUA' : 'CUSTOMER',
       });
 
       return true;
     } catch {
-      await AsyncStorage.removeItem(TOKEN_KEY);
+      await Promise.all([AsyncStorage.removeItem(TOKEN_KEY), AsyncStorage.removeItem(ACTIVE_MODE_KEY)]);
 
       set({
         user: null,
@@ -76,12 +89,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       const res = await authService.login({ email, password });
 
       await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
+      await AsyncStorage.setItem(ACTIVE_MODE_KEY, 'CUSTOMER');
 
       set({
         user: res.user,
         isAuthenticated: true,
         isLoading: false,
-        activeMode: res.user.hasMuaProfile ? 'CUSTOMER' : 'CUSTOMER',
+        activeMode: 'CUSTOMER',
       });
 
       return true;
@@ -96,6 +110,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ isLoading: true });
       const res = await authService.loginWithGoogle(idToken);
       await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
+      await AsyncStorage.setItem(ACTIVE_MODE_KEY, 'CUSTOMER');
       set({
         user: res.user,
         isAuthenticated: true,
@@ -114,6 +129,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ isLoading: true });
       const res = await authService.becomeMua();
       await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
+      await AsyncStorage.setItem(ACTIVE_MODE_KEY, 'MUA');
       set({
         user: res.user,
         activeMode: 'MUA',
@@ -147,6 +163,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await authService.logout();
     } finally {
       await AsyncStorage.removeItem(TOKEN_KEY);
+      await AsyncStorage.removeItem(ACTIVE_MODE_KEY);
       queryClient.clear();
 
       set({
@@ -155,6 +172,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         activeMode: 'CUSTOMER',
       });
     }
+  },
+
+  expireSession: async () => {
+    await Promise.all([AsyncStorage.removeItem(TOKEN_KEY), AsyncStorage.removeItem(ACTIVE_MODE_KEY)]);
+    queryClient.clear();
+    set({ user: null, isAuthenticated: false, isLoading: false, activeMode: 'CUSTOMER' });
   },
 
   deleteAccount: async () => {

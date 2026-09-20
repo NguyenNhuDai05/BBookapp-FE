@@ -8,9 +8,7 @@ export const useFeed = () => {
       return getFeed(pageParam, 10);
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) => {
-      if (!lastPage || lastPage.length < 10) return undefined;
-      return allPages.length + 1;
-    },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === 10 ? allPages.length + 1 : undefined,
   });
 };

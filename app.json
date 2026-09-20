@@ -64,6 +64,14 @@
       ],
       "expo-font",
       "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Cho phép BeautyBook truy cập ảnh để cập nhật avatar và portfolio.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
       "expo-web-browser",
       "expo-status-bar"
     ],

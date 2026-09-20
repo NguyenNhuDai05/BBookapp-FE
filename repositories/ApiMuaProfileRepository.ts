@@ -5,22 +5,24 @@ import { useAuthStore } from '../store/useAuthStore';
 
 export class ApiMuaProfileRepository implements IMuaProfileRepository {
   async getProfile(muaId: string): Promise<MuaProfileDto> {
-    let id = muaId;
-    if (id === 'me') {
-      const user = useAuthStore.getState().user;
-      if (!user) throw new Error('Not authenticated');
-      id = user.id;
-    }
-    const response = await api.get(`/Mua/${id}`);
+    const currentUser = useAuthStore.getState().user;
+    const isMine = muaId === 'me' || muaId === currentUser?.id;
+    const response = await api.get(isMine ? '/User/profile' : `/Mua/${muaId}`);
     
     // Mapping from backend to frontend DTO
-    const data = response.data;
+    const root = response.data;
+    const data = isMine ? (root.muaProfile || root.MuaProfile || root) : root;
     return {
-      id: data.muaId || id,
-      name: data.fullName || data.name || '',
-      avatarUrl: data.avatarUrl || data.avatar || '',
+      id: data.muaId || currentUser?.id || muaId,
+      name: data.fullName || root.fullName || data.name || '',
+      avatarUrl: data.avatarUrl || root.avatarUrl || data.avatar || '',
       verificationStatus: (data.status?.toUpperCase() as any) || 'UNVERIFIED',
       bio: data.bio || '',
+      phoneNumber: data.phoneNumber || root.phoneNumber || '',
+      city: data.city || '',
+      experienceYears: Number(data.experienceYears) || 0,
+      specialization: data.specialization || '',
+      socialLinks: data.socialLinks || '',
       rejectionReason: data.rejectionReason,
       reviewCount: data.totalBookings || 0,
       rating: data.averageRating || 0

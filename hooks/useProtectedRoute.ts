@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { UserRole } from '../types/auth';
 
 export function useProtectedRoute() {
-  const { user, isAuthenticated, initialize } = useAuthStore();
+  const { user, isAuthenticated, activeMode, initialize, switchMode } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
@@ -41,27 +41,39 @@ export function useProtectedRoute() {
       const inMuaGroup = segments[0] === '(mua)';
       const inAdminGroup = segments[0] === '(admin)';
 
-      if (user?.role === UserRole.Customer) {
-        // Customers cannot access mua or admin
-        if (inMuaGroup || inAdminGroup) {
-          router.replace('/(tabs)/explore');
-        } else if (inAuthGroup) {
-          router.replace('/(tabs)/explore');
-        }
-      } else if (user?.role === UserRole.MUA) {
-        // MUA should ideally stay in (mua), but maybe they can view public pages too?
-        // Let's restrict them to (mua) for now as their dashboard, or let them roam.
-        // If they are in (auth) or (tabs), push to dashboard
-        if (inAuthGroup || inTabsGroup) {
-          router.replace('/(mua)/dashboard');
-        }
-      } else if (user?.role === UserRole.Admin) {
-        if (inAuthGroup || inTabsGroup || inMuaGroup) {
+      if (user?.role === UserRole.Admin) {
+        // Admin is isolated from every customer/MUA/checkout/payment route,
+        // including ungrouped Expo Router screens.
+        if (!inAdminGroup) {
           router.replace('/(admin)/dashboard');
         }
+        return;
+      }
+
+      const hasMuaAccess = user?.role === UserRole.MUA || user?.hasMuaProfile === true;
+
+      if (activeMode === 'MUA' && hasMuaAccess) {
+        if (inAuthGroup || inTabsGroup || inAdminGroup) {
+          router.replace('/(mua)/dashboard');
+        }
+        return;
+      }
+
+      // role/hasMuaProfile represents capability; activeMode controls which UI is active.
+      // Recover safely if stale state ever requests MUA mode without an MUA profile.
+      if (activeMode === 'MUA' && !hasMuaAccess) {
+        switchMode('CUSTOMER');
+      }
+
+      if (inAuthGroup || inMuaGroup || inAdminGroup) {
+        router.replace('/(tabs)/home');
       }
     }
-  }, [user, isAuthenticated, segments, isReady, rootNavigationState?.key, router]);
+  }, [user, isAuthenticated, activeMode, segments, isReady, rootNavigationState?.key, router, switchMode]);
 
-  return isReady;
+  if (!isReady) return false;
+  const inAuthGroup = segments[0] === '(auth)';
+  if (!isAuthenticated) return inAuthGroup;
+  if (user?.role === UserRole.Admin) return segments[0] === '(admin)';
+  return segments[0] !== '(admin)';
 }

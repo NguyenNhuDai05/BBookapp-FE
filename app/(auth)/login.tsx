@@ -84,9 +84,7 @@ export default function LoginScreen() {
 
     if (success) {
       const currentUser = useAuthStore.getState().user;
-      if (currentUser?.role === 'MUA') {
-        router.replace('/(mua)/dashboard' as any);
-      } else if (currentUser?.role === 'ADMIN') {
+      if (currentUser?.role === 'ADMIN') {
         router.replace('/(admin)/dashboard' as any);
       } else {
         goHome();

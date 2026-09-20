@@ -5,8 +5,6 @@ import {
   BriefcaseBusiness,
   ChevronRight,
   CreditCard,
-  Globe,
-  Heart,
   History,
   LogOut,
   ShieldCheck,
@@ -16,7 +14,7 @@ import {
   ArrowLeft,
   Trash2,
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
