@@ -55,6 +55,7 @@ export const mapRefundStatus = (value: unknown): RefundStatus => {
     '2': 'PROCESSING', Processing: 'PROCESSING',
     '3': 'COMPLETED', Completed: 'COMPLETED',
     '4': 'FAILED', Failed: 'FAILED',
+    '5': 'AWAITING_DESTINATION', AwaitingDestination: 'AWAITING_DESTINATION',
   };
   return map[String(value)] ?? 'UNKNOWN';
 };
@@ -66,6 +67,9 @@ export const mapRefundSummary = (value: any): RefundSummaryDto | undefined => va
   reasonCode: value.reasonCode,
   reason: value.reason,
   providerReference: value.providerReference,
+  maskedDestinationAccountNumber: value.maskedDestinationAccountNumber,
+  destinationBankName: value.destinationBankName,
+  destinationAccountName: value.destinationAccountName,
   createdAt: value.createdAt,
   processingAt: value.processingAt,
   completedAt: value.completedAt,
@@ -85,6 +89,7 @@ export const getRefundPresentation = (
   if (paymentStatus === PaymentStatus.PARTIALLY_REFUNDED) return { label: 'Đã hoàn một phần', description: `Đã hoàn: ${formatVnd(refund?.amount ?? 0)}`, tone: 'success' as const };
   if (paymentStatus === PaymentStatus.REFUNDED || refund?.status === 'COMPLETED') return { label: 'Đã hoàn tiền', description: `Số tiền hoàn: ${formatVnd(refund?.amount ?? 0)}`, tone: 'success' as const };
   switch (refund?.status) {
+    case 'AWAITING_DESTINATION': return { label: 'Cần tài khoản nhận tiền', description: 'Vui lòng bổ sung tài khoản ngân hàng để nhận khoản hoàn.', tone: 'pending' as const };
     case 'MANUAL_ACTION_REQUIRED': return { label: 'Đang chờ xử lý hoàn tiền', description: 'Bộ phận hỗ trợ sẽ tiếp tục xử lý khoản hoàn.', tone: 'pending' as const };
     case 'PROCESSING': return { label: 'Đang xử lý hoàn tiền', description: 'Khoản hoàn đang được đối soát.', tone: 'pending' as const };
     case 'FAILED': return { label: 'Hoàn tiền chưa thành công', description: 'Vui lòng liên hệ hỗ trợ để được kiểm tra.', tone: 'error' as const };

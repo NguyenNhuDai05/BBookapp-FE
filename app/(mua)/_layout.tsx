@@ -61,7 +61,7 @@ export default function MuaLayout() {
       <Tabs.Screen name="manage-portfolio" options={{ href: null }} />
       <Tabs.Screen name="working-hours" options={{ href: null }} />
       <Tabs.Screen name="earnings" options={{ href: null }} />
-      <Tabs.Screen name="withdraw" options={{ href: null }} />
+      <Tabs.Screen name="withdraw" options={{ href: null, tabBarStyle: { display: 'none' } }} />
       <Tabs.Screen name="bank-accounts" options={{ href: null }} />
       <Tabs.Screen name="bank-account-form" options={{ href: null, tabBarStyle: { display: 'none' } }} />
       <Tabs.Screen name="payouts/[id]" options={{ href: null, tabBarStyle: { display: 'none' } }} />

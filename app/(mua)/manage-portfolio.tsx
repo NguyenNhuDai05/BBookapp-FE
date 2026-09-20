@@ -6,20 +6,19 @@ import { ChevronLeft, Edit2, Trash2 } from 'lucide-react-native';
 import { PortfolioPost } from '../../components/mua/portfolio/PortfolioPost';
 import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioFormModal';
 import { useMuaPortfolio } from '../../hooks/useMuaPortfolio';
-import { useQueryClient } from '@tanstack/react-query';
-
-const { height } = Dimensions.get('window');
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { getApiError } from '../../services/api';
 
 export default function PortfolioFeedScreen() {
   const router = useRouter();
   const { initialIndex } = useLocalSearchParams();
-  const { data: portfolio, deleteItem, toggleLike, toggleSave } = useMuaPortfolio('me');
-  const queryClient = useQueryClient();
+  const { data: portfolio, deleteItem, updateItem, isDeleting, toggleLike, toggleSave } = useMuaPortfolio('me');
   const flatListRef = useRef<FlatList>(null);
 
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
 
   const hasScrolledRef = useRef(false);
 
@@ -68,16 +67,15 @@ export default function PortfolioFeedScreen() {
     setEditModalVisible(true);
   };
 
-  const handleDelete = () => {
-    Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn xóa bài viết này?', [
-      { text: 'Hủy', style: 'cancel' },
-      { text: 'Xóa', style: 'destructive', onPress: async () => {
-          try {
-            await deleteItem(selectedPost.id || selectedPost.portfolioId);
-            setOptionsVisible(false);
-          } catch (e) { console.log('Delete failed', e); }
-      }}
-    ]);
+  const handleDelete = async () => {
+    if (!selectedPost || isDeleting) return;
+    try {
+      await deleteItem(selectedPost.id || selectedPost.portfolioId);
+      setDeleteVisible(false);
+      setSelectedPost(null);
+    } catch (error) {
+      Alert.alert('Không thể xóa', getApiError(error).message);
+    }
   };
 
   const renderItem = ({ item }: { item: any }) => (
@@ -119,7 +117,7 @@ export default function PortfolioFeedScreen() {
               <Text style={styles.optionText}>Chỉnh sửa bài viết</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={[styles.optionBtn, styles.deleteBtn]} onPress={handleDelete}>
+            <TouchableOpacity style={[styles.optionBtn, styles.deleteBtn]} onPress={() => { setOptionsVisible(false); setDeleteVisible(true); }}>
               <Trash2 size={24} color="#E8436A" />
               <Text style={[styles.optionText, { color: '#E8436A' }]}>Xóa bài viết</Text>
             </TouchableOpacity>
@@ -131,7 +129,20 @@ export default function PortfolioFeedScreen() {
         visible={editModalVisible}
         onClose={() => { setEditModalVisible(false); setSelectedPost(null); }}
         initialData={selectedPost}
-        onSubmit={() => { setEditModalVisible(false); setSelectedPost(null); queryClient.invalidateQueries({ queryKey: ['mua-portfolio', 'me'] }); }}
+        onSubmit={async data => {
+          if (!selectedPost) return;
+          await updateItem({ id: selectedPost.id || selectedPost.portfolioId, updates: data });
+        }}
+      />
+      <ConfirmDialog
+        visible={deleteVisible}
+        title="Xóa bài viết"
+        message="Bạn có chắc chắn muốn xóa bài viết này? Thao tác này không thể hoàn tác."
+        confirmLabel="Xóa"
+        destructive
+        loading={isDeleting}
+        onCancel={() => { setDeleteVisible(false); setSelectedPost(null); }}
+        onConfirm={handleDelete}
       />
     </SafeAreaView>
   );

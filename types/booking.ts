@@ -55,7 +55,7 @@ export enum PaymentStatus {
 
 export type BookingPaymentStatus = 'CREATED' | 'PENDING' | 'PAID' | 'FAILED' | 'EXPIRED' | 'REFUND_PENDING' | 'REFUNDED' | 'PARTIALLY_REFUNDED' | 'FORFEITED' | 'UNKNOWN';
 
-export type RefundStatus = 'PENDING' | 'MANUAL_ACTION_REQUIRED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'UNKNOWN';
+export type RefundStatus = 'PENDING' | 'MANUAL_ACTION_REQUIRED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'AWAITING_DESTINATION' | 'UNKNOWN';
 
 export interface RefundSummaryDto {
   refundId: string;
@@ -64,6 +64,9 @@ export interface RefundSummaryDto {
   reasonCode?: number | string;
   reason?: string;
   providerReference?: string;
+  maskedDestinationAccountNumber?: string;
+  destinationBankName?: string;
+  destinationAccountName?: string;
   createdAt?: string;
   processingAt?: string;
   completedAt?: string;

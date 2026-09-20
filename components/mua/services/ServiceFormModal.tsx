@@ -9,7 +9,7 @@ import { uploadImage } from '../../../services/supabase';
 interface ServiceFormModalProps {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => void | Promise<void>;
   initialData?: any;
 }
 
@@ -63,7 +63,7 @@ export function ServiceFormModal({ visible, onClose, onSubmit, initialData }: Se
       let finalImageUrl = imageUrl;
       finalImageUrl = await uploadImage(imageUrl);
       
-      onSubmit({
+      await onSubmit({
         name,
         serviceName: name,
         description,

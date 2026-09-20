@@ -89,6 +89,12 @@ export default function CancelSuccessScreen() {
             <Text style={styles.refundText}>{refundPresentation.description}</Text>
           </View>
         )}
+
+        {booking.refund?.status === 'AWAITING_DESTINATION' && (
+          <TouchableOpacity style={styles.retryButton} onPress={() => router.push({ pathname: '/refund-destination', params: { refundId: booking.refund!.refundId, bookingId: booking.id } } as any)}>
+            <Text style={styles.retryText}>Thêm tài khoản nhận tiền</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.footer}>

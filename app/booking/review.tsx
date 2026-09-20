@@ -16,8 +16,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Star, Camera, X } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { BrandColors, Shadows } from '../../constants/theme';
+import { Shadows } from '../../constants/theme';
 import { useSubmitReview } from '../../hooks/useBooking';
+import { uploadImage } from '../../services/supabase';
+import { getApiError } from '../../services/api';
 
 export default function ReviewScreen() {
   const router = useRouter();
@@ -27,7 +29,9 @@ export default function ReviewScreen() {
   const [comment, setComment] = useState<string>('');
   const [imageUri, setImageUri] = useState<string | null>(null);
   
-  const { mutate: submitReview, isPending } = useSubmitReview();
+  const { mutateAsync: submitReview, isPending } = useSubmitReview();
+  const [isUploading, setIsUploading] = useState(false);
+  const isSubmitting = isPending || isUploading;
 
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -48,32 +52,29 @@ export default function ReviewScreen() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
     if (rating === 0) {
       Alert.alert('Thiếu thông tin', 'Vui lòng chọn số sao đánh giá (từ 1 đến 5).');
       return;
     }
 
-    submitReview(
-      {
+    setIsUploading(true);
+    try {
+      const imageUrl = imageUri ? await uploadImage(imageUri) : undefined;
+      await submitReview({
         bookingId: bookingId!,
         rating,
         comment: comment.trim(),
-        imageUrl: imageUri || undefined, 
-      },
-      {
-        onSuccess: () => {
-          Alert.alert(
-            'Thành công', 
-            'Cảm ơn bạn đã gửi đánh giá! Phản hồi của bạn sẽ giúp cộng đồng BBeauty tốt hơn.',
-            [{ text: 'Đóng', onPress: () => router.back() }]
-          );
-        },
-        onError: (error: any) => {
-          Alert.alert('Lỗi', error?.message || 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
-        }
-      }
-    );
+        imageUrl,
+      });
+      Alert.alert('Thành công', 'Cảm ơn bạn đã gửi đánh giá! Phản hồi của bạn sẽ giúp cộng đồng BBeauty tốt hơn.');
+      router.back();
+    } catch (error) {
+      Alert.alert('Lỗi', getApiError(error).message || 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -168,10 +169,10 @@ export default function ReviewScreen() {
       <View style={styles.footer}>
         <TouchableOpacity 
           style={[styles.submitBtn, rating === 0 && styles.submitBtnDisabled]} 
-          disabled={rating === 0 || isPending}
+          disabled={rating === 0 || isSubmitting}
           onPress={handleSubmit}
         >
-          {isPending ? (
+          {isSubmitting ? (
             <ActivityIndicator color="#FFF" />
           ) : (
             <Text style={styles.submitBtnText}>Gửi đánh giá</Text>

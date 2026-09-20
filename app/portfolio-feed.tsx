@@ -13,7 +13,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 export default function CustomerPortfolioFeedScreen() {
   const router = useRouter();
-  const { muaId, initialIndex } = useLocalSearchParams();
+  const { muaId, initialIndex, portfolioId } = useLocalSearchParams();
   const { data: portfolio } = useMuaPortfolio(muaId as string);
   const { muaInfo } = useMuaDetail(muaId as string);
   const setLastViewedPortfolioId = useBookingStore(s => s.setLastViewedPortfolioId);
@@ -38,9 +38,12 @@ export default function CustomerPortfolioFeedScreen() {
   const viewabilityConfig = useMemo(() => ({ itemVisiblePercentThreshold: 50 }), []);
 
   useEffect(() => {
-    if (initialIndex !== undefined && portfolio && portfolio.length > 0 && !hasScrolledRef.current) {
+    if ((initialIndex !== undefined || portfolioId !== undefined) && portfolio && portfolio.length > 0 && !hasScrolledRef.current) {
       hasScrolledRef.current = true;
-      const targetIndex = Number(initialIndex);
+      const portfolioIndex = portfolioId
+        ? portfolio.findIndex((item) => String(item.id || item.portfolioId) === String(portfolioId))
+        : -1;
+      const targetIndex = portfolioIndex >= 0 ? portfolioIndex : Number(initialIndex ?? 0);
       if (targetIndex >= 0 && targetIndex < portfolio.length) {
         setTimeout(() => {
           try {
@@ -54,7 +57,7 @@ export default function CustomerPortfolioFeedScreen() {
         }, 100);
       }
     }
-  }, [initialIndex, portfolio]);
+  }, [initialIndex, portfolio, portfolioId]);
 
   const handleLike = async (item: any) => {
     try {
