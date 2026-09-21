@@ -29,7 +29,8 @@ import {
   Trash2,
   X,
   User,
- Plus, Instagram, Facebook } from 'lucide-react-native';
+  Plus,
+} from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile } from '../../hooks/useMuaProfile';
@@ -167,6 +168,8 @@ export default function MuaProfilePremiumScreen() {
   const displayAvatar = profile?.avatarUrl || '';
   const displayName = profile?.brandName || user?.name || 'Nguyễn Lan Anh';
   const displayBio = profile?.bio || 'MAKEUP ARTIST • MASTER EDUCATOR';
+  const instagramUrl = profile?.instagramUrl;
+  const facebookUrl = profile?.facebookUrl;
   
   // Use real portfolio. If empty, it's an empty array.
   const displayPortfolio = portfolio || [];
@@ -256,9 +259,9 @@ export default function MuaProfilePremiumScreen() {
             </View>
             <Text style={styles.igBioCategory}>Nghệ sĩ trang điểm</Text>
             <Text style={styles.igBioText}>{displayBio}</Text>
-            {(profile?.instagramUrl || profile?.facebookUrl) ? <View style={styles.socialRow}>
-              {profile.instagramUrl ? <TouchableOpacity style={styles.socialButton} onPress={() => openSocialLink(profile.instagramUrl!, 'instagram')}><Instagram size={16} color={BrandColors.accentPink}/><Text style={styles.socialText}>Instagram</Text></TouchableOpacity> : null}
-              {profile.facebookUrl ? <TouchableOpacity style={styles.socialButton} onPress={() => openSocialLink(profile.facebookUrl!, 'facebook')}><Facebook size={16} color="#1877F2"/><Text style={styles.socialText}>Facebook</Text></TouchableOpacity> : null}
+            {(instagramUrl || facebookUrl) ? <View style={styles.socialRow}>
+              {instagramUrl ? <TouchableOpacity style={styles.socialButton} onPress={() => openSocialLink(instagramUrl, 'instagram')}><Text style={styles.socialText}>Instagram</Text></TouchableOpacity> : null}
+              {facebookUrl ? <TouchableOpacity style={styles.socialButton} onPress={() => openSocialLink(facebookUrl, 'facebook')}><Text style={[styles.socialText, { color: '#1877F2' }]}>Facebook</Text></TouchableOpacity> : null}
             </View> : null}
           </View>
 

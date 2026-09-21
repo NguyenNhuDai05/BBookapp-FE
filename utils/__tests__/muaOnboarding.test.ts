@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import { shouldUploadMuaAvatar, validateMuaOnboarding } from '../muaOnboarding';
 
 const validForm = {
