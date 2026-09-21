@@ -8,6 +8,8 @@ export default function AdminLayout() {
       <Stack.Screen name="payouts/[id]" />
       <Stack.Screen name="refunds/index" />
       <Stack.Screen name="refunds/[id]" />
+      <Stack.Screen name="notifications/index" />
+      <Stack.Screen name="notifications/new" />
       <Stack.Screen name="access-denied" />
     </Stack>
   );

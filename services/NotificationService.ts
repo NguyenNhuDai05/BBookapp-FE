@@ -13,6 +13,16 @@ export const ANDROID_NOTIFICATION_CHANNELS = {
   payments: 'payments',
 } as const;
 
+export type InboxNotification = {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  url?: string | null;
+  createdAt: string;
+  readAt?: string | null;
+};
+
 type NotificationsModule = typeof import('expo-notifications');
 
 let notificationHandlerConfigured = false;
@@ -111,6 +121,24 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
 }
 
 export class NotificationService {
+  static async getInbox(take = 50): Promise<InboxNotification[]> {
+    const response = await api.get<InboxNotification[]>('/Notification', { params: { take } });
+    return response.data;
+  }
+
+  static async getUnreadCount(): Promise<number> {
+    const response = await api.get<{ count: number }>('/Notification/unread-count');
+    return response.data.count;
+  }
+
+  static async markRead(id: string): Promise<void> {
+    await api.put(`/Notification/${id}/read`);
+  }
+
+  static async markAllRead(): Promise<void> {
+    await api.put('/Notification/read-all');
+  }
+
   static async registerDevice(): Promise<string | null> {
     const token = await registerForPushNotificationsAsync();
     if (!token) return null;

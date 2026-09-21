@@ -14,7 +14,8 @@
       "useEmbeddedUpdate": true
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bbook.app"
     },
     "android": {
       "package": "com.bbook.app",
@@ -38,7 +39,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -57,7 +58,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/favicon.png",
+          "icon": "./assets/images/notification_icon.png",
           "color": "#FF4D6D",
           "defaultChannel": "default"
         }
@@ -72,8 +73,20 @@
           "microphonePermission": false
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "B-Book dùng vị trí để gợi ý khu vực làm việc cho Makeup Artist khi bạn chủ động yêu cầu."
+        }
+      ],
       "expo-web-browser",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "@react-native-google-signin/google-signin/app.plugin.js",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.129215624749-tbj60ogmgd2miunfraln6aboat5810u5"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

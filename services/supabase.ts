@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 import { api, API_URL } from './api';
 import { Platform } from 'react-native';
+import { normalizeMediaUrl } from '../utils/mediaUrl';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -80,6 +81,6 @@ export const uploadImage = async (uri: string): Promise<string> => {
 
   const response = await api.post<{ url: string }>('/Upload/image', form);
   const returnedUrl = response.data.url;
-  if (/^https?:\/\//i.test(returnedUrl)) return returnedUrl;
+  if (/^https?:\/\//i.test(returnedUrl)) return normalizeMediaUrl(returnedUrl);
   return `${API_URL.replace(/\/api\/?$/, '')}${returnedUrl}`;
 };

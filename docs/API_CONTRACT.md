@@ -9,7 +9,7 @@ This document is the frontend's single reference for the ASP.NET Core API curren
 | POST | `/Auth/register` | Public | `ApiAuthRepository.register` |
 | POST | `/Auth/login` | Public | `ApiAuthRepository.login` |
 | POST | `/Auth/google` | Public | `ApiAuthRepository.loginWithGoogle` |
-| POST | `/Auth/become-mua` | Bearer JWT | `AuthService.becomeMua` |
+| POST | `/Auth/become-mua` | Bearer JWT | Atomic MUA onboarding; accepts the complete profile and returns a refreshed token |
 | GET | `/User/profile` | Bearer JWT | `ApiAuthRepository.getMe`, `userService` |
 | PUT | `/User/profile` | Bearer JWT | `userService` |
 
@@ -90,5 +90,5 @@ SignalR hub: `/chathub`.
 ## Known backend gaps represented safely in the frontend
 
 - Monthly MUA availability editing is not supported. Legacy hooks return no data or a clear unsupported error and never call an invented endpoint.
-- MUA onboarding drafts are stored locally. Submission uses `/Auth/become-mua` followed by `/Mua/profile`.
+- MUA onboarding drafts are stored locally. Submission uses one idempotent `/Auth/become-mua` request; profile, styles, role, and refreshed token are committed together.
 - Admin approval, portfolio ordering/pinning/visibility, and recent-review aggregation are not exposed by the current API.

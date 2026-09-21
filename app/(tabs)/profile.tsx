@@ -1,11 +1,9 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
-  Bell,
   BriefcaseBusiness,
   ChevronRight,
   CreditCard,
-  Globe,
   Heart,
   History,
   LogOut,
@@ -26,22 +24,13 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { userService } from "../../services/userService";
+import { userService, type UserProfile } from "../../services/userService";
 import { useAuthStore } from "../../store/useAuthStore";
 import { UserRole } from "../../types/auth";
+import { bookingService } from "../../services/bookingService";
+import { portfolioService } from "../../services/portfolioService";
 
 // Định nghĩa đúng cấu trúc dữ liệu trả về từ Resource "users" trên MockAPI
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string;
-  joinedDate: string;
-  statsCompleted: number;
-  statsFavorites: number;
-  membershipTier: string;
-}
-
 export default function ProfileScreen() {
   const router = useRouter();
   const { initialize, logout, deleteAccount, user: authUser, switchMode } = useAuthStore();
@@ -61,9 +50,18 @@ export default function ProfileScreen() {
         throw new Error("Không tìm thấy thông tin đăng nhập");
       }
 
-      const profileData = await userService.getUserProfile(authUser.email);
+      const [profileData, bookingsResult, likedResult, savedResult] = await Promise.all([
+        userService.getUserProfile(authUser.email),
+        bookingService.getUserBookings().catch(() => []),
+        portfolioService.getFavorites('liked').catch(() => []),
+        portfolioService.getFavorites('saved').catch(() => []),
+      ]);
+      const completedCount = bookingsResult.filter(booking => booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED').length;
+      const favoriteIds = new Set(
+        [...likedResult, ...savedResult].map(item => String(item.id || item.portfolioId)).filter(Boolean),
+      );
 
-      setUser(profileData);
+      setUser({ ...profileData, statsCompleted: completedCount, statsFavorites: favoriteIds.size });
     } catch (error: any) {
       console.error("Lỗi Profile API:", error);
 
@@ -73,15 +71,17 @@ export default function ProfileScreen() {
     }
   }, [authUser]);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (authUser?.email) void fetchProfileFromServer();
+    }, [authUser?.email, fetchProfileFromServer]),
+  );
+
   useEffect(() => {
     let isMounted = true;
 
     const loadProfile = async () => {
-      if (authUser?.email) {
-        await fetchProfileFromServer();
-        return;
-      }
-
+      if (authUser?.email) return;
       const isAuthSuccess = await initialize();
 
       if (!isAuthSuccess && isMounted) {
@@ -95,7 +95,7 @@ export default function ProfileScreen() {
     return () => {
       isMounted = false;
     };
-  }, [authUser?.email, fetchProfileFromServer, initialize]);
+  }, [authUser?.email, initialize]);
 
   // Hàm xử lý đăng xuất đồng bộ hệ thống: Xóa token thiết bị và đẩy về màn Login
   const handleLogout = () => {
@@ -219,7 +219,7 @@ export default function ProfileScreen() {
           {subTitle && <Text style={styles.rowSubTitle}>{subTitle}</Text>}
         </View>
       </View>
-      <ChevronRight size={18} color={isDestructive ? "#F5446A" : "#A397A6"} />
+      {onPress ? <ChevronRight size={18} color={isDestructive ? "#F5446A" : "#A397A6"} /> : null}
     </TouchableOpacity>
   );
 
@@ -291,7 +291,7 @@ export default function ProfileScreen() {
         <View style={styles.statsCard}>
           <View style={styles.statBox}>
             <Text style={styles.statNumber}>{user.statsCompleted}</Text>
-            <Text style={styles.statLabel}>Đã đặt lịch</Text>
+            <Text style={styles.statLabel}>Đã hoàn thành</Text>
           </View>
           <View style={[styles.statBox, styles.statBorder]}>
             <Text style={styles.statNumber}>{user.statsFavorites}</Text>
@@ -310,13 +310,14 @@ export default function ProfileScreen() {
             {renderSettingRow(
               <User size={20} color="#ff7c98" />,
               "Chỉnh sửa thông tin",
-              "Cập nhật số điện thoại, địa chỉ cá nhân",
+              "Cập nhật ảnh đại diện và số điện thoại",
+              () => router.push('/customer-profile-edit'),
             )}
             {renderSettingRow(
               <History size={20} color="#ff7c98" />,
               "Lịch sử đặt lịch",
               "Xem danh sách và trạng thái các lịch đã đặt",
-              () => router.push("/history" as any),
+              () => router.push("/(tabs)/bookings"),
             )}
             {renderSettingRow(
               <Heart size={20} color="#ff7c98" />,
@@ -353,16 +354,6 @@ export default function ProfileScreen() {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Cài đặt ứng dụng</Text>
           <View style={styles.cardWrapper}>
-            {renderSettingRow(
-              <Bell size={20} color="#22152B" />,
-              "Thông báo",
-              "Cấu hình nhận tin nhắn, cập nhật từ hệ thống",
-            )}
-            {renderSettingRow(
-              <Globe size={20} color="#22152B" />,
-              "Ngôn ngữ",
-              "Tiếng Việt (VI)",
-            )}
             {renderSettingRow(
               <ShieldCheck size={20} color="#22152B" />,
               "Điều khoản & Bảo mật",

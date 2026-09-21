@@ -13,8 +13,9 @@ import { Strings } from '../../constants/strings';
 import { PortfolioPost } from '../../components/mua/portfolio/PortfolioPost';
 import { useBookingStore } from '../../store/useBookingStore';
 import { portfolioService } from '../../services/portfolioService';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFavoriteFeedStore } from '../../store/useFavoriteFeedStore';
+import { NotificationService } from '../../services/NotificationService';
 
 const homeLogo = require('../../assets/images/LOGO_Finalllll.png');
 
@@ -35,6 +36,12 @@ export default function HomeScreen() {
   const [commentText, setCommentText] = useState('');
   const [sendingComment, setSendingComment] = useState(false);
   const [replyingTo, setReplyingTo] = useState<any | null>(null);
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['notifications', 'unread-count'],
+    queryFn: NotificationService.getUnreadCount,
+    enabled: Boolean(authUser?.id),
+    refetchInterval: 60_000,
+  });
 
   useEffect(() => {
     if (authUser?.id) void hydrateFavorites(authUser.id);
@@ -186,16 +193,26 @@ export default function HomeScreen() {
           style={styles.hero}
         >
           <View style={styles.heroTop}>
-            <View>
+            <View style={styles.heroCopy}>
               <Image source={homeLogo} style={styles.homeLogo} resizeMode="contain" />
               <Text style={styles.greeting}>
                 {Strings.homeGreeting(userName)}
               </Text>
               <Text style={styles.subtitle}>{Strings.homeSubtitle}</Text>
             </View>
-            <View style={styles.bellCircle}>
+            <TouchableOpacity
+              style={styles.bellCircle}
+              onPress={() => router.push('/customer-notifications')}
+              accessibilityRole="button"
+              accessibilityLabel={unreadCount ? `${unreadCount} thông báo chưa đọc` : 'Thông báo'}
+            >
               <Bell size={20} color={BrandColors.accentPink} />
-            </View>
+              {unreadCount > 0 ? (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadBadgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
           </View>
         </LinearGradient>
 
@@ -340,6 +357,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
+  heroCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
   homeLogo: {
     alignSelf: 'flex-start',
     width: 70,
@@ -354,7 +375,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.9)',
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: 12,
+    marginTop: 2,
+    flexShrink: 0,
+    position: 'relative',
   },
+  unreadBadge: {
+    position: 'absolute',
+    right: -4,
+    top: -5,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    backgroundColor: '#C92855',
+    borderWidth: 2,
+    borderColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unreadBadgeText: { color: '#FFF', fontSize: 9, lineHeight: 11, fontWeight: '900' },
   greeting: {
     color: BrandColors.textWhite,
     fontSize: 26,

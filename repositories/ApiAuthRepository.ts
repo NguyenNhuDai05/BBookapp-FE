@@ -1,6 +1,7 @@
 import { api } from '../services/api';
 import type { IAuthRepository, LoginRequest, RegisterRequest } from './IAuthRepository';
 import { UserRole, type AuthResponseDto, type UserDto } from '../types/auth';
+import type { MuaApplicationRequestDto } from '../types/onboarding';
 
 interface BackendTokenDto {
   token: string;
@@ -72,8 +73,8 @@ export class ApiAuthRepository implements IAuthRepository {
     return Promise.resolve();
   }
 
-  async becomeMua(): Promise<AuthResponseDto> {
-    const response = await api.post<BackendTokenDto>('/Auth/become-mua');
+  async becomeMua(request: MuaApplicationRequestDto): Promise<AuthResponseDto> {
+    const response = await api.post<BackendTokenDto>('/Auth/become-mua', request);
     return this.mapToAuthResponse(response.data);
   }
 

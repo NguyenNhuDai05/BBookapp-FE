@@ -27,6 +27,9 @@ export interface MuaProfileDto {
   experienceYears?: number;
   specialization?: string;
   socialLinks?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+  specialties?: { styleId: number; name: string; isActive: boolean }[];
   reviewCount?: number;
   rating?: number;
 }
@@ -40,4 +43,7 @@ export interface MuaUpdateDto {
   experienceYears?: number;
   specialization?: string;
   socialLinks?: string;
+  instagramUrl?: string;
+  facebookUrl?: string;
+  styleIds?: number[];
 }

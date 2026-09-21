@@ -48,8 +48,8 @@ export default function LoginScreen() {
       }
 
       Alert.alert(
-        "Chưa kết nối Google OAuth",
-        "Frontend đã lấy được Google token, nhưng backend cần endpoint /api/Auth/google để cấp JWT cho ứng dụng.",
+        "Đăng nhập Google thất bại",
+        "Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc sử dụng email và mật khẩu.",
       );
 
       return false;

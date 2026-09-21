@@ -5,6 +5,7 @@ import type { UserDto } from "../types/auth";
 import { UserRole } from "../types/auth";
 import { queryClient } from "../lib/queryClient";
 import { NotificationService } from "../services/NotificationService";
+import type { MuaApplicationRequestDto } from "../types/onboarding";
 
 const TOKEN_KEY = "user_jwt_token";
 const ACTIVE_MODE_KEY = "bbook_active_mode";
@@ -16,7 +17,7 @@ interface AuthState {
   initialize: () => Promise<boolean>;
   login: (email: string, password?: string) => Promise<boolean>;
   loginWithGoogleToken: (idToken: string) => Promise<boolean>;
-  becomeMUA: () => Promise<boolean>;
+  becomeMUA: (request: MuaApplicationRequestDto) => Promise<boolean>;
   logout: () => Promise<void>;
   expireSession: () => Promise<void>;
   deleteAccount: () => Promise<void>;
@@ -124,10 +125,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  becomeMUA: async () => {
+  becomeMUA: async (request) => {
     try {
       set({ isLoading: true });
-      const res = await authService.becomeMua();
+      const res = await authService.becomeMua(request);
       await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
       await AsyncStorage.setItem(ACTIVE_MODE_KEY, 'MUA');
       set({
@@ -139,7 +140,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (e) {
       console.error('Error becoming MUA:', e);
       set({ isLoading: false });
-      return false;
+      throw e;
     }
   },
 
