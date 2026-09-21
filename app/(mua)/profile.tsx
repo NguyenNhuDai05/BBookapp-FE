@@ -12,6 +12,7 @@ import {
   Alert,
   Modal,
   RefreshControl,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,7 +29,7 @@ import {
   Trash2,
   X,
   User,
- Plus } from 'lucide-react-native';
+ Plus, Instagram, Facebook } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile } from '../../hooks/useMuaProfile';
@@ -41,6 +42,7 @@ import ReviewTabContent from '../../components/mua/ReviewTabContent';
 import { BrandColors } from '../../constants/theme';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { getApiError } from '../../services/api';
+import { normalizeSocialUrl } from '../../utils/socialUrl';
 
 const { width } = Dimensions.get('window');
 
@@ -173,6 +175,12 @@ export default function MuaProfilePremiumScreen() {
     router.push('/(mua)/settings' as any);
   };
 
+  const openSocialLink = async (value: string, platform: 'instagram' | 'facebook') => {
+    const url = normalizeSocialUrl(value, platform);
+    if (!url) return;
+    try { await Linking.openURL(url); } catch { Alert.alert('Không thể mở liên kết', 'Vui lòng thử lại sau.'); }
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <LinearGradient
@@ -248,6 +256,10 @@ export default function MuaProfilePremiumScreen() {
             </View>
             <Text style={styles.igBioCategory}>Nghệ sĩ trang điểm</Text>
             <Text style={styles.igBioText}>{displayBio}</Text>
+            {(profile?.instagramUrl || profile?.facebookUrl) ? <View style={styles.socialRow}>
+              {profile.instagramUrl ? <TouchableOpacity style={styles.socialButton} onPress={() => openSocialLink(profile.instagramUrl!, 'instagram')}><Instagram size={16} color={BrandColors.accentPink}/><Text style={styles.socialText}>Instagram</Text></TouchableOpacity> : null}
+              {profile.facebookUrl ? <TouchableOpacity style={styles.socialButton} onPress={() => openSocialLink(profile.facebookUrl!, 'facebook')}><Facebook size={16} color="#1877F2"/><Text style={styles.socialText}>Facebook</Text></TouchableOpacity> : null}
+            </View> : null}
           </View>
 
           {/* Action Buttons */}
@@ -680,6 +692,9 @@ const styles = StyleSheet.create({
     color: '#00376b',
     fontWeight: '500',
   },
+  socialRow:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:10},
+  socialButton:{minHeight:38,paddingHorizontal:12,borderRadius:18,borderWidth:1,borderColor:'#EEE',flexDirection:'row',alignItems:'center',gap:6,backgroundColor:'#FFF'},
+  socialText:{fontSize:13,fontWeight:'600',color:'#2B1B2A'},
   igActionRow: {
     flexDirection: 'row',
     gap: 8,

@@ -1,6 +1,7 @@
 import { ApiAuthRepository } from '../repositories/ApiAuthRepository';
 import type { IAuthRepository, LoginRequest, RegisterRequest } from '../repositories/IAuthRepository';
 import type { AuthResponseDto, UserDto } from '../types/auth';
+import type { MuaApplicationRequestDto } from '../types/onboarding';
 
 class AuthService {
   private repository: IAuthRepository;
@@ -29,8 +30,8 @@ class AuthService {
     return this.repository.logout();
   }
 
-  async becomeMua(): Promise<AuthResponseDto> {
-    return this.repository.becomeMua();
+  async becomeMua(request: MuaApplicationRequestDto): Promise<AuthResponseDto> {
+    return this.repository.becomeMua(request);
   }
 
   async deleteAccount(): Promise<void> {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Banknote, CalendarClock, ChevronRight, LogOut, RotateCcw, ShieldCheck, Users } from 'lucide-react-native';
+import { Banknote, BellRing, CalendarClock, ChevronRight, LogOut, RotateCcw, ShieldCheck, Users } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -22,6 +22,7 @@ export default function AdminDashboard(){
     <Text style={styles.section}>Vận hành</Text>
     <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/payouts' as any)} activeOpacity={.8}><View style={styles.icon}><Banknote size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Chi trả MUA</Text><Text style={styles.cardText}>Xử lý hàng đợi payout thủ công</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
     <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/refunds' as any)} activeOpacity={.8}><View style={styles.icon}><RotateCcw size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Hoàn tiền customer</Text><Text style={styles.cardText}>Xử lý và đối soát các khoản hoàn</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
+    <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/notifications' as any)} activeOpacity={.8}><View style={styles.icon}><BellRing size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Thông báo</Text><Text style={styles.cardText}>Gửi thông báo chung hoặc riêng cho người dùng</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
     <Text style={styles.section}>Chưa khả dụng</Text>
     {unavailable.map(item=><View key={item.title} style={[styles.card,styles.disabled]}><View style={[styles.icon,styles.disabledIcon]}><item.icon size={23} color={BrandColors.textMuted}/></View><View style={styles.copy}><Text style={styles.disabledTitle}>{item.title}</Text><Text style={styles.cardText}>{item.subtitle}</Text></View><View style={styles.badge}><Text style={styles.badgeText}>Chưa khả dụng</Text></View></View>)}
   </ScrollView></SafeAreaView>;

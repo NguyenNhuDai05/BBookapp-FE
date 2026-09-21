@@ -23,6 +23,9 @@ export class ApiMuaProfileRepository implements IMuaProfileRepository {
       experienceYears: Number(data.experienceYears) || 0,
       specialization: data.specialization || '',
       socialLinks: data.socialLinks || '',
+      instagramUrl: data.instagramUrl || '',
+      facebookUrl: data.facebookUrl || '',
+      specialties: data.specialties || [],
       rejectionReason: data.rejectionReason,
       reviewCount: data.totalBookings || 0,
       rating: data.averageRating || 0

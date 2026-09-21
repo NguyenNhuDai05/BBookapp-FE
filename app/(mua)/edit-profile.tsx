@@ -9,6 +9,8 @@ import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constan
 import { uploadImage } from '../../services/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile, useUpdateMuaProfile } from '../../hooks/useMuaProfile';
+import { useMuaStyles } from '../../hooks/useMuaStyles';
+import { normalizeSocialUrl } from '../../utils/socialUrl';
 
 
 export default function EditProfileScreen() {
@@ -24,10 +26,12 @@ export default function EditProfileScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [city, setCity] = useState('');
   const [experienceYears, setExperienceYears] = useState('');
-  const [specialization, setSpecialization] = useState('');
-  const [socialLinks, setSocialLinks] = useState('');
+  const [styleIds, setStyleIds] = useState<number[]>([]);
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [facebookUrl, setFacebookUrl] = useState('');
   const [formError, setFormError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const stylesQuery = useMuaStyles();
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -38,8 +42,9 @@ export default function EditProfileScreen() {
         setPhoneNumber(profile.phoneNumber || '');
         setCity(profile.city || '');
         setExperienceYears(String(profile.experienceYears || ''));
-        setSpecialization(profile.specialization || '');
-        setSocialLinks(profile.socialLinks || '');
+        setStyleIds(profile.specialties?.map(item => item.styleId) || []);
+        setInstagramUrl(profile.instagramUrl || '');
+        setFacebookUrl(profile.facebookUrl || '');
       } else if (user) {
         setAvatar('');
         setName(user.name || '');
@@ -50,7 +55,8 @@ export default function EditProfileScreen() {
 
   const { mutateAsync: updateProfile, isPending } = useUpdateMuaProfile();
   const isSaving = isPending || isUploading;
-  const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && experienceYears === String(profile?.experienceYears || '') && specialization === (profile?.specialization || '') && socialLinks === (profile?.socialLinks || '');
+  const initialStyleIds = profile?.specialties?.map(item => item.styleId) || [];
+  const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && experienceYears === String(profile?.experienceYears || '') && JSON.stringify([...styleIds].sort()) === JSON.stringify([...initialStyleIds].sort()) && instagramUrl === (profile?.instagramUrl || '') && facebookUrl === (profile?.facebookUrl || '');
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -58,11 +64,17 @@ export default function EditProfileScreen() {
       return;
     }
     setFormError('');
+    const normalizedInstagram = normalizeSocialUrl(instagramUrl, 'instagram');
+    const normalizedFacebook = normalizeSocialUrl(facebookUrl, 'facebook');
+    if (normalizedInstagram === null || normalizedFacebook === null) {
+      setFormError('Liên kết Instagram hoặc Facebook không hợp lệ.');
+      return;
+    }
     
     setIsUploading(true);
     try {
       const finalAvatarUrl = await uploadImage(avatar);
-      await updateProfile({ displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceYears: Number(experienceYears) || 0, specialization, socialLinks });
+      await updateProfile({ displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceYears: Number(experienceYears) || 0, styleIds, instagramUrl: normalizedInstagram, facebookUrl: normalizedFacebook });
       updateUser({ name: name.trim(), avatarUrl: finalAvatarUrl });
       Alert.alert('Thành công', 'Đã lưu thông tin hồ sơ.');
       router.back();
@@ -181,8 +193,14 @@ export default function EditProfileScreen() {
             <ProfileInput icon={<Phone size={16} color={BrandColors.textMuted}/>} label="Số điện thoại" value={phoneNumber} onChangeText={setPhoneNumber} keyboardType="phone-pad" />
             <ProfileInput icon={<MapPin size={16} color={BrandColors.textMuted}/>} label="Thành phố / khu vực" value={city} onChangeText={setCity} />
             <ProfileInput icon={<Sparkles size={16} color={BrandColors.textMuted}/>} label="Số năm kinh nghiệm" value={experienceYears} onChangeText={value => setExperienceYears(value.replace(/\D/g, ''))} keyboardType="number-pad" />
-            <ProfileInput icon={<Sparkles size={16} color={BrandColors.textMuted}/>} label="Chuyên môn / phong cách" value={specialization} onChangeText={setSpecialization} />
-            <ProfileInput icon={<FileText size={16} color={BrandColors.textMuted}/>} label="Instagram / Facebook" value={socialLinks} onChangeText={setSocialLinks} autoCapitalize="none" keyboardType="url" />
+            <View style={styles.inputGroup}>
+              <View style={styles.labelRow}><Sparkles size={16} color={BrandColors.textMuted}/><Text style={styles.label}>Chuyên môn</Text></View>
+              <Text style={styles.helpText}>Chọn một hoặc nhiều</Text>
+              {stylesQuery.isLoading ? <ActivityIndicator color={BrandColors.accentPink}/> : stylesQuery.isError ? <TouchableOpacity onPress={() => stylesQuery.refetch()}><Text style={styles.formError}>Không thể tải chuyên môn. Chạm để thử lại.</Text></TouchableOpacity> : <View style={styles.styleChips}>{stylesQuery.data?.map(item => { const selected = styleIds.includes(item.styleId); return <TouchableOpacity key={item.styleId} onPress={() => setStyleIds(current => selected ? current.filter(id => id !== item.styleId) : [...current,item.styleId])} style={[styles.styleChip,selected&&styles.styleChipSelected]}><Text style={[styles.styleChipText,selected&&styles.styleChipTextSelected]}>{selected?'✓ ':''}{item.name}</Text></TouchableOpacity>; })}</View>}
+            </View>
+            <View style={styles.inputGroup}><Text style={styles.sectionLabel}>Liên kết mạng xã hội</Text><Text style={styles.helpText}>Không bắt buộc</Text></View>
+            <ProfileInput icon={<FileText size={16} color={BrandColors.textMuted}/>} label="Instagram" value={instagramUrl} onChangeText={setInstagramUrl} placeholder="instagram.com/username" autoCapitalize="none" keyboardType="url" />
+            <ProfileInput icon={<FileText size={16} color={BrandColors.textMuted}/>} label="Facebook" value={facebookUrl} onChangeText={setFacebookUrl} placeholder="facebook.com/profile" autoCapitalize="none" keyboardType="url" />
 
           </View>
         </ScrollView>
@@ -314,6 +332,12 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
   },
   formError: { color: BrandColors.statusCancelled, fontFamily: Typography.regular, fontSize: 12, marginBottom: Spacing.md },
+  sectionLabel:{fontFamily:Typography.bold,fontSize:17,color:BrandColors.textDark},
+  styleChips:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:Spacing.md},
+  styleChip:{minHeight:40,paddingHorizontal:13,borderRadius:Radius.full,borderWidth:1,borderColor:BrandColors.borderLight,alignItems:'center',justifyContent:'center'},
+  styleChipSelected:{backgroundColor:BrandColors.accentPink,borderColor:BrandColors.accentPink},
+  styleChipText:{fontFamily:Typography.medium,fontSize:13,color:BrandColors.textBody},
+  styleChipTextSelected:{color:'#FFF'},
   verificationBox: {
     flexDirection: 'row',
     alignItems: 'center',

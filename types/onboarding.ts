@@ -33,16 +33,12 @@ export interface MuaDraft {
 
 export interface MuaApplicationRequestDto {
   displayName: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   city: string;
   bio: string;
   experienceYears?: number;
   specialization?: string;
   socialLinks?: string;
-  avatarUrl?: string;
-}
-
-export interface MuaApplicationResponseDto {
-  profile: MuaApplicationRequestDto;
-  status: string;
+  avatarUrl: string;
+  styleIds: number[];
 }

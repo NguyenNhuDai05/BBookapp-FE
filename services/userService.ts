@@ -5,6 +5,7 @@ export interface UserProfile {
   name: string;
   email: string;
   avatar: string;
+  phoneNumber: string;
   joinedDate: string;
   statsCompleted: number;
   statsFavorites: number;
@@ -16,6 +17,7 @@ interface BackendUserProfile {
   fullName?: string;
   email?: string;
   avatarUrl?: string;
+  phoneNumber?: string;
   role: number | string;
   createdAt: string;
 }
@@ -30,7 +32,8 @@ const mapUserProfile = (data: BackendUserProfile): UserProfile => ({
   id: data.userId,
   name: data.fullName || "BeautyBook User",
   email: data.email || "",
-  avatar: data.avatarUrl || "BB",
+  avatar: data.avatarUrl || "",
+  phoneNumber: data.phoneNumber || "",
   joinedDate: data.createdAt ? new Date(data.createdAt).toLocaleDateString("vi-VN") : "",
   statsCompleted: 0,
   statsFavorites: 0,
@@ -48,13 +51,11 @@ export const userService = {
     }
   },
 
-  updateUserProfile: async (
-    _userId: string,
-    updateData: Partial<UserProfile>,
-  ): Promise<UserProfile> => {
+  updateUserProfile: async (updateData: Partial<UserProfile>): Promise<UserProfile> => {
     const response = await api.put("/User/profile", {
       fullName: updateData.name,
       avatarUrl: updateData.avatar,
+      phoneNumber: updateData.phoneNumber,
     });
 
     return mapUserProfile(response.data.user || response.data);

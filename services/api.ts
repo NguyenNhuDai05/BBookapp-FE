@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Platform } from "react-native";
+import { normalizeMediaUrlsInPayload } from "../utils/mediaUrl";
 
 const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -90,7 +91,10 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    response.data = normalizeMediaUrlsInPayload(response.data);
+    return response;
+  },
   async (error) => {
     if (error.response?.status === 401) {
       const token = await AsyncStorage.getItem("user_jwt_token");
