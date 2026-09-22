@@ -15,6 +15,9 @@ export interface MuaEligibility {
   canReceiveBookings: boolean;
   canWithdraw: boolean;
   verificationStatus: string;
+  rejectionReason?: string | null;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
   requirements: MuaEligibilityRequirement[];
   missingRequirements: MuaEligibilityRequirement[];
 }
