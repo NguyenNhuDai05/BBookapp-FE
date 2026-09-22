@@ -10,6 +10,8 @@ export default function AdminLayout() {
       <Stack.Screen name="refunds/[id]" />
       <Stack.Screen name="notifications/index" />
       <Stack.Screen name="notifications/new" />
+      <Stack.Screen name="mua-applications/index" />
+      <Stack.Screen name="mua-applications/[id]" />
       <Stack.Screen name="access-denied" />
     </Stack>
   );
