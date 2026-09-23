@@ -8,7 +8,7 @@ import { useMuaServices } from '../../hooks/useMuaServices';
 import { useMuaPortfolio } from '../../hooks/useMuaPortfolio';
 import { MuaBookingCard } from '../../components/mua/MuaBookingCard';
 import { useRouter } from 'expo-router';
-import { Bell, BriefcaseBusiness, CalendarClock, Images } from 'lucide-react-native';
+import { Bell, BriefcaseBusiness, CalendarClock, Images, UsersRound } from 'lucide-react-native';
 import { useMuaEligibility } from '../../hooks/useMuaEligibility';
 import { MuaCompletionCard } from '../../components/mua/MuaCompletionCard';
 import { ErrorView } from '../../components/ui/ErrorView';
@@ -69,6 +69,7 @@ export default function MuaDashboard() {
           <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(mua)/services')}><BriefcaseBusiness size={21} color={BrandColors.accentRose}/><Text style={styles.quickText}>Dịch vụ</Text></TouchableOpacity>
           <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(mua)/services?tab=PORTFOLIO')}><Images size={21} color={BrandColors.accentRose}/><Text style={styles.quickText}>Portfolio</Text></TouchableOpacity>
           <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(mua)/working-hours')}><CalendarClock size={21} color={BrandColors.accentRose}/><Text style={styles.quickText}>Giờ làm</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(mua)/community')}><UsersRound size={21} color={BrandColors.accentRose}/><Text style={styles.quickText}>Cộng đồng</Text></TouchableOpacity>
         </View>
 
         {earningsIsError ? (

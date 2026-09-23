@@ -356,8 +356,9 @@ export default function ProfileScreen() {
           <View style={styles.cardWrapper}>
             {renderSettingRow(
               <ShieldCheck size={20} color="#22152B" />,
-              "Điều khoản & Bảo mật",
-              "Chính sách quyền riêng tư của hệ thống",
+              "Chính sách & Điều khoản",
+              "Đọc chính sách dành cho khách hàng",
+              () => router.push("/policy" as any),
             )}
           </View>
         </View>

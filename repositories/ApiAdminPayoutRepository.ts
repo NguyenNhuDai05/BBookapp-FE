@@ -47,6 +47,7 @@ const mapPayout = (value: any, includeSensitive = false): AdminPayoutDto => ({
   reconciledAt: value.reconciledAt || undefined,
   failureCode: value.failureCode || undefined,
   failureMessage: value.failureMessage || undefined,
+  qrCodeUrl: value.qrCodeUrl || undefined,
 });
 
 export class ApiAdminPayoutRepository {

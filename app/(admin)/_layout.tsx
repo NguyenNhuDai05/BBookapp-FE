@@ -12,6 +12,7 @@ export default function AdminLayout() {
       <Stack.Screen name="notifications/new" />
       <Stack.Screen name="mua-applications/index" />
       <Stack.Screen name="mua-applications/[id]" />
+      <Stack.Screen name="bank-accounts/index" />
       <Stack.Screen name="access-denied" />
     </Stack>
   );

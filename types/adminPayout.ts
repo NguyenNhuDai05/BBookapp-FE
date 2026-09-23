@@ -28,6 +28,7 @@ export interface AdminPayoutDto {
   reconciledAt?: string;
   failureCode?: string;
   failureMessage?: string;
+  qrCodeUrl?: string;
 }
 
 export interface StartAdminPayoutRequest {

@@ -10,6 +10,10 @@ export interface MuaBankAccountDto {
   isDefault: boolean;
   isActive: boolean;
   verificationStatus: string;
+  method: 'BANK' | 'MOMO';
+  qrCodeUrl?: string;
+  activatedAt: string;
+  isCoolingDown: boolean;
 }
 
 export interface UpsertMuaBankAccountRequest {
@@ -18,6 +22,9 @@ export interface UpsertMuaBankAccountRequest {
   accountNumber: string;
   accountHolderName: string;
   isDefault: boolean;
+  currentPassword: string;
+  method: 'BANK' | 'MOMO';
+  qrCodeUrl?: string;
 }
 
 export interface CreatePayoutRequest {
@@ -45,4 +52,5 @@ export interface MuaPayoutDto {
   reconciledAt?: string;
   failureCode?: string;
   failureMessage?: string;
+  qrCodeUrl?: string;
 }

@@ -27,11 +27,13 @@ export function useProtectedRoute() {
     if (!isReady || !rootNavigationState?.key) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const isPolicyScreen = segments[0] === 'policy';
     
     if (
       // If the user is not authenticated and not already in the auth group...
       !isAuthenticated &&
-      !inAuthGroup
+      !inAuthGroup &&
+      !isPolicyScreen
     ) {
       // Redirect to the login page.
       router.replace('/(auth)/login');
@@ -73,7 +75,8 @@ export function useProtectedRoute() {
 
   if (!isReady) return false;
   const inAuthGroup = segments[0] === '(auth)';
-  if (!isAuthenticated) return inAuthGroup;
+  const isPolicyScreen = segments[0] === 'policy';
+  if (!isAuthenticated) return inAuthGroup || isPolicyScreen;
   if (user?.role === UserRole.Admin) return segments[0] === '(admin)';
   return segments[0] !== '(admin)';
 }

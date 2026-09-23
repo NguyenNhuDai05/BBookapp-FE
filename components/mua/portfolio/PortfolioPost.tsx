@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FlatList, Image, LayoutChangeEvent, NativeScrollEvent, NativeSyntheticEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Bookmark, CalendarDays, Heart, MapPin, MessageCircle, MoreVertical, Send, Sparkles } from 'lucide-react-native';
+import { Bookmark, CalendarDays, Heart, MapPin, MessageCircle, MoreVertical, Sparkles } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { BrandColors, Radius, Shadows, Spacing } from '../../../constants/theme';
 import type { PortfolioItemDto } from '../../../types/portfolio';
@@ -22,7 +22,6 @@ interface PortfolioPostProps {
   item: FeedPostItem;
   onLike?: () => void;
   onSave?: () => void;
-  onShare?: () => void;
   onOptions?: () => void;
   onFollow?: () => void;
   onAuthorPress?: () => void;
@@ -31,7 +30,7 @@ interface PortfolioPostProps {
   onAddService?: () => void;
 }
 
-function PortfolioPostComponent({ item, onLike, onSave, onShare, onOptions, onFollow, onAuthorPress, onComment, onImagePress, onAddService }: PortfolioPostProps) {
+function PortfolioPostComponent({ item, onLike, onSave, onOptions, onFollow, onAuthorPress, onComment, onImagePress, onAddService }: PortfolioPostProps) {
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [carouselWidth, setCarouselWidth] = useState(0);
@@ -128,10 +127,12 @@ function PortfolioPostComponent({ item, onLike, onSave, onShare, onOptions, onFo
             <Text style={styles.serviceDescription} numberOfLines={1}>{item.service.description || 'Dịch vụ trang điểm chuyên nghiệp'}</Text>
           </View>
           <Text style={styles.servicePrice} numberOfLines={1}>{Number(item.service.price || 0).toLocaleString('vi-VN')}đ</Text>
-          <TouchableOpacity style={styles.bookButton} onPress={onAddService} activeOpacity={0.82}>
-            <CalendarDays size={17} color={BrandColors.textWhite} />
-            <Text style={styles.bookButtonText}>Đặt dịch vụ</Text>
-          </TouchableOpacity>
+          {onAddService ? (
+            <TouchableOpacity style={styles.bookButton} onPress={onAddService} activeOpacity={0.82}>
+              <CalendarDays size={17} color={BrandColors.textWhite} />
+              <Text style={styles.bookButtonText}>Đặt dịch vụ</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       ) : null}
 
@@ -145,7 +146,6 @@ function PortfolioPostComponent({ item, onLike, onSave, onShare, onOptions, onFo
             <MessageCircle size={27} color={BrandColors.textDark} />
             <Text style={styles.actionCount}>{(item.commentsCount || 0).toLocaleString('vi-VN')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onShare} style={styles.iconAction} hitSlop={6}><Send size={26} color={BrandColors.textDark} /></TouchableOpacity>
         </View>
         <TouchableOpacity onPress={onSave} style={styles.iconAction} hitSlop={6}>
           <Bookmark size={27} color={BrandColors.textDark} fill={item.isSaved ? BrandColors.textDark : 'transparent'} />

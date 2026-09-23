@@ -57,6 +57,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(mua)" />
         <Stack.Screen name="(admin)" />
+        <Stack.Screen name="policy" />
 
         <Stack.Screen
           name="mua-detail"

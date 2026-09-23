@@ -10,6 +10,7 @@ import { BrandColors, Radius, Spacing, Typography } from '../constants/theme';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 
 const KEY = ['customer', 'refund-bank-accounts'] as const;
+const securityStyles=StyleSheet.create({badge:{fontFamily:Typography.bold,fontSize:10,color:'#9A6700',backgroundColor:'#FFF4CE',paddingHorizontal:8,paddingVertical:3,borderRadius:Radius.full},text:{fontFamily:Typography.regular,fontSize:11,color:'#9A6700',marginTop:5}});
 
 export default function RefundDestinationScreen() {
   const router = useRouter();
@@ -19,10 +20,16 @@ export default function RefundDestinationScreen() {
   const accounts = useQuery({ queryKey: KEY, queryFn: refundService.getBankAccounts });
   const assign = useMutation({
     mutationFn: (bankAccountId: string) => refundService.setDestination(String(refundId), bankAccountId),
-    onSuccess: () => {
+    onSuccess: (_, bankAccountId) => {
       void queryClient.invalidateQueries({ queryKey: ['bookingDetail', bookingId] });
       void queryClient.invalidateQueries({ queryKey: ['userBookings'] });
-      Alert.alert('Đã chọn tài khoản', 'Khoản hoàn đã được đưa vào hàng đợi xử lý.', [{ text: 'Xem booking', onPress: () => router.replace(`/booking/${bookingId}` as any) }]);
+      const selected = accounts.data?.find(item => item.id === bankAccountId);
+      const message = selected?.verificationStatus === 'PENDING_ADMIN'
+        ? 'Admin đã thấy tài khoản và QR. Khoản hoàn sẽ vào hàng xử lý ngay sau khi admin duyệt.'
+        : selected?.isCoolingDown
+        ? `Admin đã thấy thông tin tài khoản. Khoản hoàn sẽ tự vào hàng xử lý sau ${new Date(selected.activatedAt).toLocaleString('vi-VN')}.`
+        : 'Khoản hoàn đã được đưa vào hàng đợi xử lý.';
+      Alert.alert('Đã chọn tài khoản', message, [{ text: 'Xem booking', onPress: () => router.replace(`/booking/${bookingId}` as any) }]);
     },
     onError: error => Alert.alert('Không thể cập nhật', getApiError(error).message),
   });
@@ -39,7 +46,7 @@ export default function RefundDestinationScreen() {
     {accounts.isLoading ? <ActivityIndicator style={{ marginTop: 40 }} color={BrandColors.accentRose}/> : accounts.isError ? <Text style={styles.error}>{getApiError(accounts.error).message}</Text> :
       <FlatList data={accounts.data || []} keyExtractor={item => item.id} contentContainerStyle={styles.list}
         ListEmptyComponent={<View style={styles.empty}><Building2 size={38} color={BrandColors.textMuted}/><Text style={styles.emptyTitle}>Chưa có tài khoản nhận tiền</Text><Text style={styles.emptyText}>Thêm tài khoản ngân hàng chính chủ để nhận tiền hoàn.</Text><TouchableOpacity style={styles.add} onPress={openForm}><Text style={styles.addText}>Thêm tài khoản</Text></TouchableOpacity></View>}
-        renderItem={({ item }) => <TouchableOpacity style={styles.card} onPress={() => refundId && assign.mutate(item.id)} disabled={assign.isPending} activeOpacity={refundId ? .75 : 1}><View style={{ flex: 1 }}><View style={styles.row}><Text style={styles.bank}>{item.bankName || item.bankBin}</Text>{item.isDefault ? <Text style={styles.defaultBadge}>Mặc định</Text> : null}</View><Text style={styles.number}>{item.maskedAccountNumber}</Text><Text style={styles.holder}>{item.accountHolderName}</Text></View>{refundId ? <CheckCircle2 size={22} color={BrandColors.accentRose}/> : <TouchableOpacity style={styles.delete} onPress={() => setDeleteId(item.id)}><Trash2 size={19} color={BrandColors.statusCancelled}/></TouchableOpacity>}</TouchableOpacity>}/>
+        renderItem={({ item }) => <TouchableOpacity style={styles.card} onPress={() => refundId && assign.mutate(item.id)} disabled={assign.isPending} activeOpacity={refundId ? .75 : 1}><View style={{ flex: 1 }}><View style={styles.row}><Text style={styles.bank}>{item.bankName || item.bankBin}</Text>{item.isDefault ? <Text style={styles.defaultBadge}>Mặc định</Text> : null}{item.verificationStatus==='PENDING_ADMIN' ? <Text style={securityStyles.badge}>Chờ admin duyệt</Text> : item.isCoolingDown?<Text style={securityStyles.badge}>Bảo vệ 24h</Text>:null}</View><Text style={styles.number}>{item.maskedAccountNumber}</Text><Text style={styles.holder}>{item.accountHolderName}</Text>{item.verificationStatus==='PENDING_ADMIN'?<Text style={securityStyles.text}>Admin sẽ đối chiếu QR và kích hoạt tài khoản.</Text>:item.isCoolingDown?<Text style={securityStyles.text}>Có thể xử lý sau {new Date(item.activatedAt).toLocaleString('vi-VN')}</Text>:null}</View>{refundId ? <CheckCircle2 size={22} color={BrandColors.accentRose}/> : <TouchableOpacity style={styles.delete} onPress={() => setDeleteId(item.id)}><Trash2 size={19} color={BrandColors.statusCancelled}/></TouchableOpacity>}</TouchableOpacity>}/>
     }
     <ConfirmDialog visible={Boolean(deleteId)} title="Xóa tài khoản" message="Tài khoản sẽ không còn được dùng cho các khoản hoàn tiền mới." confirmLabel="Xóa" destructive loading={remove.isPending} onCancel={() => setDeleteId(null)} onConfirm={() => { if (deleteId) remove.mutate(deleteId); }}/>
   </SafeAreaView>;

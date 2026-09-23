@@ -8,8 +8,8 @@ export const MUA_PAYOUTS_KEY = ['mua','payouts'] as const;
 export const muaPayoutKey = (id:string) => ['mua','payouts',id] as const;
 
 export const useMuaBankAccounts = () => useQuery({queryKey:MUA_BANK_ACCOUNTS_KEY,queryFn:()=>muaPayoutService.getBankAccounts()});
-export const useMuaPayouts = () => useQuery({queryKey:MUA_PAYOUTS_KEY,queryFn:()=>muaPayoutService.getPayouts()});
-export const useMuaPayout = (id:string) => useQuery({queryKey:muaPayoutKey(id),queryFn:()=>muaPayoutService.getPayout(id),enabled:Boolean(id)});
+export const useMuaPayouts = () => useQuery({queryKey:MUA_PAYOUTS_KEY,queryFn:()=>muaPayoutService.getPayouts(),refetchOnWindowFocus:true});
+export const useMuaPayout = (id:string) => useQuery({queryKey:muaPayoutKey(id),queryFn:()=>muaPayoutService.getPayout(id),enabled:Boolean(id),refetchOnWindowFocus:true,refetchInterval:q=>{const s=q.state.data?.status;return s==='PENDING'||s==='MANUAL_ACTION_REQUIRED'||s==='PROCESSING'?15000:false;}});
 
 export const useAddMuaBankAccount = () => {const q=useQueryClient();return useMutation({mutationFn:(request:UpsertMuaBankAccountRequest)=>muaPayoutService.addBankAccount(request),retry:false,onSuccess:()=>{void q.invalidateQueries({queryKey:MUA_BANK_ACCOUNTS_KEY});void q.invalidateQueries({queryKey:MUA_ELIGIBILITY_QUERY_KEY});}});};
 export const useUpdateMuaBankAccount = () => {const q=useQueryClient();return useMutation({mutationFn:({id,request}:{id:string;request:UpsertMuaBankAccountRequest})=>muaPayoutService.updateBankAccount(id,request),retry:false,onSuccess:()=>void q.invalidateQueries({queryKey:MUA_BANK_ACCOUNTS_KEY})});};
