@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Eye, EyeOff, LockKeyhole, Mail, Phone, Sparkles, UserRound } from "lucide-react-native";
+import { Check, Eye, EyeOff, LockKeyhole, Mail, Phone, Sparkles, UserRound } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -56,6 +56,7 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
   const handleGoogleToken = useCallback(
     async (idToken: string) => {
@@ -81,6 +82,11 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     setError("");
+
+    if (!acceptedPolicy) {
+      setError("Vui lòng đọc và đồng ý với chính sách trước khi đăng ký.");
+      return;
+    }
 
     if (
       !fullName.trim() ||
@@ -137,6 +143,11 @@ export default function RegisterScreen() {
   };
 
   const handleGooglePress = async () => {
+    if (!acceptedPolicy) {
+      setError("Vui lòng đọc và đồng ý với chính sách trước khi đăng ký.");
+      return;
+    }
+
     try {
       await signInWithGoogle();
     } catch (err: any) {
@@ -222,11 +233,33 @@ export default function RegisterScreen() {
                 secureTextEntry
               />
 
+              <View style={styles.policyRow}>
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: acceptedPolicy }}
+                  accessibilityLabel="Đồng ý với chính sách và điều khoản"
+                  hitSlop={8}
+                  onPress={() => {
+                    setAcceptedPolicy((accepted) => !accepted);
+                    setError("");
+                  }}
+                  style={[styles.checkbox, acceptedPolicy && styles.checkboxChecked]}
+                >
+                  {acceptedPolicy ? <Check size={16} strokeWidth={3} color="#FFF" /> : null}
+                </Pressable>
+                <Text style={styles.policyText}>
+                  Tôi đã đọc và đồng ý với{" "}
+                  <Text style={styles.policyLink} onPress={() => router.push("/policy" as any)}>
+                    Chính sách & Điều khoản của B-Book
+                  </Text>
+                </Text>
+              </View>
+
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={handleRegister}
-                disabled={loading}
-                style={[styles.primaryButton, loading && styles.disabled]}
+                disabled={loading || !acceptedPolicy}
+                style={[styles.primaryButton, (loading || !acceptedPolicy) && styles.disabledButton]}
               >
                 {loading ? (
                   <ActivityIndicator color="#fff" />
@@ -244,10 +277,10 @@ export default function RegisterScreen() {
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={handleGooglePress}
-                disabled={googleLoading || !googleReady}
+                disabled={googleLoading || !googleReady || !acceptedPolicy}
                 style={[
                   styles.googleButton,
-                  (googleLoading || !googleReady) && styles.disabled,
+                  (googleLoading || !googleReady || !acceptedPolicy) && styles.disabledButton,
                 ]}
               >
                 {googleLoading ? (
@@ -421,8 +454,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 4,
   },
-  disabled: { opacity: 0.72 },
+  disabledButton: { opacity: 0.45 },
   primaryButtonText: { color: "#fff", fontSize: 15, fontWeight: "900" },
+  policyRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    marginTop: 2,
+    marginBottom: 14,
+  },
+  checkbox: {
+    width: 23,
+    height: 23,
+    borderRadius: 7,
+    borderWidth: 1.5,
+    borderColor: "#D88DA0",
+    backgroundColor: "#FFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: { backgroundColor: "#F55389", borderColor: "#F55389" },
+  policyText: { flex: 1, color: "#795565", fontSize: 13, lineHeight: 19, fontWeight: "600" },
+  policyLink: { color: "#D93D72", fontWeight: "900", textDecorationLine: "underline" },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",

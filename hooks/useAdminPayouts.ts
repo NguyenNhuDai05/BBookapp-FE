@@ -12,6 +12,7 @@ export const useAdminPayouts = () => {
   const query = useQuery({
     queryKey: ADMIN_PAYOUTS_KEY,
     queryFn: adminPayoutService.getQueue,
+    refetchInterval: 10_000,
   });
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export const useAdminPayout = (id: string) => {
     queryKey: adminPayoutDetailKey(id),
     enabled: Boolean(id),
     queryFn: () => adminPayoutService.getById(id),
+    refetchInterval: 10_000,
   });
 };
 

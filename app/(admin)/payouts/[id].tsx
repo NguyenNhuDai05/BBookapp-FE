@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, AlertTriangle, RefreshCw } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -69,7 +69,7 @@ export default function AdminPayoutDetailScreen(){
       {notice?<View style={[styles.notice,notice.tone==='error'&&styles.noticeError,notice.tone==='warning'&&styles.noticeWarning]}><Text style={styles.noticeText}>{notice.text}</Text></View>:null}
       {uncertain?<View style={styles.uncertain}><AlertTriangle size={20} color="#9A3A12"/><View style={{flex:1}}><Text style={styles.uncertainTitle}>Kết quả thao tác chưa được xác minh</Text><Text style={styles.uncertainText}>Các nút tài chính đang bị khóa để tránh gửi lặp.</Text></View><TouchableOpacity style={styles.refresh} onPress={()=>reconcile()} disabled={query.isFetching}>{query.isFetching?<ActivityIndicator color={BrandColors.accentPink}/>:<RefreshCw size={20} color={BrandColors.accentPink}/>}</TouchableOpacity></View>:null}
       <View style={styles.amountCard}><Text style={styles.label}>Số tiền chi trả</Text><Text style={styles.amount}>{money(payout.amount)}</Text><Text style={styles.provider}>Phương thức: {payout.provider==='MANUAL'?'Thủ công':payout.provider}</Text></View>
-      <Section title="Tài khoản nhận"><Row label="Ngân hàng" value={bank}/><Row label="Chủ tài khoản" value={payout.accountHolderName||'—'}/><Row label="Số tài khoản" value={payout.accountNumber||payout.maskedAccountNumber||'—'}/></Section>
+      <Section title="Tài khoản nhận"><Row label="Ngân hàng" value={bank}/><Row label="Chủ tài khoản" value={payout.accountHolderName||'—'}/><Row label="Số tài khoản" value={payout.accountNumber||payout.maskedAccountNumber||'—'}/>{payout.qrCodeUrl?<><Image source={{uri:payout.qrCodeUrl}} style={{width:240,height:240,alignSelf:'center',borderRadius:16}} resizeMode="contain"/><Text style={{textAlign:'center',color:BrandColors.statusCancelled,marginTop:8}}>Đối chiếu số tài khoản trước khi quét QR.</Text></>:null}</Section>
       <Section title="Thông tin xử lý"><Row label="Trạng thái" value={payout.status}/><Row label="Ngày tạo" value={date(payout.createdAt)}/><Row label="Bắt đầu xử lý" value={date(payout.processingAt)}/><Row label="Đã chi trả" value={date(payout.paidAt)}/><Row label="Mã tham chiếu" value={payout.providerReference||'—'}/><Row label="Số khoản đối soát" value={String(payout.receivableIds.length)}/></Section>
       {payout.failureCode||payout.failureMessage?<Section title="Thông tin thất bại"><Row label="Mã lỗi" value={payout.failureCode||'—'}/><Row label="Lý do" value={payout.failureMessage||'—'}/><Row label="Thời điểm" value={date(payout.failedAt)}/></Section>:null}
       <View style={styles.actions}>

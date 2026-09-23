@@ -17,6 +17,8 @@ import { DatePickerSheet } from '../../components/booking/DatePickerSheet';
 import { TimePickerSheet } from '../../components/booking/TimePickerSheet';
 import { AddressPickerSheet } from '../../components/booking/AddressPickerSheet';
 import { getApiError } from '../../services/api';
+import { useAuthStore } from '../../store/useAuthStore';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 
 function createLocalBookingDate(date: string, time: string) {
   const [year, month, day] = date.split('-').map(Number);
@@ -35,6 +37,8 @@ function formatDuration(minutes: number) {
 export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const activeMode = useAuthStore(state => state.activeMode);
+  const switchMode = useAuthStore(state => state.switchMode);
   const { 
     draft, setAddress, setDate, setTime, updateServiceParticipantsCount, removeService
   } = useBookingStore();
@@ -42,6 +46,7 @@ export default function CheckoutScreen() {
   const [dateSheetVisible, setDateSheetVisible] = useState(false);
   const [timeSheetVisible, setTimeSheetVisible] = useState(false);
   const [addressSheetVisible, setAddressSheetVisible] = useState(false);
+  const [modeDialogVisible, setModeDialogVisible] = useState(false);
   const checkoutAttemptRef = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
   const checkoutInFlightRef = useRef(false);
 
@@ -82,6 +87,10 @@ export default function CheckoutScreen() {
 
   const handleCheckout = async () => {
     if (checkoutInFlightRef.current) return;
+    if (activeMode === 'MUA') {
+      setModeDialogVisible(true);
+      return;
+    }
     if (!draft.address.trim() || !draft.date || !draft.time || draft.services.length === 0) {
       Alert.alert('Chưa đủ thông tin', 'Vui lòng chọn địa chỉ, ngày, giờ và ít nhất một dịch vụ.');
       return;
@@ -390,6 +399,19 @@ export default function CheckoutScreen() {
           onSelectAddress={setAddress}
         />
       ) : null}
+      <ConfirmDialog
+        visible={modeDialogVisible}
+        title="Chuyển sang chế độ Khách hàng"
+        message={`Bạn đang sử dụng B-Book với tư cách Makeup Artist. Để đặt dịch vụ của ${draft.mua.name}, hãy chuyển sang chế độ Khách hàng.`}
+        confirmLabel="Chuyển sang Customer Mode"
+        cancelLabel="Hủy"
+        onCancel={() => setModeDialogVisible(false)}
+        onConfirm={() => {
+          switchMode('CUSTOMER');
+          setModeDialogVisible(false);
+          router.replace('/checkout');
+        }}
+      />
     </View>
   );
 }

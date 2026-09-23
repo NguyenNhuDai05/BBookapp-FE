@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Banknote, BellRing, CalendarClock, ChevronRight, LogOut, RotateCcw, ShieldCheck, Users } from 'lucide-react-native';
+import { Banknote, BellRing, CalendarClock, ChevronRight, Landmark, LogOut, RotateCcw, ShieldCheck, Users } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -20,6 +20,7 @@ export default function AdminDashboard(){
     <View style={styles.security}><ShieldCheck size={22} color={BrandColors.statusConfirmed}/><View style={{flex:1}}><Text style={styles.securityTitle}>Khu vực vận hành bảo mật</Text><Text style={styles.securityText}>Các thao tác tài chính luôn sử dụng trạng thái xác nhận từ backend.</Text></View></View>
     <Text style={styles.section}>Vận hành</Text>
     <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/mua-applications' as any)} activeOpacity={.8}><View style={styles.icon}><Users size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Duyệt hồ sơ MUA</Text><Text style={styles.cardText}>Kiểm tra, phê duyệt hoặc góp ý hồ sơ đối tác</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
+    <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/bank-accounts' as any)} activeOpacity={.8}><View style={styles.icon}><Landmark size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Duyệt tài khoản nhận tiền</Text><Text style={styles.cardText}>Đối chiếu QR và duyệt tài khoản lần đầu</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
     <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/payouts' as any)} activeOpacity={.8}><View style={styles.icon}><Banknote size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Chi trả MUA</Text><Text style={styles.cardText}>Xử lý hàng đợi payout thủ công</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
     <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/refunds' as any)} activeOpacity={.8}><View style={styles.icon}><RotateCcw size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Hoàn tiền customer</Text><Text style={styles.cardText}>Xử lý và đối soát các khoản hoàn</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>
     <TouchableOpacity style={styles.card} onPress={()=>router.push('/(admin)/notifications' as any)} activeOpacity={.8}><View style={styles.icon}><BellRing size={24} color={BrandColors.accentPink}/></View><View style={styles.copy}><Text style={styles.cardTitle}>Thông báo</Text><Text style={styles.cardText}>Gửi thông báo chung hoặc riêng cho người dùng</Text></View><ChevronRight size={20} color={BrandColors.textMuted}/></TouchableOpacity>

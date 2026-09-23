@@ -1,0 +1,93 @@
+MÀN HÌNH CHẤP THUẬN KHI ĐĂNG KÝ (IN-APP CONSENT SCREEN - CLIENT)
+Tôi xác nhận đã từ đủ 18 tuổi trở lên, đã đọc, hiểu rõ và đồng ý với Điều khoản Dịch vụ Người tiêu dùng và Chính sách Bảo vệ Dữ liệu Cá nhân của B-Book.
+Tùy chọn dữ liệu vị trí GPS: Tôi đồng ý cho phép B-Book truy cập tọa độ GPS của thiết bị để gợi ý Chuyên viên trang điểm gần nhất và điều phối lộ trình dịch vụ. Dữ liệu vị trí chỉ được kích hoạt trong thời gian tìm kiếm hoặc thực hiện lịch hẹn và được ẩn hoặc xóa sau khi hoàn tất.
+Tùy chọn công nghệ Filter AI: Tôi đồng ý cho phép B-Book quét và xử lý tạm thời khuôn mặt thông qua công cụ Filter AI để ướm thử các phong cách makeup. Dữ liệu khuôn mặt được mã hóa vector tức thời, không lưu trữ ảnh khuôn mặt gốc trên máy chủ.
+Tùy chọn tiếp thị: Tôi đồng ý nhận thông báo về chương trình ưu đãi, mã giảm giá booking từ B-Book qua Thông báo ứng dụng, tin nhắn SMS hoặc Thư điện tử.
+
+THỎA THUẬN ĐIỀU KHOẢN DỊCH VỤ DÀNH CHO NGƯỜI TIÊU DÙNG
+CĂN CỨ PHÁP LÝ
+Căn cứ Bộ luật Dân sự số 91/2015/QH13 ngày 24 tháng 11 năm 2015.
+Căn cứ Luật Thương mại số 36/2005/QH11 ngày 14 tháng 6 năm 2005.
+Căn cứ Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15 ngày 20 tháng 6 năm 2023.
+Căn cứ Luật Giao dịch điện tử số 20/2023/QH15 ngày 22 tháng 6 năm 2023.
+Căn cứ Nghị định số 52/2013/NĐ-CP và Nghị định số 85/2021/NĐ-CP của Chính phủ về thương mại điện tử.
+Căn cứ Nghị định số 55/2024/NĐ-CP của Chính phủ quy định chi tiết một số điều của Luật Bảo vệ quyền lợi người tiêu dùng.
+Điều 1. Định nghĩa và giải thích từ ngữ
+1.1. B-Book hoặc Đơn vị vận hành là Công ty Cổ phần Công nghệ B-Book, pháp nhân sở hữu và vận hành sàn giao dịch thương mại điện tử thông qua ứng dụng di động B-Book.
+1.2. Khách hàng hoặc Người tiêu dùng là cá nhân đăng ký, thiết lập tài khoản sử dụng trên ứng dụng B-Book nhằm mục đích tiếp cận thông tin, giao kết hợp đồng và sử dụng dịch vụ làm đẹp, trang điểm phục vụ nhu cầu cá nhân.
+1.3. Chuyên viên trang điểm (Makeup Artist - MUA) hoặc Đối tác là cá nhân, hộ kinh doanh hoặc tổ chức độc lập cung ứng dịch vụ trang điểm, làm đẹp đã thực hiện thủ tục đăng ký gian hàng và được B-Book phê duyệt hoạt động trên sàn giao dịch.
+1.4. Dịch vụ là các gói dịch vụ trang điểm nghệ thuật, làm tóc hoặc chăm sóc sắc đẹp do MUA niêm yết công khai trên B-Book.
+1.5. Hợp đồng dịch vụ là thỏa thuận dịch vụ điện tử được xác lập trực tiếp giữa Khách hàng và MUA thông qua chức năng đặt lịch trên B-Book.
+1.6. Khoản đặt cọc là số tiền bảo đảm thực hiện giao kết hợp đồng do Khách hàng nạp qua cổng thanh toán bảo lãnh của B-Book (với tư cách là đơn vị trung gian giữ hộ) theo quy định tại Điều 328 Bộ luật Dân sự 2015 nhằm đảm bảo việc thực hiện Hợp đồng dịch vụ với MUA.
+Điều 2. Vị trí pháp lý và phạm vi dịch vụ nền tảng
+2.1. B-Book vận hành với tư cách là Sàn giao dịch thương mại điện tử trung gian công nghệ theo quy định tại Nghị định số 52/2013/NĐ-CP và Nghị định số 85/2021/NĐ-CP. B-Book cung cấp giải pháp kết nối, hệ thống tìm kiếm, tính năng đặt lịch trực tuyến, theo dõi hành trình và đóng vai trò trung gian bảo lãnh thanh toán (Escrow Services).
+2.2. B-Book không phải là người sử dụng lao động của MUA và không trực tiếp cung cấp dịch vụ trang điểm thực tế đến Khách hàng.
+2.3. Hợp đồng dịch vụ làm đẹp ràng buộc quyền và nghĩa vụ trực tiếp giữa Khách hàng và MUA. Tuy nhiên, theo quy định của pháp luật bảo vệ quyền lợi người tiêu dùng và thương mại điện tử, B-Book chịu trách nhiệm liên đới giám sát thông tin, thẩm định hồ sơ MUA, vận hành quy trình hoàn tiền minh bạch và tiếp nhận, chủ trì điều phối giải quyết khiếu nại phát sinh từ giao dịch trên sàn.
+Điều 3. Minh bạch giá cả, phụ phí và xác nhận giao dịch từ xa
+3.1. Tuân thủ Điều 23 và Điều 38 Luật Bảo vệ quyền lợi người tiêu dùng 2023, toàn bộ thông tin về thành phần giá của Gói dịch vụ hiển thị trên ứng dụng là mức giá trọn gói cuối cùng.
+3.2. MUA không được quyền thu thêm bất kỳ khoản tiền phụ thu nào khác ngoài hệ thống B-Book, trừ trường hợp phụ phí đó đã được thiết lập hiển thị rõ ràng trên hệ thống để Khách hàng xác nhận trước khi đặt cọc, hoặc được Khách hàng đồng ý bằng văn bản điện tử thông qua tính năng nhắn tin nội bộ (In-app Chat) của ứng dụng trước thời điểm thực hiện dịch vụ.
+3.3. Giao dịch đặt lịch được coi là xác lập hợp pháp khi Khách hàng nhận được thông báo xác nhận đặt lịch thành công và mã số đơn hàng do hệ thống tự động khởi tạo sau khi hoàn tất thanh toán Khoản đặt cọc qua cổng thanh toán bảo lãnh.
+Điều 4. Chính sách đặt cọc, điều chỉnh lịch hẹn và bồi hoàn khoản tiền cọc
+4.1. Mức tiền đặt cọc: Nhằm đảm bảo cam kết giữ lịch, Khách hàng có trách nhiệm thanh toán khoản tiền đặt cọc tương đương 10% giá trị hợp đồng vào tài khoản trung gian thanh toán bảo lãnh của B-Book.
+4.2. Khách hàng đơn phương chấm dứt hoặc hủy bỏ lịch hẹn:
+4.2.1. Trường hợp thông báo trước từ 48 giờ trở lên so với giờ hẹn: Khách hàng được hoàn trả 100% Khoản đặt cọc. Tiền được hoàn về phương thức thanh toán ban đầu trong thời hạn từ 03 đến 05 ngày làm việc.
+4.2.2. Trường hợp thông báo trong khoảng từ 24 giờ đến dưới 48 giờ so với giờ hẹn: Khách hàng được hoàn trả 50% Khoản đặt cọc. 50% tiền cọc còn lại được giải ngân cho MUA để bù đắp chi phí giữ chỗ và tổn thất cơ hội kinh doanh.
+4.2.3. Trường hợp thông báo dưới 24 giờ so với giờ hẹn hoặc Khách hàng vắng mặt không lý do tại địa điểm hẹn (No-show): Khách hàng không được hoàn lại Khoản đặt cọc. Toàn bộ 100% Khoản đặt cọc được giải phóng cho MUA nhằm bồi thường chi phí di chuyển, chuẩn bị dụng cụ và tổn thất lịch trình.
+4.3. MUA đơn phương chấm dứt hoặc hủy bỏ lịch hẹn do nguyên nhân chủ quan: Khách hàng được hoàn trả 100% Khoản đặt cọc ngay lập tức. B-Book chịu trách nhiệm hỗ trợ điều phối MUA thay thế hoặc cấp mã voucher bồi thường trải nghiệm. MUA vi phạm sẽ bị xử phạt theo quy chế đối tác và trừ điểm tín nhiệm.
+4.4. Sự kiện Bất khả kháng: Khi một trong hai bên gặp trở ngại khách quan không thể khắc phục được (thiên tai, dịch bệnh, tai nạn giao thông có xác nhận của cơ quan chức năng, cấp cứu y tế đột xuất có xác nhận của cơ sở khám chữa bệnh), hai bên được miễn trừ trách nhiệm bồi thường vi phạm; Khách hàng được hoàn trả 100% Khoản đặt cọc hoặc dời lịch hẹn miễn phí.
+Điều 5. Quy chuẩn an toàn da, mỹ phẩm và bồi thường thiệt hại sức khỏe
+5.1. Khách hàng có nghĩa vụ chủ động kê khai trung thực các tiền sử bệnh lý da liễu, viêm da cơ địa hoặc tình trạng kích ứng mỹ phẩm trên hồ sơ hoặc qua In-app Chat cho MUA trước thời điểm phục vụ.
+5.2. Khách hàng có quyền từ chối cho phép MUA sử dụng mỹ phẩm không nhãn mác, hết hạn sử dụng hoặc dụng cụ cọ, mút có dấu hiệu mất vệ sinh. Trong trường hợp phát hiện vi phạm, Khách hàng có quyền dừng dịch vụ, yêu cầu lập biên bản và được hoàn trả 100% số tiền đã nạp.
+5.3. Trường hợp Khách hàng bị viêm nhiễm hoặc dị ứng nặng xuất phát từ việc MUA dùng mỹ phẩm giả, mỹ phẩm hết hạn hoặc dụng cụ không vệ sinh (có xác nhận giám định của cơ sở y tế): MUA chịu trách nhiệm độc lập bồi thường toàn bộ chi phí y tế và tổn thất sức khỏe thực tế. B-Book có nghĩa vụ trích xuất hồ sơ liên quan để phối hợp bảo vệ quyền lợi người tiêu dùng.
+Điều 6. Bảo hộ quyền hình ảnh chân dung của người tiêu dùng
+6.1. Căn cứ Điều 32 Bộ luật Dân sự 2015, hình ảnh diện mạo, khuôn mặt cá nhân của Khách hàng là quyền nhân thân bất khả xâm phạm.
+6.2. MUA tuyệt đối không được phép chụp ảnh, quay video cận cảnh hoặc sử dụng hình ảnh diện mạo của Khách hàng trước và sau trang điểm để đăng tải lên mạng xã hội hoặc portfolio nếu chưa được sự đồng ý rõ ràng của Khách hàng bằng văn bản hoặc tin nhắn xác nhận trên ứng dụng.
+6.3. Việc Khách hàng từ chối cho chụp ảnh không phải là căn cứ để MUA từ chối hoặc giảm sút chất lượng phục vụ.
+Điều 7. Quy trình tiếp nhận, xử lý khiếu nại và tranh chấp
+7.1. Thời hạn khiếu nại: Khách hàng có quyền gửi khiếu nại về chất lượng dịch vụ, thái độ của MUA hoặc sai lệch tài chính trong thời hạn tối đa 48 giờ kể từ thời điểm lịch hẹn hoàn tất trên hệ thống.
+7.2. Quy trình giải quyết 03 bước:
+7.2.1. Bước 1: Bộ phận Chăm sóc Khách hàng tiếp nhận khiếu nại, yêu cầu các bên cung cấp bằng chứng (hình ảnh, video, hóa đơn y tế, bản ghi chat) trong vòng 24 giờ.
+7.2.2. Bước 2: B-Book chủ trì hòa giải trung gian, xác định trách nhiệm căn cứ hồ sơ điện tử và ban hành hướng xử lý (hoàn cọc, áp dụng chế tài phạt MUA) trong thời hạn không quá 03 ngày làm việc.
+7.2.3. Bước 3: Trường hợp hòa giải không thành, vụ việc được chuyển đến Tòa án nhân dân có thẩm quyền tại Việt Nam. B-Book cung cấp toàn bộ chứng cứ dữ liệu điện tử liên quan phục vụ xét xử theo Luật Giao dịch điện tử.
+Điều 8. Giới hạn trách nhiệm của B-Book và nguyên tắc xử lý khiếu nại
+8.1. B-Book vận hành với tư cách là bên cung cấp giải pháp hạ tầng công nghệ và sàn giao dịch thương mại điện tử trung gian, không trực tiếp thực hiện dịch vụ làm đẹp, trang điểm thực tế đến Khách hàng. Hợp đồng cung ứng dịch vụ được xác lập trực tiếp giữa Khách hàng và MUA thông qua ứng dụng.
+8.2. Căn cứ quy định của pháp luật dân sự và thương mại, B-Book không chịu trách nhiệm bồi thường đối với các thiệt hại trực tiếp phát sinh thuần túy từ trình độ chuyên môn, kỹ thuật tay nghề, tính thẩm mỹ chủ quan hoặc các hành vi vi phạm cá nhân ngoài tầm kiểm soát của MUA tại điểm hẹn, trừ các trường hợp pháp luật có quy định về trách nhiệm liên đới của đơn vị vận hành sàn giao dịch thương mại điện tử.
+8.3. B-Book không áp dụng cơ chế miễn trừ trách nhiệm tuyệt đối. Tuân thủ Luật Bảo vệ quyền lợi người tiêu dùng 2023 và Nghị định số 85/2021/NĐ-CP, trong mọi trường hợp phát sinh tranh chấp hoặc khiếu nại giữa Khách hàng và MUA, B-Book thực hiện đầy đủ các trách nhiệm bắt buộc sau đây:
+8.3.1. Tiếp nhận mọi thông tin khiếu nại của Khách hàng thông qua hệ thống hỗ trợ trên ứng dụng và đóng vai trò làm đầu mối trung gian điều phối, hỗ trợ hòa giải giữa hai bên.
+8.3.2. Tiến hành trích xuất dữ liệu đơn hàng, lịch sử giao dịch, dữ liệu định vị di chuyển và nội dung tin nhắn trao đổi trên hệ thống In-app Chat để làm căn cứ minh bạch xác định sự việc.
+8.3.3. Áp dụng biện pháp phong tỏa số tiền đặt cọc hoặc tạm giữ doanh thu chi trả của MUA liên quan đến đơn hàng có tranh chấp trong suốt thời gian xử lý khiếu nại.
+8.3.4. Cung cấp đầy đủ, trung thực thông tin định danh, địa chỉ hoạt động và dữ liệu giao dịch của MUA cho cơ quan quản lý nhà nước có thẩm quyền hoặc Tòa án khi có yêu cầu hợp pháp nhằm phục vụ việc bảo vệ quyền lợi người tiêu dùng.
+8.3.5. Chịu trách nhiệm liên đới bồi thường thiệt hại cho Khách hàng trong trường hợp sự cố phát sinh do B-Book vi phạm nghĩa vụ xác thực thông tin đối tác, cung cấp thông tin sai lệch trên ứng dụng hoặc không thực hiện đúng quy trình tiếp nhận, xử lý khiếu nại theo quy định của pháp luật thương mại điện tử.
+CHÍNH SÁCH BẢO VỆ DỮ LIỆU CÁ NHÂN NGƯỜI TIÊU DÙNG
+CĂN CỨ PHÁP LÝ
+Căn cứ Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 ngày 27 tháng 6 năm 2025.
+Căn cứ Nghị định số 13/2023/NĐ-CP ngày 17 tháng 4 năm 2023 của Chính phủ về bảo vệ dữ liệu cá nhân.
+Căn cứ Nghị định số 356/2025/NĐ-CP của Chính phủ quy định chi tiết một số điều của Luật Bảo vệ dữ liệu cá nhân.
+Điều 1. Nguyên tắc xử lý dữ liệu cá nhân
+1.1. B-Book cam kết xử lý dữ liệu cá nhân của Khách hàng một cách công khai, minh bạch, đúng mục đích đã thông báo.
+1.2. Việc thu thập dữ liệu dựa trên sự đồng ý rõ ràng, tự nguyện; không áp dụng cơ chế đồng ý ngầm định hoặc tích chọn sẵn.
+1.3. Dữ liệu thu thập chỉ giới hạn trong phạm vi cần thiết phục vụ hoạt động vận hành dịch vụ đặt lịch trang điểm.
+Điều 2. Phân loại dữ liệu thu thập và mục đích sử dụng
+2.1. Dữ liệu cá nhân cơ bản: Bao gồm họ và tên, ngày tháng năm sinh, giới tính, số điện thoại liên lạc, địa chỉ thư điện tử (email), địa chỉ nơi ở hoặc địa chỉ nhận dịch vụ trang điểm. Mục đích xử lý: Xác thực đăng ký tài khoản, gửi mã OTP, quản trị lịch hẹn, đối soát thông tin và chăm sóc khách hàng.
+2.2. Dữ liệu cá nhân nhạy cảm:
+2.2.1. Dữ liệu vị trí địa lý (GPS): Thu thập tọa độ thiết bị để gợi ý danh sách MUA lân cận và điều phối cuốc hẹn. Tọa độ chi tiết chỉ kích hoạt theo phiên làm việc và được ẩn hoặc xóa sau khi hoàn tất lịch hẹn.
+2.2.2. Dữ liệu hình ảnh nhận diện khuôn mặt (Filter AI): Thu thập qua camera khi Khách hàng ướm thử layout makeup. Hình ảnh được xử lý chuyển đổi thành chuỗi vector kỹ thuật số, không lưu trữ ảnh khuôn mặt gốc chưa mã hóa trên cơ sở dữ liệu chung.
+2.2.3. Dữ liệu tài chính và giao dịch: Ghi nhận lịch sử đặt cọc, thanh toán và hoàn tiền. Toàn bộ giao dịch thẻ được thực hiện qua cổng thanh toán trung gian đạt tiêu chuẩn quốc tế PCI-DSS. B-Book không lưu trữ số thẻ ngân hàng, ngày hết hạn hoặc mã số bí mật CVV/CVC.
+Điều 3. Chia sẻ dữ liệu và bên thứ ba
+3.1. B-Book chỉ chia sẻ thông tin gồm Họ tên, Số điện thoại và Địa chỉ nhận dịch vụ cho MUA đã xác nhận nhận lịch hẹn nhằm mục đích thực hiện hợp đồng. MUA không được quyền sử dụng lại thông tin này cho mục đích khác.
+3.2. Dữ liệu giao dịch được chuyển giao đến tổ chức trung gian thanh toán được Ngân hàng Nhà nước cấp phép.
+3.3. B-Book tuyệt đối không bán, cho thuê hoặc thương mại hóa dữ liệu cá nhân của Khách hàng cho các đơn vị quảng cáo bên thứ ba.
+3.4. Dữ liệu chỉ được cung cấp cho cơ quan nhà nước có thẩm quyền tại Việt Nam khi có văn bản yêu cầu chính thức theo đúng quy định pháp luật.
+Điều 4. Quyền và nghĩa vụ của chủ thể dữ liệu
+4.1. Khách hàng có quyền tra cứu, xem, chỉnh sửa thông tin cá nhân của mình trực tiếp trong mục Hồ sơ cá nhân trên ứng dụng.
+4.2. Khách hàng có quyền rút lại sự đồng ý truy cập GPS, Máy ảnh trong phần Cài đặt của thiết bị di động bất kỳ lúc nào.
+4.3. Khách hàng có quyền yêu cầu xóa tài khoản và dữ liệu cá nhân. B-Book thực hiện xóa bỏ không thể khôi phục trong vòng 72 giờ kể từ khi nhận được yêu cầu hợp lệ, trừ các dữ liệu bắt buộc phải lưu trữ theo luật thuế và kế toán.
+4.4. Khách hàng có quyền từ chối nhận thông báo tiếp thị, tin nhắn khuyến mãi thông qua tính năng tắt thông báo trên ứng dụng.
+4.5. Khách hàng có nghĩa vụ tự bảo quản thông tin đăng nhập, mã xác thực OTP và không chia sẻ tài khoản cho người khác.
+Điều 5. Thông báo sự cố vi phạm dữ liệu cá nhân (Data Breach)
+Khi phát hiện sự cố an ninh mạng dẫn đến nguy cơ rò rỉ, mất mát hoặc truy cập trái phép dữ liệu cá nhân, B-Book cam kết:
+5.1. Thực hiện các biện pháp kỹ thuật cô lập vùng dữ liệu bị ảnh hưởng trong vòng 02 giờ.
+5.2. Gửi văn bản thông báo hành vi vi phạm đến Cục An ninh mạng và phòng, chống tội phạm sử dụng công nghệ cao (A05) - Bộ Công an trong thời hạn không quá 72 giờ kể từ khi ghi nhận sự cố.
+5.3. Thông báo trực tiếp đến Khách hàng bị ảnh hưởng qua email hoặc thông báo ứng dụng kèm theo các chỉ dẫn phòng ngừa rủi ro.
+
+

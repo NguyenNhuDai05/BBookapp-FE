@@ -8,13 +8,14 @@ const mapAdmin = (x:any):AdminRefundDto => ({
   amount:Number(x.amount??0),status:mapRefundStatus(x.status),reason:String(x.reason??''),providerReference:x.providerReference,
   destinationBankBin:x.destinationBankBin,destinationBankName:x.destinationBankName,destinationAccountNumber:x.destinationAccountNumber,
   maskedDestinationAccountNumber:x.maskedDestinationAccountNumber,destinationAccountName:x.destinationAccountName,
+  destinationQrCodeUrl:x.destinationQrCodeUrl,
   createdAt:String(x.createdAt??''),processingAt:x.processingAt,completedAt:x.completedAt,failedAt:x.failedAt,
   failureCode:x.failureCode,failureMessage:x.failureMessage,
 });
 
 export const refundService = {
   getBankAccounts: async ():Promise<CustomerBankAccountDto[]> => (await api.get('/customer-bank-accounts')).data,
-  addBankAccount: async (request:UpsertCustomerBankAccountRequest):Promise<CustomerBankAccountDto> => (await api.post('/customer-bank-accounts',request)).data,
+  addBankAccount: async (request:UpsertCustomerBankAccountRequest):Promise<CustomerBankAccountDto> => (await api.post('/customer-bank-accounts',{...request,qrCodeUrl:request.qrCodeUrl||undefined})).data,
   deleteBankAccount: async (id:string):Promise<void> => { await api.delete(`/customer-bank-accounts/${id}`); },
   setDestination: async (refundId:string,bankAccountId:string):Promise<RefundSummaryDto> => (await api.post(`/customer-refunds/${refundId}/destination`,{bankAccountId})).data,
   getAdminQueue: async ():Promise<AdminRefundDto[]> => ((await api.get('/Refund')).data as any[]).map(mapAdmin),

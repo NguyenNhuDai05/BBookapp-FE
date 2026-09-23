@@ -61,12 +61,19 @@ export const getApiError = (error: unknown) => {
         message?: string;
         Message?: string;
         title?: string;
+        errors?: Record<string, string[]>;
+        Errors?: Record<string, string[]>;
       }
     | undefined;
+  const validationErrors = payload?.errors ?? payload?.Errors;
+  const firstValidationMessage = validationErrors
+    ? Object.values(validationErrors).flat().find(Boolean)
+    : undefined;
   return {
     status: error.response?.status,
     code: payload?.code ?? payload?.Code,
     message:
+      firstValidationMessage ??
       payload?.message ??
       payload?.Message ??
       payload?.title ??

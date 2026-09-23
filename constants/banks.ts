@@ -1,6 +1,7 @@
 export type BankOption = { name: string; fullName: string; code: string; bin: string; color: string };
 
 export const VIETNAM_BANKS: BankOption[] = [
+  { name: 'MoMo', fullName: 'Ví điện tử MoMo', code: 'MOMO', bin: 'MOMO', color: '#A50064' },
   { name: 'MB Bank', fullName: 'Ngân hàng TMCP Quân Đội', code: 'MB', bin: '970422', color: '#1677D2' },
   { name: 'Vietcombank', fullName: 'Ngân hàng TMCP Ngoại thương Việt Nam', code: 'VCB', bin: '970436', color: '#0A8A62' },
   { name: 'Techcombank', fullName: 'Ngân hàng TMCP Kỹ thương Việt Nam', code: 'TCB', bin: '970407', color: '#D9272E' },

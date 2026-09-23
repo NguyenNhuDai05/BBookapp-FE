@@ -8,10 +8,11 @@ import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioForm
 import { useMuaPortfolio } from '../../hooks/useMuaPortfolio';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { getApiError } from '../../services/api';
+import { PortfolioCommentsSheet } from '../../components/feed/PortfolioCommentsSheet';
 
 export default function PortfolioFeedScreen() {
   const router = useRouter();
-  const { initialIndex } = useLocalSearchParams();
+  const { initialIndex, portfolioId } = useLocalSearchParams();
   const { data: portfolio, deleteItem, updateItem, isDeleting, toggleLike, toggleSave } = useMuaPortfolio('me');
   const flatListRef = useRef<FlatList>(null);
 
@@ -19,13 +20,17 @@ export default function PortfolioFeedScreen() {
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
+  const [commentItem, setCommentItem] = useState<any>(null);
 
   const hasScrolledRef = useRef(false);
 
   useEffect(() => {
-    if (initialIndex !== undefined && portfolio && portfolio.length > 0 && !hasScrolledRef.current) {
+    if ((initialIndex !== undefined || portfolioId !== undefined) && portfolio && portfolio.length > 0 && !hasScrolledRef.current) {
       hasScrolledRef.current = true;
-      const targetIndex = Number(initialIndex);
+      const matchedIndex = portfolioId
+        ? portfolio.findIndex(item => String(item.id || item.portfolioId) === String(portfolioId))
+        : -1;
+      const targetIndex = matchedIndex >= 0 ? matchedIndex : Number(initialIndex ?? 0);
       if (targetIndex >= 0 && targetIndex < portfolio.length) {
         setTimeout(() => {
           try {
@@ -39,7 +44,7 @@ export default function PortfolioFeedScreen() {
         }, 100);
       }
     }
-  }, [initialIndex, portfolio]);
+  }, [initialIndex, portfolio, portfolioId]);
 
   const handleLike = async (item: any) => {
     try {
@@ -83,6 +88,7 @@ export default function PortfolioFeedScreen() {
       item={item}
       onLike={() => handleLike(item)}
       onSave={() => handleSave(item)}
+      onComment={() => setCommentItem(item)}
       onOptions={() => openOptions(item)}
     />
   );
@@ -144,6 +150,7 @@ export default function PortfolioFeedScreen() {
         onCancel={() => { setDeleteVisible(false); setSelectedPost(null); }}
         onConfirm={handleDelete}
       />
+      <PortfolioCommentsSheet item={commentItem} onClose={() => setCommentItem(null)} />
     </SafeAreaView>
   );
 }
