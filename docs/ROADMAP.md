@@ -13,7 +13,7 @@
 * Status: **In Progress**
 - `[ ]` Customer: Advanced Booking Checkout Flow
 - `[ ]` Customer: Advanced Search and Filtering 
-- `[ ]` MUA: Comprehensive Onboarding UI
+- `[~]` MUA: Comprehensive Onboarding UI — 4-step application, identity/bank/service/portfolio review and admin decision flow implemented; private document storage hardening remains before production rollout.
 - `[ ]` MUA: Services & Portfolio Management Portal
 - `[ ]` Admin: Application Approval Portal
 
