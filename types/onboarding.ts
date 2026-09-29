@@ -41,4 +41,12 @@ export interface MuaApplicationRequestDto {
   socialLinks?: string;
   avatarUrl: string;
   styleIds: number[];
+  address: string;
+  identityFrontUrl: string;
+  identityBackUrl: string;
+  portraitUrl: string;
+  certificateUrls: string[];
+  portfolioUrls: string[];
+  services: Array<{ name: string; price: number; durationMinutes: number; description?: string }>;
+  bankAccount: { bankCode: string; bankName?: string; accountNumber: string; accountHolderName: string };
 }
