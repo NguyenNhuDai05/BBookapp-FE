@@ -33,14 +33,18 @@ export function MuaCompletionCard({ eligibility, onContinue, compact = false }: 
     );
   }
 
+  if (eligibility.verificationStatus === 'PendingReview') {
+    return <View style={styles.card}><View style={styles.titleRow}><CheckCircle2 size={21} color={BrandColors.accentRose}/><Text style={styles.title}>Admin đang xét duyệt hồ sơ</Text></View><Text style={styles.description}>Hồ sơ chưa hiển thị trên marketplace và chưa thể nhận booking cho đến khi được duyệt.</Text><TouchableOpacity style={styles.button} onPress={onContinue}><Text style={styles.buttonText}>Xem trạng thái</Text><ChevronRight size={19} color={BrandColors.textWhite}/></TouchableOpacity></View>;
+  }
+
   return (
     <View style={styles.card}>
       <View style={styles.progressHeader}>
-        <View><Text style={styles.eyebrow}>HOÀN THIỆN HỒ SƠ</Text><Text style={styles.title}>Sẵn sàng để khách hàng tìm thấy bạn</Text></View>
+        <View><Text style={styles.eyebrow}>{eligibility.verificationStatus === 'Rejected' ? 'CẦN CHỈNH SỬA' : 'HOÀN THIỆN HỒ SƠ'}</Text><Text style={styles.title}>{eligibility.verificationStatus === 'Rejected' ? 'Cập nhật hồ sơ theo góp ý của admin' : 'Hoàn thành để nhận booking'}</Text></View>
         <Text style={styles.percent}>{eligibility.completionPercentage}%</Text>
       </View>
       <View style={styles.track}><View style={[styles.fill, { width: `${eligibility.completionPercentage}%` }]} /></View>
-      <Text style={styles.description}>Hồ sơ của bạn chưa được công khai. Hoàn thành các mục còn thiếu để bắt đầu nhận booking.</Text>
+      <Text style={styles.description}>{eligibility.verificationStatus === 'Rejected' ? (eligibility.rejectionReason || 'Vui lòng kiểm tra, cập nhật hồ sơ và gửi lại.') : 'Hồ sơ của bạn chưa được công khai. Hoàn thành các mục còn thiếu rồi gửi admin xét duyệt.'}</Text>
       {nextItems.map(item => (
         <View key={item.key} style={styles.requirementRow}>
           <Circle size={15} color={BrandColors.textMuted} />

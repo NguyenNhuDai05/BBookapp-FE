@@ -8,7 +8,7 @@ import { getApiError } from '../../services/api';
 import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../constants/theme';
 
 const routes: Record<string, string> = {
-  accountActive: '/(mua)/settings', basicInformation: '/(mua)/edit-profile', phoneNumber: '/(mua)/edit-profile', city: '/(mua)/edit-profile', bio: '/(mua)/edit-profile', specialty: '/(mua)/edit-profile', activeService: '/(mua)/services', publicPortfolioImages: '/(mua)/services?tab=PORTFOLIO', workingSchedule: '/(mua)/working-hours',
+  accountActive: '/(mua)/settings', basicInformation: '/(mua)/edit-profile', avatar: '/(mua)/edit-profile', phoneNumber: '/(mua)/edit-profile', city: '/(mua)/edit-profile', address: '/(mua)/edit-profile', bio: '/(mua)/edit-profile', specialty: '/(mua)/edit-profile', activeService: '/(mua)/services', publicPortfolioImages: '/(mua)/services?tab=PORTFOLIO', identityVerification: '/(mua)/identity-verification', bankAccount: '/(mua)/bank-account-form',
 };
 
 export default function MuaSetupScreen() {
@@ -33,8 +33,7 @@ export default function MuaSetupScreen() {
         <View style={[styles.reviewCard, data.verificationStatus === 'Approved' && styles.reviewApproved]}>
           <Text style={styles.reviewTitle}>{data.verificationStatus === 'Approved' ? 'Hồ sơ đã được duyệt' : data.verificationStatus === 'PendingReview' ? 'Admin đang xét duyệt' : data.verificationStatus === 'Rejected' ? 'Hồ sơ cần điều chỉnh' : 'Sẵn sàng gửi xét duyệt'}</Text>
           <Text style={styles.reviewText}>{data.verificationStatus === 'Approved' ? 'Bạn có thể xuất hiện công khai và nhận booking khi các điều kiện vận hành vẫn đầy đủ.' : data.verificationStatus === 'PendingReview' ? 'Bạn vẫn có thể cập nhật hồ sơ. Các chỉnh sửa thông thường sau khi được duyệt sẽ không làm mất trạng thái Approved.' : data.verificationStatus === 'Rejected' ? (data.rejectionReason || 'Vui lòng cập nhật hồ sơ theo góp ý rồi gửi lại.') : 'Sau khi hoàn thành toàn bộ checklist, gửi hồ sơ để admin kiểm tra lần đầu.'}</Text>
-          {data.verificationStatus === 'Rejected' ? <TouchableOpacity style={styles.submitReview} onPress={()=>router.push('/mua-onboarding/apply')}><Text style={styles.submitReviewText}>Sửa hồ sơ và gửi lại</Text></TouchableOpacity> : null}
-          {data.verificationStatus === 'Draft' ? <TouchableOpacity disabled={data.missingRequirements.length > 0 || submitReview.isPending} style={[styles.submitReview,(data.missingRequirements.length > 0 || submitReview.isPending)&&styles.disabled]} onPress={()=>submitReview.mutate(undefined,{onError:e=>Alert.alert('Không thể gửi hồ sơ',getApiError(e).message)})}>{submitReview.isPending?<ActivityIndicator color="#FFF"/>:<Text style={styles.submitReviewText}>Gửi admin xét duyệt</Text>}</TouchableOpacity> : null}
+          {(data.verificationStatus === 'Draft' || data.verificationStatus === 'Rejected') ? <TouchableOpacity disabled={data.missingRequirements.length > 0 || submitReview.isPending} style={[styles.submitReview,(data.missingRequirements.length > 0 || submitReview.isPending)&&styles.disabled]} onPress={()=>submitReview.mutate(undefined,{onError:e=>Alert.alert('Không thể gửi hồ sơ',getApiError(e).message)})}>{submitReview.isPending?<ActivityIndicator color="#FFF"/>:<Text style={styles.submitReviewText}>{data.verificationStatus === 'Rejected' ? 'Gửi lại để xét duyệt' : 'Gửi admin xét duyệt'}</Text>}</TouchableOpacity> : null}
         </View>
 
         <Text style={styles.sectionTitle}>Các mục cần hoàn thiện</Text>
@@ -49,8 +48,6 @@ export default function MuaSetupScreen() {
           })}
         </View>
 
-        <Text style={styles.sectionTitle}>Thiết lập bổ sung</Text>
-        <View style={styles.optional}><Text style={styles.optionalTitle}>Xác minh & tài khoản nhận tiền</Text><Text style={styles.optionalText}>Các thiết lập này không chặn việc nhận booking khi backend chưa yêu cầu. Bạn có thể hoàn thiện sau trong Cài đặt.</Text></View>
       </ScrollView>
     </SafeAreaView>
   );
