@@ -1,8 +1,11 @@
+import { AppBottomSheet } from '../../ui/AppBottomSheet';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image} from 'react-native';
+
+import { AppAlert as appDialog } from '../../ui/dialogStore';
 import * as ImagePicker from 'expo-image-picker';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
-import { X } from 'lucide-react-native';
+
 import { uploadImage } from '../../../services/supabase';
 import { useMuaServices } from '../../../hooks/useMuaServices';
 import { getApiError } from '../../../services/api';
@@ -48,6 +51,7 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
   };
 
   const handleSubmit = async () => {
+    if (isUploading) return;
     setIsUploading(true);
     try {
       const finalUrls = await Promise.all(
@@ -55,7 +59,7 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
           return uploadImage(img);
         })
       );
-      
+
       await onSubmit({
         title,
         description,
@@ -67,33 +71,16 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
       onClose();
     } catch (error) {
       console.error('Error saving portfolio', error);
-      Alert.alert('Không thể lưu portfolio', getApiError(error).message);
+      appDialog.alert('Không thể lưu portfolio', getApiError(error).message);
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-      onShow={resetForm}
-    >
-      <KeyboardAvoidingView 
-        style={styles.modalOverlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{initialData ? 'Sửa Portfolio' : 'Thêm tác phẩm'}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <X size={20} color={BrandColors.textDark} />
-            </TouchableOpacity>
-          </View>
+    <AppBottomSheet visible={visible} title={initialData ? 'Sửa Portfolio' : 'Thêm tác phẩm'} onClose={onClose} loading={isUploading} onShow={resetForm} contentStyle={{height:'85%'}}>
 
-          <ScrollView style={styles.formContent} showsVerticalScrollIndicator={false}>
+<ScrollView style={styles.formContent} showsVerticalScrollIndicator={false}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Hình ảnh *</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
@@ -154,56 +141,27 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
             </View>
           </ScrollView>
 
-          <View style={styles.modalFooter}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+<View style={styles.modalFooter}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose} disabled={isUploading}>
               <Text style={styles.cancelBtnText}>Hủy</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.submitBtn, (!imageUrls || imageUrls.length === 0 || isUploading) ? styles.submitBtnDisabled : null]} 
+            <TouchableOpacity
+              style={[styles.submitBtn, (!imageUrls || imageUrls.length === 0 || isUploading) ? styles.submitBtnDisabled : null]}
               onPress={handleSubmit}
               disabled={(!imageUrls || imageUrls.length === 0 || isUploading)}
             >
               <Text style={styles.submitBtnText}>{isUploading ? 'Đang tải lên...' : 'Lưu'}</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
+</AppBottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFF',
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    height: '70%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: BrandColors.borderLight,
-  },
-  modalTitle: {
-    fontFamily: Typography.bold,
-    fontSize: 18,
-    color: BrandColors.textDark,
-  },
-  closeBtn: {
-    padding: 4,
-  },
-  formContent: {
+formContent: {
     padding: Spacing.md,
   },
-  imagePickerBtn: {
+imagePickerBtn: {
     borderWidth: 1,
     borderColor: BrandColors.borderLight,
     borderStyle: 'dashed',
@@ -214,26 +172,26 @@ const styles = StyleSheet.create({
     backgroundColor: BrandColors.bgPrimary,
     overflow: 'hidden',
   },
-  previewImage: {
+previewImage: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-  imagePickerText: {
+imagePickerText: {
     color: BrandColors.textMuted,
     fontFamily: Typography.medium,
     fontSize: 14,
   },
-  inputGroup: {
+inputGroup: {
     marginBottom: Spacing.lg,
   },
-  label: {
+label: {
     fontFamily: Typography.medium,
     fontSize: 14,
     color: BrandColors.textDark,
     marginBottom: Spacing.xs,
   },
-  input: {
+input: {
     borderWidth: 1,
     borderColor: BrandColors.borderLight,
     borderRadius: Radius.md,
@@ -244,27 +202,27 @@ const styles = StyleSheet.create({
     color: BrandColors.textDark,
     backgroundColor: BrandColors.bgPrimary,
   },
-  textArea: {
+textArea: {
     height: 80,
     textAlignVertical: 'top',
   },
-  characterCount: {
+characterCount: {
     marginTop: Spacing.xs,
     textAlign: 'right',
     color: BrandColors.textMuted,
     fontFamily: Typography.regular,
     fontSize: 12,
   },
-  serviceChip: { maxWidth: 170, paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.full, backgroundColor: '#F4F4F5', marginRight: 8, borderWidth: 1, borderColor: '#EEE' },
-  serviceChipActive: { backgroundColor: '#FFF0F5', borderColor: BrandColors.accentPink },
-  modalFooter: {
+serviceChip: { maxWidth: 170, paddingHorizontal: 14, paddingVertical: 10, borderRadius: Radius.full, backgroundColor: '#F4F4F5', marginRight: 8, borderWidth: 1, borderColor: '#EEE' },
+serviceChipActive: { backgroundColor: '#FFF0F5', borderColor: BrandColors.accentPink },
+modalFooter: {
     flexDirection: 'row',
     padding: Spacing.md,
     borderTopWidth: 1,
     borderTopColor: BrandColors.borderLight,
     gap: Spacing.md,
   },
-  cancelBtn: {
+cancelBtn: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: Radius.md,
@@ -272,24 +230,24 @@ const styles = StyleSheet.create({
     borderColor: BrandColors.borderLight,
     alignItems: 'center',
   },
-  cancelBtnText: {
+cancelBtnText: {
     fontFamily: Typography.semiBold,
     fontSize: 15,
     color: BrandColors.textDark,
   },
-  submitBtn: {
+submitBtn: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: Radius.md,
     backgroundColor: BrandColors.accentRose,
     alignItems: 'center',
   },
-  submitBtnDisabled: {
+submitBtnDisabled: {
     backgroundColor: BrandColors.textMuted,
   },
-  submitBtnText: {
+submitBtnText: {
     fontFamily: Typography.semiBold,
     fontSize: 15,
     color: '#FFF',
-  },
+  }
 });

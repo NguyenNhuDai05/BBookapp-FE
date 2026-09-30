@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,7 +18,7 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const { user, updateUser } = useAuthStore();
   const muaId = 'me';
-  
+
   const { data: profile, isLoading } = useMuaProfile(muaId);
 
   const [avatar, setAvatar] = useState('');
@@ -70,13 +71,13 @@ export default function EditProfileScreen() {
       setFormError('Liên kết Instagram hoặc Facebook không hợp lệ.');
       return;
     }
-    
+
     setIsUploading(true);
     try {
       const finalAvatarUrl = await uploadImage(avatar);
       await updateProfile({ displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceYears: Number(experienceYears) || 0, styleIds, instagramUrl: normalizedInstagram, facebookUrl: normalizedFacebook });
       updateUser({ name: name.trim(), avatarUrl: finalAvatarUrl });
-      Alert.alert('Thành công', 'Đã lưu thông tin hồ sơ.');
+      appDialog.alert('Thành công', 'Đã lưu thông tin hồ sơ.');
       router.back();
     } catch {
       setFormError('Không thể lưu hồ sơ. Vui lòng kiểm tra kết nối và thử lại.');
@@ -88,9 +89,9 @@ export default function EditProfileScreen() {
   const handleChangeAvatar = async () => {
     // Request permission to access media library
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (permissionResult.granted === false) {
-      Alert.alert('Cấp quyền', 'Bạn cần cấp quyền truy cập thư viện ảnh để thay đổi ảnh đại diện.');
+      appDialog.alert('Cấp quyền', 'Bạn cần cấp quyền truy cập thư viện ảnh để thay đổi ảnh đại diện.');
       return;
     }
 
@@ -131,12 +132,12 @@ export default function EditProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView 
-        style={styles.keyboardView} 
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-          
+
           {/* Avatar Section */}
           <View style={styles.avatarSection}>
             <View style={styles.avatarContainer}>
@@ -156,7 +157,7 @@ export default function EditProfileScreen() {
 
           {/* Form Section */}
           <View style={styles.formSection}>
-            
+
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}>
                 <User size={16} color={BrandColors.textMuted} />
@@ -188,7 +189,7 @@ export default function EditProfileScreen() {
                 numberOfLines={4}
               />
             </View>
-            
+
             {formError ? <Text style={styles.formError}>{formError}</Text> : null}
             <ProfileInput icon={<Phone size={16} color={BrandColors.textMuted}/>} label="Số điện thoại" value={phoneNumber} onChangeText={setPhoneNumber} keyboardType="phone-pad" />
             <ProfileInput icon={<MapPin size={16} color={BrandColors.textMuted}/>} label="Thành phố / khu vực" value={city} onChangeText={setCity} />
@@ -214,17 +215,17 @@ function ProfileInput({ icon, label, ...props }: { icon: React.ReactNode; label:
 }
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: '#FFF',
   },
-  centerContainer: {
+centerContainer: {
     flex: 1,
     backgroundColor: '#FFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
+header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -236,39 +237,39 @@ const styles = StyleSheet.create({
     zIndex: 10,
     ...Shadows.sm,
   },
-  headerBtn: {
+headerBtn: {
     padding: Spacing.xs,
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: {
+headerTitle: {
     fontFamily: Typography.semiBold,
     fontSize: 18,
     color: BrandColors.textDark,
   },
-  keyboardView: {
+keyboardView: {
     flex: 1,
   },
-  scrollView: {
+scrollView: {
     flex: 1,
   },
-  scrollContent: {
+scrollContent: {
     paddingBottom: Spacing.xxl,
   },
-  avatarSection: {
+avatarSection: {
     alignItems: 'center',
     paddingVertical: Spacing.xl,
     backgroundColor: '#FFF9FA',
     borderBottomWidth: 1,
     borderBottomColor: BrandColors.borderLight,
   },
-  avatarContainer: {
+avatarContainer: {
     position: 'relative',
     marginBottom: Spacing.md,
   },
-  avatar: {
+avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
@@ -276,7 +277,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFF',
     ...Shadows.md,
   },
-  cameraBtn: {
+cameraBtn: {
     position: 'absolute',
     bottom: 0,
     right: 0,
@@ -289,29 +290,29 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#FFF',
   },
-  avatarHelperText: {
+avatarHelperText: {
     fontFamily: Typography.regular,
     fontSize: 13,
     color: BrandColors.textMuted,
   },
-  formSection: {
+formSection: {
     padding: Spacing.lg,
   },
-  inputGroup: {
+inputGroup: {
     marginBottom: Spacing.lg,
   },
-  labelRow: {
+labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.sm,
   },
-  label: {
+label: {
     fontFamily: Typography.medium,
     fontSize: 15,
     color: BrandColors.textDark,
     marginLeft: Spacing.xs,
   },
-  input: {
+input: {
     backgroundColor: BrandColors.background,
     borderWidth: 1,
     borderColor: BrandColors.borderLight,
@@ -322,46 +323,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: BrandColors.textDark,
   },
-  textArea: {
+textArea: {
     height: 120,
   },
-  helpText: {
+helpText: {
     fontFamily: Typography.regular,
     fontSize: 12,
     color: BrandColors.textMuted,
     marginTop: Spacing.xs,
   },
-  formError: { color: BrandColors.statusCancelled, fontFamily: Typography.regular, fontSize: 12, marginBottom: Spacing.md },
-  sectionLabel:{fontFamily:Typography.bold,fontSize:17,color:BrandColors.textDark},
-  styleChips:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:Spacing.md},
-  styleChip:{minHeight:40,paddingHorizontal:13,borderRadius:Radius.full,borderWidth:1,borderColor:BrandColors.borderLight,alignItems:'center',justifyContent:'center'},
-  styleChipSelected:{backgroundColor:BrandColors.accentPink,borderColor:BrandColors.accentPink},
-  styleChipText:{fontFamily:Typography.medium,fontSize:13,color:BrandColors.textBody},
-  styleChipTextSelected:{color:'#FFF'},
-  verificationBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0F9FF',
-    padding: Spacing.md,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    borderColor: '#BAE6FD',
-    marginTop: Spacing.md,
-  },
-  verificationTexts: {
-    marginLeft: Spacing.sm,
-    flex: 1,
-  },
-  verificationTitle: {
-    fontFamily: Typography.medium,
-    fontSize: 15,
-    color: '#0369A1',
-    marginBottom: 2,
-  },
-  verificationDesc: {
-    fontFamily: Typography.regular,
-    fontSize: 13,
-    color: '#0284C7',
-    lineHeight: 18,
-  },
+formError: { color: BrandColors.statusCancelled, fontFamily: Typography.regular, fontSize: 12, marginBottom: Spacing.md },
+sectionLabel:{fontFamily:Typography.bold,fontSize:17,color:BrandColors.textDark},
+styleChips:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:Spacing.md},
+styleChip:{minHeight:40,paddingHorizontal:13,borderRadius:Radius.full,borderWidth:1,borderColor:BrandColors.borderLight,alignItems:'center',justifyContent:'center'},
+styleChipSelected:{backgroundColor:BrandColors.accentPink,borderColor:BrandColors.accentPink},
+styleChipText:{fontFamily:Typography.medium,fontSize:13,color:BrandColors.textBody},
+styleChipTextSelected:{color:'#FFF'}
 });

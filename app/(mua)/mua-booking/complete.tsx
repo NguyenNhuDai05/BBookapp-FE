@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { AppAlert as appDialog } from '../../../components/ui/dialogStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Upload, X, CheckCircle } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -12,7 +13,7 @@ import { getApiError } from '../../../services/api';
 export default function MuaCompleteBookingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  
+
   const { data: booking, isLoading } = useBookingDetail(id);
   const { mutateAsync: updateStatus, isPending } = useUpdateBookingStatus(booking?.mua.id || 'me');
 
@@ -39,16 +40,16 @@ export default function MuaCompleteBookingScreen() {
   const handleComplete = async () => {
     if (isPending) return;
     if (images.length === 0) {
-      Alert.alert('Bắt buộc', 'Vui lòng tải lên ít nhất 1 hình ảnh kết quả makeup để hoàn thành đơn!');
+      appDialog.alert('Bắt buộc', 'Vui lòng tải lên ít nhất 1 hình ảnh kết quả makeup để hoàn thành đơn!');
       return;
     }
-    
+
     try {
       await updateStatus({ bookingId: id, status: 'WAITING_CUSTOMER' });
-      Alert.alert('Thành công', 'Đã gửi xác nhận hoàn thành. Vui lòng chờ khách hàng xác nhận để nhận thanh toán.');
+      appDialog.alert('Thành công', 'Đã gửi xác nhận hoàn thành. Vui lòng chờ khách hàng xác nhận để nhận thanh toán.');
       router.replace('/(mua)/bookings');
     } catch (error) {
-      Alert.alert('Không thể hoàn thành', getApiError(error).message);
+      appDialog.alert('Không thể hoàn thành', getApiError(error).message);
     }
   };
 
@@ -92,7 +93,7 @@ export default function MuaCompleteBookingScreen() {
               </TouchableOpacity>
             </View>
           ))}
-          
+
           {images.length < 5 && (
             <TouchableOpacity style={styles.uploadBtn} onPress={pickImage}>
               <Upload size={32} color={BrandColors.textMuted} />
@@ -103,7 +104,7 @@ export default function MuaCompleteBookingScreen() {
       </ScrollView>
 
       <View style={styles.bottomBar}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.submitBtn, (images.length === 0 || isPending) && styles.submitBtnDisabled]}
           onPress={handleComplete}
           disabled={images.length === 0 || isPending}

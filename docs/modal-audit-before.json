@@ -1,0 +1,690 @@
+{
+  "files": 242,
+  "findings": [
+    {
+      "file": "app/(admin)/bank-accounts/index.tsx",
+      "line": 13,
+      "text": "<ConfirmDialog visible={Boolean(dialog)} title={dialog?.kind==='approve'?'Duyệt tài khoản?':'Từ chối tài khoản?'} message={dialog?`${dialog.item.bankName||dialog.item.bankCode} · ${dialog.item.accountNumber}\\n${dialog.item.accountHolderName}${dialog.kind==='approve'?'\\n\\nSau khi duyệt, tài khoản bắt đầu cooldown bảo mật 24 giờ.':''}`:''} confirmLabel={dialog?.kind==='approve'?'Duyệt':'Từ chối'} destructive={dialog?.kind==='reject'} loading={action.isPending} onCancel={()=>setDialog(null)} onConfirm={()=>{if(dialog)action.mutate(dialog)}}/>"
+    },
+    {
+      "file": "app/(admin)/mua-applications/[id].tsx",
+      "line": 19,
+      "text": "Alert.alert('Đã cập nhật',approved?'MUA đã được duyệt, mở lịch 08:00–22:00 cả tuần và có thể nhận booking ngay.':'Đã gửi lý do từ chối cho MUA.')"
+    },
+    {
+      "file": "app/(admin)/mua-applications/[id].tsx",
+      "line": 19,
+      "text": "Alert.alert('Không thể cập nhật',getApiError(error).message)"
+    },
+    {
+      "file": "app/(admin)/mua-applications/[id].tsx",
+      "line": 20,
+      "text": "Alert.alert('Duyệt và kích hoạt MUA','Tài khoản sẽ được niêm yết và nhận booking ngay với lịch mặc định cả tuần.',[{text:'Quay lại',style:'cancel'},{text:'Duyệt hồ sơ',onPress:()=>run(true)}])"
+    },
+    {
+      "file": "app/(admin)/mua-applications/[id].tsx",
+      "line": 31,
+      "text": "<Modal visible={rejecting} transparent animationType=\"fade\" onRequestClose={()=>setRejecting(false)}>"
+    },
+    {
+      "file": "app/(admin)/notifications/new.tsx",
+      "line": 31,
+      "text": "<Modal visible={confirm} transparent animationType=\"fade\" onRequestClose={()=>setConfirm(false)}>"
+    },
+    {
+      "file": "app/(admin)/payouts/[id].tsx",
+      "line": 83,
+      "text": "<AdminConfirmDialog visible={dialog!==null} mode={dialog||'complete'} amount={money(payout.amount)} bank={bank} accountHolder={payout.accountHolderName||'—'} maskedAccountNumber={payout.accountNumber||payout.maskedAccountNumber||'—'} status={payout.status} submitting={submitting} onClose={()=>setDialog(null)} onSubmit={handleDialogSubmit}/>"
+    },
+    {
+      "file": "app/(admin)/refunds/[id].tsx",
+      "line": 11,
+      "text": "Alert.alert('Không thể cập nhật',getApiError(e).message)"
+    },
+    {
+      "file": "app/(admin)/refunds/[id].tsx",
+      "line": 11,
+      "text": "Alert.alert('Xác nhận tiền đã được chuyển','Thao tác này không tự chuyển tiền. Chỉ tiếp tục khi giao dịch ngân hàng đã thành công.',[{text:'Quay lại',style:'cancel'},{text:'Xác nhận',onPress:()=>mutation.mutate('complete')}])"
+    },
+    {
+      "file": "app/(admin)/refunds/[id].tsx",
+      "line": 11,
+      "text": "Alert.alert('Xác nhận tiền chưa được chuyển','Chỉ đánh dấu thất bại khi chắc chắn customer chưa nhận tiền.',[{text:'Quay lại',style:'cancel'},{text:'Xác nhận',style:'destructive',onPress:()=>mutation.mutate('fail')}])"
+    },
+    {
+      "file": "app/(auth)/forgot-password.tsx",
+      "line": 28,
+      "text": "Alert.alert(\"Kiểm tra email\", \"Nếu email tồn tại, BBook đã gửi một mã OTP có hiệu lực trong 5 phút.\")"
+    },
+    {
+      "file": "app/(auth)/forgot-password.tsx",
+      "line": 31,
+      "text": "Alert.alert(\"Thành công\", \"Mật khẩu đã được đặt lại.\", [{ text: \"Đăng nhập\", onPress: () => router.replace({ pathname: \"/(auth)/login\", params: { email: email.trim() } } as any) }])"
+    },
+    {
+      "file": "app/(auth)/login.tsx",
+      "line": 50,
+      "text": "Alert.alert(\n        \"Đăng nhập Google thất bại\",\n        \"Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc sử dụng email và mật khẩu.\",\n      )"
+    },
+    {
+      "file": "app/(auth)/login.tsx",
+      "line": 95,
+      "text": "Alert.alert(\r\n      \"Đăng nhập thất bại\",\r\n      \"Email hoặc mật khẩu không chính xác. Hãy kiểm tra lại tài khoản.\",\r\n    )"
+    },
+    {
+      "file": "app/(auth)/login.tsx",
+      "line": 105,
+      "text": "Alert.alert(\"Google OAuth\", error?.message || \"Không thể mở Google OAuth.\")"
+    },
+    {
+      "file": "app/(auth)/register.tsx",
+      "line": 73,
+      "text": "Alert.alert(\n        \"Đăng ký Google thất bại\",\n        \"Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc đăng ký bằng email.\",\n      )"
+    },
+    {
+      "file": "app/(auth)/register.tsx",
+      "line": 132,
+      "text": "Alert.alert(\"Đã gửi OTP\", `Vui lòng kiểm tra hộp thư ${trimmedEmail}. Mã có hiệu lực trong 5 phút.`)"
+    },
+    {
+      "file": "app/(auth)/register.tsx",
+      "line": 151,
+      "text": "Alert.alert(\"Đăng ký thất bại\", \"Có lỗi xảy ra. Vui lòng thử lại.\")"
+    },
+    {
+      "file": "app/(auth)/register.tsx",
+      "line": 170,
+      "text": "Alert.alert(\"Google OAuth\", err?.message || \"Không thể mở Google OAuth.\")"
+    },
+    {
+      "file": "app/(mua)/bank-account-form.tsx",
+      "line": 101,
+      "text": "<Modal visible={bankPickerVisible} transparent animationType=\"slide\" onRequestClose={() => setBankPickerVisible(false)}>"
+    },
+    {
+      "file": "app/(mua)/bank-account-form.tsx",
+      "line": 111,
+      "text": "<FeedbackDialog visible={Boolean(feedback)} title={feedback?.title||''} message={feedback?.message||''} error={feedback?.error} buttonLabel={feedback?.navigate?'Hoàn tất':'Đóng'} onClose={()=>{const navigate=feedback?.navigate;setFeedback(null);if(navigate)router.back();}}/>"
+    },
+    {
+      "file": "app/(mua)/bank-accounts.tsx",
+      "line": 30,
+      "text": "<ConfirmDialog visible={Boolean(deleteId)} title=\"Xóa tài khoản\" message=\"Tài khoản sẽ không còn được dùng cho các yêu cầu rút tiền mới.\" confirmLabel=\"Xóa\" destructive loading={remove.isPending} onCancel={()=>setDeleteId(null)} onConfirm={confirmDelete}/>"
+    },
+    {
+      "file": "app/(mua)/bank-accounts.tsx",
+      "line": 31,
+      "text": "<BankDefaultPasswordModal visible={Boolean(defaultId)} loading={setDefault.isPending} onCancel={()=>setDefaultId(null)} onSubmit={confirmDefault}/>"
+    },
+    {
+      "file": "app/(mua)/bank-accounts.tsx",
+      "line": 32,
+      "text": "<FeedbackDialog visible={Boolean(feedback)} title={feedback?.title||''} message={feedback?.message||''} error={feedback?.error} onClose={()=>setFeedback(null)}/>"
+    },
+    {
+      "file": "app/(mua)/community.tsx",
+      "line": 63,
+      "text": "Alert.alert('Không thể thả tim', 'Vui lòng kiểm tra kết nối và thử lại.')"
+    },
+    {
+      "file": "app/(mua)/community.tsx",
+      "line": 82,
+      "text": "Alert.alert('Không thể lưu bài viết', 'Vui lòng kiểm tra kết nối và thử lại.')"
+    },
+    {
+      "file": "app/(mua)/community.tsx",
+      "line": 94,
+      "text": "Alert.alert('Tùy chọn bài viết', 'Bạn có thể báo cáo nội dung không phù hợp.', [\n      { text: 'Báo cáo bài viết' },\n      { text: 'Hủy', style: 'cancel' },\n    ])"
+    },
+    {
+      "file": "app/(mua)/community.tsx",
+      "line": 184,
+      "text": "<Modal visible={Boolean(fullImage)} transparent animationType=\"fade\" onRequestClose={() => setFullImage(null)}>"
+    },
+    {
+      "file": "app/(mua)/edit-profile.tsx",
+      "line": 79,
+      "text": "Alert.alert('Thành công', 'Đã lưu thông tin hồ sơ.')"
+    },
+    {
+      "file": "app/(mua)/edit-profile.tsx",
+      "line": 93,
+      "text": "Alert.alert('Cấp quyền', 'Bạn cần cấp quyền truy cập thư viện ảnh để thay đổi ảnh đại diện.')"
+    },
+    {
+      "file": "app/(mua)/identity-verification.tsx",
+      "line": 16,
+      "text": "Alert.alert('Cần quyền truy cập ảnh','Hãy cho phép ứng dụng chọn ảnh xác minh.')"
+    },
+    {
+      "file": "app/(mua)/identity-verification.tsx",
+      "line": 17,
+      "text": "Alert.alert('Chưa đủ ảnh','Vui lòng thêm CCCD/CMND mặt trước, mặt sau và ảnh chân dung.')"
+    },
+    {
+      "file": "app/(mua)/identity-verification.tsx",
+      "line": 17,
+      "text": "Alert.alert('Đã lưu','Thông tin xác minh đã được cập nhật.')"
+    },
+    {
+      "file": "app/(mua)/identity-verification.tsx",
+      "line": 17,
+      "text": "Alert.alert('Đã lưu','Thông tin xác minh đã được cập nhật.',[{text:'Tiếp tục',onPress:()=>router.replace('/mua-onboarding/setup')}])"
+    },
+    {
+      "file": "app/(mua)/identity-verification.tsx",
+      "line": 17,
+      "text": "Alert.alert('Không thể lưu',getApiError(error).message)"
+    },
+    {
+      "file": "app/(mua)/manage-portfolio.tsx",
+      "line": 82,
+      "text": "Alert.alert('Không thể xóa', getApiError(error).message)"
+    },
+    {
+      "file": "app/(mua)/manage-portfolio.tsx",
+      "line": 118,
+      "text": "<Modal visible={optionsVisible} transparent animationType=\"slide\">"
+    },
+    {
+      "file": "app/(mua)/manage-portfolio.tsx",
+      "line": 143,
+      "text": "<ConfirmDialog\n        visible={deleteVisible}\n        title=\"Xóa bài viết\"\n        message=\"Bạn có chắc chắn muốn xóa bài viết này? Thao tác này không thể hoàn tác.\"\n        confirmLabel=\"Xóa\"\n        destructive\n        loading={isDeleting}\n        onCancel={() => { setDeleteVisible(false); setSelectedPost(null); }}\n        onConfirm={handleDelete}\n      />"
+    },
+    {
+      "file": "app/(mua)/mua-booking/complete.tsx",
+      "line": 42,
+      "text": "Alert.alert('Bắt buộc', 'Vui lòng tải lên ít nhất 1 hình ảnh kết quả makeup để hoàn thành đơn!')"
+    },
+    {
+      "file": "app/(mua)/mua-booking/complete.tsx",
+      "line": 48,
+      "text": "Alert.alert('Thành công', 'Đã gửi xác nhận hoàn thành. Vui lòng chờ khách hàng xác nhận để nhận thanh toán.')"
+    },
+    {
+      "file": "app/(mua)/mua-booking/complete.tsx",
+      "line": 51,
+      "text": "Alert.alert('Không thể hoàn thành', getApiError(error).message)"
+    },
+    {
+      "file": "app/(mua)/mua-booking/[id].tsx",
+      "line": 52,
+      "text": "Alert.alert('Lỗi', 'Vui lòng nhập lý do từ chối')"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 126,
+      "text": "Alert.alert('Thành công', 'Đã xóa dịch vụ.')"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 128,
+      "text": "Alert.alert('Không thể xóa', getApiError(error).message || 'Dịch vụ có thể đã được sử dụng trong booking.')"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 139,
+      "text": "Alert.alert('Thành công', 'Đã xóa tác phẩm.')"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 141,
+      "text": "Alert.alert('Không thể xóa', getApiError(error).message)"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 184,
+      "text": "Alert.alert('Không thể mở liên kết', 'Vui lòng thử lại sau.')"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 429,
+      "text": "<Modal visible={!!selectedService} animationType=\"slide\" transparent={true} onRequestClose={() => setSelectedService(null)}>"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 467,
+      "text": "<Modal visible={!!selectedPortfolioItem} animationType=\"slide\" transparent={true} onRequestClose={() => setSelectedPortfolioItem(null)}>"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 533,
+      "text": "<Modal visible={isServiceOptionsVisible} transparent animationType=\"slide\">"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 557,
+      "text": "<Modal visible={isPortfolioOptionsVisible} transparent animationType=\"slide\">"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 580,
+      "text": "<ConfirmDialog visible={deleteServiceVisible} title=\"Xóa dịch vụ\" message=\"Bạn có chắc chắn muốn xóa dịch vụ này?\" confirmLabel=\"Xóa\" destructive loading={deleteService.isPending} onCancel={() => { setDeleteServiceVisible(false); setSelectedService(null); }} onConfirm={confirmDeleteService}/>"
+    },
+    {
+      "file": "app/(mua)/profile.tsx",
+      "line": 581,
+      "text": "<ConfirmDialog visible={deletePortfolioVisible} title=\"Xóa tác phẩm\" message=\"Bạn có chắc chắn muốn xóa tác phẩm này khỏi Portfolio?\" confirmLabel=\"Xóa\" destructive loading={isDeletingPortfolio} onCancel={() => { setDeletePortfolioVisible(false); setSelectedPortfolioItem(null); }} onConfirm={confirmDeletePortfolio}/>"
+    },
+    {
+      "file": "app/(mua)/settings.tsx",
+      "line": 45,
+      "text": "window.confirm(\r\n        \"Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?\",\r\n      )"
+    },
+    {
+      "file": "app/(mua)/settings.tsx",
+      "line": 57,
+      "text": "Alert.alert(\r\n      \"Đăng xuất\",\r\n      \"Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?\",\r\n      [\r\n        { text: \"Hủy\", style: \"cancel\" },\r\n        {\r\n          text: \"Đăng xuất\",\r\n          style: \"destructive\",\r\n          onPress: async () => {\r\n            try {\r\n              await logout();\r\n              router.replace(\"/(auth)/login\" as any);\r\n            } catch (error) {\r\n              console.error(\"Lỗi khi đăng xuất:\", error);\r\n            }\r\n          },\r\n        },\r\n      ],\r\n    )"
+    },
+    {
+      "file": "app/(mua)/settings.tsx",
+      "line": 92,
+      "text": "window.alert(message)"
+    },
+    {
+      "file": "app/(mua)/settings.tsx",
+      "line": 93,
+      "text": "Alert.alert(\"Chưa thể xóa tài khoản\", message)"
+    },
+    {
+      "file": "app/(mua)/settings.tsx",
+      "line": 103,
+      "text": "window.confirm(warning)"
+    },
+    {
+      "file": "app/(mua)/settings.tsx",
+      "line": 106,
+      "text": "Alert.alert(\"Xóa tài khoản\", warning, [\r\n      { text: \"Hủy\", style: \"cancel\" },\r\n      { text: \"Xóa tài khoản\", style: \"destructive\", onPress: () => void performAccountDeletion() },\r\n    ])"
+    },
+    {
+      "file": "app/(mua)/withdraw.tsx",
+      "line": 76,
+      "text": "<Modal visible={confirmationVisible} transparent animationType=\"fade\" onRequestClose={() => !create.isPending && setConfirmationVisible(false)}>"
+    },
+    {
+      "file": "app/(tabs)/home.tsx",
+      "line": 80,
+      "text": "Alert.alert('Không thể thả tim', 'Vui lòng đăng nhập hoặc thử lại sau.')"
+    },
+    {
+      "file": "app/(tabs)/home.tsx",
+      "line": 91,
+      "text": "Alert.alert('Không thể lưu bài viết', 'Vui lòng đăng nhập hoặc thử lại sau.')"
+    },
+    {
+      "file": "app/(tabs)/home.tsx",
+      "line": 119,
+      "text": "Alert.alert('Không thể gửi bình luận', 'Vui lòng thử lại sau.')"
+    },
+    {
+      "file": "app/(tabs)/home.tsx",
+      "line": 154,
+      "text": "Alert.alert('Tùy chọn bài viết', 'Các thao tác này cần backend hỗ trợ.', [\n      { text: 'Báo cáo bài viết' },\n      { text: 'Chặn người dùng' },\n      { text: 'Ẩn bài viết' },\n      { text: 'Hủy', style: 'cancel' },\n    ])"
+    },
+    {
+      "file": "app/(tabs)/home.tsx",
+      "line": 274,
+      "text": "<Modal visible={!!fullImage} transparent animationType=\"fade\" onRequestClose={() => setFullImage(null)}>"
+    },
+    {
+      "file": "app/(tabs)/home.tsx",
+      "line": 282,
+      "text": "<Modal visible={!!commentItem} animationType=\"slide\" transparent onRequestClose={() => setCommentItem(null)}>"
+    },
+    {
+      "file": "app/(tabs)/profile.tsx",
+      "line": 104,
+      "text": "window.confirm(\r\n        \"Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?\",\r\n      )"
+    },
+    {
+      "file": "app/(tabs)/profile.tsx",
+      "line": 117,
+      "text": "Alert.alert(\r\n      \"Đăng xuất\",\r\n      \"Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?\",\r\n      [\r\n        {\r\n          text: \"Hủy\",\r\n          style: \"cancel\",\r\n        },\r\n        {\r\n          text: \"Đăng xuất\",\r\n          style: \"destructive\",\r\n          onPress: async () => {\r\n            try {\r\n              await logout();\r\n\r\n              router.replace(\"/login\" as any);\r\n            } catch (error) {\r\n              console.error(\"Lỗi khi đăng xuất:\", error);\r\n            }\r\n          },\r\n        },\r\n      ],\r\n    )"
+    },
+    {
+      "file": "app/(tabs)/profile.tsx",
+      "line": 150,
+      "text": "window.alert(message)"
+    },
+    {
+      "file": "app/(tabs)/profile.tsx",
+      "line": 151,
+      "text": "Alert.alert(\"Chưa thể xóa tài khoản\", message)"
+    },
+    {
+      "file": "app/(tabs)/profile.tsx",
+      "line": 161,
+      "text": "window.confirm(warning)"
+    },
+    {
+      "file": "app/(tabs)/profile.tsx",
+      "line": 164,
+      "text": "Alert.alert(\"Xóa tài khoản\", warning, [\n      { text: \"Hủy\", style: \"cancel\" },\n      { text: \"Xóa tài khoản\", style: \"destructive\", onPress: () => void performAccountDeletion() },\n    ])"
+    },
+    {
+      "file": "app/(tabs)/profile.tsx",
+      "line": 177,
+      "text": "window.confirm(\"Bạn muốn đăng ký tài khoản này thành Makeup Artist?\")"
+    },
+    {
+      "file": "app/(tabs)/profile.tsx",
+      "line": 183,
+      "text": "Alert.alert(\r\n      \"Trở thành Makeup Artist\",\r\n      \"Tài khoản của bạn sẽ được chuyển sang Makeup Artist và có thể đăng dịch vụ.\",\r\n      [\n        { text: \"Hủy\", style: \"cancel\" },\n        { text: \"Tiếp tục\", onPress: openApplication },\n      ],\n    )"
+    },
+    {
+      "file": "app/booking/review.tsx",
+      "line": 39,
+      "text": "Alert.alert('Quyền truy cập', 'Vui lòng cấp quyền truy cập thư viện ảnh để tải ảnh lên.')"
+    },
+    {
+      "file": "app/booking/review.tsx",
+      "line": 58,
+      "text": "Alert.alert('Thiếu thông tin', 'Vui lòng chọn số sao đánh giá (từ 1 đến 5).')"
+    },
+    {
+      "file": "app/booking/review.tsx",
+      "line": 71,
+      "text": "Alert.alert('Thành công', 'Cảm ơn bạn đã gửi đánh giá! Phản hồi của bạn sẽ giúp cộng đồng BBeauty tốt hơn.')"
+    },
+    {
+      "file": "app/booking/review.tsx",
+      "line": 74,
+      "text": "Alert.alert('Lỗi', getApiError(error).message || 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.')"
+    },
+    {
+      "file": "app/booking/[id]/cancel.tsx",
+      "line": 55,
+      "text": "Alert.alert(\n          isUncertainResult ? 'Chưa xác minh được kết quả' : 'Không thể hủy booking',\n          apiError.message || 'Vui lòng thử lại sau.',\n        )"
+    },
+    {
+      "file": "app/booking/[id]/cancel.tsx",
+      "line": 65,
+      "text": "Alert.alert('Chưa chọn lý do', 'Vui lòng chọn lý do hủy.')"
+    },
+    {
+      "file": "app/booking/[id]/cancel.tsx",
+      "line": 148,
+      "text": "<Modal\n        visible={showConfirmation}\n        transparent\n        animationType=\"fade\"\n        statusBarTranslucent\n        onRequestClose={() => !isPending && setShowConfirmation(false)}\n      >"
+    },
+    {
+      "file": "app/booking/[id].tsx",
+      "line": 66,
+      "text": "Alert.alert('Không thể thanh toán cọc', payload?.message || payload?.Message || err.message)"
+    },
+    {
+      "file": "app/booking/[id].tsx",
+      "line": 71,
+      "text": "Alert.alert('Thiếu nội dung', 'Vui lòng nhập nội dung khiếu nại.')"
+    },
+    {
+      "file": "app/change-password.tsx",
+      "line": 10,
+      "text": "Alert.alert(\"Thành công\",\"Đã đổi mật khẩu.\",[{text:\"OK\",onPress:()=>router.back()}])"
+    },
+    {
+      "file": "app/chat/[id].tsx",
+      "line": 64,
+      "text": "Alert.alert('Không thể mở cuộc trò chuyện', getApiError(error).message)"
+    },
+    {
+      "file": "app/chat/[id].tsx",
+      "line": 114,
+      "text": "Alert.alert('Không thể tải lịch sử', getApiError(error).message)"
+    },
+    {
+      "file": "app/chat/[id].tsx",
+      "line": 147,
+      "text": "Alert.alert('Gửi tin nhắn thất bại', getApiError(error).message)"
+    },
+    {
+      "file": "app/chat/[id].tsx",
+      "line": 165,
+      "text": "Alert.alert('Gửi ảnh thất bại', getApiError(error).message)"
+    },
+    {
+      "file": "app/chat/[id].tsx",
+      "line": 174,
+      "text": "Alert.alert('Không thể thả cảm xúc', getApiError(error).message)"
+    },
+    {
+      "file": "app/checkout/index.tsx",
+      "line": 95,
+      "text": "Alert.alert('Chưa đủ thông tin', 'Vui lòng chọn địa chỉ, ngày, giờ và ít nhất một dịch vụ.')"
+    },
+    {
+      "file": "app/checkout/index.tsx",
+      "line": 100,
+      "text": "Alert.alert('Thời gian không hợp lệ', 'Vui lòng chọn thời gian thực hiện trong tương lai.')"
+    },
+    {
+      "file": "app/checkout/index.tsx",
+      "line": 140,
+      "text": "Alert.alert(\n          'Chưa thể xác nhận trạng thái thanh toán',\n          'Booking đã được tạo nhưng kết nối bị gián đoạn. Ứng dụng sẽ mở booking để bạn kiểm tra trạng thái trước khi tạo yêu cầu thanh toán mới.',\n        )"
+    },
+    {
+      "file": "app/checkout/index.tsx",
+      "line": 146,
+      "text": "Alert.alert('Không thể tiếp tục', apiError.message || 'Vui lòng thử lại sau.')"
+    },
+    {
+      "file": "app/checkout/index.tsx",
+      "line": 402,
+      "text": "<ConfirmDialog\n        visible={modeDialogVisible}\n        title=\"Chuyển sang chế độ Khách hàng\"\n        message={`Bạn đang sử dụng B-Book với tư cách Makeup Artist. Để đặt dịch vụ của ${draft.mua.name}, hãy chuyển sang chế độ Khách hàng.`}\n        confirmLabel=\"Chuyển sang Customer Mode\"\n        cancelLabel=\"Hủy\"\n        onCancel={() => setModeDialogVisible(false)}\n        onConfirm={() => {\n          switchMode('CUSTOMER');\n          setModeDialogVisible(false);\n          router.replace('/checkout');\n        }}\n      />"
+    },
+    {
+      "file": "app/customer-profile-edit.tsx",
+      "line": 46,
+      "text": "Alert.alert('Không thể tải hồ sơ', getApiError(error).message)"
+    },
+    {
+      "file": "app/customer-profile-edit.tsx",
+      "line": 54,
+      "text": "Alert.alert('Cần quyền truy cập ảnh', 'Hãy cho phép BeautyBook truy cập thư viện ảnh để đổi ảnh đại diện.')"
+    },
+    {
+      "file": "app/customer-profile-edit.tsx",
+      "line": 69,
+      "text": "Alert.alert('Thiếu thông tin', 'Vui lòng nhập họ và tên.')"
+    },
+    {
+      "file": "app/customer-profile-edit.tsx",
+      "line": 81,
+      "text": "window.alert('Đã cập nhật thông tin.')"
+    },
+    {
+      "file": "app/customer-profile-edit.tsx",
+      "line": 82,
+      "text": "Alert.alert('Thành công', 'Thông tin tài khoản đã được cập nhật.')"
+    },
+    {
+      "file": "app/customer-profile-edit.tsx",
+      "line": 86,
+      "text": "window.alert(message)"
+    },
+    {
+      "file": "app/customer-profile-edit.tsx",
+      "line": 87,
+      "text": "Alert.alert('Không thể cập nhật', message)"
+    },
+    {
+      "file": "app/favorites.tsx",
+      "line": 101,
+      "text": "<Modal visible={!!fullImage} transparent animationType=\"fade\" onRequestClose={() => setFullImage(null)}>"
+    },
+    {
+      "file": "app/mua-detail.tsx",
+      "line": 337,
+      "text": "<Modal\n        visible={isBottomSheetVisible}\n        animationType=\"slide\"\n        transparent={true}\n        onRequestClose={() => setBottomSheetVisible(false)}\n      >"
+    },
+    {
+      "file": "app/mua-onboarding/apply.tsx",
+      "line": 24,
+      "text": "Alert.alert('Thông tin chưa hoàn tất',firstMessage)"
+    },
+    {
+      "file": "app/mua-onboarding/apply.tsx",
+      "line": 24,
+      "text": "Alert.alert('Không thể tạo hồ sơ MUA',message)"
+    },
+    {
+      "file": "app/mua-onboarding/setup.tsx",
+      "line": 36,
+      "text": "Alert.alert('Không thể gửi hồ sơ',getApiError(e).message)"
+    },
+    {
+      "file": "app/portfolio-feed.tsx",
+      "line": 108,
+      "text": "Alert.alert('Đã thêm', 'Dịch vụ đã được thêm vào lịch đặt của bạn.')"
+    },
+    {
+      "file": "app/portfolio-feed.tsx",
+      "line": 152,
+      "text": "<Modal visible={!!fullImage} transparent animationType=\"fade\" onRequestClose={() => setFullImage(null)}>"
+    },
+    {
+      "file": "app/portfolio-feed.tsx",
+      "line": 155,
+      "text": "<Modal visible={!!commentItem} animationType=\"slide\" transparent onRequestClose={() => setCommentItem(null)}>"
+    },
+    {
+      "file": "app/refund-bank-account-form.tsx",
+      "line": 43,
+      "text": "<Modal visible={pickerVisible} transparent animationType=\"slide\" onRequestClose={() => setPickerVisible(false)}>"
+    },
+    {
+      "file": "app/refund-bank-account-form.tsx",
+      "line": 44,
+      "text": "<FeedbackDialog visible={Boolean(feedback)} title={feedback?.title||''} message={feedback?.message||''} error={feedback?.error} buttonLabel={feedback?.navigate?'Hoàn tất':'Đóng'} onClose={()=>{const navigate=feedback?.navigate;setFeedback(null);if(navigate==='booking')router.replace(`/booking/${bookingId}/cancel-success` as never);else if(navigate==='back')router.back();}}/>"
+    },
+    {
+      "file": "app/refund-destination.tsx",
+      "line": 35,
+      "text": "<ConfirmDialog visible={Boolean(deleteId)} title=\"Xóa tài khoản\" message=\"Tài khoản sẽ không còn được dùng cho các khoản hoàn tiền mới.\" confirmLabel=\"Xóa\" destructive loading={remove.isPending} onCancel={()=>setDeleteId(null)} onConfirm={()=>{if(deleteId)remove.mutate(deleteId,{onSuccess:()=>{setDeleteId(null);setFeedback({title:'Đã xóa tài khoản',message:'Tài khoản không còn được dùng cho giao dịch mới.'});},onError:error=>setFeedback({title:'Không thể xóa',message:getApiError(error).message,error:true})});}}/>"
+    },
+    {
+      "file": "app/refund-destination.tsx",
+      "line": 36,
+      "text": "<BankDefaultPasswordModal visible={Boolean(defaultId)} loading={setDefault.isPending} onCancel={()=>setDefaultId(null)} onSubmit={confirmDefault}/>"
+    },
+    {
+      "file": "app/refund-destination.tsx",
+      "line": 37,
+      "text": "<FeedbackDialog visible={Boolean(feedback)} title={feedback?.title||''} message={feedback?.message||''} error={feedback?.error} buttonLabel={feedback?.navigate?'Xem booking':'Đóng'} onClose={()=>{const navigate=feedback?.navigate;setFeedback(null);if(navigate)router.replace(`/booking/${bookingId}` as never);}}/>"
+    },
+    {
+      "file": "components/admin/AdminConfirmDialog.tsx",
+      "line": 38,
+      "text": "<Modal visible={props.visible} transparent animationType=\"fade\" onShow={reset} onRequestClose={close}>"
+    },
+    {
+      "file": "components/bank/BankDefaultPasswordModal.tsx",
+      "line": 26,
+      "text": "<Modal visible={visible} transparent animationType=\"fade\" onRequestClose={onCancel}>"
+    },
+    {
+      "file": "components/booking/AddressPickerSheet.tsx",
+      "line": 58,
+      "text": "Alert.alert('Thiếu địa chỉ', 'Vui lòng nhập hoặc chọn địa chỉ thực hiện.')"
+    },
+    {
+      "file": "components/booking/AddressPickerSheet.tsx",
+      "line": 66,
+      "text": "<Modal visible={visible} transparent animationType=\"slide\" onRequestClose={onClose}>"
+    },
+    {
+      "file": "components/booking/DatePickerSheet.tsx",
+      "line": 45,
+      "text": "<Modal visible={visible} transparent animationType=\"slide\" onRequestClose={onClose}>"
+    },
+    {
+      "file": "components/booking/TimePickerSheet.tsx",
+      "line": 33,
+      "text": "<Modal visible={visible} transparent animationType=\"slide\" onRequestClose={onClose}>"
+    },
+    {
+      "file": "components/chat/ChatListScreen.tsx",
+      "line": 129,
+      "text": "<Modal transparent visible={menuVisible} animationType=\"fade\" onRequestClose={() => setMenuVisible(false)}>"
+    },
+    {
+      "file": "components/chat/ChatListScreen.tsx",
+      "line": 133,
+      "text": "Alert.alert('Không thể cập nhật','Vui lòng thử lại.')"
+    },
+    {
+      "file": "components/common/ConfirmDialog.tsx",
+      "line": 18,
+      "text": "<Modal visible={visible} transparent animationType=\"fade\" onRequestClose={loading ? undefined : onCancel}>"
+    },
+    {
+      "file": "components/common/FeedbackDialog.tsx",
+      "line": 15,
+      "text": "<Modal visible={visible} transparent animationType=\"fade\" onRequestClose={onClose}>"
+    },
+    {
+      "file": "components/feed/PortfolioCommentsSheet.tsx",
+      "line": 51,
+      "text": "Alert.alert('Không thể tải bình luận', 'Vui lòng kiểm tra kết nối và thử lại.')"
+    },
+    {
+      "file": "components/feed/PortfolioCommentsSheet.tsx",
+      "line": 87,
+      "text": "Alert.alert('Không thể gửi bình luận', 'Vui lòng kiểm tra kết nối và thử lại.')"
+    },
+    {
+      "file": "components/feed/PortfolioCommentsSheet.tsx",
+      "line": 94,
+      "text": "<Modal visible={Boolean(item)} animationType=\"slide\" transparent onRequestClose={close}>"
+    },
+    {
+      "file": "components/mua/portfolio/PortfolioFormModal.tsx",
+      "line": 70,
+      "text": "Alert.alert('Không thể lưu portfolio', getApiError(error).message)"
+    },
+    {
+      "file": "components/mua/portfolio/PortfolioFormModal.tsx",
+      "line": 77,
+      "text": "<Modal\n      visible={visible}\n      animationType=\"slide\"\n      transparent={true}\n      onRequestClose={onClose}\n      onShow={resetForm}\n    >"
+    },
+    {
+      "file": "components/mua/ReviewTabContent.tsx",
+      "line": 77,
+      "text": "Alert.alert('Thành công', 'Đã gửi phản hồi!')"
+    },
+    {
+      "file": "components/mua/ReviewTabContent.tsx",
+      "line": 82,
+      "text": "Alert.alert('Lỗi', err.message || 'Không thể phản hồi đánh giá này.')"
+    },
+    {
+      "file": "components/mua/ReviewTabContent.tsx",
+      "line": 251,
+      "text": "<Modal visible={!!selectedImage} transparent={true} animationType=\"fade\" onRequestClose={() => setSelectedImage(null)}>"
+    },
+    {
+      "file": "components/mua/ReviewTabContent.tsx",
+      "line": 271,
+      "text": "<Modal visible={!!replyingToReviewId} transparent animationType=\"slide\">"
+    },
+    {
+      "file": "components/mua/services/ServiceFormModal.tsx",
+      "line": 94,
+      "text": "<Modal visible={visible} transparent animationType=\"slide\" onRequestClose={onClose} statusBarTranslucent>"
+    },
+    {
+      "file": "components/ServiceDetailModal.tsx",
+      "line": 80,
+      "text": "<Modal\n      visible={visible}\n      animationType=\"slide\"\n      transparent={true}\n      onRequestClose={onClose}\n    >"
+    },
+    {
+      "file": "hooks/useMuaPortfolio.ts",
+      "line": 26,
+      "text": "Alert.alert('Lỗi', 'Không thể thêm ảnh vào portfolio.')"
+    },
+    {
+      "file": "hooks/useMuaPortfolio.ts",
+      "line": 46,
+      "text": "Alert.alert('Lỗi', 'Không thể xóa ảnh khỏi portfolio.')"
+    }
+  ]
+}

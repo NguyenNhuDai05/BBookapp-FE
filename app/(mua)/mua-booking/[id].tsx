@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, TextInput } from 'react-native';
+import { AppAlert as appDialog } from '../../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, MapPin, Clock, Calendar as CalendarIcon, Phone, FileText, CheckCircle, XCircle } from 'lucide-react-native';
@@ -11,10 +12,10 @@ import { BookingTimeline } from '../../../components/BookingTimeline';
 export default function MuaBookingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  
+
   const { data: booking, isLoading, isError } = useBookingDetail(id);
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateBookingStatus(booking?.mua.id || 'me');
-  
+
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectInput, setShowRejectInput] = useState(false);
 
@@ -49,7 +50,7 @@ export default function MuaBookingDetailScreen() {
       return;
     }
     if (!rejectReason.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập lý do từ chối');
+      appDialog.alert('Lỗi', 'Vui lòng nhập lý do từ chối');
       return;
     }
     updateStatus({ bookingId: booking.id, status: 'REJECTED', reason: rejectReason });
@@ -63,7 +64,7 @@ export default function MuaBookingDetailScreen() {
       case 'IN_PROGRESS': return BrandColors.statusCompleted;
       case 'WAITING_CUSTOMER': return '#00BCD4'; // Cyan
       case 'COMPLETED': return BrandColors.statusCompleted;
-      case 'CANCELLED': 
+      case 'CANCELLED':
       case 'REJECTED': return BrandColors.statusCancelled;
       case 'DISPUTED': return BrandColors.statusCancelled;
       case 'AUTO_COMPLETED': return BrandColors.statusCompleted;
@@ -109,9 +110,9 @@ export default function MuaBookingDetailScreen() {
             <Text style={styles.sectionTitle}>Thông tin khách hàng</Text>
             <View style={styles.divider} />
             <View style={styles.customerRow}>
-              <Image 
-                source={{ uri: booking.customer.avatarUrl || 'https://i.pravatar.cc/150?u=' + booking.customer.id }} 
-                style={styles.avatar} 
+              <Image
+                source={{ uri: booking.customer.avatarUrl || 'https://i.pravatar.cc/150?u=' + booking.customer.id }}
+                style={styles.avatar}
               />
               <View style={styles.customerInfo}>
                 <Text style={styles.customerName}>{booking.customer.name}</Text>
@@ -159,9 +160,9 @@ export default function MuaBookingDetailScreen() {
             {booking.services.map((service, idx) => (
               <View key={service.id} style={[styles.serviceRow, idx > 0 && styles.serviceRowBorder]}>
                 <View style={styles.serviceItemLeft}>
-                  <Image 
-                    source={{ uri: service.imageUrl || 'https://images.unsplash.com/photo-1512496015851-a1c8ce9015c3?w=200&q=80' }} 
-                    style={styles.serviceImage} 
+                  <Image
+                    source={{ uri: service.imageUrl || 'https://images.unsplash.com/photo-1512496015851-a1c8ce9015c3?w=200&q=80' }}
+                    style={styles.serviceImage}
                   />
                   <Text style={styles.serviceName} numberOfLines={2}>
                     {service.name} <Text style={styles.serviceQty}>x{service.participantsCount}</Text>
@@ -245,18 +246,18 @@ export default function MuaBookingDetailScreen() {
         {/* Actions - moved inside ScrollView to ensure visibility */}
         {booking.status === 'PENDING_CONFIRMATION' && (
           <View style={[styles.bottomBar, { backgroundColor: 'transparent', borderTopWidth: 0 }]}>
-            <TouchableOpacity 
-              style={[styles.actionBtn, styles.rejectBtn]} 
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.rejectBtn]}
               onPress={handleReject}
               disabled={isUpdating}
             >
               <XCircle size={20} color="#FFF" />
               <Text style={styles.actionBtnText}>Từ chối</Text>
             </TouchableOpacity>
-            
+
             {!showRejectInput && (
-              <TouchableOpacity 
-                style={[styles.actionBtn, styles.acceptBtn]} 
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.acceptBtn]}
                 onPress={handleAccept}
                 disabled={isUpdating}
               >
@@ -278,8 +279,8 @@ export default function MuaBookingDetailScreen() {
 
         {booking.status === 'IN_PROGRESS' && (
           <View style={[styles.bottomBar, { backgroundColor: 'transparent', borderTopWidth: 0 }]}>
-            <TouchableOpacity 
-              style={[styles.actionBtn, styles.completeBtn]} 
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.completeBtn]}
               onPress={() => router.push({ pathname: '/(mua)/mua-booking/complete', params: { id: booking.id } })}
             >
               <CheckCircle size={20} color="#FFF" />

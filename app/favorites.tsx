@@ -1,9 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Heart, Bookmark, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AppOverlay } from '../components/ui/OverlayProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PortfolioPost } from '../components/mua/portfolio/PortfolioPost';
+import { FollowPortfolioPost as PortfolioPost } from '../components/feed/FollowPortfolioPost';
 import { BrandColors } from '../constants/theme';
 import { portfolioService } from '../services/portfolioService';
 import { useAuthStore } from '../store/useAuthStore';
@@ -98,12 +99,12 @@ export default function FavoritesScreen() {
         contentContainerStyle={posts.length === 0 ? styles.emptyList : styles.list}
       />
 
-      <Modal visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
+      <AppOverlay visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
         <View style={styles.imageModal}>
           <TouchableOpacity style={styles.closeModal} onPress={() => setFullImage(null)}><X size={28} color="#FFF" /></TouchableOpacity>
           {fullImage ? <Image source={{ uri: fullImage }} style={styles.fullImage} resizeMode="contain" /> : null}
         </View>
-      </Modal>
+      </AppOverlay>
     </SafeAreaView>
   );
 }

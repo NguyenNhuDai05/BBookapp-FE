@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { portfolioService } from '../services/portfolioService';
 import { CreatePortfolioItemRequest } from '../types/portfolio';
-import { Alert } from 'react-native';
+import { AppAlert as appDialog } from '../components/ui/dialogStore';
 import { MUA_ELIGIBILITY_QUERY_KEY } from './useMuaEligibility';
 
 const PORTFOLIO_QUERY_KEY = 'mua-portfolio';
@@ -23,12 +23,12 @@ export function useMuaPortfolio(muaId: string) {
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
     },
     onError: () => {
-      Alert.alert('Lỗi', 'Không thể thêm ảnh vào portfolio.');
+      appDialog.alert('Lỗi', 'Không thể thêm ảnh vào portfolio.');
     }
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<CreatePortfolioItemRequest> }) => 
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<CreatePortfolioItemRequest> }) =>
       portfolioService.updateItem(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
@@ -43,7 +43,7 @@ export function useMuaPortfolio(muaId: string) {
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
     },
     onError: () => {
-      Alert.alert('Lỗi', 'Không thể xóa ảnh khỏi portfolio.');
+      appDialog.alert('Lỗi', 'Không thể xóa ảnh khỏi portfolio.');
     }
   });
 

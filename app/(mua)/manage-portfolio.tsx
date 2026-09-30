@@ -1,9 +1,12 @@
+import { ActionSheet } from '../../components/ui/ActionSheet';
 import React, { useRef, useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions, Modal, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
+
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, Edit2, Trash2 } from 'lucide-react-native';
-import { PortfolioPost } from '../../components/mua/portfolio/PortfolioPost';
+import {ChevronLeft, Edit2, Trash2} from 'lucide-react-native';
+import { FollowPortfolioPost as PortfolioPost } from '../../components/feed/FollowPortfolioPost';
 import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioFormModal';
 import { useMuaPortfolio } from '../../hooks/useMuaPortfolio';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
@@ -79,7 +82,7 @@ export default function PortfolioFeedScreen() {
       setDeleteVisible(false);
       setSelectedPost(null);
     } catch (error) {
-      Alert.alert('Không thể xóa', getApiError(error).message);
+      appDialog.alert('Không thể xóa', getApiError(error).message);
     }
   };
 
@@ -102,7 +105,7 @@ export default function PortfolioFeedScreen() {
         <Text style={styles.headerTitle}>Bài viết</Text>
         <View style={{ width: 28 }} />
       </View>
-      
+
       <FlatList
         ref={flatListRef}
         data={portfolio || []}
@@ -115,23 +118,12 @@ export default function PortfolioFeedScreen() {
         )}
       />
 
-      <Modal visible={optionsVisible} transparent animationType="slide">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setOptionsVisible(false)}>
-          <View style={styles.optionsContainer}>
-            <TouchableOpacity style={styles.optionBtn} onPress={handleEdit}>
-              <Edit2 size={24} color="#22152B" />
-              <Text style={styles.optionText}>Chỉnh sửa bài viết</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={[styles.optionBtn, styles.deleteBtn]} onPress={() => { setOptionsVisible(false); setDeleteVisible(true); }}>
-              <Trash2 size={24} color="#E8436A" />
-              <Text style={[styles.optionText, { color: '#E8436A' }]}>Xóa bài viết</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      <ActionSheet visible={optionsVisible} title="Tùy chọn bài viết" onClose={()=>setOptionsVisible(false)} actions={[
+        {id:'edit',label:'Chỉnh sửa bài viết',icon:Edit2,onPress:handleEdit},
+        {id:'delete',label:'Xóa bài viết',icon:Trash2,destructive:true,onPress:()=>{setOptionsVisible(false);setDeleteVisible(true);}},
+      ]} />
 
-      <PortfolioFormModal 
+      <PortfolioFormModal
         visible={editModalVisible}
         onClose={() => { setEditModalVisible(false); setSelectedPost(null); }}
         initialData={selectedPost}
@@ -156,11 +148,11 @@ export default function PortfolioFeedScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  header: {
+header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -170,43 +162,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#EFEFEF',
   },
-  backButton: {
+backButton: {
     padding: 4,
   },
-  headerTitle: {
+headerTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#22152B',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  optionsContainer: {
-    backgroundColor: '#FFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  optionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F5F5F5',
-  },
-  deleteBtn: {
-    borderBottomWidth: 0,
-  },
-  optionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#22152B',
-    marginLeft: 15,
-  },
+  }
 });
 
 

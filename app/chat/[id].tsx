@@ -3,13 +3,15 @@ import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, CalendarDays, CheckCheck, FileText, ImageIcon, MoreVertical, Plus, Send, Smile, X } from 'lucide-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandColors, Radius, Shadows, Typography } from '../../constants/theme';
 import { getApiError } from '../../services/api';
 import { authService } from '../../services/authService';
 import { ChatRoomDto, chatService, MessageDto } from '../../services/chatService';
+import { getChatPeer } from '../../utils/chatPeer';
 import { signalRService } from '../../services/signalRService';
 
 export default function ChatRoomScreen() {
@@ -61,7 +63,7 @@ export default function ChatRoomScreen() {
         setMessages(history); setHasMore(history.length === 50);
         await chatService.markRead(id);
         requestAnimationFrame(() => flatListRef.current?.scrollToEnd({ animated: false }));
-      } catch (error) { Alert.alert('Không thể mở cuộc trò chuyện', getApiError(error).message); }
+      } catch (error) { appDialog.alert('Không thể mở cuộc trò chuyện', getApiError(error).message); }
       finally { setLoading(false); }
     };
     const offMessage = signalRService.onMessageReceived((message: MessageDto) => {
@@ -90,14 +92,9 @@ export default function ChatRoomScreen() {
   }, [id, mergeMessages]);
 
   const isCustomer = Boolean(roomInfo && currentUserId && roomInfo.customerId.toLowerCase() === currentUserId.toLowerCase());
-  const otherName = useMemo(() => {
-    if (!roomInfo || !currentUserId) return 'Đang tải...';
-    const apiName = isCustomer ? roomInfo.muaName : roomInfo.customerName;
-    return apiName?.trim() || 'Người dùng B-Book';
-  }, [currentUserId, isCustomer, roomInfo]);
-  const otherAvatar = roomInfo && currentUserId
-    ? (isCustomer ? roomInfo.muaAvatar : roomInfo.customerAvatar)
-    : undefined;
+  const peer = roomInfo ? getChatPeer(roomInfo, currentUserId) : null;
+  const otherName = peer?.name || 'Đang tải...';
+  const otherAvatar = peer?.avatar;
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -111,7 +108,7 @@ export default function ChatRoomScreen() {
       const older = await chatService.getMessages(id, messages[0].sentAt);
       setMessages(previous => mergeMessages(older, previous));
       setHasMore(older.length === 50);
-    } catch (error) { Alert.alert('Không thể tải lịch sử', getApiError(error).message); }
+    } catch (error) { appDialog.alert('Không thể tải lịch sử', getApiError(error).message); }
     finally { setLoadingOlder(false); }
   };
 
@@ -144,7 +141,7 @@ export default function ChatRoomScreen() {
       if (recovered) {
         setInputText(''); setReplyTo(null); setShowEmoji(false);
         requestAnimationFrame(() => flatListRef.current?.scrollToEnd({ animated: true }));
-      } else Alert.alert('Gửi tin nhắn thất bại', getApiError(error).message);
+      } else appDialog.alert('Gửi tin nhắn thất bại', getApiError(error).message);
     }
     finally { setSending(false); }
   };
@@ -162,7 +159,7 @@ export default function ChatRoomScreen() {
     } catch (error) {
       const recovered = await reconcileAfterFailedRequest(inputText, uploadedImageUrl);
       if (recovered) { setInputText(''); setReplyTo(null); }
-      else Alert.alert('Gửi ảnh thất bại', getApiError(error).message);
+      else appDialog.alert('Gửi ảnh thất bại', getApiError(error).message);
     }
     finally { setUploading(false); }
   };
@@ -171,7 +168,7 @@ export default function ChatRoomScreen() {
     try {
       const updated = await chatService.reactToMessage(id, message.messageId, emoji);
       setMessages(previous => mergeMessages(previous, [updated]));
-    } catch (error) { Alert.alert('Không thể thả cảm xúc', getApiError(error).message); }
+    } catch (error) { appDialog.alert('Không thể thả cảm xúc', getApiError(error).message); }
   };
 
   const openMua = (tab?: string) => {

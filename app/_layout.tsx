@@ -10,6 +10,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import { NotificationService } from '../services/NotificationService';
 import { setUnauthorizedHandler } from '../services/api';
 import { AppErrorBoundary } from '../components/AppErrorBoundary';
+import { OverlayProvider } from '../components/ui/OverlayProvider';
+import { DialogHost } from '../components/ui/DialogHost';
 
 export default function RootLayout() {
   const canRenderRoute = useProtectedRoute();
@@ -57,6 +59,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppErrorBoundary>
+       <OverlayProvider>
        <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
@@ -78,6 +81,8 @@ export default function RootLayout() {
           }}
         />
        </Stack>
+       <DialogHost />
+       </OverlayProvider>
       </AppErrorBoundary>
     </QueryClientProvider>
   );

@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Platform } from "react-native";
 import { normalizeMediaUrlsInPayload } from "../utils/mediaUrl";
+import { sanitizeUiMessage } from "../utils/uiMessage";
 
 const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -50,7 +51,7 @@ export const getApiError = (error: unknown) => {
     return {
       status: undefined,
       code: undefined,
-      message: error instanceof Error ? error.message : "Đã xảy ra lỗi.",
+      message: sanitizeUiMessage(error instanceof Error ? error.message : error),
       isNetworkError: false,
     };
   }
@@ -72,14 +73,14 @@ export const getApiError = (error: unknown) => {
   return {
     status: error.response?.status,
     code: payload?.code ?? payload?.Code,
-    message:
+    message: sanitizeUiMessage(
       firstValidationMessage ??
       payload?.message ??
       payload?.Message ??
       payload?.title ??
       (error.code === "ECONNABORTED"
         ? "Kết nối mất nhiều thời gian hơn dự kiến."
-        : error.message),
+        : error.message)),
     isNetworkError: !error.response || error.code === "ECONNABORTED",
   };
 };

@@ -13,17 +13,8 @@ import {
   Trash2,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-} from "react-native";
+import {ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, Image} from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { userService, type UserProfile } from "../../services/userService";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -100,21 +91,9 @@ export default function ProfileScreen() {
 
   // Hàm xử lý đăng xuất đồng bộ hệ thống: Xóa token thiết bị và đẩy về màn Login
   const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm(
-        "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?",
-      );
 
-      if (confirmed) {
-        logout()
-          .then(() => router.replace("/login" as any))
-          .catch((error) => console.error("Logout error:", error));
-      }
 
-      return;
-    }
-
-    Alert.alert(
+    appDialog.alert(
       "Đăng xuất",
       "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?",
       [
@@ -147,8 +126,7 @@ export default function ProfileScreen() {
       router.replace("/login" as any);
     } catch (error: any) {
       const message = error?.response?.data?.message || error?.message || "Không thể xóa tài khoản. Vui lòng thử lại.";
-      if (Platform.OS === "web") window.alert(message);
-      else Alert.alert("Chưa thể xóa tài khoản", message);
+      appDialog.alert("Chưa thể xóa tài khoản", message);
     } finally {
       setIsDeletingAccount(false);
     }
@@ -157,13 +135,10 @@ export default function ProfileScreen() {
   const handleDeleteAccount = () => {
     if (isDeletingAccount) return;
     const warning = "Tài khoản và dữ liệu cá nhân sẽ bị xóa vĩnh viễn. Lịch sử giao dịch cần thiết cho đối soát có thể được lưu ở dạng ẩn danh. Hành động này không thể hoàn tác.";
-    if (Platform.OS === "web") {
-      if (window.confirm(warning)) void performAccountDeletion();
-      return;
-    }
-    Alert.alert("Xóa tài khoản", warning, [
+
+    appDialog.alert("Xóa tài khoản", warning, [
       { text: "Hủy", style: "cancel" },
-      { text: "Xóa tài khoản", style: "destructive", onPress: () => void performAccountDeletion() },
+      { text: "Xóa tài khoản", style: "destructive", onPress: () => performAccountDeletion() },
     ]);
   };
 
@@ -173,14 +148,9 @@ export default function ProfileScreen() {
   const handleBecomeMUA = async () => {
     const openApplication = () => router.push("/mua-onboarding" as any);
 
-    if (Platform.OS === "web") {
-      if (window.confirm("Bạn muốn đăng ký tài khoản này thành Makeup Artist?")) {
-        openApplication();
-      }
-      return;
-    }
 
-    Alert.alert(
+
+    appDialog.alert(
       "Trở thành Makeup Artist",
       "Tài khoản của bạn sẽ được chuyển sang Makeup Artist và có thể đăng dịch vụ.",
       [

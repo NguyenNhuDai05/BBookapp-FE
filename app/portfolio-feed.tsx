@@ -1,10 +1,13 @@
+import { AppBottomSheet } from '../components/ui/AppBottomSheet';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions, Modal, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import {View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions, TextInput} from 'react-native';
+import { AppOverlay } from '../components/ui/OverlayProvider';
+import { AppAlert as appDialog } from '../components/ui/dialogStore';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, X, Send } from 'lucide-react-native';
-import { PortfolioPost } from '../components/mua/portfolio/PortfolioPost';
+import { FollowPortfolioPost as PortfolioPost } from '../components/feed/FollowPortfolioPost';
 import { useMuaPortfolio } from '../hooks/useMuaPortfolio';
 import { useMuaDetail } from '../hooks/useMuaDetail';
 import { useBookingStore } from '../store/useBookingStore';
@@ -105,7 +108,7 @@ export default function CustomerPortfolioFeedScreen() {
     if (!service) return;
     setMua({ id: String(muaId), name: muaInfo?.name || 'MUA', avatarUrl: muaInfo?.avatar || '', rating: muaInfo?.rating || 0, reviewCount: muaInfo?.reviewCount || 0, location: '', yearsOfExp: 0 });
     addService({ id: service.serviceId || service.id, name: service.serviceName || service.name, durationMinutes: service.durationMinutes, price: Number(service.price), participantsCount: 1, imageUrl: service.imageUrl, description: service.description });
-    Alert.alert('Đã thêm', 'Dịch vụ đã được thêm vào lịch đặt của bạn.');
+    appDialog.alert('Đã thêm', 'Dịch vụ đã được thêm vào lịch đặt của bạn.');
   };
 
   const renderItem = ({ item }: { item: any }) => (
@@ -135,7 +138,7 @@ export default function CustomerPortfolioFeedScreen() {
         <Text style={styles.headerTitle}>Bài viết</Text>
         <View style={{ width: 28 }} />
       </View>
-      
+
       <FlatList
         ref={flatListRef}
         data={portfolio || []}
@@ -149,30 +152,29 @@ export default function CustomerPortfolioFeedScreen() {
           { length: Dimensions.get('window').width + 200, offset: (Dimensions.get('window').width + 200) * index, index }
         )}
       />
-      <Modal visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
+      <AppOverlay visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
         <View style={styles.imageModal}><TouchableOpacity style={styles.closeModal} onPress={() => setFullImage(null)}><X size={28} color="#FFF" /></TouchableOpacity>{fullImage && <Image source={{ uri: fullImage }} style={styles.fullImage} contentFit="contain" />}</View>
-      </Modal>
-      <Modal visible={!!commentItem} animationType="slide" transparent onRequestClose={() => setCommentItem(null)}>
-        <KeyboardAvoidingView style={styles.commentOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View style={styles.commentSheet}>
-            <View style={styles.commentHeader}><Text style={styles.commentTitle}>Bình luận</Text><TouchableOpacity onPress={() => setCommentItem(null)}><X size={24} /></TouchableOpacity></View>
-            <FlatList data={comments} keyExtractor={item => item.id} renderItem={({ item }) => <View style={styles.commentRow}><View style={styles.commentAvatar}><Text>{(item.userName || 'U')[0]}</Text></View><View style={styles.commentBubble}><Text style={styles.commentUser}>{item.userName || 'Người dùng'}</Text><Text>{item.content}</Text><TouchableOpacity onPress={() => setReplyingTo(item)}><Text style={styles.replyAction}>Trả lời</Text></TouchableOpacity>{(item.replies || []).map((reply: any) => <View key={reply.id} style={styles.replyRow}><Text style={styles.commentUser}>{reply.userName || 'Người dùng'}</Text><Text>{reply.content}</Text></View>)}</View></View>} ListEmptyComponent={<Text style={styles.emptyComments}>Chưa có bình luận.</Text>} />
-            {replyingTo ? <View style={styles.replyingBanner}><Text style={styles.replyingText}>Đang trả lời {replyingTo.userName || 'người dùng'}</Text><TouchableOpacity onPress={() => setReplyingTo(null)}><X size={16} /></TouchableOpacity></View> : null}
-            <View style={styles.emojiRow}>{['❤️','😍','😂','🔥','👏'].map(e => <TouchableOpacity key={e} onPress={() => setCommentText(v => v + e)}><Text style={styles.emoji}>{e}</Text></TouchableOpacity>)}</View>
-            <View style={styles.commentInputRow}><TextInput value={commentText} onChangeText={setCommentText} placeholder="Viết bình luận..." style={styles.commentInput}/><TouchableOpacity onPress={sendComment} disabled={sendingComment || !commentText.trim()}><Send size={22} color="#E8436A" /></TouchableOpacity></View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      </AppOverlay>
+      <AppBottomSheet visible={!!commentItem} title="Bình luận" onClose={()=>setCommentItem(null)} loading={sendingComment}  contentStyle={{height:'72%'}}>
+
+<FlatList data={comments} keyExtractor={item => item.id} renderItem={({ item }) => <View style={styles.commentRow}><View style={styles.commentAvatar}><Text>{(item.userName || 'U')[0]}</Text></View><View style={styles.commentBubble}><Text style={styles.commentUser}>{item.userName || 'Người dùng'}</Text><Text>{item.content}</Text><TouchableOpacity onPress={() => setReplyingTo(item)}><Text style={styles.replyAction}>Trả lời</Text></TouchableOpacity>{(item.replies || []).map((reply: any) => <View key={reply.id} style={styles.replyRow}><Text style={styles.commentUser}>{reply.userName || 'Người dùng'}</Text><Text>{reply.content}</Text></View>)}</View></View>} ListEmptyComponent={<Text style={styles.emptyComments}>Chưa có bình luận.</Text>} />
+
+{replyingTo ? <View style={styles.replyingBanner}><Text style={styles.replyingText}>Đang trả lời {replyingTo.userName || 'người dùng'}</Text><TouchableOpacity onPress={() => setReplyingTo(null)}><X size={16} /></TouchableOpacity></View> : null}
+
+<View style={styles.emojiRow}>{['❤️','😍','😂','🔥','👏'].map(e => <TouchableOpacity key={e} onPress={() => setCommentText(v => v + e)}><Text style={styles.emoji}>{e}</Text></TouchableOpacity>)}</View>
+
+<View style={styles.commentInputRow}><TextInput value={commentText} onChangeText={setCommentText} placeholder="Viết bình luận..." style={styles.commentInput}/><TouchableOpacity onPress={sendComment} disabled={sendingComment || !commentText.trim()}><Send size={22} color="#E8436A" /></TouchableOpacity></View>
+</AppBottomSheet>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: '#FFF',
   },
-  header: {
+header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -181,32 +183,28 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F5F5F5',
   },
-  backButton: {
+backButton: {
     padding: 4,
   },
-  headerTitle: {
+headerTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#22152B',
   },
-  imageModal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.96)', justifyContent: 'center' },
-  fullImage: { width: '100%', height: '85%' },
-  closeModal: { position: 'absolute', top: 50, right: 20, zIndex: 2, padding: 8 },
-  commentOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
-  commentSheet: { height: '70%', backgroundColor: '#FFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 16 },
-  commentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#EEE' },
-  commentTitle: { fontSize: 18, fontWeight: '700' },
-  commentRow: { flexDirection: 'row', marginTop: 14, gap: 10 },
-  commentAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE5ED', alignItems: 'center', justifyContent: 'center' },
-  commentBubble: { flex: 1, backgroundColor: '#F7F7F8', borderRadius: 14, padding: 10 },
-  commentUser: { fontWeight: '700', marginBottom: 2 },
-  replyAction: { color: '#E8436A', fontWeight: '600', fontSize: 12, marginTop: 6 },
-  replyRow: { marginTop: 8, marginLeft: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: '#FFD4E1' },
-  replyingBanner: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#FFF2F6', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginTop: 8 },
-  replyingText: { color: '#6C5360', fontSize: 12 },
-  emptyComments: { textAlign: 'center', color: '#888', marginTop: 30 },
-  emojiRow: { flexDirection: 'row', gap: 18, paddingVertical: 10 },
-  emoji: { fontSize: 24 },
-  commentInputRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EEE', borderRadius: 22, paddingHorizontal: 14 },
-  commentInput: { flex: 1, minHeight: 44 },
+imageModal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.96)', justifyContent: 'center' },
+fullImage: { width: '100%', height: '85%' },
+closeModal: { position: 'absolute', top: 50, right: 20, zIndex: 2, padding: 8 },
+commentRow: { flexDirection: 'row', marginTop: 14, gap: 10 },
+commentAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE5ED', alignItems: 'center', justifyContent: 'center' },
+commentBubble: { flex: 1, backgroundColor: '#F7F7F8', borderRadius: 14, padding: 10 },
+commentUser: { fontWeight: '700', marginBottom: 2 },
+replyAction: { color: '#E8436A', fontWeight: '600', fontSize: 12, marginTop: 6 },
+replyRow: { marginTop: 8, marginLeft: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: '#FFD4E1' },
+replyingBanner: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#FFF2F6', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginTop: 8 },
+replyingText: { color: '#6C5360', fontSize: 12 },
+emptyComments: { textAlign: 'center', color: '#888', marginTop: 30 },
+emojiRow: { flexDirection: 'row', gap: 18, paddingVertical: 10 },
+emoji: { fontSize: 24 },
+commentInputRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EEE', borderRadius: 22, paddingHorizontal: 14 },
+commentInput: { flex: 1, minHeight: 44 }
 });

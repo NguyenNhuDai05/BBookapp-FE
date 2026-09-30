@@ -1,10 +1,11 @@
+import { AppBottomSheet } from '../../ui/AppBottomSheet';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronDown, ChevronUp, CircleDollarSign, Clock3, FileText, Hash, ImagePlus, Tag, X } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+
 import { Shadows, Typography } from '../../../constants/theme';
 import { uploadImage } from '../../../services/supabase';
 import type { CreateServiceRequest, ServiceDto } from '../../../types/ServiceDto';
@@ -30,7 +31,6 @@ export function ServiceFormModal(props: ServiceFormModalProps) {
 }
 
 function ServiceFormModalContent({ visible, onClose, onSubmit, initialData, availableTags = [] }: ServiceFormModalProps) {
-  const insets = useSafeAreaInsets();
   const [name, setName] = useState(initialData?.name || initialData?.serviceName || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [price, setPrice] = useState(initialData?.price ? String(Math.trunc(initialData.price)) : '');
@@ -91,18 +91,9 @@ function ServiceFormModalContent({ visible, onClose, onSubmit, initialData, avai
 
   const inputStyle = (field: Field) => [styles.inputShell, focused === field && styles.inputFocused, touched[field] && errors[field] && styles.inputError];
 
-  return <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-    <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 10) }]}>
-        <View style={styles.header}>
-          <View style={styles.handle}/>
-          <View style={styles.headerRow}>
-            <View style={styles.headerCopy}><Text style={styles.title}>{initialData ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ mới'}</Text><Text style={styles.subtitle}>Tạo dịch vụ để khách hàng dễ dàng tìm thấy và đặt lịch.</Text></View>
-            <TouchableOpacity onPress={onClose} style={styles.close} accessibilityLabel="Đóng"><X size={23} color="#2B1B2A"/></TouchableOpacity>
-          </View>
-        </View>
+  return <AppBottomSheet visible={visible} title={initialData ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ mới'} onClose={onClose} loading={submitting}  contentStyle={{height:'90%'}}>
 
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+<ScrollView style={styles.scroll} contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <Section number="1" title="Thông tin cơ bản"/>
           <FieldLabel text="Tên dịch vụ" required/>
           <View style={inputStyle('name')}>
@@ -130,16 +121,14 @@ function ServiceFormModalContent({ visible, onClose, onSubmit, initialData, avai
           {errors.submit ? <Text style={styles.submitError}>{errors.submit}</Text> : null}
         </ScrollView>
 
-        <View style={styles.footer}>
+<View style={styles.footer}>
           <TouchableOpacity style={styles.cancel} onPress={onClose} disabled={submitting}><Text style={styles.cancelText}>Hủy</Text></TouchableOpacity>
           <TouchableOpacity style={styles.saveTouch} onPress={handleSubmit} disabled={!valid||submitting}>
             {valid ? <LinearGradient colors={['#FF5C9A','#FF9BC1']} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.save}>{submitting?<><ActivityIndicator color="#FFF"/><Text style={styles.saveText}>Đang lưu...</Text></>:<Text style={styles.saveText}>{initialData?'Lưu thay đổi':'Lưu dịch vụ'}</Text>}</LinearGradient>
               : <View style={[styles.save,styles.saveDisabled]}><Text style={styles.saveText}>{initialData?'Lưu thay đổi':'Lưu dịch vụ'}</Text></View>}
           </TouchableOpacity>
         </View>
-      </View>
-    </KeyboardAvoidingView>
-  </Modal>;
+</AppBottomSheet>;
 }
 
 function Section({number,title,subtitle}:{number:string;title:string;subtitle?:string}){return <View style={styles.section}><View style={styles.sectionTitleRow}><View style={styles.number}><Text style={styles.numberText}>{number}</Text></View><Text style={styles.sectionTitle}>{title}</Text></View>{subtitle?<Text style={styles.sectionSubtitle}>{subtitle}</Text>:null}</View>}
@@ -147,5 +136,56 @@ function FieldLabel({text,required}:{text:string;required?:boolean}){return <Tex
 function ErrorText({text}:{text:string}){return <Text style={styles.error}>⚠ {text}</Text>}
 
 const styles=StyleSheet.create({
-  overlay:{flex:1,backgroundColor:'rgba(43,27,42,.38)',justifyContent:'flex-end'},sheet:{height:'94%',width:'100%',maxWidth:720,alignSelf:'center',backgroundColor:'#FFFBFC',borderTopLeftRadius:28,borderTopRightRadius:28,overflow:'hidden'},header:{backgroundColor:'#FFFBFC',paddingHorizontal:24,paddingBottom:16,borderBottomWidth:1,borderBottomColor:'#F7E9EF'},handle:{width:48,height:5,borderRadius:3,backgroundColor:'#CFC3C9',alignSelf:'center',marginTop:13,marginBottom:18},headerRow:{flexDirection:'row',alignItems:'flex-start'},headerCopy:{flex:1,paddingRight:12},title:{fontFamily:Typography.black,fontSize:26,lineHeight:33,color:'#2B1B2A'},subtitle:{fontFamily:Typography.regular,fontSize:14,lineHeight:20,color:'#7D6F78',marginTop:5},close:{width:44,height:44,borderRadius:22,alignItems:'center',justifyContent:'center',backgroundColor:'#FFE7EF'},scroll:{flex:1},form:{paddingHorizontal:24,paddingBottom:28},section:{marginTop:24,marginBottom:12},sectionTitleRow:{flexDirection:'row',alignItems:'center',gap:11},number:{width:34,height:34,borderRadius:17,backgroundColor:'#FFD6E5',alignItems:'center',justifyContent:'center'},numberText:{fontFamily:Typography.extraBold,fontSize:17,color:'#EF376F'},sectionTitle:{fontFamily:Typography.extraBold,fontSize:18,color:'#2B1B2A'},sectionSubtitle:{fontFamily:Typography.regular,fontSize:13,lineHeight:19,color:'#7D6F78',marginTop:6},label:{fontFamily:Typography.semiBold,fontSize:14,color:'#2B1B2A',marginBottom:7},required:{color:'#E22E64'},inputShell:{minHeight:56,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',paddingHorizontal:14,flexDirection:'row',alignItems:'center',gap:11},inputFocused:{borderColor:'#FF5C9A',shadowColor:'#FF5C9A',shadowOpacity:.09,shadowRadius:7,elevation:1},inputError:{borderColor:'#D95A67'},input:{flex:1,fontFamily:Typography.regular,fontSize:15,color:'#2B1B2A',paddingVertical:12,outlineStyle:'none'} as any,clear:{width:32,height:32,borderRadius:16,backgroundColor:'#F1ECF0',alignItems:'center',justifyContent:'center'},twoColumns:{flexDirection:'row',gap:12,marginTop:18},column:{flex:1,minWidth:0},suffix:{fontFamily:Typography.medium,fontSize:12,color:'#7D6F78'},error:{fontFamily:Typography.regular,fontSize:12,color:'#B64753',marginTop:5},textAreaShell:{minHeight:142,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',flexDirection:'row',alignItems:'flex-start',padding:14},textAreaIcon:{marginTop:2,marginRight:10},textArea:{flex:1,minHeight:110,fontFamily:Typography.regular,fontSize:15,lineHeight:22,color:'#2B1B2A',padding:0,outlineStyle:'none'} as any,upload:{height:166,borderWidth:1.5,borderStyle:'dashed',borderColor:'#FF9CBC',borderRadius:18,backgroundColor:'#FFF7FA',alignItems:'center',justifyContent:'center'},uploadIcon:{width:54,height:54,borderRadius:27,backgroundColor:'#FFE5EE',alignItems:'center',justifyContent:'center'},uploadTitle:{fontFamily:Typography.bold,fontSize:15,color:'#2B1B2A',marginTop:10},uploadHint:{fontFamily:Typography.regular,fontSize:13,color:'#7D6F78',marginTop:5},imagePreviewWrap:{height:210,borderRadius:17,overflow:'hidden',backgroundColor:'#F4EBEF'},imagePreview:{width:'100%',height:'100%'},removeImage:{position:'absolute',right:10,top:10,width:44,height:44,borderRadius:22,backgroundColor:'#FFF',alignItems:'center',justifyContent:'center',...Shadows.sm},replaceImage:{position:'absolute',right:10,bottom:10,height:42,paddingHorizontal:14,borderRadius:21,backgroundColor:'#FFF',flexDirection:'row',alignItems:'center',gap:6,...Shadows.sm},replaceText:{fontFamily:Typography.bold,fontSize:13,color:'#FF5C9A'},tagSelector:{minHeight:58,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',paddingHorizontal:14,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:10},selectedTagArea:{flex:1,flexDirection:'row',flexWrap:'wrap',gap:6},tagPlaceholder:{fontFamily:Typography.regular,fontSize:15,color:'#A999A4'},selectedTag:{height:32,paddingHorizontal:11,borderRadius:16,backgroundColor:'#FFE8F0',flexDirection:'row',alignItems:'center',gap:5},selectedTagText:{fontFamily:Typography.semiBold,fontSize:12,color:'#D13B73'},tagPanel:{marginTop:8,padding:12,borderWidth:1,borderColor:'#F2E4EA',borderRadius:16,backgroundColor:'#FFF',flexDirection:'row',flexWrap:'wrap',gap:8},noTags:{fontFamily:Typography.regular,fontSize:13,color:'#7D6F78'},suggestionLabel:{fontFamily:Typography.semiBold,fontSize:13,color:'#2B1B2A',marginTop:14,marginBottom:9},suggestionRow:{flexDirection:'row',flexWrap:'wrap',gap:8},suggestion:{minHeight:36,paddingHorizontal:14,borderWidth:1,borderColor:'#FFC5D8',borderRadius:18,backgroundColor:'#FFF5F8',alignItems:'center',justifyContent:'center'},suggestionActive:{backgroundColor:'#FF5C9A',borderColor:'#FF5C9A'},suggestionText:{fontFamily:Typography.medium,fontSize:13,color:'#E14078'},suggestionTextActive:{color:'#FFF'},submitError:{fontFamily:Typography.medium,fontSize:13,color:'#B64753',textAlign:'center',marginTop:20},footer:{backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:'#F3E4EA',paddingHorizontal:24,paddingTop:14,flexDirection:'row',gap:12},cancel:{flex:0.85,height:54,borderRadius:22,borderWidth:1,borderColor:'#E3D5DC',alignItems:'center',justifyContent:'center'},cancelText:{fontFamily:Typography.bold,fontSize:15,color:'#2B1B2A'},saveTouch:{flex:1.15,height:54,borderRadius:22,overflow:'hidden'},save:{flex:1,flexDirection:'row',gap:8,alignItems:'center',justifyContent:'center'},saveDisabled:{backgroundColor:'#E7DDE3'},saveText:{fontFamily:Typography.bold,fontSize:15,color:'#FFF'}
+scroll:{flex:1},
+form:{paddingHorizontal:24,paddingBottom:28},
+section:{marginTop:24,marginBottom:12},
+sectionTitleRow:{flexDirection:'row',alignItems:'center',gap:11},
+number:{width:34,height:34,borderRadius:17,backgroundColor:'#FFD6E5',alignItems:'center',justifyContent:'center'},
+numberText:{fontFamily:Typography.extraBold,fontSize:17,color:'#EF376F'},
+sectionTitle:{fontFamily:Typography.extraBold,fontSize:18,color:'#2B1B2A'},
+sectionSubtitle:{fontFamily:Typography.regular,fontSize:13,lineHeight:19,color:'#7D6F78',marginTop:6},
+label:{fontFamily:Typography.semiBold,fontSize:14,color:'#2B1B2A',marginBottom:7},
+required:{color:'#E22E64'},
+inputShell:{minHeight:56,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',paddingHorizontal:14,flexDirection:'row',alignItems:'center',gap:11},
+inputFocused:{borderColor:'#FF5C9A',shadowColor:'#FF5C9A',shadowOpacity:.09,shadowRadius:7,elevation:1},
+inputError:{borderColor:'#D95A67'},
+input:{flex:1,fontFamily:Typography.regular,fontSize:15,color:'#2B1B2A',paddingVertical:12,outlineStyle:'none'} as any,
+clear:{width:32,height:32,borderRadius:16,backgroundColor:'#F1ECF0',alignItems:'center',justifyContent:'center'},
+twoColumns:{flexDirection:'row',gap:12,marginTop:18},
+column:{flex:1,minWidth:0},
+suffix:{fontFamily:Typography.medium,fontSize:12,color:'#7D6F78'},
+error:{fontFamily:Typography.regular,fontSize:12,color:'#B64753',marginTop:5},
+textAreaShell:{minHeight:142,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',flexDirection:'row',alignItems:'flex-start',padding:14},
+textAreaIcon:{marginTop:2,marginRight:10},
+textArea:{flex:1,minHeight:110,fontFamily:Typography.regular,fontSize:15,lineHeight:22,color:'#2B1B2A',padding:0,outlineStyle:'none'} as any,
+upload:{height:166,borderWidth:1.5,borderStyle:'dashed',borderColor:'#FF9CBC',borderRadius:18,backgroundColor:'#FFF7FA',alignItems:'center',justifyContent:'center'},
+uploadIcon:{width:54,height:54,borderRadius:27,backgroundColor:'#FFE5EE',alignItems:'center',justifyContent:'center'},
+uploadTitle:{fontFamily:Typography.bold,fontSize:15,color:'#2B1B2A',marginTop:10},
+uploadHint:{fontFamily:Typography.regular,fontSize:13,color:'#7D6F78',marginTop:5},
+imagePreviewWrap:{height:210,borderRadius:17,overflow:'hidden',backgroundColor:'#F4EBEF'},
+imagePreview:{width:'100%',height:'100%'},
+removeImage:{position:'absolute',right:10,top:10,width:44,height:44,borderRadius:22,backgroundColor:'#FFF',alignItems:'center',justifyContent:'center',...Shadows.sm},
+replaceImage:{position:'absolute',right:10,bottom:10,height:42,paddingHorizontal:14,borderRadius:21,backgroundColor:'#FFF',flexDirection:'row',alignItems:'center',gap:6,...Shadows.sm},
+replaceText:{fontFamily:Typography.bold,fontSize:13,color:'#FF5C9A'},
+tagSelector:{minHeight:58,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',paddingHorizontal:14,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:10},
+selectedTagArea:{flex:1,flexDirection:'row',flexWrap:'wrap',gap:6},
+tagPlaceholder:{fontFamily:Typography.regular,fontSize:15,color:'#A999A4'},
+selectedTag:{height:32,paddingHorizontal:11,borderRadius:16,backgroundColor:'#FFE8F0',flexDirection:'row',alignItems:'center',gap:5},
+selectedTagText:{fontFamily:Typography.semiBold,fontSize:12,color:'#D13B73'},
+tagPanel:{marginTop:8,padding:12,borderWidth:1,borderColor:'#F2E4EA',borderRadius:16,backgroundColor:'#FFF',flexDirection:'row',flexWrap:'wrap',gap:8},
+noTags:{fontFamily:Typography.regular,fontSize:13,color:'#7D6F78'},
+suggestionLabel:{fontFamily:Typography.semiBold,fontSize:13,color:'#2B1B2A',marginTop:14,marginBottom:9},
+suggestionRow:{flexDirection:'row',flexWrap:'wrap',gap:8},
+suggestion:{minHeight:36,paddingHorizontal:14,borderWidth:1,borderColor:'#FFC5D8',borderRadius:18,backgroundColor:'#FFF5F8',alignItems:'center',justifyContent:'center'},
+suggestionActive:{backgroundColor:'#FF5C9A',borderColor:'#FF5C9A'},
+suggestionText:{fontFamily:Typography.medium,fontSize:13,color:'#E14078'},
+suggestionTextActive:{color:'#FFF'},
+submitError:{fontFamily:Typography.medium,fontSize:13,color:'#B64753',textAlign:'center',marginTop:20},
+footer:{backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:'#F3E4EA',paddingHorizontal:24,paddingTop:14,flexDirection:'row',gap:12},
+cancel:{flex:0.85,height:54,borderRadius:22,borderWidth:1,borderColor:'#E3D5DC',alignItems:'center',justifyContent:'center'},
+cancelText:{fontFamily:Typography.bold,fontSize:15,color:'#2B1B2A'},
+saveTouch:{flex:1.15,height:54,borderRadius:22,overflow:'hidden'},
+save:{flex:1,flexDirection:'row',gap:8,alignItems:'center',justifyContent:'center'},
+saveDisabled:{backgroundColor:'#E7DDE3'},
+saveText:{fontFamily:Typography.bold,fontSize:15,color:'#FFF'}
 });

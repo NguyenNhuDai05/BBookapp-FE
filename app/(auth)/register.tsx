@@ -2,20 +2,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Check, Eye, EyeOff, LockKeyhole, Mail, Phone, Sparkles, UserRound } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -70,7 +58,7 @@ export default function RegisterScreen() {
         return true;
       }
 
-      Alert.alert(
+      appDialog.alert(
         "Đăng ký Google thất bại",
         "Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc đăng ký bằng email.",
       );
@@ -129,7 +117,7 @@ export default function RegisterScreen() {
       if (!otpSent) {
         await authService.requestRegistrationOtp(trimmedEmail);
         setOtpSent(true);
-        Alert.alert("Đã gửi OTP", `Vui lòng kiểm tra hộp thư ${trimmedEmail}. Mã có hiệu lực trong 5 phút.`);
+        appDialog.alert("Đã gửi OTP", `Vui lòng kiểm tra hộp thư ${trimmedEmail}. Mã có hiệu lực trong 5 phút.`);
         return;
       }
 
@@ -148,7 +136,7 @@ export default function RegisterScreen() {
           params: { registered: "1", email: trimmedEmail },
         } as any);
       } else {
-        Alert.alert("Đăng ký thất bại", "Có lỗi xảy ra. Vui lòng thử lại.");
+        appDialog.alert("Đăng ký thất bại", "Có lỗi xảy ra. Vui lòng thử lại.");
       }
     } catch (err: any) {
       console.error("Register error:", err?.response?.data || err?.message || err);
@@ -167,7 +155,7 @@ export default function RegisterScreen() {
     try {
       await signInWithGoogle();
     } catch (err: any) {
-      Alert.alert("Google OAuth", err?.message || "Không thể mở Google OAuth.");
+      appDialog.alert("Google OAuth", err?.message || "Không thể mở Google OAuth.");
     }
   };
 

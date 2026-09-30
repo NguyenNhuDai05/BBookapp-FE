@@ -2,19 +2,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Eye, EyeOff, LockKeyhole, Mail, Sparkles } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -47,7 +36,7 @@ export default function LoginScreen() {
         return true;
       }
 
-      Alert.alert(
+      appDialog.alert(
         "Đăng nhập Google thất bại",
         "Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc sử dụng email và mật khẩu.",
       );
@@ -92,9 +81,10 @@ export default function LoginScreen() {
       return;
     }
 
-    Alert.alert(
-      "Đăng nhập thất bại",
-      "Email hoặc mật khẩu không chính xác. Hãy kiểm tra lại tài khoản.",
+    appDialog.alert(
+      "Đăng nhập không thành công",
+      "Email hoặc mật khẩu chưa chính xác. Vui lòng kiểm tra và thử lại.",
+      [{ text: 'Thử lại' }],
     );
   };
 
@@ -102,7 +92,7 @@ export default function LoginScreen() {
     try {
       await signInWithGoogle();
     } catch (error: any) {
-      Alert.alert("Google OAuth", error?.message || "Không thể mở Google OAuth.");
+      appDialog.alert("Google OAuth", error?.message || "Không thể mở Google OAuth.");
     }
   };
 

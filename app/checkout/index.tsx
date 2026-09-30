@@ -1,11 +1,12 @@
 import React, { useRef, useState } from 'react';
-import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useRouter } from 'expo-router';
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { 
+import {
   ArrowLeft, MapPin, Calendar, Clock, Trash2, Plus, Minus, Sparkles,
   QrCode, ArrowRight
 } from 'lucide-react-native';
@@ -39,10 +40,10 @@ export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
   const activeMode = useAuthStore(state => state.activeMode);
   const switchMode = useAuthStore(state => state.switchMode);
-  const { 
+  const {
     draft, setAddress, setDate, setTime, updateServiceParticipantsCount, removeService
   } = useBookingStore();
-  
+
   const [dateSheetVisible, setDateSheetVisible] = useState(false);
   const [timeSheetVisible, setTimeSheetVisible] = useState(false);
   const [addressSheetVisible, setAddressSheetVisible] = useState(false);
@@ -92,12 +93,12 @@ export default function CheckoutScreen() {
       return;
     }
     if (!draft.address.trim() || !draft.date || !draft.time || draft.services.length === 0) {
-      Alert.alert('Chưa đủ thông tin', 'Vui lòng chọn địa chỉ, ngày, giờ và ít nhất một dịch vụ.');
+      appDialog.alert('Chưa đủ thông tin', 'Vui lòng chọn địa chỉ, ngày, giờ và ít nhất một dịch vụ.');
       return;
     }
 
     if (createLocalBookingDate(draft.date, draft.time).getTime() <= Date.now()) {
-      Alert.alert('Thời gian không hợp lệ', 'Vui lòng chọn thời gian thực hiện trong tương lai.');
+      appDialog.alert('Thời gian không hợp lệ', 'Vui lòng chọn thời gian thực hiện trong tương lai.');
       return;
     }
 
@@ -137,13 +138,13 @@ export default function CheckoutScreen() {
     } catch (error: unknown) {
       const apiError = getApiError(error);
       if (apiError.isNetworkError && createdBookingId) {
-        Alert.alert(
+        appDialog.alert(
           'Chưa thể xác nhận trạng thái thanh toán',
           'Booking đã được tạo nhưng kết nối bị gián đoạn. Ứng dụng sẽ mở booking để bạn kiểm tra trạng thái trước khi tạo yêu cầu thanh toán mới.',
         );
         router.replace(`/booking/${createdBookingId}`);
       } else {
-        Alert.alert('Không thể tiếp tục', apiError.message || 'Vui lòng thử lại sau.');
+        appDialog.alert('Không thể tiếp tục', apiError.message || 'Vui lòng thử lại sau.');
       }
     } finally {
       checkoutInFlightRef.current = false;
@@ -167,14 +168,14 @@ export default function CheckoutScreen() {
             <ActivityIndicator color={BrandColors.accentPink} style={{ padding: 20 }} />
           ) : (
             <>
-              <Image 
-                source={{ uri: muaInfo?.avatar || draft.mua.avatarUrl || 'https://via.placeholder.com/150' }} 
-                style={styles.muaAvatar} 
+              <Image
+                source={{ uri: muaInfo?.avatar || draft.mua.avatarUrl || 'https://via.placeholder.com/150' }}
+                style={styles.muaAvatar}
               />
               <View style={styles.muaInfo}>
                 <Text style={styles.muaName} numberOfLines={1}>{muaInfo?.name || draft.mua.name}</Text>
                 <Text style={styles.muaBrand} numberOfLines={1}>{muaInfo?.specialties?.[0] || 'Chuyên gia trang điểm'}</Text>
-                
+
                 <View style={styles.muaStatsRow}>
                   <View style={styles.muaStatBadge}>
                     <Text style={styles.muaStatText}>⭐ {muaInfo?.rating || 5.0} ({muaInfo?.reviewCount || 0})</Text>
@@ -217,16 +218,16 @@ export default function CheckoutScreen() {
               <Text style={styles.pickerLabel}>Ngày thực hiện</Text>
             </View>
             <Text style={styles.pickerValue}>
-              {draft.date 
-                ? draft.date.split('-').reverse().join('/') 
+              {draft.date
+                ? draft.date.split('-').reverse().join('/')
                 : 'Chọn ngày'} ▾
             </Text>
           </TouchableOpacity>
-          
+
           <View style={styles.pickerSpacer} />
-          
-          <TouchableOpacity 
-            style={styles.pickerBox} 
+
+          <TouchableOpacity
+            style={styles.pickerBox}
             onPress={() => setTimeSheetVisible(true)}
             disabled={!draft.date}
           >
@@ -268,7 +269,7 @@ export default function CheckoutScreen() {
                 <Trash2 size={18} color="#BDBDBD" />
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.serviceFooter}>
               <View style={styles.serviceMeta}>
                 <Text style={styles.servicePrice}>{(service.price || 0).toLocaleString('vi-VN')}đ</Text>
@@ -277,16 +278,16 @@ export default function CheckoutScreen() {
                   <Text style={styles.serviceMetaText}>{service.durationMinutes} phút</Text>
                 </View>
               </View>
-              
+
               <View style={styles.quantityControl}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.qtyBtn}
                   onPress={() => updateServiceParticipantsCount(service.id, service.participantsCount - 1)}
                 >
                   <Minus size={16} color={service.participantsCount <= 1 ? BrandColors.borderLight : BrandColors.accentPink} />
                 </TouchableOpacity>
                 <Text style={styles.qtyText}>{service.participantsCount.toString().padStart(2, '0')}</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.qtyBtn}
                   onPress={() => updateServiceParticipantsCount(service.id, service.participantsCount + 1)}
                 >
@@ -340,8 +341,8 @@ export default function CheckoutScreen() {
 
         {/* Payment Method */}
         <Text style={styles.sectionTitlePlain}>Phương thức thanh toán</Text>
-        
-        <PaymentMethodItem 
+
+        <PaymentMethodItem
           title="Chuyển khoản QR"
           subtitle="Thanh toán an toàn qua payOS"
           icon={<QrCode size={20} color={BrandColors.accentPink} />}
@@ -357,7 +358,7 @@ export default function CheckoutScreen() {
           <Text style={styles.footerLabel}>Cần thanh toán</Text>
           <Text style={styles.footerAmount} numberOfLines={1}>{estimatedDepositAmount.toLocaleString('vi-VN')}đ</Text>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.submitBtn, (!isFormValid || isPending) && styles.submitBtnDisabled]}
           onPress={handleCheckout}
           disabled={!isFormValid || isPending}
@@ -373,13 +374,13 @@ export default function CheckoutScreen() {
         </TouchableOpacity>
       </View>
 
-      <DatePickerSheet 
-        visible={dateSheetVisible} 
-        onClose={() => setDateSheetVisible(false)} 
+      <DatePickerSheet
+        visible={dateSheetVisible}
+        onClose={() => setDateSheetVisible(false)}
         selectedDate={draft.date}
         onSelectDate={handleDateSelect}
       />
-      
+
       {timeSheetVisible ? (
         <TimePickerSheet
           visible
@@ -417,8 +418,8 @@ export default function CheckoutScreen() {
 }
 
 const PaymentMethodItem = ({ title, subtitle, icon, isSelected, onSelect }: any) => (
-  <TouchableOpacity 
-    style={[styles.paymentMethodCard, isSelected && styles.paymentMethodCardSelected]} 
+  <TouchableOpacity
+    style={[styles.paymentMethodCard, isSelected && styles.paymentMethodCardSelected]}
     onPress={onSelect}
     activeOpacity={0.8}
   >
@@ -442,7 +443,7 @@ const styles = StyleSheet.create({
   errorText: { fontFamily: Typography.medium, color: BrandColors.textSecondary, marginBottom: Spacing.lg },
   backBtn: { padding: Spacing.md, backgroundColor: BrandColors.bgPinkLight, borderRadius: Radius.md },
   backBtnText: { color: BrandColors.accentPink, fontFamily: Typography.bold },
-  
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -462,12 +463,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: BrandColors.textDark,
   },
-  
+
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: Spacing.lg,
   },
-  
+
   muaCard: {
     flexDirection: 'row',
     backgroundColor: '#FFF',
@@ -522,7 +523,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: BrandColors.accentPink,
   },
-  
+
   sectionTitleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -552,7 +553,7 @@ const styles = StyleSheet.create({
     fontFamily: Typography.semiBold,
     fontSize: 12,
   },
-  
+
   card: {
     backgroundColor: '#FFF',
     borderRadius: Radius.base,
@@ -588,7 +589,7 @@ const styles = StyleSheet.create({
     color: BrandColors.accentPink,
     marginLeft: Spacing.sm,
   },
-  
+
   dateTimeRow: {
     flexDirection: 'row',
     marginBottom: Spacing.sm,
@@ -618,13 +619,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: BrandColors.textDark,
   },
-  
+
   durationCard: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.md, padding: Spacing.md, borderRadius: Radius.base, backgroundColor: BrandColors.bgPinkLight },
   durationIcon: { width: 38, height: 38, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center', backgroundColor: BrandColors.bgCard, marginRight: Spacing.md },
   durationCopy: { flex: 1 },
   durationLabel: { fontFamily: Typography.regular, fontSize: 12, color: BrandColors.textMuted },
   durationValue: { marginTop: 2, fontFamily: Typography.semiBold, fontSize: 14, color: BrandColors.textDark },
-  
+
   serviceCard: {
     backgroundColor: '#FFF',
     borderRadius: Radius.xl,
@@ -686,7 +687,7 @@ const styles = StyleSheet.create({
     width: 30,
     textAlign: 'center',
   },
-  
+
   summaryCard: {
     backgroundColor: '#FFF',
     borderRadius: Radius.lg,
@@ -748,7 +749,7 @@ const styles = StyleSheet.create({
   depositAmount: { flexShrink: 0, fontFamily: Typography.bold, fontSize: 20, color: BrandColors.accentPink },
   remainingAmount: { flexShrink: 0, fontFamily: Typography.bold, fontSize: 17, color: BrandColors.textDark },
   depositHelp: { fontFamily: Typography.regular, fontSize: 12, color: BrandColors.textMuted, lineHeight: 17 },
-  
+
   paymentMethodCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -806,7 +807,7 @@ const styles = StyleSheet.create({
     backgroundColor: BrandColors.accentPink,
   },
   paymentMethodHelp: { marginTop: Spacing.sm, fontFamily: Typography.regular, fontSize: 12, color: BrandColors.textMuted },
-  
+
   footer: {
     position: 'absolute',
     bottom: 0,

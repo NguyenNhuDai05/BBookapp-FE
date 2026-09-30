@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -63,12 +64,12 @@ export default function BookingDetailScreen() {
       router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } });
     } catch (err: any) {
       const payload = err.response?.data;
-      Alert.alert('Không thể thanh toán cọc', payload?.message || payload?.Message || err.message);
+      appDialog.alert('Không thể thanh toán cọc', payload?.message || payload?.Message || err.message);
     }
   };
 
   const handleDispute = () => {
-    if (!disputeReason.trim()) return Alert.alert('Thiếu nội dung', 'Vui lòng nhập nội dung khiếu nại.');
+    if (!disputeReason.trim()) return appDialog.alert('Thiếu nội dung', 'Vui lòng nhập nội dung khiếu nại.');
     disputeBooking({ bookingId: booking.id, reason: disputeReason.trim() }, { onSuccess: () => setShowDispute(false) });
   };
 
@@ -160,9 +161,9 @@ export default function BookingDetailScreen() {
           {booking.services.map((s) => (
             <View key={s.id} style={styles.serviceItem}>
               <View style={styles.serviceItemLeft}>
-                <Image 
-                  source={{ uri: s.imageUrl || 'https://images.unsplash.com/photo-1512496015851-a1c8ce9015c3?w=200&q=80' }} 
-                  style={styles.serviceImage} 
+                <Image
+                  source={{ uri: s.imageUrl || 'https://images.unsplash.com/photo-1512496015851-a1c8ce9015c3?w=200&q=80' }}
+                  style={styles.serviceImage}
                 />
                 <Text style={styles.serviceName} numberOfLines={2}>
                   {s.name} <Text style={styles.serviceQty}>x{s.participantsCount}</Text>
@@ -209,7 +210,7 @@ export default function BookingDetailScreen() {
         {/* Actions for COMPLETED or CANCELLED */}
         {(booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED') && (
           <View style={[styles.card, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm }]}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.reviewBtn, booking.isReviewed && styles.reviewedBtn]}
               disabled={booking.isReviewed}
               onPress={() => { /* Navigate to review screen if needed */ }}
@@ -219,7 +220,7 @@ export default function BookingDetailScreen() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.rebookBtn}
               onPress={() => router.push({ pathname: '/mua-detail', params: { id: booking.mua.id, tab: 'Dịch vụ' } })}
             >
@@ -245,7 +246,7 @@ export default function BookingDetailScreen() {
       )}
       {(booking.status === 'PENDING_CONFIRMATION' || booking.status === 'CONFIRMED') && (
         <View style={styles.footer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.cancelBtn}
             onPress={() => router.push(`/booking/${booking.id}/cancel`)}
           >
@@ -258,20 +259,19 @@ export default function BookingDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  center: {
+center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorText: { fontFamily: Typography.medium, color: BrandColors.textSecondary, marginBottom: Spacing.lg },
-  backBtn: { padding: Spacing.md, backgroundColor: BrandColors.bgPinkLight, borderRadius: Radius.md },
-  backBtnText: { color: BrandColors.accentPink, fontFamily: Typography.bold },
-  
-  header: {
+errorText: { fontFamily: Typography.medium, color: BrandColors.textSecondary, marginBottom: Spacing.lg },
+backBtn: { padding: Spacing.md, backgroundColor: BrandColors.bgPinkLight, borderRadius: Radius.md },
+backBtnText: { color: BrandColors.accentPink, fontFamily: Typography.bold },
+header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -279,38 +279,29 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: '#FFF',
   },
-  headerBtn: { padding: Spacing.xs },
-  headerTitle: {
+headerBtn: { padding: Spacing.xs },
+headerTitle: {
     fontFamily: Typography.bold,
     fontSize: 16,
     color: BrandColors.textDark,
   },
-  headerRight: { width: 32 },
-
-  scrollContent: {
+headerRight: { width: 32 },
+scrollContent: {
     paddingHorizontal: Spacing.sm,
     paddingTop: Spacing.md,
     paddingBottom: 100,
   },
-
-  statusBanner: {
+statusBanner: {
     padding: Spacing.md,
     borderRadius: Radius.lg,
     alignItems: 'center',
     marginBottom: Spacing.lg,
   },
-  statusBannerText: {
+statusBannerText: {
     fontFamily: Typography.bold,
     fontSize: 16,
   },
-  statusSubtext: {
-    fontFamily: Typography.regular,
-    fontSize: 13,
-    color: '#FF9800',
-    marginTop: 4,
-  },
-
-  card: {
+card: {
     backgroundColor: '#FFF',
     borderRadius: Radius.xl,
     padding: Spacing.lg,
@@ -319,21 +310,21 @@ const styles = StyleSheet.create({
     borderColor: '#F0F0F0',
     ...Shadows.card,
   },
-  idRow: {
+idRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  idLabel: {
+idLabel: {
     fontFamily: Typography.regular,
     fontSize: 14,
     color: BrandColors.textSecondary,
   },
-  idValue: {
+idValue: {
     fontFamily: Typography.bold,
     color: BrandColors.textDark,
   },
-  copyBtn: {
+copyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -342,40 +333,40 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: Radius.sm,
   },
-  copyText: {
+copyText: {
     fontFamily: Typography.medium,
     fontSize: 12,
     color: BrandColors.textSecondary,
   },
-  divider: {
+divider: {
     height: 1,
     backgroundColor: '#F5F5F5',
     marginVertical: Spacing.md,
   },
-  muaRow: {
+muaRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  muaAvatar: {
+muaAvatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
     marginRight: Spacing.md,
   },
-  muaInfo: {
+muaInfo: {
     flex: 1,
   },
-  muaName: {
+muaName: {
     fontFamily: Typography.bold,
     fontSize: 15,
     color: BrandColors.textDark,
   },
-  muaRole: {
+muaRole: {
     fontFamily: Typography.regular,
     fontSize: 13,
     color: BrandColors.textSecondary,
   },
-  chatBtn: {
+chatBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -385,109 +376,103 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: Radius.full,
   },
-  chatText: {
+chatText: {
     fontFamily: Typography.semiBold,
     fontSize: 13,
     color: BrandColors.accentPink,
   },
-
-  sectionTitle: {
+sectionTitle: {
     fontFamily: Typography.bold,
     fontSize: 16,
     color: BrandColors.textDark,
     marginBottom: Spacing.sm,
   },
-  infoRow: {
+infoRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
   },
-  infoText: {
+infoText: {
     flex: 1,
     fontFamily: Typography.medium,
     fontSize: 15,
     color: BrandColors.textDark,
     lineHeight: 22,
   },
-  addressBlock: { flex: 1 },
-  locationType: {
+addressBlock: { flex: 1 },
+locationType: {
     fontFamily: Typography.semiBold,
     fontSize: 13,
     color: BrandColors.accentPink,
     marginBottom: 2,
   },
-  noteText: {
+noteText: {
     flex: 1,
     fontFamily: Typography.regular,
     fontSize: 15,
     color: BrandColors.textDark,
     fontStyle: 'italic',
   },
-
-  serviceItem: {
+serviceItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.md,
   },
-  serviceItemLeft: {
+serviceItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
     paddingRight: Spacing.sm,
   },
-  serviceImage: {
+serviceImage: {
     width: 48,
     height: 48,
     borderRadius: Radius.md,
     marginRight: Spacing.sm,
   },
-  serviceName: {
+serviceName: {
     fontFamily: Typography.semiBold,
     fontSize: 15,
     color: BrandColors.textDark,
     flexShrink: 1,
   },
-  serviceQty: {
+serviceQty: {
     fontFamily: Typography.medium,
     fontSize: 14,
     color: BrandColors.accentPink,
   },
-  servicePriceHighlight: {
+servicePriceHighlight: {
     fontFamily: Typography.bold,
     fontSize: 16,
     color: BrandColors.accentPink,
   },
-
-  paymentRow: {
+paymentRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: Spacing.sm,
   },
-  paymentLabel: {
+paymentLabel: {
     fontFamily: Typography.medium,
     fontSize: 14,
     color: BrandColors.textSecondary,
   },
-  paymentValueTotal: {
+paymentValueTotal: {
     fontFamily: Typography.bold,
     fontSize: 15,
     color: BrandColors.textDark,
   },
-  paymentValuePaid: {
+paymentValuePaid: {
     fontFamily: Typography.bold,
     fontSize: 15,
     color: '#00C853',
   },
-  paymentValueRemaining: {
+paymentValueRemaining: {
     fontFamily: Typography.bold,
     fontSize: 15,
     color: BrandColors.accentPink,
   },
-
-
-
-  footer: {
+footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -499,7 +484,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
   },
-  cancelBtn: {
+cancelBtn: {
     backgroundColor: '#FFF',
     borderWidth: 1,
     borderColor: '#F44336',
@@ -507,22 +492,22 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     alignItems: 'center',
   },
-  cancelBtnText: {
+cancelBtnText: {
     fontFamily: Typography.bold,
     fontSize: 15,
     color: '#F44336',
   },
-  actionBtnText: {
+actionBtnText: {
     fontFamily: Typography.bold,
     fontSize: 15,
     color: '#FFF',
   },
-  primaryBtn: { backgroundColor: BrandColors.accentPink, paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
-  footerRow: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFF', padding: Spacing.md, flexDirection: 'row', gap: Spacing.sm, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-  cancelBtnFlex: { flex: 1, borderWidth: 1, borderColor: '#F44336', paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
-  primaryBtnFlex: { flex: 1, backgroundColor: BrandColors.accentPink, paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
-  disputeInput: { minHeight: 90, borderWidth: 1, borderColor: '#E0E0E0', borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md, textAlignVertical: 'top' },
-  reviewBtn: {
+primaryBtn: { backgroundColor: BrandColors.accentPink, paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
+footerRow: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFF', padding: Spacing.md, flexDirection: 'row', gap: Spacing.sm, borderTopWidth: 1, borderTopColor: '#F0F0F0' },
+cancelBtnFlex: { flex: 1, borderWidth: 1, borderColor: '#F44336', paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
+primaryBtnFlex: { flex: 1, backgroundColor: BrandColors.accentPink, paddingVertical: 14, borderRadius: Radius.full, alignItems: 'center' },
+disputeInput: { minHeight: 90, borderWidth: 1, borderColor: '#E0E0E0', borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.md, textAlignVertical: 'top' },
+reviewBtn: {
     flex: 1,
     backgroundColor: '#FFF',
     borderWidth: 1,
@@ -532,19 +517,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: Spacing.xs,
   },
-  reviewedBtn: {
+reviewedBtn: {
     borderColor: '#BDBDBD',
     backgroundColor: '#F5F5F5',
   },
-  reviewBtnText: {
+reviewBtnText: {
     fontFamily: Typography.bold,
     fontSize: 14,
     color: BrandColors.accentPink,
   },
-  reviewedBtnText: {
+reviewedBtnText: {
     color: '#9E9E9E',
   },
-  rebookBtn: {
+rebookBtn: {
     flex: 1,
     backgroundColor: BrandColors.accentPink,
     paddingVertical: 12,
@@ -552,9 +537,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: Spacing.xs,
   },
-  rebookBtnText: {
+rebookBtnText: {
     fontFamily: Typography.bold,
     fontSize: 14,
     color: '#FFF',
-  },
+  }
 });

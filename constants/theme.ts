@@ -13,6 +13,8 @@ export const BrandColors = {
   gradientHeroStart: '#FFE2D7',
   gradientHeroMid: '#F799A5',
   gradientHeroEnd: '#F55389',
+  gradientHeaderStart: '#E8436A',
+  gradientHeaderEnd: '#FF8AB5',
 
   // Text
   textPrimary: '#8B1A2E',
@@ -33,6 +35,7 @@ export const BrandColors = {
 
   // Accent
   accentPink: '#F55389',
+  primaryPink: '#FF5C9A',
   accentRose: '#E8436A',
   accentRoseDark: '#C71585',
   accentGold: '#F5A623',
@@ -91,6 +94,30 @@ export const Radius = {
   xl: 24,
   xxl: 28,
   full: 999,
+} as const;
+
+export const CustomerTabBarTokens = { contentHeight: 68, minBottomPadding: 12, topPadding: 8 } as const;
+
+export const getCustomerTabBarMetrics = (bottomInset: number) => {
+  const bottomPadding = Math.max(bottomInset, CustomerTabBarTokens.minBottomPadding);
+  return { bottomPadding, height: CustomerTabBarTokens.contentHeight + bottomPadding };
+};
+
+// Shared overlay tokens. Existing screen colors remain unchanged.
+export const OverlayTokens = {
+  primary: BrandColors.primaryPink,
+  light: '#FFD6E5',
+  background: '#FFF7FA',
+  text: '#2B1B2A',
+  description: '#716775',
+  backdrop: 'rgba(43, 27, 42, 0.45)',
+  destructive: BrandColors.statusCancelled,
+  duration: 220,
+  cardRadius: Radius.xl,
+  sheetRadius: Radius.xxl,
+  maxWidth: 400,
+  buttonHeight: 52,
+  iconSize: 52,
 } as const;
 
 // ─── SHADOW PRESETS ─────────────────────────────────────────

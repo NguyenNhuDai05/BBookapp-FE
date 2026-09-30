@@ -1,9 +1,11 @@
+import { AppModal } from '../../../components/ui/AppModal';
 import * as Crypto from 'expo-crypto';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { ArrowLeft, Check, Search, Send, X } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../../constants/theme';
 import { adminNotificationService } from '../../../services/adminNotificationService';
@@ -28,7 +30,53 @@ export default function NewAdminNotificationScreen(){
     <View style={styles.preview}><Text style={styles.previewLabel}>XEM TRƯỚC</Text><Text style={styles.previewTitle}>{title.trim()||'Tiêu đề thông báo'}</Text><Text style={styles.previewBody}>{body.trim()||'Nội dung sẽ hiển thị tại đây.'}</Text></View>
     <TouchableOpacity disabled={!valid} style={[styles.submit,!valid&&styles.disabled]} onPress={()=>{setError('');setConfirm(true)}}><Send size={19} color="#FFF"/><Text style={styles.submitText}>Tiếp tục gửi</Text></TouchableOpacity>
     </View></ScrollView></KeyboardAvoidingView>
-    <Modal visible={confirm} transparent animationType="fade" onRequestClose={()=>setConfirm(false)}><View style={styles.overlay}><View style={styles.dialog}><Text style={styles.dialogTitle}>Xác nhận gửi thông báo</Text><Text style={styles.dialogBody}>{audience==='SelectedUsers'?`Gửi thông báo này đến ${selected.length} người dùng đã chọn?`:`Gửi thông báo này đến nhóm “${choices.find(x=>x.value===audience)?.label}”?`}</Text>{error?<Text style={styles.error}>{error}</Text>:null}<View style={styles.dialogActions}><TouchableOpacity style={styles.cancel} onPress={()=>setConfirm(false)} disabled={create.isPending}><Text style={styles.cancelText}>Kiểm tra lại</Text></TouchableOpacity><TouchableOpacity style={styles.confirm} onPress={()=>create.mutate()} disabled={create.isPending}>{create.isPending?<ActivityIndicator color="#FFF"/>:<Text style={styles.confirmText}>Gửi ngay</Text>}</TouchableOpacity></View></View></View></Modal>
+    <AppModal visible={confirm} title="Xác nhận gửi thông báo" variant="confirm"
+    description={audience==='SelectedUsers'?`Gửi thông báo này đến ${selected.length} người dùng đã chọn?`:`Gửi thông báo này đến nhóm “${choices.find(x=>x.value===audience)?.label}”?`}
+    loading={create.isPending} onClose={()=>setConfirm(false)} primaryAction={{label:'Gửi ngay',onPress:()=>create.mutate(),loading:create.isPending}}
+    secondaryAction={{label:'Kiểm tra lại',onPress:()=>setConfirm(false)}}>{error?<Text style={styles.error}>{error}</Text>:null}</AppModal>
   </SafeAreaView>;
 }
-const styles=StyleSheet.create({flex:{flex:1},safe:{flex:1,backgroundColor:BrandColors.bgPrimary},content:{width:'100%',maxWidth:760,alignSelf:'center',padding:Spacing.base,paddingBottom:50},header:{flexDirection:'row',alignItems:'center',gap:10,marginBottom:Spacing.md},back:{width:44,height:44,borderRadius:22,alignItems:'center',justifyContent:'center',backgroundColor:'#FFF'},pageTitle:{fontFamily:Typography.extraBold,fontSize:22,color:BrandColors.textDark},sub:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:2},panel:{backgroundColor:'#FFF',borderRadius:Radius.lg,padding:Spacing.base,borderWidth:1,borderColor:BrandColors.borderLight,...Shadows.sm},label:{fontFamily:Typography.bold,fontSize:14,color:BrandColors.textDark,marginTop:12,marginBottom:8},choiceGrid:{flexDirection:'row',flexWrap:'wrap',gap:8},choice:{width:'48%',minHeight:68,padding:10,borderRadius:Radius.md,borderWidth:1,borderColor:BrandColors.borderLight,backgroundColor:'#FFF'},choiceActive:{borderColor:BrandColors.accentPink,backgroundColor:BrandColors.bgPink},choiceHead:{flexDirection:'row',alignItems:'center',gap:5},choiceTitle:{fontFamily:Typography.bold,color:BrandColors.textDark},choiceTitleActive:{color:BrandColors.accentPink},choiceHint:{fontFamily:Typography.regular,fontSize:11,color:BrandColors.textMuted,marginTop:4},input:{minHeight:48,borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.md,paddingHorizontal:13,fontFamily:Typography.regular,color:BrandColors.textDark,backgroundColor:'#FFF'},textarea:{height:130,paddingTop:13},counter:{textAlign:'right',fontFamily:Typography.regular,fontSize:10,color:BrandColors.textMuted,marginTop:4},userSection:{marginTop:12},searchBox:{height:46,flexDirection:'row',alignItems:'center',gap:8,borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.md,paddingHorizontal:12},searchInput:{flex:1},chips:{flexDirection:'row',flexWrap:'wrap',gap:6,marginVertical:9},chip:{maxWidth:180,flexDirection:'row',alignItems:'center',gap:5,paddingHorizontal:9,paddingVertical:6,borderRadius:16,backgroundColor:BrandColors.bgPink},chipText:{flexShrink:1,fontFamily:Typography.bold,fontSize:11,color:BrandColors.accentPink},userRow:{flexDirection:'row',alignItems:'center',paddingVertical:10,borderBottomWidth:1,borderBottomColor:BrandColors.borderDivider},avatar:{width:38,height:38,borderRadius:19,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.bgPink,marginRight:9},avatarText:{fontFamily:Typography.bold,color:BrandColors.accentPink},userCopy:{flex:1},userName:{fontFamily:Typography.bold,fontSize:13,color:BrandColors.textDark},userEmail:{fontFamily:Typography.regular,fontSize:11,color:BrandColors.textMuted,marginTop:2},checkbox:{width:22,height:22,borderRadius:7,borderWidth:1,borderColor:BrandColors.borderPink,alignItems:'center',justifyContent:'center'},checkboxOn:{backgroundColor:BrandColors.accentPink,borderColor:BrandColors.accentPink},help:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textMuted,marginTop:9},preview:{borderRadius:Radius.md,backgroundColor:BrandColors.bgPink,padding:14,marginTop:18},previewLabel:{fontFamily:Typography.bold,fontSize:10,letterSpacing:1,color:BrandColors.accentPink},previewTitle:{fontFamily:Typography.extraBold,fontSize:15,color:BrandColors.textDark,marginTop:8},previewBody:{fontFamily:Typography.regular,fontSize:13,lineHeight:19,color:BrandColors.textBody,marginTop:4},submit:{height:50,borderRadius:25,backgroundColor:BrandColors.accentPink,flexDirection:'row',gap:8,alignItems:'center',justifyContent:'center',marginTop:18},disabled:{opacity:.45},submitText:{fontFamily:Typography.bold,color:'#FFF'},overlay:{flex:1,backgroundColor:'rgba(48,23,38,.45)',alignItems:'center',justifyContent:'center',padding:20},dialog:{width:'100%',maxWidth:430,backgroundColor:'#FFF',borderRadius:Radius.lg,padding:20},dialogTitle:{fontFamily:Typography.extraBold,fontSize:19,color:BrandColors.textDark},dialogBody:{fontFamily:Typography.regular,fontSize:14,lineHeight:21,color:BrandColors.textBody,marginTop:9},dialogActions:{flexDirection:'row',gap:9,marginTop:20},cancel:{flex:1,height:46,borderRadius:23,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.bgPink},cancelText:{fontFamily:Typography.bold,color:BrandColors.accentPink},confirm:{flex:1,height:46,borderRadius:23,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.accentPink},confirmText:{fontFamily:Typography.bold,color:'#FFF'},error:{color:BrandColors.statusCancelled,fontFamily:Typography.regular,fontSize:12,marginTop:10}});
+const styles=StyleSheet.create({
+flex:{flex:1},
+safe:{flex:1,backgroundColor:BrandColors.bgPrimary},
+content:{width:'100%',maxWidth:760,alignSelf:'center',padding:Spacing.base,paddingBottom:50},
+header:{flexDirection:'row',alignItems:'center',gap:10,marginBottom:Spacing.md},
+back:{width:44,height:44,borderRadius:22,alignItems:'center',justifyContent:'center',backgroundColor:'#FFF'},
+pageTitle:{fontFamily:Typography.extraBold,fontSize:22,color:BrandColors.textDark},
+sub:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:2},
+panel:{backgroundColor:'#FFF',borderRadius:Radius.lg,padding:Spacing.base,borderWidth:1,borderColor:BrandColors.borderLight,...Shadows.sm},
+label:{fontFamily:Typography.bold,fontSize:14,color:BrandColors.textDark,marginTop:12,marginBottom:8},
+choiceGrid:{flexDirection:'row',flexWrap:'wrap',gap:8},
+choice:{width:'48%',minHeight:68,padding:10,borderRadius:Radius.md,borderWidth:1,borderColor:BrandColors.borderLight,backgroundColor:'#FFF'},
+choiceActive:{borderColor:BrandColors.accentPink,backgroundColor:BrandColors.bgPink},
+choiceHead:{flexDirection:'row',alignItems:'center',gap:5},
+choiceTitle:{fontFamily:Typography.bold,color:BrandColors.textDark},
+choiceTitleActive:{color:BrandColors.accentPink},
+choiceHint:{fontFamily:Typography.regular,fontSize:11,color:BrandColors.textMuted,marginTop:4},
+input:{minHeight:48,borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.md,paddingHorizontal:13,fontFamily:Typography.regular,color:BrandColors.textDark,backgroundColor:'#FFF'},
+textarea:{height:130,paddingTop:13},
+counter:{textAlign:'right',fontFamily:Typography.regular,fontSize:10,color:BrandColors.textMuted,marginTop:4},
+userSection:{marginTop:12},
+searchBox:{height:46,flexDirection:'row',alignItems:'center',gap:8,borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.md,paddingHorizontal:12},
+searchInput:{flex:1},
+chips:{flexDirection:'row',flexWrap:'wrap',gap:6,marginVertical:9},
+chip:{maxWidth:180,flexDirection:'row',alignItems:'center',gap:5,paddingHorizontal:9,paddingVertical:6,borderRadius:16,backgroundColor:BrandColors.bgPink},
+chipText:{flexShrink:1,fontFamily:Typography.bold,fontSize:11,color:BrandColors.accentPink},
+userRow:{flexDirection:'row',alignItems:'center',paddingVertical:10,borderBottomWidth:1,borderBottomColor:BrandColors.borderDivider},
+avatar:{width:38,height:38,borderRadius:19,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.bgPink,marginRight:9},
+avatarText:{fontFamily:Typography.bold,color:BrandColors.accentPink},
+userCopy:{flex:1},
+userName:{fontFamily:Typography.bold,fontSize:13,color:BrandColors.textDark},
+userEmail:{fontFamily:Typography.regular,fontSize:11,color:BrandColors.textMuted,marginTop:2},
+checkbox:{width:22,height:22,borderRadius:7,borderWidth:1,borderColor:BrandColors.borderPink,alignItems:'center',justifyContent:'center'},
+checkboxOn:{backgroundColor:BrandColors.accentPink,borderColor:BrandColors.accentPink},
+help:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textMuted,marginTop:9},
+preview:{borderRadius:Radius.md,backgroundColor:BrandColors.bgPink,padding:14,marginTop:18},
+previewLabel:{fontFamily:Typography.bold,fontSize:10,letterSpacing:1,color:BrandColors.accentPink},
+previewTitle:{fontFamily:Typography.extraBold,fontSize:15,color:BrandColors.textDark,marginTop:8},
+previewBody:{fontFamily:Typography.regular,fontSize:13,lineHeight:19,color:BrandColors.textBody,marginTop:4},
+submit:{height:50,borderRadius:25,backgroundColor:BrandColors.accentPink,flexDirection:'row',gap:8,alignItems:'center',justifyContent:'center',marginTop:18},
+disabled:{opacity:.45},
+submitText:{fontFamily:Typography.bold,color:'#FFF'},
+error:{color:BrandColors.statusCancelled,fontFamily:Typography.regular,fontSize:12,marginTop:10}
+});

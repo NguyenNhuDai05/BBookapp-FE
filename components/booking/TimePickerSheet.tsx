@@ -1,6 +1,8 @@
+import { AppBottomSheet } from '../ui/AppBottomSheet';
 import React from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, ScrollView } from 'react-native';
-import { X } from 'lucide-react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, ScrollView } from 'react-native';
+
+
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAvailableTimeSlots } from '../../hooks/useBooking';
@@ -30,18 +32,9 @@ export function TimePickerSheet({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Chọn giờ bắt đầu</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <X size={20} color={BrandColors.textDark} />
-            </TouchableOpacity>
-          </View>
-          
-          <ScrollView contentContainerStyle={styles.content}>
+    <AppBottomSheet visible={visible} title="Chọn giờ thực hiện" onClose={onClose}   >
+
+<ScrollView contentContainerStyle={styles.content}>
             {isLoading && (
               <View style={styles.centerBox}>
                 <ActivityIndicator size="large" color={BrandColors.accentPink} />
@@ -95,82 +88,46 @@ export function TimePickerSheet({
               </View>
             )}
           </ScrollView>
-          <SafeAreaView edges={['bottom']} />
-        </View>
-      </View>
-    </Modal>
+
+<SafeAreaView edges={['bottom']} />
+</AppBottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-  },
-  sheet: {
-    backgroundColor: '#FFF',
-    borderTopLeftRadius: Radius.xxl,
-    borderTopRightRadius: Radius.xxl,
-    paddingTop: Spacing.xl,
-    paddingHorizontal: Spacing.xl,
-    maxHeight: '80%',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.xl,
-  },
-  title: {
-    fontFamily: Typography.bold,
-    fontSize: 18,
-    color: BrandColors.textDark,
-  },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F5F5F5',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  content: {
+content: {
     paddingBottom: 40,
   },
-  centerBox: {
+centerBox: {
     padding: Spacing.xl,
     alignItems: 'center',
   },
-  errorText: {
+errorText: {
     fontFamily: Typography.medium,
     color: BrandColors.accentPink,
   },
-  emptyText: {
+emptyText: {
     fontFamily: Typography.medium,
     color: BrandColors.textMuted,
     textAlign: 'center',
   },
-  retryButton: {
+retryButton: {
     marginTop: Spacing.md,
     borderRadius: Radius.full,
     backgroundColor: BrandColors.accentPink,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
   },
-  retryText: {
+retryText: {
     fontFamily: Typography.semiBold,
     color: '#FFF',
   },
-  grid: {
+grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.sm,
   },
-  timeBox: {
+timeBox: {
     width: '31%',
     paddingVertical: Spacing.md,
     alignItems: 'center',
@@ -178,23 +135,23 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderRadius: Radius.lg,
   },
-  timeBoxSelected: {
+timeBoxSelected: {
     borderColor: BrandColors.accentPink,
     backgroundColor: BrandColors.bgPinkLight,
   },
-  timeBoxDisabled: {
+timeBoxDisabled: {
     backgroundColor: '#F5F5F5',
     borderColor: '#F5F5F5',
   },
-  timeText: {
+timeText: {
     fontFamily: Typography.semiBold,
     fontSize: 15,
     color: BrandColors.textDark,
   },
-  timeTextSelected: {
+timeTextSelected: {
     color: BrandColors.accentPink,
   },
-  timeTextDisabled: {
+timeTextDisabled: {
     color: '#BDBDBD',
-  },
+  }
 });

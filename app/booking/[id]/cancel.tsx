@@ -1,5 +1,8 @@
+import { AppModal } from '../../../components/ui/AppModal';
 import React, { useRef, useState } from 'react';
-import { Alert, View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { AppAlert as appDialog } from '../../../components/ui/dialogStore';
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, AlertTriangle } from 'lucide-react-native';
@@ -52,7 +55,7 @@ export default function CancelBookingScreen() {
         setShowConfirmation(false);
         const apiError = getApiError(error);
         const isUncertainResult = apiError.isNetworkError || apiError.message.startsWith('Chưa thể xác minh kết quả hủy booking');
-        Alert.alert(
+        appDialog.alert(
           isUncertainResult ? 'Chưa xác minh được kết quả' : 'Không thể hủy booking',
           apiError.message || 'Vui lòng thử lại sau.',
         );
@@ -62,7 +65,7 @@ export default function CancelBookingScreen() {
 
   const handleCancel = () => {
     if (!selectedReason) {
-      Alert.alert('Chưa chọn lý do', 'Vui lòng chọn lý do hủy.');
+      appDialog.alert('Chưa chọn lý do', 'Vui lòng chọn lý do hủy.');
       return;
     }
 
@@ -93,8 +96,8 @@ export default function CancelBookingScreen() {
           {CANCEL_REASONS.map((reason, index) => {
             const isSelected = selectedReason === reason;
             return (
-              <TouchableOpacity 
-                key={reason} 
+              <TouchableOpacity
+                key={reason}
                 style={[styles.radioRow, index === CANCEL_REASONS.length - 1 && { borderBottomWidth: 0 }]}
                 onPress={() => setSelectedReason(reason)}
                 activeOpacity={0.7}
@@ -132,8 +135,8 @@ export default function CancelBookingScreen() {
         <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.back()}>
           <Text style={styles.secondaryBtnText}>Quay lại</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.primaryBtn, !selectedReason && styles.primaryBtnDisabled]} 
+        <TouchableOpacity
+          style={[styles.primaryBtn, !selectedReason && styles.primaryBtnDisabled]}
           onPress={handleCancel}
           disabled={!selectedReason || isPending}
         >
@@ -145,61 +148,28 @@ export default function CancelBookingScreen() {
         </TouchableOpacity>
       </View>
 
-      <Modal
-        visible={showConfirmation}
-        transparent
-        animationType="fade"
-        statusBarTranslucent
-        onRequestClose={() => !isPending && setShowConfirmation(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard} accessibilityViewIsModal>
-            <View style={styles.modalIcon}>
-              <AlertTriangle size={28} color="#E65100" />
-            </View>
-            <Text style={styles.modalTitle}>Xác nhận hủy booking</Text>
-            <Text style={styles.modalText}>Bạn có chắc muốn hủy booking này?</Text>
-            <View style={styles.modalSummary}>
-              <Text style={styles.modalSummaryLabel}>Tiền cọc</Text>
-              <Text style={styles.modalSummaryValue}>{formatVnd(booking.depositAmount)}</Text>
-            </View>
-            <Text style={styles.modalHint}>
-              Mức hoàn và số tiền hoàn sẽ được hệ thống xác định theo chính sách tại thời điểm hủy. Khoản hoàn không được đảm bảo về tài khoản ngay lập tức.
-            </Text>
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalBackButton}
-                onPress={() => setShowConfirmation(false)}
-                disabled={isPending}
-              >
-                <Text style={styles.modalBackText}>Quay lại</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalConfirmButton, isPending && styles.primaryBtnDisabled]}
-                onPress={submitCancellation}
-                disabled={isPending}
-              >
-                {isPending ? <ActivityIndicator color="#FFF" /> : <Text style={styles.modalConfirmText}>Xác nhận hủy</Text>}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <AppModal visible={showConfirmation} title="Xác nhận hủy booking" variant="destructive"
+    description="Bạn có chắc muốn hủy booking này?" loading={isPending} onClose={()=>setShowConfirmation(false)}
+    primaryAction={{label:'Xác nhận hủy',onPress:submitCancellation,loading:isPending}}
+    secondaryAction={{label:'Quay lại',onPress:()=>setShowConfirmation(false)}}>
+      <View style={styles.modalSummary}><Text style={styles.modalSummaryLabel}>Tiền cọc</Text><Text style={styles.modalSummaryValue}>{formatVnd(booking.depositAmount)}</Text></View>
+      <Text style={styles.modalHint}>Mức hoàn và số tiền hoàn sẽ được hệ thống xác định theo chính sách tại thời điểm hủy. Khoản hoàn không được đảm bảo về tài khoản ngay lập tức.</Text>
+    </AppModal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  center: {
+center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
+header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -207,20 +177,18 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: '#FFF',
   },
-  headerBtn: { padding: Spacing.xs },
-  headerTitle: {
+headerBtn: { padding: Spacing.xs },
+headerTitle: {
     fontFamily: Typography.bold,
     fontSize: 16,
     color: BrandColors.textDark,
   },
-  headerRight: { width: 32 },
-
-  scrollContent: {
+headerRight: { width: 32 },
+scrollContent: {
     padding: Spacing.xl,
     paddingBottom: 100,
   },
-
-  warningBanner: {
+warningBanner: {
     flexDirection: 'row',
     backgroundColor: '#FFF3E0',
     padding: Spacing.md,
@@ -228,30 +196,29 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: Spacing.xl,
   },
-  warningTextContainer: {
+warningTextContainer: {
     flex: 1,
     marginLeft: Spacing.sm,
   },
-  warningTitle: {
+warningTitle: {
     fontFamily: Typography.bold,
     fontSize: 15,
     color: '#E65100',
     marginBottom: 4,
   },
-  warningDesc: {
+warningDesc: {
     fontFamily: Typography.regular,
     fontSize: 13,
     color: '#E65100',
     lineHeight: 18,
   },
-
-  sectionTitle: {
+sectionTitle: {
     fontFamily: Typography.bold,
     fontSize: 16,
     color: BrandColors.textDark,
     marginBottom: Spacing.sm,
   },
-  card: {
+card: {
     backgroundColor: '#FFF',
     borderRadius: Radius.xl,
     paddingHorizontal: Spacing.md,
@@ -260,7 +227,7 @@ const styles = StyleSheet.create({
     borderColor: '#F0F0F0',
     ...Shadows.card,
   },
-  radioRow: {
+radioRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -268,12 +235,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F5F5F5',
   },
-  radioLabel: {
+radioLabel: {
     fontFamily: Typography.medium,
     fontSize: 15,
     color: BrandColors.textDark,
   },
-  radioOuter: {
+radioOuter: {
     width: 20,
     height: 20,
     borderRadius: 10,
@@ -282,17 +249,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioOuterSelected: {
+radioOuterSelected: {
     borderColor: '#F44336',
   },
-  radioInner: {
+radioInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
     backgroundColor: '#F44336',
   },
-
-  textInput: {
+textInput: {
     backgroundColor: '#FFF',
     borderRadius: Radius.lg,
     borderWidth: 1,
@@ -304,27 +270,25 @@ const styles = StyleSheet.create({
     color: BrandColors.textDark,
     marginBottom: Spacing.xl,
   },
-
-  policyBox: {
+policyBox: {
     backgroundColor: '#F5F5F5',
     padding: Spacing.md,
     borderRadius: Radius.lg,
   },
-  policyTitle: {
+policyTitle: {
     fontFamily: Typography.bold,
     fontSize: 14,
     color: BrandColors.textDark,
     marginBottom: 8,
   },
-  policyText: {
+policyText: {
     fontFamily: Typography.regular,
     fontSize: 13,
     color: BrandColors.textSecondary,
     marginBottom: 4,
     lineHeight: 18,
   },
-
-  footer: {
+footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -338,7 +302,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
   },
-  secondaryBtn: {
+secondaryBtn: {
     flex: 1,
     backgroundColor: '#F5F5F5',
     paddingVertical: 14,
@@ -346,12 +310,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  secondaryBtnText: {
+secondaryBtnText: {
     fontFamily: Typography.bold,
     fontSize: 14,
     color: BrandColors.textDark,
   },
-  primaryBtn: {
+primaryBtn: {
     flex: 1,
     backgroundColor: '#F44336',
     paddingVertical: 14,
@@ -359,52 +323,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  primaryBtnDisabled: {
+primaryBtnDisabled: {
     backgroundColor: '#FFCDD2',
   },
-  primaryBtnText: {
+primaryBtnText: {
     fontFamily: Typography.bold,
     fontSize: 14,
     color: '#FFF',
   },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(24, 18, 22, 0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.xl,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 420,
-    backgroundColor: '#FFF',
-    borderRadius: Radius.xl,
-    padding: Spacing.xl,
-  },
-  modalIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFF3E0',
-    marginBottom: Spacing.md,
-  },
-  modalTitle: {
-    fontFamily: Typography.bold,
-    fontSize: 19,
-    color: BrandColors.textDark,
-    textAlign: 'center',
-  },
-  modalText: {
-    fontFamily: Typography.regular,
-    fontSize: 14,
-    color: BrandColors.textSecondary,
-    textAlign: 'center',
-    marginTop: Spacing.sm,
-  },
-  modalSummary: {
+modalSummary: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -413,32 +340,13 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginTop: Spacing.lg,
   },
-  modalSummaryLabel: { fontFamily: Typography.medium, fontSize: 14, color: BrandColors.textSecondary },
-  modalSummaryValue: { fontFamily: Typography.bold, fontSize: 16, color: BrandColors.accentPink },
-  modalHint: {
+modalSummaryLabel: { fontFamily: Typography.medium, fontSize: 14, color: BrandColors.textSecondary },
+modalSummaryValue: { fontFamily: Typography.bold, fontSize: 16, color: BrandColors.accentPink },
+modalHint: {
     fontFamily: Typography.regular,
     fontSize: 13,
     lineHeight: 19,
     color: BrandColors.textSecondary,
     marginTop: Spacing.md,
-  },
-  modalActions: { flexDirection: 'row', gap: Spacing.md, marginTop: Spacing.xl },
-  modalBackButton: {
-    flex: 1,
-    minHeight: 48,
-    borderRadius: Radius.full,
-    backgroundColor: '#F5F5F5',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalBackText: { fontFamily: Typography.bold, fontSize: 14, color: BrandColors.textDark },
-  modalConfirmButton: {
-    flex: 1,
-    minHeight: 48,
-    borderRadius: Radius.full,
-    backgroundColor: '#F44336',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalConfirmText: { fontFamily: Typography.bold, fontSize: 14, color: '#FFF' },
+  }
 });

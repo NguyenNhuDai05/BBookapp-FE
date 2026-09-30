@@ -1,17 +1,8 @@
+import { AppBottomSheet } from '../ui/AppBottomSheet';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import { AppAlert as appDialog } from '../ui/dialogStore';
+
 import { Send, X } from 'lucide-react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { BrandColors } from '../../constants/theme';
@@ -48,7 +39,7 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
         if (mounted) {
           setComments([]);
           setLoadedPostId(currentPostId);
-          Alert.alert('Không thể tải bình luận', 'Vui lòng kiểm tra kết nối và thử lại.');
+          appDialog.alert('Không thể tải bình luận', 'Vui lòng kiểm tra kết nối và thử lại.');
         }
       });
     return () => {
@@ -84,22 +75,16 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
         queryClient.invalidateQueries({ queryKey: ['mua-portfolio'] }),
       ]);
     } catch {
-      Alert.alert('Không thể gửi bình luận', 'Vui lòng kiểm tra kết nối và thử lại.');
+      appDialog.alert('Không thể gửi bình luận', 'Vui lòng kiểm tra kết nối và thử lại.');
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <Modal visible={Boolean(item)} animationType="slide" transparent onRequestClose={close}>
-      <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <TouchableOpacity style={styles.dismissArea} activeOpacity={1} onPress={close} />
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Bình luận</Text>
-            <TouchableOpacity onPress={close} hitSlop={10}><X size={24} color={BrandColors.textDark} /></TouchableOpacity>
-          </View>
-          {loading ? <ActivityIndicator style={styles.loader} color={BrandColors.accentPink} /> : (
+    <AppBottomSheet visible={Boolean(item)} title="Bình luận" onClose={close} loading={sending}  contentStyle={{height:'72%'}}>
+
+{loading ? <ActivityIndicator style={styles.loader} color={BrandColors.accentPink} /> : (
             <FlatList
               data={comments}
               keyboardShouldPersistTaps="handled"
@@ -123,13 +108,15 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
               ListEmptyComponent={<Text style={styles.empty}>Chưa có bình luận.</Text>}
             />
           )}
-          {replyingTo ? (
+
+{replyingTo ? (
             <View style={styles.replyingBanner}>
               <Text style={styles.replyingText}>Đang trả lời {replyingTo.userName || 'người dùng'}</Text>
               <TouchableOpacity onPress={() => setReplyingTo(null)}><X size={16} /></TouchableOpacity>
             </View>
           ) : null}
-          <View style={styles.inputRow}>
+
+<View style={styles.inputRow}>
             <TextInput
               value={text}
               onChangeText={setText}
@@ -142,30 +129,23 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
               {sending ? <ActivityIndicator color={BrandColors.accentPink} /> : <Send size={22} color={text.trim() ? BrandColors.accentPink : BrandColors.textLight} />}
             </TouchableOpacity>
           </View>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
+</AppBottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
-  dismissArea: { flex: 1 },
-  sheet: { height: '72%', backgroundColor: '#FFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 16 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#EEE' },
-  title: { fontSize: 18, fontWeight: '800', color: BrandColors.textDark },
-  loader: { marginTop: 40 },
-  row: { flexDirection: 'row', marginTop: 14, gap: 10 },
-  avatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE5ED', alignItems: 'center', justifyContent: 'center' },
-  bubble: { flex: 1, backgroundColor: '#F7F7F8', borderRadius: 14, padding: 10 },
-  user: { fontWeight: '700', color: BrandColors.textDark, marginBottom: 2 },
-  content: { color: BrandColors.textDark, lineHeight: 20 },
-  replyAction: { color: BrandColors.accentPink, fontWeight: '700', fontSize: 12, marginTop: 6 },
-  reply: { marginTop: 8, marginLeft: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: '#FFD4E1' },
-  empty: { textAlign: 'center', color: BrandColors.textMuted, marginTop: 36 },
-  replyingBanner: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#FFF2F6', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginTop: 8 },
-  replyingText: { color: '#6C5360', fontSize: 12 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EEE', borderRadius: 22, paddingHorizontal: 14, marginTop: 10 },
-  input: { flex: 1, minHeight: 44, maxHeight: 96, paddingVertical: 10 },
-  sendButton: { width: 36, height: 40, alignItems: 'center', justifyContent: 'center' },
+loader: { marginTop: 40 },
+row: { flexDirection: 'row', marginTop: 14, gap: 10 },
+avatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE5ED', alignItems: 'center', justifyContent: 'center' },
+bubble: { flex: 1, backgroundColor: '#F7F7F8', borderRadius: 14, padding: 10 },
+user: { fontWeight: '700', color: BrandColors.textDark, marginBottom: 2 },
+content: { color: BrandColors.textDark, lineHeight: 20 },
+replyAction: { color: BrandColors.accentPink, fontWeight: '700', fontSize: 12, marginTop: 6 },
+reply: { marginTop: 8, marginLeft: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: '#FFD4E1' },
+empty: { textAlign: 'center', color: BrandColors.textMuted, marginTop: 36 },
+replyingBanner: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#FFF2F6', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginTop: 8 },
+replyingText: { color: '#6C5360', fontSize: 12 },
+inputRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EEE', borderRadius: 22, paddingHorizontal: 14, marginTop: 10 },
+input: { flex: 1, minHeight: 44, maxHeight: 96, paddingVertical: 10 },
+sendButton: { width: 36, height: 40, alignItems: 'center', justifyContent: 'center' }
 });
