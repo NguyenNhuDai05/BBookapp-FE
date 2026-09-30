@@ -1,5 +1,7 @@
+import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, Check, ChevronDown, ImagePlus, Landmark, Search, X } from 'lucide-react-native';
@@ -98,16 +100,13 @@ export default function BankAccountFormScreen() {
         <TouchableOpacity style={[styles.submit, (!valid || pending) && styles.submitDisabled]} disabled={!valid || pending} onPress={submit} activeOpacity={0.85}>{pending ? <ActivityIndicator color="#FFF"/> : <Text style={styles.submitText}>Lưu tài khoản</Text>}</TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
-    <Modal visible={bankPickerVisible} transparent animationType="slide" onRequestClose={() => setBankPickerVisible(false)}>
-      <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setBankPickerVisible(false)}/>
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, Spacing.md) }]}>
-          <View style={styles.sheetHandle}/><View style={styles.sheetHeader}><Text style={styles.sheetTitle}>Chọn ngân hàng</Text><TouchableOpacity style={styles.close} onPress={() => setBankPickerVisible(false)} accessibilityLabel="Đóng danh sách ngân hàng"><X size={21} color={BrandColors.textDark}/></TouchableOpacity></View>
-          <View style={styles.searchBox}><Search size={19} color={BrandColors.textMuted}/><TextInput style={styles.searchInput} value={search} onChangeText={setSearch} placeholder="Tìm kiếm ngân hàng..." placeholderTextColor={BrandColors.textLight} autoFocus autoCapitalize="none"/>{search ? <TouchableOpacity onPress={() => setSearch('')}><X size={18} color={BrandColors.textMuted}/></TouchableOpacity> : null}</View>
-          <FlatList data={filteredBanks} keyExtractor={bank => bank.code} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.bankList} ListEmptyComponent={<Text style={styles.empty}>Không tìm thấy ngân hàng phù hợp.</Text>} renderItem={({ item }) => <TouchableOpacity style={styles.bankRow} onPress={() => chooseBank(item)} activeOpacity={0.75}><BankMark bank={item}/><View style={styles.bankRowCopy}><Text style={styles.bankRowName}>{item.name}</Text><Text style={styles.bankRowFull} numberOfLines={1}>{item.fullName}</Text></View>{item.code === selectedBank?.code ? <Check size={21} color={BrandColors.accentPink}/> : null}</TouchableOpacity>}/>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
+    <AppBottomSheet visible={bankPickerVisible} title="Chọn ngân hàng" onClose={()=>setBankPickerVisible(false)}   contentStyle={{height:'75%'}}>
+<View style={styles.sheetHandle}/>
+
+<View style={styles.searchBox}><Search size={19} color={BrandColors.textMuted}/><TextInput style={styles.searchInput} value={search} onChangeText={setSearch} placeholder="Tìm kiếm ngân hàng..." placeholderTextColor={BrandColors.textLight} autoFocus autoCapitalize="none"/>{search ? <TouchableOpacity onPress={() => setSearch('')}><X size={18} color={BrandColors.textMuted}/></TouchableOpacity> : null}</View>
+
+<FlatList data={filteredBanks} keyExtractor={bank => bank.code} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={styles.bankList} ListEmptyComponent={<Text style={styles.empty}>Không tìm thấy ngân hàng phù hợp.</Text>} renderItem={({ item }) => <TouchableOpacity style={styles.bankRow} onPress={() => chooseBank(item)} activeOpacity={0.75}><BankMark bank={item}/><View style={styles.bankRowCopy}><Text style={styles.bankRowName}>{item.name}</Text><Text style={styles.bankRowFull} numberOfLines={1}>{item.fullName}</Text></View>{item.code === selectedBank?.code ? <Check size={21} color={BrandColors.accentPink}/> : null}</TouchableOpacity>}/>
+</AppBottomSheet>
     <FeedbackDialog visible={Boolean(feedback)} title={feedback?.title||''} message={feedback?.message||''} error={feedback?.error} buttonLabel={feedback?.navigate?'Hoàn tất':'Đóng'} onClose={()=>{const navigate=feedback?.navigate;setFeedback(null);if(navigate)router.back();}}/>
   </SafeAreaView>;
 }
@@ -117,6 +116,47 @@ function BankMark({ bank }: { bank?: BankOption }) {
 }
 
 const styles = StyleSheet.create({
-  safe:{flex:1,backgroundColor:BrandColors.bgPrimary},keyboard:{flex:1},header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:Spacing.md,paddingVertical:Spacing.sm},back:{width:44,height:44,alignItems:'center',justifyContent:'center'},title:{fontFamily:Typography.bold,fontSize:20,color:BrandColors.textDark},content:{paddingHorizontal:Spacing.base,paddingTop:Spacing.md},field:{marginBottom:Spacing.lg},label:{fontFamily:Typography.semiBold,fontSize:14,color:BrandColors.textDark,marginBottom:Spacing.sm},input:{minHeight:58,backgroundColor:'#FFF',borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.base,paddingHorizontal:Spacing.base,fontFamily:Typography.semiBold,fontSize:16,color:BrandColors.textDark},qrPicker:{minHeight:150,borderWidth:1,borderStyle:'dashed',borderColor:BrandColors.borderPink,borderRadius:Radius.base,backgroundColor:'#FFF',alignItems:'center',justifyContent:'center',overflow:'hidden'},qrImage:{width:'100%',height:220,resizeMode:'contain'},qrText:{fontFamily:Typography.semiBold,color:BrandColors.accentRose,marginTop:8},bankSelect:{minHeight:68,flexDirection:'row',alignItems:'center',gap:Spacing.md,backgroundColor:'#FFF',borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.base,paddingHorizontal:Spacing.md,...Shadows.sm},bankSelectActive:{borderColor:BrandColors.borderPink},bankSelectCopy:{flex:1},bankSelectedName:{fontFamily:Typography.bold,fontSize:15,color:BrandColors.textDark},bankSelectedFull:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:3},placeholder:{fontFamily:Typography.regular,fontSize:15,color:BrandColors.textMuted},bankMark:{width:44,height:44,borderRadius:13,alignItems:'center',justifyContent:'center',backgroundColor:'#F4F1F3'},bankMarkText:{fontFamily:Typography.extraBold,fontSize:11,color:'#FFF'},validation:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.statusCancelled,marginTop:6},helper:{fontFamily:Typography.regular,fontSize:12,lineHeight:17,color:BrandColors.textMuted,marginTop:7},checkRow:{minHeight:50,flexDirection:'row',alignItems:'center',gap:11,marginTop:-4},checkText:{fontFamily:Typography.semiBold,fontSize:14,color:BrandColors.textDark},infoBox:{flexDirection:'row',alignItems:'flex-start',gap:10,backgroundColor:'#FFF8F5',borderRadius:Radius.base,padding:Spacing.md,marginTop:Spacing.md,borderWidth:1,borderColor:'#F6E8E2'},infoText:{flex:1,fontFamily:Typography.regular,fontSize:12,lineHeight:18,color:BrandColors.textSecondary},submit:{minHeight:56,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.accentRose,borderRadius:Radius.full,marginTop:Spacing.lg,...Shadows.soft},submitDisabled:{opacity:.45,shadowOpacity:0},submitText:{fontFamily:Typography.bold,fontSize:16,color:'#FFF'},modalOverlay:{flex:1,justifyContent:'flex-end',backgroundColor:'rgba(48,23,38,.38)'},sheet:{height:'78%',backgroundColor:'#FFF',borderTopLeftRadius:Radius.xl,borderTopRightRadius:Radius.xl,paddingHorizontal:Spacing.base},sheetHandle:{width:42,height:4,borderRadius:2,backgroundColor:BrandColors.borderSoft,alignSelf:'center',marginTop:Spacing.sm},sheetHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingVertical:Spacing.md},sheetTitle:{fontFamily:Typography.bold,fontSize:20,color:BrandColors.textDark},close:{width:40,height:40,alignItems:'center',justifyContent:'center',borderRadius:20,backgroundColor:'#F7F4F6'},searchBox:{minHeight:50,flexDirection:'row',alignItems:'center',gap:9,backgroundColor:BrandColors.bgPinkLight,borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.base,paddingHorizontal:Spacing.md,marginBottom:Spacing.sm},searchInput:{flex:1,fontFamily:Typography.regular,fontSize:15,color:BrandColors.textDark,paddingVertical:0},bankList:{paddingBottom:Spacing.lg},bankRow:{minHeight:66,flexDirection:'row',alignItems:'center',gap:Spacing.md,borderBottomWidth:1,borderBottomColor:BrandColors.borderDivider},bankRowCopy:{flex:1},bankRowName:{fontFamily:Typography.bold,fontSize:15,color:BrandColors.textDark},bankRowFull:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:3},empty:{fontFamily:Typography.regular,color:BrandColors.textMuted,textAlign:'center',padding:Spacing.xl},
-  modeTabs:{flexDirection:'row',backgroundColor:'#F1EDF0',borderRadius:Radius.full,padding:4,marginBottom:Spacing.lg},modeTab:{flex:1,minHeight:44,alignItems:'center',justifyContent:'center',borderRadius:Radius.full},modeTabActive:{backgroundColor:'#FFF'},modeText:{fontFamily:Typography.semiBold,color:BrandColors.textSecondary},modeTextActive:{color:BrandColors.accentRose},generatedQr:{width:220,height:220,alignSelf:'center',resizeMode:'contain',backgroundColor:'#FFF',borderRadius:Radius.base},controlDisabled:{opacity:.5},warning:{fontFamily:Typography.semiBold,fontSize:12,lineHeight:18,color:'#9A6700',backgroundColor:'#FFF4CE',padding:Spacing.md,borderRadius:Radius.base,marginTop:Spacing.sm},
+safe:{flex:1,backgroundColor:BrandColors.bgPrimary},
+keyboard:{flex:1},
+header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:Spacing.md,paddingVertical:Spacing.sm},
+back:{width:44,height:44,alignItems:'center',justifyContent:'center'},
+title:{fontFamily:Typography.bold,fontSize:20,color:BrandColors.textDark},
+content:{paddingHorizontal:Spacing.base,paddingTop:Spacing.md},
+field:{marginBottom:Spacing.lg},
+label:{fontFamily:Typography.semiBold,fontSize:14,color:BrandColors.textDark,marginBottom:Spacing.sm},
+input:{minHeight:58,backgroundColor:'#FFF',borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.base,paddingHorizontal:Spacing.base,fontFamily:Typography.semiBold,fontSize:16,color:BrandColors.textDark},
+qrPicker:{minHeight:150,borderWidth:1,borderStyle:'dashed',borderColor:BrandColors.borderPink,borderRadius:Radius.base,backgroundColor:'#FFF',alignItems:'center',justifyContent:'center',overflow:'hidden'},
+qrImage:{width:'100%',height:220,resizeMode:'contain'},
+qrText:{fontFamily:Typography.semiBold,color:BrandColors.accentRose,marginTop:8},
+bankSelect:{minHeight:68,flexDirection:'row',alignItems:'center',gap:Spacing.md,backgroundColor:'#FFF',borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.base,paddingHorizontal:Spacing.md,...Shadows.sm},
+bankSelectActive:{borderColor:BrandColors.borderPink},
+bankSelectCopy:{flex:1},
+bankSelectedName:{fontFamily:Typography.bold,fontSize:15,color:BrandColors.textDark},
+bankSelectedFull:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:3},
+placeholder:{fontFamily:Typography.regular,fontSize:15,color:BrandColors.textMuted},
+bankMark:{width:44,height:44,borderRadius:13,alignItems:'center',justifyContent:'center',backgroundColor:'#F4F1F3'},
+bankMarkText:{fontFamily:Typography.extraBold,fontSize:11,color:'#FFF'},
+validation:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.statusCancelled,marginTop:6},
+helper:{fontFamily:Typography.regular,fontSize:12,lineHeight:17,color:BrandColors.textMuted,marginTop:7},
+infoBox:{flexDirection:'row',alignItems:'flex-start',gap:10,backgroundColor:'#FFF8F5',borderRadius:Radius.base,padding:Spacing.md,marginTop:Spacing.md,borderWidth:1,borderColor:'#F6E8E2'},
+infoText:{flex:1,fontFamily:Typography.regular,fontSize:12,lineHeight:18,color:BrandColors.textSecondary},
+submit:{minHeight:56,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.accentRose,borderRadius:Radius.full,marginTop:Spacing.lg,...Shadows.soft},
+submitDisabled:{opacity:.45,shadowOpacity:0},
+submitText:{fontFamily:Typography.bold,fontSize:16,color:'#FFF'},
+sheetHandle:{width:42,height:4,borderRadius:2,backgroundColor:BrandColors.borderSoft,alignSelf:'center',marginTop:Spacing.sm},
+searchBox:{minHeight:50,flexDirection:'row',alignItems:'center',gap:9,backgroundColor:BrandColors.bgPinkLight,borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.base,paddingHorizontal:Spacing.md,marginBottom:Spacing.sm},
+searchInput:{flex:1,fontFamily:Typography.regular,fontSize:15,color:BrandColors.textDark,paddingVertical:0},
+bankList:{paddingBottom:Spacing.lg},
+bankRow:{minHeight:66,flexDirection:'row',alignItems:'center',gap:Spacing.md,borderBottomWidth:1,borderBottomColor:BrandColors.borderDivider},
+bankRowCopy:{flex:1},
+bankRowName:{fontFamily:Typography.bold,fontSize:15,color:BrandColors.textDark},
+bankRowFull:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:3},
+empty:{fontFamily:Typography.regular,color:BrandColors.textMuted,textAlign:'center',padding:Spacing.xl},
+modeTabs:{flexDirection:'row',backgroundColor:'#F1EDF0',borderRadius:Radius.full,padding:4,marginBottom:Spacing.lg},
+modeTab:{flex:1,minHeight:44,alignItems:'center',justifyContent:'center',borderRadius:Radius.full},
+modeTabActive:{backgroundColor:'#FFF'},
+modeText:{fontFamily:Typography.semiBold,color:BrandColors.textSecondary},
+modeTextActive:{color:BrandColors.accentRose},
+generatedQr:{width:220,height:220,alignSelf:'center',resizeMode:'contain',backgroundColor:'#FFF',borderRadius:Radius.base},
+warning:{fontFamily:Typography.semiBold,fontSize:12,lineHeight:18,color:'#9A6700',backgroundColor:'#FFF4CE',padding:Spacing.md,borderRadius:Radius.base,marginTop:Spacing.sm}
 });

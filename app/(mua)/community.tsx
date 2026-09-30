@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Image, Modal, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
+import { AppOverlay } from '../../components/ui/OverlayProvider';
 import { ChevronLeft, UsersRound, X } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { PortfolioPost } from '../../components/mua/portfolio/PortfolioPost';
+import { FollowPortfolioPost as PortfolioPost } from '../../components/feed/FollowPortfolioPost';
 import { PortfolioCommentsSheet } from '../../components/feed/PortfolioCommentsSheet';
+import { PostActionSheet } from '../../components/feed/PostActionSheet';
 import { ErrorView } from '../../components/ui/ErrorView';
 import { SkeletonList } from '../../components/ui/SkeletonLoader';
 import { useFeed } from '../../hooks/useFeed';
@@ -29,10 +32,11 @@ export default function MuaCommunityScreen() {
   const toggleSaved = useFavoriteFeedStore(state => state.toggleSaved);
   const [commentItem, setCommentItem] = useState<PortfolioItemDto | null>(null);
   const [fullImage, setFullImage] = useState<string | null>(null);
+  const [optionsPost, setOptionsPost] = useState<{ authorName?: string } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [busyPostId, setBusyPostId] = useState<string | null>(null);
   const { draft, setMua, addService, resetDraft, setLastViewedPortfolioId } = useBookingStore();
-  const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed();
+  const { data, isLoading, isError, isSessionExpired, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useFeed();
 
   useEffect(() => {
     if (user?.id) void hydrate(user.id);
@@ -60,7 +64,7 @@ export default function MuaCommunityScreen() {
       ]);
     } catch {
       await toggleLiked(item);
-      Alert.alert('Không thể thả tim', 'Vui lòng kiểm tra kết nối và thử lại.');
+      appDialog.alert('Không thể thả tim', 'Vui lòng kiểm tra kết nối và thử lại.');
     } finally {
       setBusyPostId(null);
     }
@@ -79,7 +83,7 @@ export default function MuaCommunityScreen() {
       ]);
     } catch {
       await toggleSaved(item);
-      Alert.alert('Không thể lưu bài viết', 'Vui lòng kiểm tra kết nối và thử lại.');
+      appDialog.alert('Không thể lưu bài viết', 'Vui lòng kiểm tra kết nối và thử lại.');
     } finally {
       setBusyPostId(null);
     }
@@ -91,10 +95,7 @@ export default function MuaCommunityScreen() {
       router.push({ pathname: '/(mua)/manage-portfolio', params: { portfolioId: postId(item) } } as any);
       return;
     }
-    Alert.alert('Tùy chọn bài viết', 'Bạn có thể báo cáo nội dung không phù hợp.', [
-      { text: 'Báo cáo bài viết' },
-      { text: 'Hủy', style: 'cancel' },
-    ]);
+    setOptionsPost(item);
   };
 
   const addPostService = (item: any) => {
@@ -129,7 +130,7 @@ export default function MuaCommunityScreen() {
   }
 
   if (isError) {
-    return <SafeAreaView style={styles.safe}><Header onBack={() => router.back()} /><ErrorView message="Không thể tải cộng đồng MUA" onRetry={refresh} /></SafeAreaView>;
+    return <SafeAreaView style={styles.safe}><Header onBack={() => router.back()} /><ErrorView message={isSessionExpired ? 'Phiên bảng tin đã hết hạn. Vui lòng làm mới để tiếp tục.' : 'Không thể tải cộng đồng MUA'} onRetry={refresh} /></SafeAreaView>;
   }
 
   const posts = data?.pages.flat() || [];
@@ -181,12 +182,13 @@ export default function MuaCommunityScreen() {
         showsVerticalScrollIndicator={false}
       />
       <PortfolioCommentsSheet item={commentItem} onClose={() => setCommentItem(null)} />
-      <Modal visible={Boolean(fullImage)} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
+      <PostActionSheet visible={Boolean(optionsPost)} authorName={optionsPost?.authorName} reportOnly onClose={() => setOptionsPost(null)} />
+      <AppOverlay visible={Boolean(fullImage)} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
         <View style={styles.imageModal}>
           <TouchableOpacity style={styles.closeImage} onPress={() => setFullImage(null)}><X size={28} color="#FFF" /></TouchableOpacity>
           {fullImage ? <Image source={{ uri: fullImage }} style={styles.fullImage} resizeMode="contain" /> : null}
         </View>
-      </Modal>
+      </AppOverlay>
     </SafeAreaView>
   );
 }
@@ -208,7 +210,7 @@ const styles = StyleSheet.create({
   headerCopy: { flex: 1, alignItems: 'center' },
   title: { color: BrandColors.textDark, fontSize: 18, fontWeight: '900' },
   subtitle: { color: BrandColors.textMuted, fontSize: 11, marginTop: 2 },
-  listContent: { paddingBottom: 32, width: '100%', maxWidth: 560, alignSelf: 'center' },
+  listContent: { paddingBottom: 32, width: '100%', maxWidth: 640, alignSelf: 'center' },
   empty: { margin: Spacing.lg, padding: Spacing.xl, borderRadius: Radius.lg, backgroundColor: '#FFF', alignItems: 'center' },
   emptyTitle: { color: BrandColors.textDark, fontSize: 17, fontWeight: '800', marginTop: 12 },
   emptyText: { color: BrandColors.textMuted, fontSize: 13, textAlign: 'center', marginTop: 6 },

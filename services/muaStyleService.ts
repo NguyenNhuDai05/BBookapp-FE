@@ -8,6 +8,10 @@ export type MuaStyle = {
 };
 
 export const muaStyleService = {
+  async selectOrCreate(name: string): Promise<MuaStyle> {
+    const response = await api.post<MuaStyle>('/Mua/styles/select-or-create', { name });
+    return response.data;
+  },
   async getActiveStyles(): Promise<MuaStyle[]> {
     const response = await api.get<MuaStyle[]>('/Mua/styles');
     return response.data;

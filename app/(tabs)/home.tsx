@@ -1,26 +1,29 @@
-import { LinearGradient } from 'expo-linear-gradient';
+import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
+import { HomeFeedHeader } from '../../components/feed/HomeFeedHeader';
 import { useRouter } from 'expo-router';
-import { Bell, Send, X } from 'lucide-react-native';
+import { Send, X } from 'lucide-react-native';
 import React, { useState, useCallback, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, Image, Modal, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {StyleSheet, Text, View, FlatList, ActivityIndicator, Image, TouchableOpacity, TextInput} from 'react-native';
+import { AppOverlay } from '../../components/ui/OverlayProvider';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SkeletonList } from '../../components/ui/SkeletonLoader';
 import { ErrorView } from '../../components/ui/ErrorView';
 import { useFeed } from '../../hooks/useFeed';
 import { useAuthStore } from '../../store/useAuthStore';
-import { BrandColors, Radius, Spacing } from '../../constants/theme';
-import { Strings } from '../../constants/strings';
-import { PortfolioPost } from '../../components/mua/portfolio/PortfolioPost';
+import { BrandColors, getCustomerTabBarMetrics } from '../../constants/theme';
+import { FollowPortfolioPost as PortfolioPost } from '../../components/feed/FollowPortfolioPost';
 import { useBookingStore } from '../../store/useBookingStore';
 import { portfolioService } from '../../services/portfolioService';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFavoriteFeedStore } from '../../store/useFavoriteFeedStore';
 import { NotificationService } from '../../services/NotificationService';
-
-const homeLogo = require('../../assets/images/LOGO_Finalllll.png');
+import { PostActionSheet } from '../../components/feed/PostActionSheet';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { height: tabBarHeight } = getCustomerTabBarMetrics(insets.bottom);
   const authUser = useAuthStore((s) => s.user);
   const setLastViewedPortfolioId = useBookingStore(s => s.setLastViewedPortfolioId);
   const { draft, setMua, addService, resetDraft } = useBookingStore();
@@ -31,6 +34,7 @@ export default function HomeScreen() {
   const toggleLiked = useFavoriteFeedStore(s => s.toggleLiked);
   const toggleSaved = useFavoriteFeedStore(s => s.toggleSaved);
   const [fullImage, setFullImage] = useState<string | null>(null);
+  const [optionsPost, setOptionsPost] = useState<{ authorName?: string } | null>(null);
   const [commentItem, setCommentItem] = useState<any | null>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState('');
@@ -46,27 +50,26 @@ export default function HomeScreen() {
   useEffect(() => {
     if (authUser?.id) void hydrateFavorites(authUser.id);
   }, [authUser?.id, hydrateFavorites]);
-  
+
   // Queries
-  const { 
-    data: feedData, 
-    isLoading: feedLoading, 
-    isError: feedError, 
-    fetchNextPage, 
-    hasNextPage, 
+  const {
+    data: feedData,
+    isLoading: feedLoading,
+    isError: feedError,
+    isSessionExpired,
+    fetchNextPage,
+    hasNextPage,
     isFetchingNextPage,
-    refetch: refetchFeed 
+    refetch: refetchFeed
   } = useFeed();
 
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetchFeed();
-    setRefreshing(false);
+    try { await refetchFeed(); } finally { setRefreshing(false); }
   }, [refetchFeed]);
 
-  const userName = authUser?.name || 'bạn';
 
   const postId = (item: any) => String(item.id || item.portfolioId);
 
@@ -77,7 +80,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ queryKey: ['feed'] });
     } catch {
       await toggleLiked(item);
-      Alert.alert('Không thể thả tim', 'Vui lòng đăng nhập hoặc thử lại sau.');
+      appDialog.alert('Không thể thả tim', 'Vui lòng đăng nhập hoặc thử lại sau.');
     }
   };
 
@@ -88,7 +91,7 @@ export default function HomeScreen() {
       await queryClient.invalidateQueries({ queryKey: ['feed'] });
     } catch {
       await toggleSaved(item);
-      Alert.alert('Không thể lưu bài viết', 'Vui lòng đăng nhập hoặc thử lại sau.');
+      appDialog.alert('Không thể lưu bài viết', 'Vui lòng đăng nhập hoặc thử lại sau.');
     }
   };
 
@@ -116,7 +119,7 @@ export default function HomeScreen() {
       setReplyingTo(null);
       await queryClient.invalidateQueries({ queryKey: ['feed'] });
     } catch {
-      Alert.alert('Không thể gửi bình luận', 'Vui lòng thử lại sau.');
+      appDialog.alert('Không thể gửi bình luận', 'Vui lòng thử lại sau.');
     } finally {
       setSendingComment(false);
     }
@@ -150,20 +153,17 @@ export default function HomeScreen() {
     router.push('/checkout');
   };
 
-  const openPostOptions = () => {
-    Alert.alert('Tùy chọn bài viết', 'Các thao tác này cần backend hỗ trợ.', [
-      { text: 'Báo cáo bài viết' },
-      { text: 'Chặn người dùng' },
-      { text: 'Ẩn bài viết' },
-      { text: 'Hủy', style: 'cancel' },
-    ]);
-  };
+  const openPostOptions = (item: { authorName?: string }) => setOptionsPost(item);
+
+  const header = <HomeFeedHeader avatarUrl={authUser?.avatarUrl || authUser?.avatar} unreadCount={unreadCount}
+    onNotificationsPress={() => router.push('/customer-notifications')}
+    onProfilePress={() => router.push('/(tabs)/profile')} />;
 
   if (feedLoading && !refreshing) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={styles.screen}>
-          <View style={styles.headerGradientPlaceholder} />
+          {header}
           <SkeletonList count={4} />
         </View>
       </SafeAreaView>
@@ -172,9 +172,10 @@ export default function HomeScreen() {
 
   if (feedError) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={styles.screen}>
-          <ErrorView message="Không thể tải dữ liệu trang chủ" onRetry={onRefresh} />
+          {header}
+          <ErrorView message={isSessionExpired ? 'Phiên bảng tin đã hết hạn. Vui lòng làm mới để tiếp tục.' : 'Không thể tải bảng tin. Vui lòng kiểm tra kết nối và thử lại.'} onRetry={onRefresh} />
         </View>
       </SafeAreaView>
     );
@@ -182,59 +183,18 @@ export default function HomeScreen() {
 
   const posts = feedData?.pages?.flat() || [];
 
-  const renderHeader = () => {
-    return (
-      <View style={styles.headerContainer}>
-        {/* ── Hero Header ── */}
-        <LinearGradient
-          colors={[BrandColors.gradientHeroStart, BrandColors.gradientHeroMid, BrandColors.gradientHeroEnd]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.hero}
-        >
-          <View style={styles.heroTop}>
-            <View style={styles.heroCopy}>
-              <Image source={homeLogo} style={styles.homeLogo} resizeMode="contain" />
-              <Text style={styles.greeting}>
-                {Strings.homeGreeting(userName)}
-              </Text>
-              <Text style={styles.subtitle}>{Strings.homeSubtitle}</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.bellCircle}
-              onPress={() => router.push('/customer-notifications')}
-              accessibilityRole="button"
-              accessibilityLabel={unreadCount ? `${unreadCount} thông báo chưa đọc` : 'Thông báo'}
-            >
-              <Bell size={20} color={BrandColors.accentPink} />
-              {unreadCount > 0 ? (
-                <View style={styles.unreadBadge}>
-                  <Text style={styles.unreadBadgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
-                </View>
-              ) : null}
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-
-        <View style={styles.feedHeader}>
-          <Text style={styles.feedTitle}>Dành Cho Bạn</Text>
-          <Text style={styles.feedSubtitle}>Khám phá các chuyên gia phù hợp</Text>
-        </View>
-      </View>
-    );
-  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.screen}>
         <FlatList
           data={posts}
-          keyExtractor={(item, index) => item.portfolioId ? item.portfolioId.toString() : index.toString()}
-          ListHeaderComponent={renderHeader}
+          keyExtractor={(item) => postId(item)}
+          ListHeaderComponent={header}
           ListEmptyComponent={
             <View style={styles.emptyFeed}>
-              <Text style={styles.emptyFeedTitle}>Chưa có bài viết phù hợp</Text>
-              <Text style={styles.emptyFeedText}>Kéo xuống để làm mới hoặc quay lại sau nhé.</Text>
+              <Text style={styles.emptyFeedTitle}>Chưa có bài viết mới</Text>
+              <Text style={styles.emptyFeedText}>Những bài viết mới từ Makeup Artist sẽ xuất hiện tại đây.</Text>
             </View>
           }
           renderItem={({ item }) => {
@@ -245,12 +205,13 @@ export default function HomeScreen() {
               isSaved: Boolean(saved[id]) || item.isSaved,
             };
             return (
-            <PortfolioPost 
+            <PortfolioPost
+              compact
               item={displayItem}
               onLike={() => handleLike(displayItem)}
               onSave={() => handleSave(displayItem)}
               onComment={() => openComments(displayItem)}
-              onOptions={openPostOptions}
+              onOptions={() => openPostOptions(item)}
               onImagePress={setFullImage}
               onAddService={() => addPostService(displayItem)}
               onAuthorPress={() => {
@@ -263,30 +224,26 @@ export default function HomeScreen() {
           onRefresh={onRefresh}
           refreshing={refreshing}
           onEndReached={() => {
-            if (hasNextPage) {
+            if (hasNextPage && !isFetchingNextPage) {
               fetchNextPage();
             }
           }}
           onEndReachedThreshold={0.5}
           ListFooterComponent={isFetchingNextPage ? <ActivityIndicator style={{ margin: 20 }} color={BrandColors.accentPink} /> : null}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: tabBarHeight + 16 }}
         />
-        <Modal visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
+        <PostActionSheet visible={Boolean(optionsPost)} authorName={optionsPost?.authorName} onClose={() => setOptionsPost(null)} />
+        <AppOverlay visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
           <View style={styles.imageModal}>
             <TouchableOpacity style={styles.closeModal} onPress={() => setFullImage(null)}>
               <X size={28} color="#FFF" />
             </TouchableOpacity>
             {fullImage ? <Image source={{ uri: fullImage }} style={styles.fullImage} resizeMode="contain" /> : null}
           </View>
-        </Modal>
-        <Modal visible={!!commentItem} animationType="slide" transparent onRequestClose={() => setCommentItem(null)}>
-          <KeyboardAvoidingView style={styles.commentOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <View style={styles.commentSheet}>
-              <View style={styles.commentHeader}>
-                <Text style={styles.commentTitle}>Bình luận</Text>
-                <TouchableOpacity onPress={() => setCommentItem(null)}><X size={24} /></TouchableOpacity>
-              </View>
-              <FlatList
+        </AppOverlay>
+        <AppBottomSheet visible={!!commentItem} title="Bình luận" onClose={()=>setCommentItem(null)} loading={sendingComment}  contentStyle={{height:'72%'}}>
+
+<FlatList
                 data={comments}
                 keyExtractor={(item, index) => String(item.id || index)}
                 renderItem={({ item }) => (
@@ -307,182 +264,48 @@ export default function HomeScreen() {
                 )}
                 ListEmptyComponent={<Text style={styles.emptyComments}>Chưa có bình luận.</Text>}
               />
-              {replyingTo ? <View style={styles.replyingBanner}><Text style={styles.replyingText}>Đang trả lời {replyingTo.userName || 'người dùng'}</Text><TouchableOpacity onPress={() => setReplyingTo(null)}><X size={16} /></TouchableOpacity></View> : null}
-              <View style={styles.commentInputRow}>
+
+{replyingTo ? <View style={styles.replyingBanner}><Text style={styles.replyingText}>Đang trả lời {replyingTo.userName || 'người dùng'}</Text><TouchableOpacity onPress={() => setReplyingTo(null)}><X size={16} /></TouchableOpacity></View> : null}
+
+<View style={styles.commentInputRow}>
                 <TextInput value={commentText} onChangeText={setCommentText} placeholder="Viết bình luận..." style={styles.commentInput} />
                 <TouchableOpacity onPress={sendComment} disabled={sendingComment || !commentText.trim()}>
                   {sendingComment ? <ActivityIndicator color={BrandColors.accentPink} /> : <Send size={22} color={BrandColors.accentPink} />}
                 </TouchableOpacity>
               </View>
-            </View>
-          </KeyboardAvoidingView>
-        </Modal>
+</AppBottomSheet>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+safeArea: {
     flex: 1,
     backgroundColor: BrandColors.bgPrimary,
   },
-  screen: {
+screen: {
     flex: 1,
     width: '100%',
-    maxWidth: 430,
+    maxWidth: 640,
     alignSelf: 'center',
     backgroundColor: BrandColors.bgPrimary,
   },
-  headerGradientPlaceholder: {
-    height: 180,
-    borderRadius: Radius.xxl,
-    margin: Spacing.lg,
-    backgroundColor: BrandColors.bgPink,
-  },
-  headerContainer: {
-    paddingBottom: Spacing.md,
-  },
-  hero: {
-    marginHorizontal: 18,
-    marginTop: 12,
-    borderRadius: Radius.xxl,
-    paddingHorizontal: 22,
-    paddingTop: 24,
-    paddingBottom: 22,
-    overflow: 'hidden',
-  },
-  heroTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  heroCopy: {
-    flex: 1,
-    minWidth: 0,
-  },
-  homeLogo: {
-    alignSelf: 'flex-start',
-    width: 70,
-    height: 54,
-    marginTop: -8,
-    marginLeft: -10,
-  },
-  bellCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 12,
-    marginTop: 2,
-    flexShrink: 0,
-    position: 'relative',
-  },
-  unreadBadge: {
-    position: 'absolute',
-    right: -4,
-    top: -5,
-    minWidth: 18,
-    height: 18,
-    paddingHorizontal: 4,
-    borderRadius: 9,
-    backgroundColor: '#C92855',
-    borderWidth: 2,
-    borderColor: '#FFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  unreadBadgeText: { color: '#FFF', fontSize: 9, lineHeight: 11, fontWeight: '900' },
-  greeting: {
-    color: BrandColors.textWhite,
-    fontSize: 26,
-    fontWeight: '900',
-    marginTop: 16,
-    lineHeight: 32,
-  },
-  subtitle: {
-    color: 'rgba(255,255,255,0.88)',
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
-    fontWeight: '600',
-  },
-  bannerScroll: {
-    paddingHorizontal: Spacing.lg,
-    gap: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  bannerCard: {
-    width: 296,
-    height: 160,
-    borderRadius: Radius.xl,
-    padding: Spacing.lg,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  bannerTag: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: Radius.full,
-    marginBottom: Spacing.sm,
-  },
-  bannerTagText: {
-    color: BrandColors.textWhite,
-    fontSize: 11,
-    fontWeight: '800',
-  },
-  bannerTitle: {
-    color: BrandColors.textWhite,
-    fontSize: 22,
-    fontWeight: '900',
-    lineHeight: 28,
-  },
-  bannerSubtitle: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 13,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  feedHeader: {
-    paddingHorizontal: 18,
-    marginTop: 24,
-    marginBottom: 8,
-  },
-  feedTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#22152B',
-  },
-  feedSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  emptyFeed: { alignItems: 'center', paddingHorizontal: 32, paddingVertical: 56 },
-  emptyFeedTitle: { color: BrandColors.textDark, fontSize: 17, fontWeight: '800' },
-  emptyFeedText: { color: BrandColors.textMuted, fontSize: 13, lineHeight: 20, marginTop: 7, textAlign: 'center' },
-  imageModal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.96)', justifyContent: 'center' },
-  fullImage: { width: '100%', height: '88%' },
-  closeModal: { position: 'absolute', top: 48, right: 18, zIndex: 2, padding: 10 },
-  commentOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
-  commentSheet: { height: '70%', backgroundColor: '#FFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 16 },
-  commentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#EEE' },
-  commentTitle: { fontSize: 18, fontWeight: '700', color: '#22152B' },
-  commentRow: { flexDirection: 'row', marginTop: 14, gap: 10 },
-  commentAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE5ED', alignItems: 'center', justifyContent: 'center' },
-  commentBubble: { flex: 1, backgroundColor: '#F7F7F8', borderRadius: 14, padding: 10 },
-  commentUser: { fontWeight: '700', marginBottom: 2 },
-  replyAction: { color: BrandColors.accentPink, fontWeight: '600', fontSize: 12, marginTop: 6 },
-  replyRow: { marginTop: 8, marginLeft: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: '#FFD4E1' },
-  replyingBanner: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#FFF2F6', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginTop: 8 },
-  replyingText: { color: '#6C5360', fontSize: 12 },
-  emptyComments: { textAlign: 'center', color: '#888', marginTop: 30 },
-  commentInputRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EEE', borderRadius: 22, paddingHorizontal: 14, marginTop: 10 },
-  commentInput: { flex: 1, minHeight: 44 },
+emptyFeed: { alignItems: 'center', paddingHorizontal: 32, paddingVertical: 56 },
+emptyFeedTitle: { color: BrandColors.textDark, fontSize: 17, fontWeight: '800' },
+emptyFeedText: { color: BrandColors.textMuted, fontSize: 13, lineHeight: 20, marginTop: 7, textAlign: 'center' },
+imageModal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.96)', justifyContent: 'center' },
+fullImage: { width: '100%', height: '88%' },
+closeModal: { position: 'absolute', top: 48, right: 18, zIndex: 2, padding: 10 },
+commentRow: { flexDirection: 'row', marginTop: 14, gap: 10 },
+commentAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFE5ED', alignItems: 'center', justifyContent: 'center' },
+commentBubble: { flex: 1, backgroundColor: '#F7F7F8', borderRadius: 14, padding: 10 },
+commentUser: { fontWeight: '700', marginBottom: 2 },
+replyAction: { color: BrandColors.accentPink, fontWeight: '600', fontSize: 12, marginTop: 6 },
+replyRow: { marginTop: 8, marginLeft: 8, paddingLeft: 10, borderLeftWidth: 2, borderLeftColor: '#FFD4E1' },
+replyingBanner: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#FFF2F6', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginTop: 8 },
+replyingText: { color: '#6C5360', fontSize: 12 },
+emptyComments: { textAlign: 'center', color: '#888', marginTop: 30 },
+commentInputRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EEE', borderRadius: 22, paddingHorizontal: 14, marginTop: 10 },
+commentInput: { flex: 1, minHeight: 44 }
 });
-
-

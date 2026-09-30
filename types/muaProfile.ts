@@ -24,6 +24,10 @@ export interface MuaProfileDto {
   bio?: string;
   phoneNumber?: string;
   city?: string;
+  district?: string;
+  provinceCode?: number;
+  districtCode?: number;
+  experienceLevel?: string;
   experienceYears?: number;
   specialization?: string;
   socialLinks?: string;
@@ -35,6 +39,10 @@ export interface MuaProfileDto {
 }
 
 export interface MuaUpdateDto {
+  district?: string;
+  provinceCode?: number;
+  districtCode?: number;
+  experienceLevel?: string;
   displayName?: string;
   bio?: string;
   avatarUrl?: string;

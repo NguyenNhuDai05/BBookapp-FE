@@ -8,6 +8,9 @@ export interface ChatRoomDto {
     muaId: string;
     muaName?: string;
     muaAvatar?: string;
+    otherUserId?: string;
+    otherUserName?: string;
+    otherUserAvatar?: string;
     createdAt: string;
     lastMessage?: MessageDto;
     unreadCount: number;

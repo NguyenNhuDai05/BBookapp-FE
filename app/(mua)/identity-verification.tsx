@@ -1,21 +1,77 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, ImagePlus, ShieldCheck } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ArrowLeft, Camera, ImagePlus, UserRound } from 'lucide-react-native';
+import React, { useRef, useState } from 'react';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
-import { useSaveMuaIdentity } from '../../hooks/useMuaEligibility';
-import { getApiError } from '../../services/api';
+import { useMuaIdentity, useSaveMuaIdentity } from '../../hooks/useMuaEligibility';
 import { uploadImage } from '../../services/supabase';
+import { getApiError } from '../../services/api';
+import type { MuaIdentityVerificationRequestDto } from '../../types/onboarding';
 
-type Field='identityFrontUrl'|'identityBackUrl'|'portraitUrl';
-export default function IdentityVerificationScreen(){
- const router=useRouter(), save=useSaveMuaIdentity();
- const [images,setImages]=useState<Record<Field,string>>({identityFrontUrl:'',identityBackUrl:'',portraitUrl:''});
- const pick=async(field:Field)=>{const permission=await ImagePicker.requestMediaLibraryPermissionsAsync();if(!permission.granted)return Alert.alert('Cần quyền truy cập ảnh','Hãy cho phép ứng dụng chọn ảnh xác minh.');const result=await ImagePicker.launchImageLibraryAsync({mediaTypes:['images'],quality:.9,allowsEditing:false});if(!result.canceled&&result.assets[0])setImages(current=>({...current,[field]:result.assets[0].uri}));};
- const submit=async()=>{if(Object.values(images).some(value=>!value))return Alert.alert('Chưa đủ ảnh','Vui lòng thêm CCCD/CMND mặt trước, mặt sau và ảnh chân dung.');try{const [identityFrontUrl,identityBackUrl,portraitUrl]=await Promise.all([uploadImage(images.identityFrontUrl),uploadImage(images.identityBackUrl),uploadImage(images.portraitUrl)]);await save.mutateAsync({identityFrontUrl,identityBackUrl,portraitUrl,certificateUrls:[]});if(Platform.OS==='web'){Alert.alert('Đã lưu','Thông tin xác minh đã được cập nhật.');router.replace('/mua-onboarding/setup');}else{Alert.alert('Đã lưu','Thông tin xác minh đã được cập nhật.',[{text:'Tiếp tục',onPress:()=>router.replace('/mua-onboarding/setup')}]);}}catch(error){Alert.alert('Không thể lưu',getApiError(error).message);}};
- const picker=(label:string,field:Field,helper:string)=><View style={s.group}><Text style={s.label}>{label}</Text><TouchableOpacity style={s.picker} onPress={()=>pick(field)}>{images[field]?<Image source={{uri:images[field]}} style={s.preview}/>:<ImagePlus size={26} color={BrandColors.accentRose}/>}<View style={{flex:1}}><Text style={s.pickTitle}>{images[field]?'Thay ảnh':'Chọn ảnh'}</Text><Text style={s.helper}>{helper}</Text></View></TouchableOpacity></View>;
- return <SafeAreaView style={s.safe} edges={['top','bottom']}><View style={s.header}><TouchableOpacity style={s.icon} onPress={()=>router.back()}><ArrowLeft size={23} color={BrandColors.textDark}/></TouchableOpacity><Text style={s.title}>Xác minh danh tính</Text><View style={s.icon}/></View><ScrollView contentContainerStyle={s.content}><View style={s.notice}><ShieldCheck size={24} color={BrandColors.accentRose}/><View style={{flex:1}}><Text style={s.noticeTitle}>Thông tin chỉ dành cho xét duyệt</Text><Text style={s.helper}>Giấy tờ không hiển thị công khai trên marketplace.</Text></View></View><View style={s.card}>{picker('CCCD/CMND mặt trước','identityFrontUrl','Ảnh rõ nét, đủ bốn góc')}{picker('CCCD/CMND mặt sau','identityBackUrl','Không lóa hoặc che thông tin')}{picker('Ảnh chân dung','portraitUrl','Ảnh chính diện, rõ khuôn mặt')}</View></ScrollView><View style={s.footer}><TouchableOpacity disabled={save.isPending} style={[s.button,save.isPending&&s.disabled]} onPress={submit}>{save.isPending?<ActivityIndicator color="#FFF"/>:<Text style={s.buttonText}>Lưu xác minh</Text>}</TouchableOpacity></View></SafeAreaView>;
+export default function IdentityVerificationScreen() {
+  const query = useMuaIdentity();
+  const router = useRouter();
+  if (query.isPending) return <SafeAreaView style={s.center}><ActivityIndicator color="#FF4E91" /><Text>Đang tải ảnh xác minh...</Text></SafeAreaView>;
+  if (query.isError || !query.data) return <SafeAreaView style={s.center}><Text>Không thể tải ảnh xác minh.</Text><TouchableOpacity onPress={() => query.refetch()}><Text style={s.link}>Thử lại</Text></TouchableOpacity><TouchableOpacity onPress={() => router.back()}><Text style={s.link}>Quay lại</Text></TouchableOpacity></SafeAreaView>;
+  return <IdentityForm initial={query.data} />;
 }
-const s=StyleSheet.create({safe:{flex:1,backgroundColor:BrandColors.bgPrimary},header:{height:60,paddingHorizontal:Spacing.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between',backgroundColor:'#FFF',borderBottomWidth:1,borderBottomColor:BrandColors.borderLight},icon:{width:44,height:44,alignItems:'center',justifyContent:'center'},title:{fontFamily:Typography.bold,fontSize:18,color:BrandColors.textDark},content:{width:'100%',maxWidth:700,alignSelf:'center',padding:Spacing.base,gap:Spacing.md},notice:{padding:Spacing.base,borderRadius:Radius.base,backgroundColor:BrandColors.bgPinkLight,flexDirection:'row',gap:12,alignItems:'center'},noticeTitle:{fontFamily:Typography.bold,fontSize:14,color:BrandColors.textDark},helper:{fontFamily:Typography.regular,fontSize:12,lineHeight:18,color:BrandColors.textMuted,marginTop:3},card:{padding:Spacing.base,borderRadius:Radius.base,backgroundColor:'#FFF',borderWidth:1,borderColor:BrandColors.borderLight},group:{marginBottom:Spacing.base},label:{fontFamily:Typography.semiBold,fontSize:14,color:BrandColors.textDark,marginBottom:7},picker:{minHeight:86,borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.md,padding:10,flexDirection:'row',alignItems:'center',gap:12},preview:{width:72,height:58,borderRadius:Radius.sm},pickTitle:{fontFamily:Typography.bold,color:BrandColors.accentRose},footer:{padding:12,backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:BrandColors.borderLight},button:{width:'100%',maxWidth:560,alignSelf:'center',minHeight:50,borderRadius:Radius.md,backgroundColor:BrandColors.accentRose,alignItems:'center',justifyContent:'center'},buttonText:{fontFamily:Typography.bold,color:'#FFF'},disabled:{opacity:.5}});
+function IdentityForm({ initial }: { initial: MuaIdentityVerificationRequestDto }) {
+  const router = useRouter();
+  const save = useSaveMuaIdentity();
+  const [images, setImages] = useState(initial);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [source, setSource] = useState<'identityFrontUrl' | 'identityBackUrl' | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const lock = useRef(false);
+  const ready = !!(images.identityFrontUrl && images.identityBackUrl && images.portraitUrl);
+  const capture = async (field: 'identityFrontUrl' | 'identityBackUrl' | 'portraitUrl', camera: boolean) => {
+    if (lock.current) return;
+    lock.current = true; setBusy(true); setError('');
+    try {
+      const permission = camera ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) { setError(camera ? 'Cần quyền camera để chụp ảnh. Bạn có thể bật quyền trong cài đặt thiết bị.' : 'Cần quyền thư viện để chọn ảnh từ máy.'); return; }
+      const result = camera
+        ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: .9, allowsEditing: false, cameraType: field === 'portraitUrl' ? ImagePicker.CameraType.front : ImagePicker.CameraType.back })
+        : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: .9, allowsEditing: false });
+      if (!result.canceled && result.assets[0]) setImages(current => ({ ...current, [field]: result.assets[0].uri }));
+      setSource(null);
+    } catch { setError('Không thể mở camera hoặc thư viện ảnh. Vui lòng thử lại.'); }
+    finally { lock.current = false; setBusy(false); }
+  };
+  const submit = async () => {
+    if (lock.current || !ready) return;
+    lock.current = true; setBusy(true); setError('');
+    try {
+      const [identityFrontUrl, identityBackUrl, portraitUrl] = await Promise.all([uploadImage(images.identityFrontUrl), uploadImage(images.identityBackUrl), uploadImage(images.portraitUrl)]);
+      const request = { ...images, identityFrontUrl, identityBackUrl, portraitUrl };
+      setImages(request);
+      await save.mutateAsync(request);
+      router.replace('/mua-onboarding/setup');
+    } catch (err) { setError(getApiError(err).message || 'Không thể lưu xác minh. Vui lòng thử lại.'); }
+    finally { lock.current = false; setBusy(false); }
+  };
+  const document = (label: string, field: 'identityFrontUrl' | 'identityBackUrl') => <View style={s.document}>
+    {images[field] ? <Image source={{ uri: images[field] }} style={s.documentImage} /> : <View style={s.placeholder}><ImagePlus size={30} color="#FF4E91" /></View>}
+    <View style={s.documentCopy}><Text style={s.label}>{label}</Text><Text style={s.helper}>Chụp hoặc tải ảnh</Text><TouchableOpacity disabled={busy} accessibilityLabel={`Thay ảnh ${label}`} onPress={() => setSource(source === field ? null : field)}><Text style={s.link}>{images[field] ? 'Thay ảnh' : 'Thêm ảnh'}</Text></TouchableOpacity></View>
+    {source === field && <View style={s.sources}><TouchableOpacity disabled={busy} onPress={() => capture(field, true)}><Text style={s.link}>Chụp ảnh</Text></TouchableOpacity><TouchableOpacity disabled={busy} onPress={() => capture(field, false)}><Text style={s.link}>Chọn từ máy</Text></TouchableOpacity></View>}
+  </View>;
+  return <SafeAreaView style={s.screen} edges={['top', 'bottom']}>
+    <View style={s.header}><TouchableOpacity disabled={busy} accessibilityLabel="Quay lại" onPress={() => step === 2 ? setStep(1) : router.back()} style={s.back}><ArrowLeft size={22} color="#291E2D" /></TouchableOpacity><Text style={s.title}>{step === 1 ? 'Xác minh CCCD' : 'Xác minh khuôn mặt'}</Text><View style={s.back} /></View>
+    <View style={s.steps}><View style={s.step}><Text style={s.stepNumber}>1</Text><Text style={s.stepLabel}>CCCD</Text></View><View style={s.track} /><View style={s.step}><Text style={[s.stepNumber, step === 1 && s.inactive]}>2</Text><Text style={s.stepLabel}>Khuôn mặt</Text></View></View>
+    <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+      {step === 1 ? <View style={s.card}><Text style={s.heading}>Chụp ảnh CCCD</Text><Text style={s.helper}>Ảnh rõ nét, không bị lóa, đầy đủ bốn góc.</Text>{document('Mặt trước', 'identityFrontUrl')}{document('Mặt sau', 'identityBackUrl')}<View style={s.notice}><Text style={s.noticeTitle}>Lưu ý:</Text><Text style={s.helper}>• Không dùng ảnh chụp màn hình{ '\n' }• Thông tin phải còn hiệu lực{ '\n' }• Giấy tờ chỉ dùng để xét duyệt, không hiển thị công khai</Text></View></View> : <View style={s.card}>
+        <Text style={s.heading}>Chụp ảnh khuôn mặt</Text><Text style={s.helper}>Chụp ảnh chính diện để admin đối chiếu với ảnh trên CCCD.</Text><View style={s.face}>{images.portraitUrl ? <Image source={{ uri: images.portraitUrl }} style={s.faceImage} /> : <UserRound size={90} color="#E7A3BC" />}</View>
+        <Text style={s.guidance}>✓ Giữ khuôn mặt chính diện, rõ toàn bộ khuôn mặt{ '\n' }✓ Đảm bảo ánh sáng đầy đủ{ '\n' }✓ Không đeo kính hoặc khẩu trang</Text>
+        <TouchableOpacity disabled={busy} onPress={() => capture('portraitUrl', true)} style={s.capture}><Camera size={18} color="#FF4E91" /><Text style={s.link}>{images.portraitUrl ? 'Chụp lại khuôn mặt' : 'Chụp ảnh khuôn mặt'}</Text></TouchableOpacity>
+        <Text style={s.helper}>Ảnh đã chụp chưa đồng nghĩa với danh tính đã được xác thực. Admin sẽ kiểm tra khi bạn gửi hồ sơ.</Text>
+      </View>}
+      {!!error && <Text accessibilityRole="alert" style={s.error}>{error}</Text>}
+    </ScrollView>
+    <View style={s.footer}><TouchableOpacity accessibilityLabel={step === 1 ? 'Tiếp theo' : 'Lưu xác minh'} disabled={busy || (step === 1 ? !images.identityFrontUrl || !images.identityBackUrl : !ready)} onPress={() => step === 1 ? (setSource(null), setError(''), setStep(2)) : submit()} style={[s.primary, (busy || (step === 1 ? !images.identityFrontUrl || !images.identityBackUrl : !ready)) && s.disabled]}>{busy ? <ActivityIndicator color="#FFF" /> : <Text style={s.primaryText}>{step === 1 ? 'Tiếp theo' : 'Lưu xác minh'}</Text>}</TouchableOpacity><Text style={s.footerNote}>Lưu giấy tờ trước, gửi hồ sơ cho admin tại checklist.</Text></View>
+  </SafeAreaView>;
+}
+const s = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: '#FFF5F8' }, center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }, header: { flexDirection: 'row', alignItems: 'center', minHeight: 60, paddingHorizontal: 16 }, back: { width: 40, height: 44, justifyContent: 'center' }, title: { flex: 1, textAlign: 'center', fontSize: 19, fontWeight: '700', color: '#291E2D' }, steps: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', paddingVertical: 16, paddingHorizontal: 60 }, step: { alignItems: 'center', gap: 7 }, stepNumber: { width: 26, height: 26, borderRadius: 13, textAlign: 'center', lineHeight: 26, backgroundColor: '#FF4E91', color: '#FFF', fontWeight: '700' }, inactive: { backgroundColor: '#DCD5DB' }, stepLabel: { color: '#817785', fontSize: 12 }, track: { height: 2, flex: 1, backgroundColor: '#E9CCD8', marginTop: 12, marginHorizontal: 6 }, content: { padding: 18, gap: 16, width: '100%', maxWidth: 650, alignSelf: 'center' }, card: { backgroundColor: '#FFF', borderRadius: 20, padding: 18 }, heading: { fontSize: 18, fontWeight: '700', color: '#291E2D', marginBottom: 8 }, helper: { color: '#817785', fontSize: 12, lineHeight: 19 }, document: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', borderWidth: 1, borderStyle: 'dashed', borderColor: '#FFC5D8', backgroundColor: '#FFF9FB', padding: 14, borderRadius: 14, marginTop: 16, gap: 14 }, documentImage: { width: 95, height: 70, borderRadius: 10 }, placeholder: { width: 75, height: 70, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFE8F0' }, documentCopy: { flex: 1 }, label: { fontSize: 15, fontWeight: '600', color: '#291E2D' }, link: { color: '#FF4E91', fontWeight: '600', paddingVertical: 10 }, sources: { width: '100%', flexDirection: 'row', justifyContent: 'space-around', borderTopWidth: 1, borderTopColor: '#FFE0EB' }, notice: { marginTop: 20, backgroundColor: '#FFF5F8', padding: 14, borderRadius: 12 }, noticeTitle: { color: '#FF4E91', fontWeight: '700', marginBottom: 5 }, face: { width: 230, height: 230, borderRadius: 115, borderWidth: 3, borderColor: '#FF4E91', overflow: 'hidden', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginVertical: 28, backgroundColor: '#FFF5F8' }, faceImage: { width: '100%', height: '100%' }, guidance: { fontSize: 13, lineHeight: 26, color: '#534857' }, capture: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginVertical: 16, borderWidth: 1, borderColor: '#FFBCD4', borderRadius: 24 }, footer: { padding: 16, backgroundColor: '#FFF5F8' }, primary: { minHeight: 50, backgroundColor: '#FF4E91', borderRadius: 25, justifyContent: 'center', alignItems: 'center' }, primaryText: { color: '#FFF', fontSize: 15, fontWeight: '700' }, footerNote: { fontSize: 11, textAlign: 'center', color: '#817785', marginTop: 8 }, disabled: { opacity: .45 }, error: { color: '#B63F58', fontSize: 13, lineHeight: 20 },
+});

@@ -29,6 +29,7 @@ export class ApiMuaRepository implements IMuaRepository {
       visibility: s.visibility !== false,
       status: s.status || 'ACTIVE',
       imageUrl: s.imageUrl,
+      imageUrls: s.imageUrls?.length ? s.imageUrls : s.imageUrl ? [s.imageUrl] : [],
     }));
   }
 
@@ -55,6 +56,8 @@ type MuaProfileResponse = {
   totalBookings: number;
   minPrice?: number | null;
   experienceYears: number;
+  experienceLevel?: string | null;
+  district?: string | null;
   city?: string | null;
   bio?: string | null;
   styles?: string[] | null;
@@ -71,6 +74,7 @@ type ServiceResponse = {
   visibility?: boolean;
   status?: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   imageUrl?: string;
+  imageUrls?: string[];
 };
 
 type PortfolioResponse = {
@@ -93,6 +97,8 @@ const mapMuaProfile = (m: MuaProfileResponse): ArtistDto => ({
         completedBookingsCount: m.totalBookings,
         minPrice: m.minPrice ?? null,
         yearsExperience: m.experienceYears || 0,
+        experienceLevel: m.experienceLevel || undefined,
+        district: m.district || undefined,
         city: m.city || '',
         bio: m.bio || '',
         specialties: m.styles || [],

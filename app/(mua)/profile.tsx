@@ -1,36 +1,12 @@
+import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
+import { ActionSheet } from '../../components/ui/ActionSheet';
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  Dimensions,
-  Platform,
-  useWindowDimensions,
-  Alert,
-  Modal,
-  RefreshControl,
-  Linking,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions, Platform, useWindowDimensions, RefreshControl, Linking } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  Menu,
-  Share2,
-  CheckCircle2,
-  Star,
-  PenTool,
-  Image as ImageIcon,
-  Check,
-  MoreVertical,
-  Edit2,
-  Trash2,
-  X,
-  User,
-  Plus,
-} from 'lucide-react-native';
+import {Menu, CheckCircle2, Image as ImageIcon, MoreVertical, Edit2, Trash2, X, User, Plus} from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile } from '../../hooks/useMuaProfile';
@@ -84,7 +60,7 @@ export default function MuaProfilePremiumScreen() {
   const numColumns = isDesktop ? 6 : 3;
   const gridGap = 2;
   const itemSize = Math.floor((width - (numColumns - 1) * gridGap) / numColumns); // 32 is horizontal padding (Spacing.lg * 2 if padding is applied to container)
-  
+
   // Real API calls
   const { data: profile, refetch: refetchProfile } = useMuaProfile('me');
   const { data: portfolio, refetch: refetchPortfolio, createItem: createPortfolioItem, updateItem: updatePortfolioItem, deleteItem: deletePortfolioItem, isDeleting: isDeletingPortfolio } = useMuaPortfolio('me');
@@ -123,9 +99,9 @@ export default function MuaProfilePremiumScreen() {
       await deleteService.mutateAsync(id);
       setDeleteServiceVisible(false);
       setSelectedService(null);
-      Alert.alert('Thành công', 'Đã xóa dịch vụ.');
+      appDialog.alert('Thành công', 'Đã xóa dịch vụ.');
     } catch (error) {
-      Alert.alert('Không thể xóa', getApiError(error).message || 'Dịch vụ có thể đã được sử dụng trong booking.');
+      appDialog.alert('Không thể xóa', getApiError(error).message || 'Dịch vụ có thể đã được sử dụng trong booking.');
     }
   };
 
@@ -136,9 +112,9 @@ export default function MuaProfilePremiumScreen() {
       await deletePortfolioItem(id);
       setDeletePortfolioVisible(false);
       setSelectedPortfolioItem(null);
-      Alert.alert('Thành công', 'Đã xóa tác phẩm.');
+      appDialog.alert('Thành công', 'Đã xóa tác phẩm.');
     } catch (error) {
-      Alert.alert('Không thể xóa', getApiError(error).message);
+      appDialog.alert('Không thể xóa', getApiError(error).message);
     }
   };
 
@@ -170,7 +146,7 @@ export default function MuaProfilePremiumScreen() {
   const displayBio = profile?.bio || 'MAKEUP ARTIST • MASTER EDUCATOR';
   const instagramUrl = profile?.instagramUrl;
   const facebookUrl = profile?.facebookUrl;
-  
+
   // Use real portfolio. If empty, it's an empty array.
   const displayPortfolio = portfolio || [];
 
@@ -181,7 +157,7 @@ export default function MuaProfilePremiumScreen() {
   const openSocialLink = async (value: string, platform: 'instagram' | 'facebook') => {
     const url = normalizeSocialUrl(value, platform);
     if (!url) return;
-    try { await Linking.openURL(url); } catch { Alert.alert('Không thể mở liên kết', 'Vui lòng thử lại sau.'); }
+    try { await Linking.openURL(url); } catch { appDialog.alert('Không thể mở liên kết', 'Vui lòng thử lại sau.'); }
   };
 
   return (
@@ -190,7 +166,7 @@ export default function MuaProfilePremiumScreen() {
         colors={['#FFF5F7', '#FFFFFF']}
         style={StyleSheet.absoluteFill}
       />
-      
+
       {/* Top Header */}
       <View style={styles.header}>
         {/* Placeholder for back arrow if needed */}
@@ -201,19 +177,19 @@ export default function MuaProfilePremiumScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={onRefresh} 
-            colors={[BrandColors.accentPink]} 
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[BrandColors.accentPink]}
             tintColor={BrandColors.accentPink}
           />
         }
       >
-        
+
         {/* Instagram-inspired Header */}
         <View style={styles.igHeaderContainer}>
           <View style={styles.igTopRow}>
@@ -267,7 +243,7 @@ export default function MuaProfilePremiumScreen() {
 
           {/* Action Buttons */}
           <View style={styles.igActionRow}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.igPrimaryBtn}
               onPress={() => router.push('/(mua)/edit-profile' as any)}
             >
@@ -280,15 +256,15 @@ export default function MuaProfilePremiumScreen() {
         </View>
 
         {/* Content Tabs */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
           style={styles.tabsScroll}
           contentContainerStyle={styles.tabsContainer}
         >
           {['Portfolio', 'Dịch vụ', 'Đánh giá', 'Thông tin'].map((tab) => (
-            <TouchableOpacity 
-              key={tab} 
+            <TouchableOpacity
+              key={tab}
               style={[styles.tabItem, activeTab === tab && styles.tabItemActive]}
               onPress={() => setActiveTab(tab)}
             >
@@ -310,7 +286,7 @@ export default function MuaProfilePremiumScreen() {
               <Plus size={24} color={BrandColors.textDark} />
             </TouchableOpacity>
           </View>
-          
+
           {(!displayPortfolio || displayPortfolio.length === 0) ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Chưa có tác phẩm nào.</Text>
@@ -362,7 +338,7 @@ export default function MuaProfilePremiumScreen() {
             {(!services || services.length === 0) ? (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>Chưa có dịch vụ nào.</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.serviceBookBtn, { marginTop: 16 }]}
                   onPress={() => setIsServiceModalVisible(true)}
                 >
@@ -371,12 +347,12 @@ export default function MuaProfilePremiumScreen() {
               </View>
             ) : (
               services.map((svc) => (
-                <View 
-                  key={svc.id || svc.serviceId} 
+                <View
+                  key={svc.id || svc.serviceId}
                   style={styles.serviceCard}
                 >
-                  <TouchableOpacity 
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }} 
+                  <TouchableOpacity
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
                     onPress={() => setSelectedService(svc)}
                   >
                     {/* Service Image at the left */}
@@ -421,16 +397,13 @@ export default function MuaProfilePremiumScreen() {
             <Text style={styles.bioText}>{profile?.bio || 'Chưa có thông tin.'}</Text>
           </View>
         )}
-        
+
         <View style={{ height: 40 }} />
       </ScrollView>
 
       {/* Service Detail Modal */}
-      <Modal visible={!!selectedService} animationType="slide" transparent={true} onRequestClose={() => setSelectedService(null)}>
-        {selectedService && (
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { height: '85%' }]}>
-              <View style={styles.modalHeader}>
+      <AppBottomSheet visible={!!selectedService} onClose={()=>setSelectedService(null)} contentStyle={{height:'85%',paddingHorizontal:0}}>{selectedService ? <>
+<View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Chi tiết dịch vụ</Text>
                 <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
                   <TouchableOpacity onPress={() => handleServiceOptions(selectedService)}>
@@ -441,7 +414,8 @@ export default function MuaProfilePremiumScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
-              <ScrollView showsVerticalScrollIndicator={false}>
+
+<ScrollView showsVerticalScrollIndicator={false}>
                 {selectedService.imageUrl ? (
                   <Image source={{ uri: selectedService.imageUrl }} style={{ width: '100%', height: 250 }} resizeMode="cover" />
                 ) : (
@@ -453,22 +427,16 @@ export default function MuaProfilePremiumScreen() {
                   <Text style={{ fontSize: 22, fontWeight: '700', color: '#22152B', marginBottom: 8 }}>{selectedService.name || selectedService.serviceName}</Text>
                   <Text style={{ fontSize: 18, fontWeight: '700', color: '#C42A64', marginBottom: 16 }}>{(selectedService.price || 0).toLocaleString('vi-VN')}đ</Text>
                   <Text style={{ fontSize: 14, color: '#666', marginBottom: 8 }}>{"\u23F3"} Thời gian: {selectedService.durationMinutes} phút</Text>
-                  
+
                   <Text style={{ fontSize: 16, fontWeight: '600', color: '#22152B', marginTop: 16, marginBottom: 8 }}>Mô tả</Text>
                   <Text style={{ fontSize: 14, color: '#444', lineHeight: 22 }}>{selectedService.description || 'Không có mô tả.'}</Text>
                 </View>
               </ScrollView>
-            </View>
-          </View>
-        )}
-      </Modal>
+</> : null}</AppBottomSheet>
 
       {/* Portfolio Detail Modal */}
-      <Modal visible={!!selectedPortfolioItem} animationType="slide" transparent={true} onRequestClose={() => setSelectedPortfolioItem(null)}>
-        {selectedPortfolioItem && (
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { height: '85%' }]}>
-              <View style={styles.modalHeader}>
+      <AppBottomSheet visible={!!selectedPortfolioItem} onClose={()=>setSelectedPortfolioItem(null)} contentStyle={{height:'85%',paddingHorizontal:0}}>{selectedPortfolioItem ? <>
+<View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Chi tiết tác phẩm</Text>
                 <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
                   <TouchableOpacity onPress={() => handlePortfolioOptions(selectedPortfolioItem)}>
@@ -479,7 +447,8 @@ export default function MuaProfilePremiumScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
-              <ScrollView showsVerticalScrollIndicator={false}>
+
+<ScrollView showsVerticalScrollIndicator={false}>
                 {((selectedPortfolioItem.imageUrls && selectedPortfolioItem.imageUrls.length > 0) || selectedPortfolioItem.imageUrl) ? (
                   <Image source={{ uri: (selectedPortfolioItem.imageUrls && selectedPortfolioItem.imageUrls.length > 0) ? selectedPortfolioItem.imageUrls[0] : (selectedPortfolioItem.imageUrl || '') }} style={{ width: '100%', height: 350 }} resizeMode="contain" />
                 ) : (
@@ -498,12 +467,9 @@ export default function MuaProfilePremiumScreen() {
                   <Text style={{ fontSize: 14, color: '#444', lineHeight: 22 }}>{selectedPortfolioItem.description || 'Không có mô tả.'}</Text>
                 </View>
               </ScrollView>
-            </View>
-          </View>
-        )}
-      </Modal>
+</> : null}</AppBottomSheet>
 
-      <ServiceFormModal 
+      <ServiceFormModal
         visible={isServiceModalVisible}
         onClose={() => { setIsServiceModalVisible(false); setEditingService(null); }}
         onSubmit={async (data) => {
@@ -514,9 +480,10 @@ export default function MuaProfilePremiumScreen() {
           }
         }}
         initialData={editingService}
+        availableTags={[...new Set((services || []).flatMap(service => service.tags || []))]}
       />
 
-      <PortfolioFormModal 
+      <PortfolioFormModal
         visible={isPortfolioModalVisible}
         onClose={() => { setIsPortfolioModalVisible(false); setEditingPortfolioItem(null); }}
         onSubmit={async (data) => {
@@ -528,53 +495,16 @@ export default function MuaProfilePremiumScreen() {
         }}
         initialData={editingPortfolioItem}
       />
-    
-        <Modal visible={isServiceOptionsVisible} transparent animationType="slide">
-          <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setIsServiceOptionsVisible(false)}>
-            <View style={styles.optionsContainer}>
-              <TouchableOpacity style={styles.optionBtn} onPress={() => {
-                setIsServiceOptionsVisible(false);
-                setSelectedService(null);
-                setEditingService(selectedService);
-                setIsServiceModalVisible(true);
-              }}>
-                <Edit2 size={24} color="#22152B" />
-                <Text style={styles.optionText}>Chỉnh sửa dịch vụ</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={[styles.optionBtn, styles.deleteBtn]} onPress={() => {
-                setIsServiceOptionsVisible(false);
-                setDeleteServiceVisible(true);
-              }}>
-                <Trash2 size={24} color="#E8436A" />
-                <Text style={[styles.optionText, { color: '#E8436A' }]}>Xóa dịch vụ</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </Modal>
 
-        <Modal visible={isPortfolioOptionsVisible} transparent animationType="slide">
-          <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setIsPortfolioOptionsVisible(false)}>
-            <View style={styles.optionsContainer}>
-              <TouchableOpacity style={styles.optionBtn} onPress={() => {
-                setIsPortfolioOptionsVisible(false);
-                setEditingPortfolioItem(selectedPortfolioItem);
-                setIsPortfolioModalVisible(true);
-              }}>
-                <Edit2 size={24} color="#22152B" />
-                <Text style={styles.optionText}>Chỉnh sửa tác phẩm</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={[styles.optionBtn, styles.deleteBtn]} onPress={() => {
-                setIsPortfolioOptionsVisible(false);
-                setDeletePortfolioVisible(true);
-              }}>
-                <Trash2 size={24} color="#E8436A" />
-                <Text style={[styles.optionText, { color: '#E8436A' }]}>Xóa tác phẩm</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </Modal>
+        <ActionSheet visible={isServiceOptionsVisible} title="Tùy chọn dịch vụ" onClose={()=>setIsServiceOptionsVisible(false)} actions={[
+          {id:'edit',label:'Chỉnh sửa dịch vụ',icon:Edit2,onPress:()=>{setIsServiceOptionsVisible(false);setSelectedService(null);setEditingService(selectedService);setIsServiceModalVisible(true);}},
+          {id:'delete',label:'Xóa dịch vụ',icon:Trash2,destructive:true,onPress:()=>{setIsServiceOptionsVisible(false);setDeleteServiceVisible(true);}},
+        ]} />
+
+        <ActionSheet visible={isPortfolioOptionsVisible} title="Tùy chọn bài viết" onClose={()=>setIsPortfolioOptionsVisible(false)} actions={[
+          {id:'edit',label:'Chỉnh sửa tác phẩm',icon:Edit2,onPress:()=>{setIsPortfolioOptionsVisible(false);setEditingPortfolioItem(selectedPortfolioItem);setIsPortfolioModalVisible(true);}},
+          {id:'delete',label:'Xóa tác phẩm',icon:Trash2,destructive:true,onPress:()=>{setIsPortfolioOptionsVisible(false);setDeletePortfolioVisible(true);}},
+        ]} />
 
         <ConfirmDialog visible={deleteServiceVisible} title="Xóa dịch vụ" message="Bạn có chắc chắn muốn xóa dịch vụ này?" confirmLabel="Xóa" destructive loading={deleteService.isPending} onCancel={() => { setDeleteServiceVisible(false); setSelectedService(null); }} onConfirm={confirmDeleteService}/>
         <ConfirmDialog visible={deletePortfolioVisible} title="Xóa tác phẩm" message="Bạn có chắc chắn muốn xóa tác phẩm này khỏi Portfolio?" confirmLabel="Xóa" destructive loading={isDeletingPortfolio} onCancel={() => { setDeletePortfolioVisible(false); setSelectedPortfolioItem(null); }} onConfirm={confirmDeletePortfolio}/>
@@ -584,61 +514,36 @@ export default function MuaProfilePremiumScreen() {
 }
 
 const styles = StyleSheet.create({
-  optionsContainer: {
-    backgroundColor: '#FFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  optionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F5F5F5',
-  },
-  optionText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#22152B',
-    marginLeft: 15,
-  },
-  deleteBtn: {
-    borderBottomWidth: 0,
-  },
-
-  container: {
+container: {
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  header: {
+header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
-  headerTitle: {
+headerTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#22152B',
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
-  igHeaderContainer: {
+igHeaderContainer: {
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
     backgroundColor: '#FFF',
   },
-  igTopRow: {
+igTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
   },
-  igAvatarWrapper: {
+igAvatarWrapper: {
     width: 80,
     height: 80,
     borderRadius: 40,
@@ -646,64 +551,59 @@ const styles = StyleSheet.create({
     borderColor: '#C42A64',
     padding: 3,
   },
-  igAvatar: {
+igAvatar: {
     width: '100%',
     height: '100%',
     borderRadius: 35,
   },
-  igStatsContainer: {
+igStatsContainer: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginLeft: 20,
   },
-  igStatItem: {
+igStatItem: {
     alignItems: 'center',
   },
-  igStatValue: {
+igStatValue: {
     fontSize: 16,
     fontWeight: '700',
     color: '#22152B',
   },
-  igStatLabel: {
+igStatLabel: {
     fontSize: 13,
     color: '#22152B',
     marginTop: 2,
   },
-  igBioContainer: {
+igBioContainer: {
     marginBottom: 16,
   },
-  igName: {
+igName: {
     fontSize: 14,
     fontWeight: '700',
     color: '#22152B',
     marginBottom: 2,
   },
-  igBioCategory: {
+igBioCategory: {
     fontSize: 13,
     color: '#666',
     marginBottom: 2,
   },
-  igBioText: {
+igBioText: {
     fontSize: 13,
     color: '#22152B',
     lineHeight: 18,
     marginBottom: 2,
   },
-  igBioLink: {
-    fontSize: 13,
-    color: '#00376b',
-    fontWeight: '500',
-  },
-  socialRow:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:10},
-  socialButton:{minHeight:38,paddingHorizontal:12,borderRadius:18,borderWidth:1,borderColor:'#EEE',flexDirection:'row',alignItems:'center',gap:6,backgroundColor:'#FFF'},
-  socialText:{fontSize:13,fontWeight:'600',color:'#2B1B2A'},
-  igActionRow: {
+socialRow:{flexDirection:'row',flexWrap:'wrap',gap:8,marginTop:10},
+socialButton:{minHeight:38,paddingHorizontal:12,borderRadius:18,borderWidth:1,borderColor:'#EEE',flexDirection:'row',alignItems:'center',gap:6,backgroundColor:'#FFF'},
+socialText:{fontSize:13,fontWeight:'600',color:'#2B1B2A'},
+igActionRow: {
     flexDirection: 'row',
     gap: 8,
     marginBottom: 16,
   },
-  igPrimaryBtn: {
+igPrimaryBtn: {
     flex: 1,
     backgroundColor: '#EFEFEF',
     borderRadius: 8,
@@ -711,12 +611,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  igPrimaryBtnText: {
+igPrimaryBtnText: {
     color: '#22152B',
     fontSize: 14,
     fontWeight: '600',
   },
-  igSecondaryBtn: {
+igSecondaryBtn: {
     flex: 1,
     backgroundColor: '#EFEFEF',
     borderRadius: 8,
@@ -724,201 +624,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  igSecondaryBtnText: {
+igSecondaryBtnText: {
     color: '#22152B',
     fontSize: 14,
     fontWeight: '600',
   },
-  scrollContent: {
+scrollContent: {
     paddingBottom: 40,
   },
-  tabsScroll: {
+tabsScroll: {
     marginBottom: 24,
   },
-  tabsContainer: {
+tabsContainer: {
     paddingHorizontal: 20,
     gap: 20,
   },
-  tabItem: {
+tabItem: {
     paddingBottom: 8,
   },
-  tabItemActive: {
+tabItemActive: {
     borderBottomWidth: 2,
     borderBottomColor: '#C42A64',
   },
-  tabText: {
+tabText: {
     fontSize: 14,
     color: '#666',
     fontWeight: '500',
   },
-  tabTextActive: {
+tabTextActive: {
     color: '#C42A64',
     fontWeight: '600',
   },
-  section: {
+section: {
     paddingHorizontal: 20,
     marginBottom: 32,
   },
-  sectionTitle: {
+sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#22152B',
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     marginBottom: 16,
   },
-  heroImageContainer: {
-    width: '100%',
-    height: 220,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    justifyContent: 'flex-end',
-    padding: 16,
-  },
-  imageTitle: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 20,
-  },
-  tag: {
-    backgroundColor: '#FFF0F3',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  tagActive: {
-    backgroundColor: '#FFD1DC',
-  },
-  tagText: {
-    fontSize: 11,
-    color: '#666',
-  },
-  tagTextActive: {
-    color: '#C42A64',
-    fontWeight: '600',
-  },
-  masonryContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  masonryColumn: {
-    flex: 1,
-    gap: 12,
-  },
-  masonryItem: {
-    width: '100%',
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    marginBottom: 4,
-  },
-  masonryImage: {
-    width: '100%',
-  },
-  masonryTitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#22152B',
-    padding: 8,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  seeAllText: {
-    fontSize: 12,
-    color: '#C42A64',
-    fontWeight: '600',
-  },
-  transformationCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 16,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
-  },
-  transformationImages: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  transformationHalf: {
-    flex: 1,
-    position: 'relative',
-    height: 180,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  transformationImg: {
-    width: '100%',
-    height: '100%',
-  },
-  transformationLabel: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  transformationLabelText: {
-    color: '#FFF',
-    fontSize: 9,
-    fontWeight: '700',
-  },
-  transformationCardTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#22152B',
-    marginBottom: 4,
-  },
-  transformationCardDesc: {
-    fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic',
-    lineHeight: 18,
-  },
-  emptyContainer: {
+emptyContainer: {
     padding: 24,
     alignItems: 'center',
     backgroundColor: '#FFF',
     borderRadius: 12,
   },
-  serviceBookBtn: { backgroundColor: "#FFF0F5", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  serviceBookBtnText: { color: "#C42A64", fontWeight: "600", fontSize: 14 },
-  emptyText: {
+serviceBookBtn: { backgroundColor: "#FFF0F5", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+serviceBookBtnText: { color: "#C42A64", fontWeight: "600", fontSize: 14 },
+emptyText: {
     fontSize: 14,
     color: '#999',
   },
-  serviceCard: {
+serviceCard: {
     backgroundColor: '#FFF',
     borderRadius: 16,
     padding: 12,
@@ -932,7 +692,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  serviceImageContainer: {
+serviceImageContainer: {
     width: 60,
     height: 60,
     borderRadius: 8,
@@ -940,63 +700,52 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     marginRight: 12,
   },
-  serviceImage: {
+serviceImage: {
     width: '100%',
     height: '100%',
   },
-  serviceImagePlaceholder: {
+serviceImagePlaceholder: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  serviceInfo: {
+serviceInfo: {
     flex: 1,
     paddingRight: 12,
   },
-  serviceName: {
+serviceName: {
     fontSize: 16,
     fontWeight: '700',
     color: '#22152B',
     marginBottom: 4,
   },
-  serviceDesc: {
+serviceDesc: {
     fontSize: 12,
     color: '#666',
     marginBottom: 6,
   },
-  serviceDuration: {
+serviceDuration: {
     fontSize: 12,
     color: '#999',
     fontWeight: '500',
   },
-  serviceAction: {
+serviceAction: {
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     height: 60,
   },
-  servicePrice: {
+servicePrice: {
     fontSize: 14,
     fontWeight: '700',
     color: '#C42A64',
   },
-  bioText: {
+bioText: {
     fontSize: 14,
     color: '#444',
     lineHeight: 22,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: 'hidden',
-  },
-  modalHeader: {
+modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -1004,11 +753,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#EEE',
   },
-  modalTitle: {
+modalTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#22152B',
-  },
+  }
 });
 
 

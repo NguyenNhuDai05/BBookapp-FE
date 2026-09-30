@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
+import { AppOverlay } from './ui/OverlayProvider';
 import { useBookingStore } from '../store/useBookingStore';
 import { BrandColors } from '../constants/theme';
 import { ArrowLeft, Share2, Minus, Plus, ImageIcon } from 'lucide-react-native';
@@ -77,7 +78,7 @@ export default function ServiceDetailModal({ visible, onClose, service, mua }: S
   };
 
   return (
-    <Modal
+    <AppOverlay
       visible={visible}
       animationType="slide"
       transparent={true}
@@ -109,12 +110,12 @@ export default function ServiceDetailModal({ visible, onClose, service, mua }: S
           {/* Service Details Section */}
           <View style={styles.contentContainer}>
             <Text style={styles.serviceName}>{service.name || service.serviceName}</Text>
-            
+
             <View style={styles.priceRow}>
               <Text style={styles.priceText}>{(service.price || 0).toLocaleString('vi-VN')}đ</Text>
-              
+
               <View style={styles.stepper}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.stepperBtn}
                   onPress={handleDecrease}
                   disabled={localQuantity <= 1}
@@ -122,7 +123,7 @@ export default function ServiceDetailModal({ visible, onClose, service, mua }: S
                   <Minus color={localQuantity <= 1 ? BrandColors.borderLight : BrandColors.accentPink} size={20} />
                 </TouchableOpacity>
                 <Text style={styles.quantityValue}>{localQuantity}</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.stepperBtn}
                   onPress={handleIncrease}
                 >
@@ -132,7 +133,7 @@ export default function ServiceDetailModal({ visible, onClose, service, mua }: S
             </View>
 
             <View style={styles.divider} />
-            
+
             <Text style={styles.sectionTitle}>Mô tả chi tiết</Text>
             {service.description ? (
               <Text style={styles.descriptionText}>{service.description}</Text>
@@ -148,15 +149,15 @@ export default function ServiceDetailModal({ visible, onClose, service, mua }: S
         </ScrollView>
 
         <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-          <TouchableOpacity 
-            style={styles.addToCartBtn} 
+          <TouchableOpacity
+            style={styles.addToCartBtn}
             onPress={handleAddToCart}
           >
             <Text style={styles.addToCartBtnText}>Thêm vào Booking</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </Modal>
+    </AppOverlay>
   );
 }
 

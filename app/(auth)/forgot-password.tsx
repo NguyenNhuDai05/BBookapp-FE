@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authService } from "../../services/authService";
 import { getApiError } from "../../services/api";
@@ -25,10 +26,10 @@ export default function ForgotPasswordScreen() {
       if (!sent) {
         await authService.requestPasswordReset(email.trim());
         setSent(true);
-        Alert.alert("Kiểm tra email", "Nếu email tồn tại, BBook đã gửi một mã OTP có hiệu lực trong 5 phút.");
+        appDialog.alert("Kiểm tra email", "Nếu email tồn tại, BBook đã gửi một mã OTP có hiệu lực trong 5 phút.");
       } else {
         await authService.resetPassword(email.trim(), otp, password);
-        Alert.alert("Thành công", "Mật khẩu đã được đặt lại.", [{ text: "Đăng nhập", onPress: () => router.replace({ pathname: "/(auth)/login", params: { email: email.trim() } } as any) }]);
+        appDialog.alert("Thành công", "Mật khẩu đã được đặt lại.", [{ text: "Đăng nhập", onPress: () => router.replace({ pathname: "/(auth)/login", params: { email: email.trim() } } as any) }]);
       }
     } catch (e) { setError(getApiError(e).message); }
     finally { setLoading(false); }

@@ -16,17 +16,8 @@ import {
   KeyRound,
 } from "lucide-react-native";
 import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import {ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useAuthStore } from "../../store/useAuthStore";
 import { useMuaProfile } from "../../hooks/useMuaProfile";
 
@@ -41,20 +32,9 @@ export default function MuaSettingsScreen() {
 
   // Handle Logout
   const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm(
-        "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?",
-      );
 
-      if (confirmed) {
-        logout()
-          .then(() => router.replace("/(auth)/login" as any))
-          .catch((error) => console.error("Logout error:", error));
-      }
-      return;
-    }
 
-    Alert.alert(
+    appDialog.alert(
       "Đăng xuất",
       "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng bBeauty không?",
       [
@@ -89,8 +69,7 @@ export default function MuaSettingsScreen() {
       router.replace("/(auth)/login" as any);
     } catch (error: any) {
       const message = error?.response?.data?.message || error?.message || "Không thể xóa tài khoản. Vui lòng thử lại.";
-      if (Platform.OS === "web") window.alert(message);
-      else Alert.alert("Chưa thể xóa tài khoản", message);
+      appDialog.alert("Chưa thể xóa tài khoản", message);
     } finally {
       setIsDeletingAccount(false);
     }
@@ -99,13 +78,10 @@ export default function MuaSettingsScreen() {
   const handleDeleteAccount = () => {
     if (isDeletingAccount) return;
     const warning = "Tài khoản MUA và dữ liệu cá nhân sẽ bị xóa vĩnh viễn. Bạn cần hoàn tất booking, hoàn tiền và doanh thu chờ đối soát trước khi xóa.";
-    if (Platform.OS === "web") {
-      if (window.confirm(warning)) void performAccountDeletion();
-      return;
-    }
-    Alert.alert("Xóa tài khoản", warning, [
+
+    appDialog.alert("Xóa tài khoản", warning, [
       { text: "Hủy", style: "cancel" },
-      { text: "Xóa tài khoản", style: "destructive", onPress: () => void performAccountDeletion() },
+      { text: "Xóa tài khoản", style: "destructive", onPress: () => performAccountDeletion() },
     ]);
   };
 
@@ -179,8 +155,8 @@ export default function MuaSettingsScreen() {
           end={{ x: 1, y: 1 }}
           style={styles.headerBanner}
         >
-          <TouchableOpacity 
-            onPress={() => router.back()} 
+          <TouchableOpacity
+            onPress={() => router.back()}
             style={{ position: 'absolute', top: 50, left: 24, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center' }}
           >
             <ArrowLeft size={24} color="#FFF" />

@@ -1,3 +1,4 @@
+import { getMuaExperienceLabel } from '../utils/muaAreas';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Star } from "lucide-react-native";
@@ -59,7 +60,7 @@ export default function MUACard({ mua }: Props) {
 
         <View className="absolute top-3 left-3 bg-black/60 px-2.5 py-1 rounded-full">
           <Text className="text-white text-[10px] font-bold">
-            {mua.yearsExperience} năm KN
+            {getMuaExperienceLabel(mua.experienceLevel, mua.yearsExperience)}
           </Text>
         </View>
         <View className="absolute bottom-3 right-3 bg-bbook-accent px-2.5 py-1 rounded-lg">

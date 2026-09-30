@@ -33,7 +33,7 @@ export interface MuaDraft {
 
 export interface MuaApplicationRequestDto {
   displayName: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   city: string;
   bio: string;
   experienceYears?: number;
@@ -41,7 +41,13 @@ export interface MuaApplicationRequestDto {
   socialLinks?: string;
   avatarUrl: string;
   styleIds: number[];
-  address: string;
+  address?: string;
+  district?: string;
+  provinceCode?: number;
+  districtCode?: number;
+  experienceLevel?: 'BEGINNER' | 'UNDER_ONE' | 'ONE_TO_THREE' | 'THREE_TO_FIVE' | 'OVER_FIVE';
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface MuaIdentityVerificationRequestDto {

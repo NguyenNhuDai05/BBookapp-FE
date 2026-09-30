@@ -1,11 +1,13 @@
+import { getMuaExperienceLabel } from '../utils/muaAreas';
+import { AppBottomSheet } from '../components/ui/AppBottomSheet';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator, ScrollView, StyleSheet, View, Text, TouchableOpacity, Dimensions, Image, Modal, RefreshControl
-} from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View, Text, TouchableOpacity, Dimensions, Image, RefreshControl } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, CheckCircle2, ChevronDown, Bell, MoreHorizontal } from 'lucide-react-native';
+import {ArrowLeft, CheckCircle2, MoreHorizontal} from 'lucide-react-native';
 import { ErrorView } from '../components/ui/ErrorView';
+import { useFollow } from '../hooks/useFollow';
 import { useMuaDetail } from '../hooks/useMuaDetail';
 import { BrandColors } from '../constants/theme';
 import { useBookingStore } from '../store/useBookingStore';
@@ -31,12 +33,12 @@ export default function MuaDetailScreen() {
     refetch,
   } = useMuaDetail(id);
 
+  const follow = useFollow(id);
   const [activeTab, setActiveTab] = useState(tab || 'Portfolio');
-  const [isLiked, setIsLiked] = useState(false);
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [selectedServiceForDetail, setSelectedServiceForDetail] = useState<ServiceDto | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const onRefresh = async () => {
     setRefreshing(true);
     refetch(); // Trigger refetch
@@ -45,17 +47,17 @@ export default function MuaDetailScreen() {
       setRefreshing(false);
     }, 1000);
   };
-  
+
   const { draft, resetDraft, setMua, addService, lastViewedPortfolioId } = useBookingStore();
 
   const handleBookService = (service: ServiceDto) => {
     if (!muaInfo) return;
-    
+
     // If the cart already has services from a different MUA, reset it
     if (draft.mua && draft.mua.id !== muaInfo.id) {
       resetDraft();
     }
-    
+
     if (!draft.mua || draft.mua.id !== muaInfo.id) {
       setMua({
         id: muaInfo.id,
@@ -67,9 +69,9 @@ export default function MuaDetailScreen() {
         yearsOfExp: muaInfo.yearsExperience || 1,
       });
     }
-    
+
     const firstPortfolioImage = portfolio?.[0]?.imageUrl || portfolio?.[0]?.image || 'https://images.unsplash.com/photo-1512496015851-a1c8ce9015c3?w=200&q=80';
-    
+
     addService({
       id: service.id,
       name: service.name,
@@ -118,13 +120,13 @@ export default function MuaDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={onRefresh} 
-            colors={[BrandColors.accentPink]} 
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[BrandColors.accentPink]}
             tintColor={BrandColors.accentPink}
           />
         }
@@ -166,16 +168,21 @@ export default function MuaDetailScreen() {
             <Text style={styles.igBioText}>{displayBio}</Text>
           </View>
 
+          {follow.status ? <Text style={{ color: BrandColors.textMuted, marginHorizontal: 20, marginBottom: 10 }}>{follow.status.followersCount.toLocaleString('vi-VN')} người theo dõi</Text> : null}
+          {follow.error ? <TouchableOpacity onPress={() => { void follow.refetch(); }} style={{ padding: 12 }}><Text style={{ color: BrandColors.primaryPink }}>Không tải được trạng thái theo dõi. Nhấn để thử lại.</Text></TouchableOpacity> : null}
           {/* Action Buttons for Customer */}
           <View style={styles.igActionRow}>
-            <TouchableOpacity 
-              style={styles.igPrimaryBtn}
-              onPress={() => setActiveTab('Dịch vụ')}
+            <TouchableOpacity
+              style={[styles.igPrimaryBtn, follow.status?.isFollowing && { backgroundColor: BrandColors.bgPink }, (follow.self || follow.loading || follow.busy || follow.error) && { opacity: 0.5 }]}
+              onPress={() => { void follow.toggle(); }}
+              disabled={follow.self || follow.loading || follow.busy || follow.error}
+              accessibilityRole="button"
+              accessibilityLabel={follow.status?.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
             >
-              <Text style={styles.igPrimaryBtnText}>Đặt lịch ngay</Text>
+              {follow.loading || follow.busy ? <ActivityIndicator color={BrandColors.primaryPink} /> : <Text style={[styles.igPrimaryBtnText, follow.status?.isFollowing && { color: BrandColors.primaryPink }]}>{follow.self ? 'Hồ sơ của bạn' : follow.status?.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}</Text>}
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.igSecondaryBtn} 
+            <TouchableOpacity
+              style={styles.igSecondaryBtn}
               onPress={async () => {
                 if (!muaInfo) return;
                 try {
@@ -192,15 +199,15 @@ export default function MuaDetailScreen() {
         </View>
 
         {/* Content Tabs */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
           style={styles.tabsScroll}
           contentContainerStyle={styles.tabsContainer}
         >
           {['Portfolio', 'Dịch vụ', 'Đánh giá', 'Thông tin'].map((tab) => (
-            <TouchableOpacity 
-              key={tab} 
+            <TouchableOpacity
+              key={tab}
               style={[styles.tabItem, activeTab === tab && styles.tabItemActive]}
               onPress={() => setActiveTab(tab)}
             >
@@ -270,12 +277,12 @@ export default function MuaDetailScreen() {
               </View>
             ) : (
               services.map((svc) => (
-                <View 
-                  key={svc.id || svc.serviceId} 
+                <View
+                  key={svc.id || svc.serviceId}
                   style={styles.serviceCard}
                 >
-                  <TouchableOpacity 
-                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }} 
+                  <TouchableOpacity
+                    style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
                     onPress={() => setSelectedServiceForDetail(svc)}
                   >
                     <View style={styles.serviceImageContainer}>
@@ -320,7 +327,7 @@ export default function MuaDetailScreen() {
           <View style={styles.section}>
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Địa chỉ: {muaInfo.city || 'Chưa cập nhật'}</Text>
-              <Text style={styles.emptyText}>Kinh nghiệm: {muaInfo.yearsExperience || 0} năm</Text>
+              <Text style={styles.emptyText}>Kinh nghiệm: {getMuaExperienceLabel(muaInfo.experienceLevel, muaInfo.yearsExperience)}</Text>
             </View>
           </View>
         )}
@@ -328,34 +335,22 @@ export default function MuaDetailScreen() {
       </ScrollView>
 
       {/* Cart Integration */}
-      <BookingCartFloatingBar 
-        onPressCart={() => setBottomSheetVisible(true)} 
+      <BookingCartFloatingBar
+        onPressCart={() => setBottomSheetVisible(true)}
         onPressCheckout={() => router.push('/checkout')}
       />
 
       {/* Booking Cart Bottom Sheet */}
-      <Modal
-        visible={isBottomSheetVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setBottomSheetVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity 
-            style={styles.modalDismissArea} 
-            activeOpacity={1} 
-            onPress={() => setBottomSheetVisible(false)}
-          />
-          <BookingCartBottomSheet onClose={() => setBottomSheetVisible(false)} />
-        </View>
-      </Modal>
+      <AppBottomSheet visible={isBottomSheetVisible} onClose={()=>setBottomSheetVisible(false)} contentStyle={{height:'85%',paddingHorizontal:0}}>
+    <BookingCartBottomSheet onClose={()=>setBottomSheetVisible(false)} />
+  </AppBottomSheet>
 
       {/* Service Detail Modal */}
-      <ServiceDetailModal 
-        visible={!!selectedServiceForDetail} 
-        onClose={() => setSelectedServiceForDetail(null)} 
-        service={selectedServiceForDetail} 
-        mua={muaInfo as any} 
+      <ServiceDetailModal
+        visible={!!selectedServiceForDetail}
+        onClose={() => setSelectedServiceForDetail(null)}
+        service={selectedServiceForDetail}
+        mua={muaInfo as any}
       />
     </SafeAreaView>
   );
@@ -363,11 +358,11 @@ export default function MuaDetailScreen() {
 
 
 const styles = StyleSheet.create({
-  safeArea: {
+safeArea: {
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  headerContainer: {
+headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -376,28 +371,28 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     backgroundColor: '#FAFAFA',
   },
-  headerTitle: {
+headerTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: BrandColors.textDark,
   },
-  igHeaderContainer: {
+igHeaderContainer: {
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 20,
     backgroundColor: '#FAFAFA',
   },
-  igProfileRow: {
+igProfileRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  igAvatarContainer: {
+igAvatarContainer: {
     position: 'relative',
     marginRight: 20,
   },
-  igAvatarRing: {
+igAvatarRing: {
     width: 86,
     height: 86,
     borderRadius: 43,
@@ -406,128 +401,116 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  igAvatar: {
+igAvatar: {
     width: 76,
     height: 76,
     borderRadius: 38,
   },
-  igStatsContainer: {
+igStatsContainer: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
   },
-  igStatItem: {
+igStatItem: {
     alignItems: 'center',
   },
-  igStatValue: {
+igStatValue: {
     fontSize: 18,
     fontWeight: '700',
     color: BrandColors.textDark,
   },
-  igStatLabel: {
+igStatLabel: {
     fontSize: 13,
     color: '#666',
     marginTop: 2,
   },
-  igBioContainer: {
+igBioContainer: {
     marginBottom: 16,
   },
-  igName: {
+igName: {
     fontSize: 16,
     fontWeight: '700',
     color: BrandColors.textDark,
   },
-  igBioCategory: {
+igBioCategory: {
     fontSize: 14,
     color: '#888',
     marginBottom: 4,
   },
-  igBioText: {
+igBioText: {
     fontSize: 14,
     color: BrandColors.textDark,
     lineHeight: 20,
   },
-  igBioLink: {
-    fontSize: 14,
-    color: '#00376B',
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  igActionRow: {
+igActionRow: {
     flexDirection: 'row',
     gap: 8,
   },
-  igPrimaryBtn: {
+igPrimaryBtn: {
     flex: 1,
     backgroundColor: BrandColors.accentPink,
     paddingVertical: 8,
     borderRadius: 8,
     alignItems: 'center',
   },
-  igPrimaryBtnText: {
+igPrimaryBtnText: {
     color: '#FFF',
     fontSize: 14,
     fontWeight: '600',
   },
-  igSecondaryBtn: {
+igSecondaryBtn: {
     flex: 1,
     backgroundColor: '#EFEFEF',
     paddingVertical: 8,
     borderRadius: 8,
     alignItems: 'center',
   },
-  igSecondaryBtnText: {
+igSecondaryBtnText: {
     color: BrandColors.textDark,
     fontSize: 14,
     fontWeight: '600',
   },
-  tabsScroll: {
+tabsScroll: {
     marginBottom: 24,
   },
-  tabsContainer: {
+tabsContainer: {
     paddingHorizontal: 20,
     gap: 20,
   },
-  tabItem: {
+tabItem: {
     paddingBottom: 8,
   },
-  tabItemActive: {
+tabItemActive: {
     borderBottomWidth: 2,
     borderBottomColor: '#C42A64',
   },
-  tabText: {
+tabText: {
     fontSize: 14,
     color: '#666',
     fontWeight: '500',
   },
-  tabTextActive: {
+tabTextActive: {
     color: '#C42A64',
     fontWeight: '600',
   },
-  section: {
+section: {
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: BrandColors.textDark,
-    marginBottom: 16,
-  },
-  emptyContainer: {
+emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 40,
     backgroundColor: '#F9F9F9',
     borderRadius: 12,
   },
-  emptyText: {
+emptyText: {
     color: '#666',
     fontSize: 14,
     marginTop: 12,
   },
-  serviceCard: {
+serviceCard: {
     backgroundColor: '#FFF',
     borderRadius: 12,
     padding: 16,
@@ -540,7 +523,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  serviceImageContainer: {
+serviceImageContainer: {
     width: 60,
     height: 60,
     borderRadius: 8,
@@ -548,63 +531,50 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     marginRight: 12,
   },
-  serviceImage: {
+serviceImage: {
     width: '100%',
     height: '100%',
   },
-  serviceImagePlaceholder: {
+serviceImagePlaceholder: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  serviceAction: {
+serviceAction: {
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     paddingVertical: 4,
   },
-  serviceInfo: {
+serviceInfo: {
     flex: 1,
     marginRight: 16,
   },
-  serviceHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  serviceName: {
+serviceName: {
     fontSize: 16,
     fontWeight: '600',
     color: BrandColors.textDark,
     marginBottom: 4,
   },
-  serviceDuration: {
+serviceDuration: {
     fontSize: 13,
     color: '#666',
     marginBottom: 8,
   },
-  serviceDesc: {
+serviceDesc: {
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
   },
-  servicePrice: {
+servicePrice: {
     fontSize: 16,
     fontWeight: '700',
     color: BrandColors.accentPink,
     marginTop: 8,
   },
-  loadingContainer: {
+loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalDismissArea: {
-    flex: 1,
-  },
+  }
 });

@@ -2,19 +2,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Camera, Save } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppAlert as appDialog } from '../components/ui/dialogStore';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandColors, Radius, Spacing } from '../constants/theme';
 import { getApiError } from '../services/api';
@@ -43,7 +32,7 @@ export default function CustomerProfileEditScreen() {
         setPhoneNumber(data.phoneNumber);
         setAvatar(data.avatar);
       })
-      .catch(error => Alert.alert('Không thể tải hồ sơ', getApiError(error).message))
+      .catch(error => appDialog.alert('Không thể tải hồ sơ', getApiError(error).message))
       .finally(() => active && setLoading(false));
     return () => { active = false; };
   }, []);
@@ -51,7 +40,7 @@ export default function CustomerProfileEditScreen() {
   const pickAvatar = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Cần quyền truy cập ảnh', 'Hãy cho phép BeautyBook truy cập thư viện ảnh để đổi ảnh đại diện.');
+      appDialog.alert('Cần quyền truy cập ảnh', 'Hãy cho phép BeautyBook truy cập thư viện ảnh để đổi ảnh đại diện.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -66,7 +55,7 @@ export default function CustomerProfileEditScreen() {
   const save = async () => {
     if (!profile || saving) return;
     if (!name.trim()) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập họ và tên.');
+      appDialog.alert('Thiếu thông tin', 'Vui lòng nhập họ và tên.');
       return;
     }
     try {
@@ -78,13 +67,11 @@ export default function CustomerProfileEditScreen() {
         avatar: uploadedAvatar,
       });
       updateUser({ name: updated.name, avatar: updated.avatar, avatarUrl: updated.avatar });
-      if (Platform.OS === 'web') window.alert('Đã cập nhật thông tin.');
-      else Alert.alert('Thành công', 'Thông tin tài khoản đã được cập nhật.');
+      appDialog.alert('Thành công', 'Thông tin tài khoản đã được cập nhật.');
       router.back();
     } catch (error) {
       const message = getApiError(error).message;
-      if (Platform.OS === 'web') window.alert(message);
-      else Alert.alert('Không thể cập nhật', message);
+      appDialog.alert('Không thể cập nhật', message);
     } finally {
       setSaving(false);
     }

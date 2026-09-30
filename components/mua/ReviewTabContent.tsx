@@ -1,5 +1,8 @@
+import { AppBottomSheet } from '../ui/AppBottomSheet';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator, Modal, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator, TextInput} from 'react-native';
+import { AppOverlay } from '../ui/OverlayProvider';
+import { AppAlert as appDialog } from '../ui/dialogStore';
 import { Star, ThumbsUp, MessageCircle, X, CornerDownRight } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { BrandColors, Shadows } from '../../constants/theme';
@@ -16,7 +19,7 @@ const timeAgo = (dateStr: string) => {
   const date = new Date(dateStr);
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
+
   if (diffInSeconds < 60) return "Vừa xong";
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
@@ -74,12 +77,12 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
       { reviewId: replyingToReviewId, replyContent: replyText.trim() },
       {
         onSuccess: () => {
-          Alert.alert('Thành công', 'Đã gửi phản hồi!');
+          appDialog.alert('Thành công', 'Đã gửi phản hồi!');
           setReplyingToReviewId(null);
           setReplyText('');
         },
         onError: (err: any) => {
-          Alert.alert('Lỗi', err.message || 'Không thể phản hồi đánh giá này.');
+          appDialog.alert('Lỗi', err.message || 'Không thể phản hồi đánh giá này.');
         }
       }
     );
@@ -102,11 +105,11 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
           <Text style={styles.scoreText}>{averageRating}</Text>
           <View style={styles.starsWrapper}>
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star 
-                key={s} 
-                size={12} 
-                color="#C71585" 
-                fill={s <= Math.round(Number(averageRating)) ? "#C71585" : "transparent"} 
+              <Star
+                key={s}
+                size={12}
+                color="#C71585"
+                fill={s <= Math.round(Number(averageRating)) ? "#C71585" : "transparent"}
               />
             ))}
           </View>
@@ -134,28 +137,28 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
 
       {/* FILTER BUTTONS */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.filterBtn, filter === 'all' && styles.filterBtnActive]}
           onPress={() => setFilter('all')}
         >
           <Text style={[styles.filterBtnText, filter === 'all' && styles.filterBtnTextActive]}>Tất cả</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.filterBtn, filter === '5' && styles.filterBtnActive]}
           onPress={() => setFilter('5')}
         >
           <Text style={[styles.filterBtnText, filter === '5' && styles.filterBtnTextActive]}>5 sao</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.filterBtn, filter === '4' && styles.filterBtnActive]}
           onPress={() => setFilter('4')}
         >
           <Text style={[styles.filterBtnText, filter === '4' && styles.filterBtnTextActive]}>4 sao</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.filterBtn, filter === 'has_image' && styles.filterBtnActive]}
           onPress={() => setFilter('has_image')}
         >
@@ -177,11 +180,11 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
                 </View>
                 <View style={styles.headerRight}>
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <Star 
-                      key={s} 
-                      size={14} 
-                      color="#C71585" 
-                      fill={s <= review.rating ? "#C71585" : "transparent"} 
+                    <Star
+                      key={s}
+                      size={14}
+                      color="#C71585"
+                      fill={s <= review.rating ? "#C71585" : "transparent"}
                     />
                   ))}
                 </View>
@@ -194,9 +197,9 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
               <View style={styles.imageGallery}>
                 {review.imageUrl ? (
                   <TouchableOpacity onPress={() => setSelectedImage(review.imageUrl!)}>
-                    <Image 
-                      source={{ uri: review.imageUrl }} 
-                      style={styles.reviewImage} 
+                    <Image
+                      source={{ uri: review.imageUrl }}
+                      style={styles.reviewImage}
                       contentFit="cover"
                       transition={200}
                     />
@@ -222,8 +225,8 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
                   <Text style={styles.replyText}>{review.muaReply}</Text>
                 </View>
               ) : isOwner ? (
-                <TouchableOpacity 
-                  style={styles.replyBtn} 
+                <TouchableOpacity
+                  style={styles.replyBtn}
                   onPress={() => setReplyingToReviewId(review.reviewId)}
                 >
                   <MessageCircle size={14} color={BrandColors.accentPink} style={{ marginRight: 6 }} />
@@ -237,7 +240,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
                   <ThumbsUp size={16} color="#C71585" style={{ marginRight: 6 }} />
                   <Text style={styles.helpfulText}>Hữu ích (0)</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity>
                   <Text style={styles.reportText}>Báo cáo</Text>
                 </TouchableOpacity>
@@ -248,39 +251,29 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
       </View>
 
       {/* Image Modal */}
-      <Modal visible={!!selectedImage} transparent={true} animationType="fade" onRequestClose={() => setSelectedImage(null)}>
+      <AppOverlay visible={!!selectedImage} transparent={true} animationType="fade" onRequestClose={() => setSelectedImage(null)}>
         <View style={styles.modalContainer}>
-          <TouchableOpacity 
-            style={styles.closeBtn} 
+          <TouchableOpacity
+            style={styles.closeBtn}
             onPress={() => setSelectedImage(null)}
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
           >
             <X size={24} color="#FFF" />
           </TouchableOpacity>
           {selectedImage && (
-            <Image 
-              source={{ uri: selectedImage }} 
-              style={styles.fullImage} 
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.fullImage}
               contentFit="contain"
             />
           )}
         </View>
-      </Modal>
+      </AppOverlay>
 
       {/* MUA REPLY MODAL */}
-      <Modal visible={!!replyingToReviewId} transparent animationType="slide">
-        <KeyboardAvoidingView 
-          style={styles.replyModalOverlay} 
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <View style={styles.replyModalContent}>
-            <View style={styles.replyModalHeader}>
-              <Text style={styles.replyModalTitle}>Phản hồi đánh giá</Text>
-              <TouchableOpacity onPress={() => setReplyingToReviewId(null)}>
-                <X size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-            <TextInput
+      <AppBottomSheet visible={!!replyingToReviewId} title="Phản hồi đánh giá" onClose={()=>setReplyingToReviewId(null)} loading={isReplying}  >
+
+<TextInput
               style={styles.replyInput}
               placeholder="Nhập nội dung phản hồi của bạn..."
               multiline
@@ -289,8 +282,9 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
               onChangeText={setReplyText}
               textAlignVertical="top"
             />
-            <TouchableOpacity 
-              style={[styles.replySubmitBtn, !replyText.trim() && { opacity: 0.5 }]} 
+
+<TouchableOpacity
+              style={[styles.replySubmitBtn, !replyText.trim() && { opacity: 0.5 }]}
               disabled={!replyText.trim() || isReplying}
               onPress={handleReplySubmit}
             >
@@ -300,9 +294,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
                 <Text style={styles.replySubmitText}>Gửi phản hồi</Text>
               )}
             </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+</AppBottomSheet>
     </View>
   );
 }
@@ -310,40 +302,40 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
 const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  container: {
+container: {
     paddingVertical: 16,
     backgroundColor: '#FFF9FA', // Very light pink background
   },
-  loadingContainer: {
+loadingContainer: {
     padding: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyContainer: {
+emptyContainer: {
     padding: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyTitle: {
+emptyTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#333',
     marginTop: 16,
     marginBottom: 8,
   },
-  emptySub: {
+emptySub: {
     fontSize: 14,
     color: '#888',
     textAlign: 'center',
     lineHeight: 20,
   },
-  summaryContainer: {
+summaryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  scoreBox: {
+scoreBox: {
     backgroundColor: '#FCEEF2',
     borderRadius: 16,
     paddingVertical: 20,
@@ -352,31 +344,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 20,
   },
-  scoreText: {
+scoreText: {
     fontSize: 32,
     fontWeight: '800',
     color: '#C71585', // Deep pink
     marginBottom: 4,
   },
-  starsWrapper: {
+starsWrapper: {
     flexDirection: 'row',
     gap: 2,
   },
-  barsContainer: {
+barsContainer: {
     flex: 1,
     gap: 8,
   },
-  barRow: {
+barRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  barStarText: {
+barStarText: {
     fontSize: 12,
     fontWeight: '700',
     color: '#333',
     width: 12,
   },
-  progressBarBg: {
+progressBarBg: {
     flex: 1,
     height: 6,
     backgroundColor: '#FCEEF2',
@@ -384,46 +376,26 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     overflow: 'hidden',
   },
-  progressBarFill: {
+progressBarFill: {
     height: '100%',
     backgroundColor: '#F55389',
     borderRadius: 3,
   },
-  barPctText: {
+barPctText: {
     fontSize: 12,
     color: '#888',
     width: 30,
     textAlign: 'right',
   },
-  categoryScoresContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 12,
-    paddingHorizontal: 20,
-  },
-  categoryTag: {
-    borderWidth: 1,
-    borderColor: '#FCEEF2',
-    backgroundColor: '#FFF',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-  },
-  categoryTagText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#C71585',
-  },
-  filterScroll: {
+filterScroll: {
     marginBottom: 24,
   },
-  filterContainer: {
+filterContainer: {
     paddingHorizontal: 20,
     gap: 12,
     alignItems: 'center',
   },
-  filterBtn: {
+filterBtn: {
     backgroundColor: '#FCEEF2',
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -432,68 +404,68 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minWidth: 80,
   },
-  filterBtnActive: {
+filterBtnActive: {
     backgroundColor: '#F55389',
   },
-  filterBtnText: {
+filterBtnText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
     textAlign: 'center',
   },
-  filterBtnTextActive: {
+filterBtnTextActive: {
     color: '#FFF',
   },
-  listContainer: {
+listContainer: {
     paddingHorizontal: 12,
     gap: 16,
   },
-  reviewCard: {
+reviewCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
     padding: 24,
     ...Shadows.card,
   },
-  reviewHeader: {
+reviewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  headerLeft: {
+headerLeft: {
     flex: 1,
   },
-  customerName: {
+customerName: {
     fontSize: 16,
     fontWeight: '700',
     color: '#333',
     marginBottom: 4,
   },
-  reviewDate: {
+reviewDate: {
     fontSize: 13,
     color: '#999',
   },
-  headerRight: {
+headerRight: {
     flexDirection: 'row',
     gap: 2,
   },
-  commentText: {
+commentText: {
     fontSize: 15,
     color: '#444',
     lineHeight: 24,
     marginBottom: 16,
   },
-  imageGallery: {
+imageGallery: {
     flexDirection: 'row',
     gap: 12,
     marginBottom: 16,
   },
-  reviewImage: {
+reviewImage: {
     width: 100,
     height: 100,
     borderRadius: 16,
     backgroundColor: '#F5F5F5',
   },
-  reviewImagePlaceholder: {
+reviewImagePlaceholder: {
     width: 100,
     height: 100,
     borderRadius: 16,
@@ -501,32 +473,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F6F3F5',
   },
-  cardFooter: {
+cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
   },
-  helpfulBtn: {
+helpfulBtn: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  helpfulText: {
+helpfulText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#C71585',
   },
-  reportText: {
+reportText: {
     fontSize: 13,
     color: '#999',
   },
-  modalContainer: {
+modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.9)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closeBtn: {
+closeBtn: {
     position: 'absolute',
     top: 60,
     right: 20,
@@ -535,71 +507,48 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 20,
   },
-  fullImage: {
+fullImage: {
     width: width,
     height: '80%',
   },
-  replyContainer: {
+replyContainer: {
     backgroundColor: '#FFF0F5',
     borderRadius: 16,
     padding: 16,
     marginTop: 8,
     marginBottom: 8,
   },
-  replyHeader: {
+replyHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
-  replyTitle: {
+replyTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: '#333',
     flex: 1,
   },
-  replyDate: {
+replyDate: {
     fontSize: 12,
     color: '#888',
   },
-  replyText: {
+replyText: {
     fontSize: 14,
     color: '#444',
     lineHeight: 22,
   },
-  replyBtn: {
+replyBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
   },
-  replyBtnText: {
+replyBtnText: {
     fontSize: 14,
     fontWeight: '600',
     color: BrandColors.accentPink,
   },
-  replyModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  replyModalContent: {
-    backgroundColor: '#FFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    minHeight: 300,
-  },
-  replyModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  replyModalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-  },
-  replyInput: {
+replyInput: {
     backgroundColor: '#F9F9F9',
     borderRadius: 12,
     padding: 16,
@@ -608,15 +557,15 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
   },
-  replySubmitBtn: {
+replySubmitBtn: {
     backgroundColor: BrandColors.accentPink,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
   },
-  replySubmitText: {
+replySubmitText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: '700',
-  },
+  }
 });

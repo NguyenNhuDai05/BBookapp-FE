@@ -1,13 +1,14 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppAlert as appDialog } from '../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { authService } from "../services/authService";
 import { getApiError } from "../services/api";
 
 export default function ChangePasswordScreen() {
   const router = useRouter(); const [current,setCurrent]=useState(""); const [next,setNext]=useState(""); const [confirm,setConfirm]=useState(""); const [loading,setLoading]=useState(false); const [error,setError]=useState("");
-  const submit=async()=>{setError("");if(next.length<6)return setError("Mật khẩu mới phải có ít nhất 6 ký tự.");if(next!==confirm)return setError("Mật khẩu xác nhận không khớp.");if(current===next)return setError("Mật khẩu mới phải khác mật khẩu hiện tại.");try{setLoading(true);await authService.changePassword(current,next);Alert.alert("Thành công","Đã đổi mật khẩu.",[{text:"OK",onPress:()=>router.back()}]);}catch(e){setError(getApiError(e).message);}finally{setLoading(false);}};
+  const submit=async()=>{setError("");if(next.length<6)return setError("Mật khẩu mới phải có ít nhất 6 ký tự.");if(next!==confirm)return setError("Mật khẩu xác nhận không khớp.");if(current===next)return setError("Mật khẩu mới phải khác mật khẩu hiện tại.");try{setLoading(true);await authService.changePassword(current,next);appDialog.alert("Thành công","Đã đổi mật khẩu.",[{text:"OK",onPress:()=>router.back()}]);}catch(e){setError(getApiError(e).message);}finally{setLoading(false);}};
   return <SafeAreaView style={s.safe}><View style={s.page}><TouchableOpacity onPress={()=>router.back()}><Text style={s.back}>‹ Quay lại</Text></TouchableOpacity><Text style={s.title}>Đổi mật khẩu</Text><Text style={s.hint}>Nhập mật khẩu hiện tại để bảo vệ tài khoản.</Text>{error?<Text style={s.error}>{error}</Text>:null}<Field label="Mật khẩu hiện tại" value={current} onChangeText={setCurrent}/><Field label="Mật khẩu mới" value={next} onChangeText={setNext}/><Field label="Xác nhận mật khẩu mới" value={confirm} onChangeText={setConfirm}/><TouchableOpacity style={s.button} disabled={loading} onPress={submit}>{loading?<ActivityIndicator color="#fff"/>:<Text style={s.buttonText}>Đổi mật khẩu</Text>}</TouchableOpacity></View></SafeAreaView>;
 }
 function Field(props:any){return <View style={s.field}><Text style={s.label}>{props.label}</Text><TextInput {...props} secureTextEntry autoCapitalize="none" style={s.input}/></View>}

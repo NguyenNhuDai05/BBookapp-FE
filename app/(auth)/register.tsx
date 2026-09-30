@@ -1,25 +1,13 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { Check, Eye, EyeOff, LockKeyhole, Mail, Phone, Sparkles, UserRound } from "lucide-react-native";
+import { Check, Eye, EyeOff, LockKeyhole, Mail, Sparkles, UserRound } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
 import { useAuthStore } from "../../store/useAuthStore";
-import { UserRole } from "../../types/auth";
+import { useRegistrationStore } from "../../store/useRegistrationStore";
 import { authService } from "../../services/authService";
 
 const authLogo = require("../../assets/images/B.png");
@@ -47,19 +35,17 @@ const getRegisterErrorMessage = (err: any) => {
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const registerStore = useAuthStore((state) => state.register);
+
   const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+
 
   const handleGoogleToken = useCallback(
     async (idToken: string) => {
@@ -70,7 +56,7 @@ export default function RegisterScreen() {
         return true;
       }
 
-      Alert.alert(
+      appDialog.alert(
         "Đăng ký Google thất bại",
         "Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc đăng ký bằng email.",
       );
@@ -94,7 +80,6 @@ export default function RegisterScreen() {
     if (
       !fullName.trim() ||
       !email.trim() ||
-      !phoneNumber.trim() ||
       !password.trim() ||
       !confirmPassword.trim()
     ) {
@@ -102,7 +87,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setError("Email không hợp lệ.");
       return;
     }
@@ -117,39 +102,13 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (otpSent && !/^[0-9]{6}$/.test(otp)) {
-      setError("Vui lòng nhập đúng mã OTP gồm 6 số.");
-      return;
-    }
-
+    if (loading) return;
     try {
       setLoading(true);
       const trimmedEmail = email.trim();
-
-      if (!otpSent) {
-        await authService.requestRegistrationOtp(trimmedEmail);
-        setOtpSent(true);
-        Alert.alert("Đã gửi OTP", `Vui lòng kiểm tra hộp thư ${trimmedEmail}. Mã có hiệu lực trong 5 phút.`);
-        return;
-      }
-
-      const success = await registerStore(
-        fullName.trim(),
-        trimmedEmail,
-        password,
-        phoneNumber.trim(),
-        UserRole.Customer,
-        otp,
-      );
-
-      if (success) {
-        router.replace({
-          pathname: "/(auth)/login",
-          params: { registered: "1", email: trimmedEmail },
-        } as any);
-      } else {
-        Alert.alert("Đăng ký thất bại", "Có lỗi xảy ra. Vui lòng thử lại.");
-      }
+      await authService.requestRegistrationOtp(trimmedEmail);
+      useRegistrationStore.getState().begin({ fullName: fullName.trim(), email: trimmedEmail, password });
+      router.push("/(auth)/verify-email" as any);
     } catch (err: any) {
       console.error("Register error:", err?.response?.data || err?.message || err);
       setError(getRegisterErrorMessage(err));
@@ -167,7 +126,7 @@ export default function RegisterScreen() {
     try {
       await signInWithGoogle();
     } catch (err: any) {
-      Alert.alert("Google OAuth", err?.message || "Không thể mở Google OAuth.");
+      appDialog.alert("Google OAuth", err?.message || "Không thể mở Google OAuth.");
     }
   };
 
@@ -193,9 +152,9 @@ export default function RegisterScreen() {
                   <Sparkles size={15} color="#F55389" />
                   <Text style={styles.badgeText}>Thành viên mới</Text>
                 </View>
-                <Text style={styles.title}>Đăng ký</Text>
+                <Text style={styles.title}>Tạo tài khoản</Text>
                 <Text style={styles.subtitle}>
-                  Hoàn tất thông tin để tạo ví và hồ sơ khách hàng.
+                  Nhập thông tin để tạo tài khoản B-Book.
                 </Text>
               </View>
 
@@ -223,15 +182,6 @@ export default function RegisterScreen() {
               />
 
               <AuthInput
-                icon={<Phone size={18} color="#E46B87" />}
-                label="Số điện thoại"
-                placeholder="Nhập số điện thoại"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="phone-pad"
-              />
-
-              <AuthInput
                 icon={<LockKeyhole size={18} color="#E46B87" />}
                 label="Mật khẩu"
                 placeholder="Tạo mật khẩu"
@@ -249,17 +199,6 @@ export default function RegisterScreen() {
                 secureTextEntry
               />
 
-              {otpSent ? (
-                <AuthInput
-                  icon={<LockKeyhole size={18} color="#E46B87" />}
-                  label="Mã OTP"
-                  placeholder="Nhập 6 số trong email"
-                  value={otp}
-                  onChangeText={(value) => setOtp(value.replace(/\D/g, "").slice(0, 6))}
-                  keyboardType="phone-pad"
-                />
-              ) : null}
-
               <View style={styles.policyRow}>
                 <Pressable
                   accessibilityRole="checkbox"
@@ -275,9 +214,9 @@ export default function RegisterScreen() {
                   {acceptedPolicy ? <Check size={16} strokeWidth={3} color="#FFF" /> : null}
                 </Pressable>
                 <Text style={styles.policyText}>
-                  Tôi đã đọc và đồng ý với{" "}
+                  Tôi đồng ý với{" "}
                   <Text style={styles.policyLink} onPress={() => router.push("/policy" as any)}>
-                    Chính sách & Điều khoản của B-Book
+                    Điều khoản sử dụng và Chính sách quyền riêng tư
                   </Text>
                 </Text>
               </View>
@@ -291,7 +230,7 @@ export default function RegisterScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.primaryButtonText}>{otpSent ? "Xác nhận & tạo tài khoản" : "Gửi mã OTP"}</Text>
+                  <Text style={styles.primaryButtonText}>Tiếp tục</Text>
                 )}
               </TouchableOpacity>
 
@@ -317,7 +256,7 @@ export default function RegisterScreen() {
                     <View style={styles.googleMark}>
                       <Text style={styles.googleMarkText}>G</Text>
                     </View>
-                    <Text style={styles.googleText}>Đăng ký với Google</Text>
+                    <Text style={styles.googleText}>Tiếp tục với Google</Text>
                   </>
                 )}
               </TouchableOpacity>

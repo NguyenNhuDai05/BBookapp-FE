@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useBookingStore } from '../store/useBookingStore';
 import { BrandColors } from '../constants/theme';
@@ -18,10 +18,11 @@ export default function BookingCartBottomSheet({ onClose }: BookingCartBottomShe
 
   const totalAmount = getServiceTotal();
 
-  if (!draft || draft.services.length === 0) {
-    onClose();
-    return null;
-  }
+  React.useEffect(() => {
+    if (!draft || draft.services.length === 0) onClose();
+  }, [draft, onClose]);
+
+  if (!draft || draft.services.length === 0) return null;
 
   const handleCheckout = () => {
     onClose();
@@ -47,11 +48,11 @@ export default function BookingCartBottomSheet({ onClose }: BookingCartBottomShe
               <Text style={styles.serviceName} numberOfLines={2}>{service.name}</Text>
               <Text style={styles.servicePrice}>{service.price.toLocaleString('vi-VN')}đ</Text>
             </View>
-            
+
             <View style={styles.quantityControls}>
               <Text style={styles.quantityLabel}>Số người:</Text>
               <View style={styles.stepper}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.stepperBtn}
                   onPress={() => {
                     if (service.participantsCount <= 1) {
@@ -64,7 +65,7 @@ export default function BookingCartBottomSheet({ onClose }: BookingCartBottomShe
                   <Minus color={BrandColors.accentPink} size={16} />
                 </TouchableOpacity>
                 <Text style={styles.quantityValue}>{service.participantsCount}</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.stepperBtn}
                   onPress={() => updateServiceParticipantsCount(service.id, service.participantsCount + 1)}
                 >
@@ -94,8 +95,7 @@ const styles = StyleSheet.create({
     backgroundColor: BrandColors.textWhite,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '90%',
-    minHeight: 500,
+    flex: 1,
   },
   header: {
     flexDirection: 'row',

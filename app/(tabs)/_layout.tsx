@@ -8,10 +8,13 @@ import {
 } from "lucide-react-native";
 import { ActivityIndicator, Platform, View } from "react-native";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
-import { BrandColors, Shadows } from "../../constants/theme";
+import { BrandColors, CustomerTabBarTokens, getCustomerTabBarMetrics, Shadows } from "../../constants/theme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
   const checkingAuth = useRequireAuth();
+  const insets = useSafeAreaInsets();
+  const { bottomPadding, height: tabBarHeight } = getCustomerTabBarMetrics(insets.bottom);
 
   if (checkingAuth) {
     return (
@@ -39,9 +42,9 @@ export default function TabsLayout() {
           right: 0,
           bottom: 0,
 
-          height: 104,
-          paddingTop: 8,
-          paddingBottom: 28,
+          height: tabBarHeight,
+          paddingTop: CustomerTabBarTokens.topPadding,
+          paddingBottom: bottomPadding,
 
           borderTopLeftRadius: 28,
           borderTopRightRadius: 28,
@@ -56,7 +59,7 @@ export default function TabsLayout() {
         tabBarItemStyle:
           Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : undefined,
 
-        tabBarActiveTintColor: BrandColors.accentPinkLight,
+        tabBarActiveTintColor: BrandColors.primaryPink,
       }}
     >
       <Tabs.Screen
@@ -78,7 +81,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="bookings"
         options={{
-          title: "Booking",
+          title: "Lịch sử",
           tabBarIcon: ({ color, size }) => (
             <CalendarDays color={color} size={size} />
           ),
@@ -88,7 +91,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="chat"
         options={{
-          title: "Chat",
+          title: "Tin nhắn",
           tabBarIcon: ({ color, size }) => (
             <MessageCircle color={color} size={size} />
           ),

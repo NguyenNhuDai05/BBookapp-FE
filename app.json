@@ -69,7 +69,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Cho phép BeautyBook truy cập ảnh để tải hồ sơ, giấy tờ xác minh và portfolio do bạn chọn.",
-          "cameraPermission": false,
+          "cameraPermission": "Cho phép B-Book sử dụng camera để chụp CCCD và ảnh khuôn mặt khi bạn xác minh danh tính.",
           "microphonePermission": false
         }
       ],

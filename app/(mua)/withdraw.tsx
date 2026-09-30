@@ -1,7 +1,9 @@
+import { AppModal } from '../../components/ui/AppModal';
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Building2, CheckCircle2, Circle, X } from 'lucide-react-native';
+import {ArrowLeft, Building2, CheckCircle2, Circle} from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Crypto from 'expo-crypto';
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
@@ -73,20 +75,45 @@ export default function WithdrawScreen() {
       </>}
     </ScrollView>
 
-    <Modal visible={confirmationVisible} transparent animationType="fade" onRequestClose={() => !create.isPending && setConfirmationVisible(false)}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.confirmCard}>
-          <View style={styles.confirmHeader}><Text style={styles.confirmTitle}>Xác nhận rút tiền</Text><TouchableOpacity style={styles.close} onPress={() => setConfirmationVisible(false)} disabled={create.isPending}><X size={21} color={BrandColors.textDark}/></TouchableOpacity></View>
-          <Text style={styles.confirmAmount}>{money(amount)}</Text>
-          <Text style={styles.confirmText}>Tiền sẽ được chuyển tới tài khoản:</Text>
-          <View style={styles.confirmBank}><Text style={styles.confirmBankName}>{selectedBank?.bankName || selectedBank?.bankCode}</Text><Text style={styles.bankMeta}>{selectedBank?.maskedAccountNumber} · {selectedBank?.accountHolderName}</Text></View>
-          <View style={styles.confirmActions}><TouchableOpacity style={styles.cancel} onPress={() => setConfirmationVisible(false)} disabled={create.isPending}><Text style={styles.cancelText}>Quay lại</Text></TouchableOpacity><TouchableOpacity style={styles.confirmButton} onPress={confirmWithdraw} disabled={create.isPending}>{create.isPending ? <ActivityIndicator color="#FFF"/> : <Text style={styles.confirmButtonText}>Gửi yêu cầu</Text>}</TouchableOpacity></View>
-        </View>
-      </View>
-    </Modal>
+    <AppModal visible={confirmationVisible} title="Xác nhận rút tiền" variant="confirm"
+    description="Tiền sẽ được chuyển tới tài khoản dưới đây sau khi yêu cầu được xử lý."
+    loading={create.isPending} onClose={()=>setConfirmationVisible(false)}
+    primaryAction={{label:'Gửi yêu cầu',onPress:confirmWithdraw,loading:create.isPending}}
+    secondaryAction={{label:'Quay lại',onPress:()=>setConfirmationVisible(false)}}>
+      <Text style={styles.confirmAmount}>{money(amount)}</Text>
+      <View style={styles.confirmBank}><Text style={styles.confirmBankName}>{selectedBank?.bankName || selectedBank?.bankCode}</Text><Text style={styles.bankMeta}>{selectedBank?.maskedAccountNumber} · {selectedBank?.accountHolderName}</Text></View>
+    </AppModal>
   </SafeAreaView>;
 }
 
 const styles = StyleSheet.create({
-  safe:{flex:1,backgroundColor:BrandColors.bgPrimary},header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',padding:Spacing.md},back:{width:44,height:44,alignItems:'center',justifyContent:'center'},title:{fontFamily:Typography.bold,fontSize:20,color:BrandColors.textDark},content:{padding:Spacing.base,paddingBottom:Spacing.xxl},amountCard:{backgroundColor:BrandColors.accentRose,borderRadius:Radius.lg,padding:Spacing.lg,alignItems:'center'},label:{fontFamily:Typography.medium,color:'#FFEAF0'},amount:{fontFamily:Typography.extraBold,fontSize:32,color:'#FFF',marginVertical:4},caption:{fontFamily:Typography.regular,fontSize:12,color:'#FFEAF0'},sectionRow:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:Spacing.xl,marginBottom:Spacing.sm},section:{fontFamily:Typography.bold,fontSize:17,color:BrandColors.textDark},link:{fontFamily:Typography.bold,color:BrandColors.accentRose},bank:{flexDirection:'row',alignItems:'center',backgroundColor:'#FFF',padding:Spacing.md,borderRadius:Radius.md,borderWidth:1,borderColor:BrandColors.borderLight,marginBottom:Spacing.sm},bankSelected:{borderColor:BrandColors.accentRose,backgroundColor:BrandColors.bgPinkLight},bankDisabled:{opacity:.58},bankName:{fontFamily:Typography.bold,color:BrandColors.textDark},bankMeta:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:4},bankState:{fontFamily:Typography.semiBold,fontSize:11,color:'#9A6700',marginTop:5},bankStateUsable:{color:BrandColors.statusConfirmed},empty:{alignItems:'center',padding:Spacing.xl,backgroundColor:'#FFF',borderRadius:Radius.md,borderWidth:1,borderStyle:'dashed',borderColor:BrandColors.borderLight},emptyText:{fontFamily:Typography.regular,color:BrandColors.textMuted,textAlign:'center',marginTop:10},notice:{fontFamily:Typography.regular,fontSize:12,lineHeight:18,color:BrandColors.textSecondary,marginVertical:Spacing.lg},submit:{minHeight:54,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.textDark,borderRadius:Radius.full,marginTop:Spacing.md},submitText:{fontFamily:Typography.bold,color:'#FFF'},disabled:{opacity:.4},error:{color:BrandColors.statusCancelled,backgroundColor:BrandColors.statusCancelledBg,padding:Spacing.md,borderRadius:Radius.md,marginBottom:Spacing.sm},modalOverlay:{flex:1,backgroundColor:'rgba(48,23,38,.45)',alignItems:'center',justifyContent:'center',padding:Spacing.base},confirmCard:{width:'100%',maxWidth:440,backgroundColor:'#FFF',borderRadius:Radius.xl,padding:Spacing.lg},confirmHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},confirmTitle:{fontFamily:Typography.bold,fontSize:19,color:BrandColors.textDark},close:{width:40,height:40,alignItems:'center',justifyContent:'center',borderRadius:20,backgroundColor:'#F6F2F4'},confirmAmount:{fontFamily:Typography.extraBold,fontSize:30,color:BrandColors.accentRose,textAlign:'center',marginVertical:Spacing.lg},confirmText:{fontFamily:Typography.regular,fontSize:13,color:BrandColors.textSecondary},confirmBank:{backgroundColor:BrandColors.bgPinkLight,borderRadius:Radius.md,padding:Spacing.md,marginTop:Spacing.sm},confirmBankName:{fontFamily:Typography.bold,color:BrandColors.textDark},confirmActions:{flexDirection:'row',gap:Spacing.sm,marginTop:Spacing.lg},cancel:{flex:1,minHeight:50,alignItems:'center',justifyContent:'center',borderRadius:Radius.full,backgroundColor:'#F3F0F2'},cancelText:{fontFamily:Typography.bold,color:BrandColors.textDark},confirmButton:{flex:1.3,minHeight:50,alignItems:'center',justifyContent:'center',borderRadius:Radius.full,backgroundColor:BrandColors.accentRose},confirmButtonText:{fontFamily:Typography.bold,color:'#FFF'},
+safe:{flex:1,backgroundColor:BrandColors.bgPrimary},
+header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',padding:Spacing.md},
+back:{width:44,height:44,alignItems:'center',justifyContent:'center'},
+title:{fontFamily:Typography.bold,fontSize:20,color:BrandColors.textDark},
+content:{padding:Spacing.base,paddingBottom:Spacing.xxl},
+amountCard:{backgroundColor:BrandColors.accentRose,borderRadius:Radius.lg,padding:Spacing.lg,alignItems:'center'},
+label:{fontFamily:Typography.medium,color:'#FFEAF0'},
+amount:{fontFamily:Typography.extraBold,fontSize:32,color:'#FFF',marginVertical:4},
+caption:{fontFamily:Typography.regular,fontSize:12,color:'#FFEAF0'},
+sectionRow:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:Spacing.xl,marginBottom:Spacing.sm},
+section:{fontFamily:Typography.bold,fontSize:17,color:BrandColors.textDark},
+link:{fontFamily:Typography.bold,color:BrandColors.accentRose},
+bank:{flexDirection:'row',alignItems:'center',backgroundColor:'#FFF',padding:Spacing.md,borderRadius:Radius.md,borderWidth:1,borderColor:BrandColors.borderLight,marginBottom:Spacing.sm},
+bankSelected:{borderColor:BrandColors.accentRose,backgroundColor:BrandColors.bgPinkLight},
+bankDisabled:{opacity:.58},
+bankName:{fontFamily:Typography.bold,color:BrandColors.textDark},
+bankMeta:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:4},
+bankState:{fontFamily:Typography.semiBold,fontSize:11,color:'#9A6700',marginTop:5},
+bankStateUsable:{color:BrandColors.statusConfirmed},
+empty:{alignItems:'center',padding:Spacing.xl,backgroundColor:'#FFF',borderRadius:Radius.md,borderWidth:1,borderStyle:'dashed',borderColor:BrandColors.borderLight},
+emptyText:{fontFamily:Typography.regular,color:BrandColors.textMuted,textAlign:'center',marginTop:10},
+notice:{fontFamily:Typography.regular,fontSize:12,lineHeight:18,color:BrandColors.textSecondary,marginVertical:Spacing.lg},
+submit:{minHeight:54,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.textDark,borderRadius:Radius.full,marginTop:Spacing.md},
+submitText:{fontFamily:Typography.bold,color:'#FFF'},
+disabled:{opacity:.4},
+error:{color:BrandColors.statusCancelled,backgroundColor:BrandColors.statusCancelledBg,padding:Spacing.md,borderRadius:Radius.md,marginBottom:Spacing.sm},
+confirmAmount:{fontFamily:Typography.extraBold,fontSize:30,color:BrandColors.accentRose,textAlign:'center',marginVertical:Spacing.lg},
+confirmBank:{backgroundColor:BrandColors.bgPinkLight,borderRadius:Radius.md,padding:Spacing.md,marginTop:Spacing.sm},
+confirmBankName:{fontFamily:Typography.bold,color:BrandColors.textDark}
 });

@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  TextInput, 
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  ActivityIndicator
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Star, Camera, X } from 'lucide-react-native';
@@ -24,11 +14,11 @@ import { getApiError } from '../../services/api';
 export default function ReviewScreen() {
   const router = useRouter();
   const { id: bookingId, muaName } = useLocalSearchParams<{ id: string, muaName: string }>();
-  
+
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>('');
   const [imageUri, setImageUri] = useState<string | null>(null);
-  
+
   const { mutateAsync: submitReview, isPending } = useSubmitReview();
   const [isUploading, setIsUploading] = useState(false);
   const isSubmitting = isPending || isUploading;
@@ -36,7 +26,7 @@ export default function ReviewScreen() {
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Quyền truy cập', 'Vui lòng cấp quyền truy cập thư viện ảnh để tải ảnh lên.');
+      appDialog.alert('Quyền truy cập', 'Vui lòng cấp quyền truy cập thư viện ảnh để tải ảnh lên.');
       return;
     }
 
@@ -55,7 +45,7 @@ export default function ReviewScreen() {
   const handleSubmit = async () => {
     if (isSubmitting) return;
     if (rating === 0) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng chọn số sao đánh giá (từ 1 đến 5).');
+      appDialog.alert('Thiếu thông tin', 'Vui lòng chọn số sao đánh giá (từ 1 đến 5).');
       return;
     }
 
@@ -68,10 +58,10 @@ export default function ReviewScreen() {
         comment: comment.trim(),
         imageUrl,
       });
-      Alert.alert('Thành công', 'Cảm ơn bạn đã gửi đánh giá! Phản hồi của bạn sẽ giúp cộng đồng BBeauty tốt hơn.');
+      appDialog.alert('Thành công', 'Cảm ơn bạn đã gửi đánh giá! Phản hồi của bạn sẽ giúp cộng đồng BBeauty tốt hơn.');
       router.back();
     } catch (error) {
-      Alert.alert('Lỗi', getApiError(error).message || 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
+      appDialog.alert('Lỗi', getApiError(error).message || 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
     } finally {
       setIsUploading(false);
     }
@@ -88,8 +78,8 @@ export default function ReviewScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <KeyboardAvoidingView 
-        style={{ flex: 1 }} 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -105,15 +95,15 @@ export default function ReviewScreen() {
             <Text style={styles.ratingTitle}>Bạn cảm thấy thế nào?</Text>
             <View style={styles.starsWrapper}>
               {[1, 2, 3, 4, 5].map((star) => (
-                <TouchableOpacity 
-                  key={star} 
+                <TouchableOpacity
+                  key={star}
                   onPress={() => setRating(star)}
                   style={styles.starBtn}
                 >
-                  <Star 
-                    size={48} 
-                    color={star <= rating ? '#FFD700' : '#E0E0E0'} 
-                    fill={star <= rating ? '#FFD700' : 'transparent'} 
+                  <Star
+                    size={48}
+                    color={star <= rating ? '#FFD700' : '#E0E0E0'}
+                    fill={star <= rating ? '#FFD700' : 'transparent'}
                   />
                 </TouchableOpacity>
               ))}
@@ -146,7 +136,7 @@ export default function ReviewScreen() {
           {/* PHOTO UPLOAD */}
           <View style={styles.photoContainer}>
             <Text style={styles.inputLabel}>Đính kèm hình ảnh thực tế (Tùy chọn)</Text>
-            
+
             {imageUri ? (
               <View style={styles.imageWrapper}>
                 <Image source={{ uri: imageUri }} style={styles.uploadedImage} />
@@ -167,8 +157,8 @@ export default function ReviewScreen() {
 
       {/* STICKY BOTTOM BUTTON */}
       <View style={styles.footer}>
-        <TouchableOpacity 
-          style={[styles.submitBtn, rating === 0 && styles.submitBtnDisabled]} 
+        <TouchableOpacity
+          style={[styles.submitBtn, rating === 0 && styles.submitBtnDisabled]}
           disabled={rating === 0 || isSubmitting}
           onPress={handleSubmit}
         >
