@@ -128,6 +128,7 @@ export default function MuaManagementScreen() {
         onClose={() => setIsServiceModalVisible(false)}
         onSubmit={handleSaveService}
         initialData={editingService}
+        availableTags={[...new Set(services.flatMap(service => service.tags || []))]}
       />
       <PortfolioFormModal
         visible={isPortfolioModalVisible}

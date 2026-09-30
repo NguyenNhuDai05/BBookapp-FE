@@ -89,9 +89,15 @@ export default function ChatRoomScreen() {
     };
   }, [id, mergeMessages]);
 
-  const isCustomer = roomInfo && currentUserId ? roomInfo.customerId.toLowerCase() === currentUserId.toLowerCase() : userRole !== 'MUA';
-  const otherName = useMemo(() => isCustomer ? roomInfo?.muaName || 'Chuyên gia trang điểm' : roomInfo?.customerName || 'Khách hàng', [isCustomer, roomInfo]);
-  const otherAvatar = isCustomer ? roomInfo?.muaAvatar : roomInfo?.customerAvatar;
+  const isCustomer = Boolean(roomInfo && currentUserId && roomInfo.customerId.toLowerCase() === currentUserId.toLowerCase());
+  const otherName = useMemo(() => {
+    if (!roomInfo || !currentUserId) return 'Đang tải...';
+    const apiName = isCustomer ? roomInfo.muaName : roomInfo.customerName;
+    return apiName?.trim() || 'Người dùng B-Book';
+  }, [currentUserId, isCustomer, roomInfo]);
+  const otherAvatar = roomInfo && currentUserId
+    ? (isCustomer ? roomInfo.muaAvatar : roomInfo.customerAvatar)
+    : undefined;
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -109,6 +115,21 @@ export default function ChatRoomScreen() {
     finally { setLoadingOlder(false); }
   };
 
+  const reconcileAfterFailedRequest = async (content?: string, imageUrl?: string) => {
+    if (!id || !currentUserIdRef.current) return null;
+    try {
+      const latest = await chatService.getMessages(id, undefined, 20);
+      const normalizedContent = content?.trim() || '';
+      const recovered = [...latest].reverse().find(message =>
+        message.senderId.toLowerCase() === currentUserIdRef.current!.toLowerCase()
+        && (!normalizedContent || message.content?.trim() === normalizedContent)
+        && (!imageUrl || message.imageUrl === imageUrl)
+        && Date.now() - new Date(message.sentAt).getTime() < 120_000);
+      if (recovered) setMessages(previous => mergeMessages(previous, [recovered]));
+      return recovered || null;
+    } catch { return null; }
+  };
+
   const sendMessage = async () => {
     const content = inputText.trim();
     if (!content || !id || sending) return;
@@ -118,7 +139,13 @@ export default function ChatRoomScreen() {
       setMessages(previous => mergeMessages(previous, [sent]));
       setInputText(''); setReplyTo(null); setShowEmoji(false);
       requestAnimationFrame(() => flatListRef.current?.scrollToEnd({ animated: true }));
-    } catch (error) { Alert.alert('Gửi tin nhắn thất bại', getApiError(error).message); }
+    } catch (error) {
+      const recovered = await reconcileAfterFailedRequest(content);
+      if (recovered) {
+        setInputText(''); setReplyTo(null); setShowEmoji(false);
+        requestAnimationFrame(() => flatListRef.current?.scrollToEnd({ animated: true }));
+      } else Alert.alert('Gửi tin nhắn thất bại', getApiError(error).message);
+    }
     finally { setSending(false); }
   };
 
@@ -126,12 +153,17 @@ export default function ChatRoomScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.82 });
     if (result.canceled || !result.assets[0] || !id) return;
     setUploading(true);
+    let uploadedImageUrl: string | undefined;
     try {
-      const imageUrl = await chatService.uploadImage(result.assets[0].uri);
-      const sent = await chatService.sendMessage(id, inputText.trim() || undefined, imageUrl, replyTo?.messageId);
+      uploadedImageUrl = await chatService.uploadImage(result.assets[0].uri);
+      const sent = await chatService.sendMessage(id, inputText.trim() || undefined, uploadedImageUrl, replyTo?.messageId);
       setMessages(previous => mergeMessages(previous, [sent]));
       setInputText(''); setReplyTo(null);
-    } catch (error) { Alert.alert('Gửi ảnh thất bại', getApiError(error).message); }
+    } catch (error) {
+      const recovered = await reconcileAfterFailedRequest(inputText, uploadedImageUrl);
+      if (recovered) { setInputText(''); setReplyTo(null); }
+      else Alert.alert('Gửi ảnh thất bại', getApiError(error).message);
+    }
     finally { setUploading(false); }
   };
 
@@ -180,8 +212,8 @@ export default function ChatRoomScreen() {
       <View style={styles.page}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.headerButton} onPress={goBack} accessibilityLabel="Quay lại"><ArrowLeft size={25} color={BrandColors.accentRose}/></TouchableOpacity>
-          <View style={styles.headerAvatarWrap}>{otherAvatar ? <Image source={{uri:otherAvatar}} style={styles.headerAvatar} contentFit="cover"/> : <View style={styles.headerAvatarFallback}><Text style={styles.headerAvatarLetter}>{otherName.charAt(0).toUpperCase()}</Text></View>}<View style={styles.onlineDot}/></View>
-          <View style={styles.headerCopy}><Text style={styles.headerName} numberOfLines={1}>{otherName}</Text><View style={styles.statusRow}><View style={styles.statusDot}/><Text style={styles.statusText}>{otherTyping ? 'Đang nhập...' : 'Đang hoạt động'}</Text></View></View>
+          <View style={styles.headerAvatarWrap}>{otherAvatar ? <Image source={{uri:otherAvatar}} style={styles.headerAvatar} contentFit="cover"/> : <View style={styles.headerAvatarFallback}><Text style={styles.headerAvatarLetter}>{otherName.charAt(0).toUpperCase()}</Text></View>}</View>
+          <View style={styles.headerCopy}><Text style={styles.headerName} numberOfLines={1}>{otherName}</Text><Text style={styles.statusText}>{otherTyping ? 'Đang nhập...' : 'Tin nhắn riêng'}</Text></View>
           <TouchableOpacity style={styles.headerButton} accessibilityLabel="Tùy chọn"><MoreVertical size={24} color={BrandColors.accentRose}/></TouchableOpacity>
         </View>
 
@@ -214,5 +246,5 @@ function ReplyPreview({item,own=false}:{item:MessageDto;own?:boolean}){return <V
 function MessageCircleEmpty(){return <View style={styles.emptyIcon}><View style={styles.emptyIconBack}/><View style={styles.emptyIconFront}><View style={styles.whiteDot}/><View style={styles.whiteDot}/><View style={styles.whiteDot}/></View></View>;}
 
 const styles=StyleSheet.create({
-  safe:{flex:1,backgroundColor:'#FFF8FA'},keyboard:{flex:1},page:{flex:1,width:'100%',maxWidth:760,alignSelf:'center',backgroundColor:'#FFF8FA',borderLeftWidth:Platform.OS==='web'?1:0,borderRightWidth:Platform.OS==='web'?1:0,borderColor:BrandColors.borderDivider},header:{minHeight:76,paddingHorizontal:10,flexDirection:'row',alignItems:'center',backgroundColor:'#FFF',borderBottomWidth:1,borderBottomColor:BrandColors.borderDivider,...Shadows.sm},headerButton:{width:46,height:46,borderRadius:23,alignItems:'center',justifyContent:'center',backgroundColor:'#FFF1F5'},headerAvatarWrap:{width:52,height:52,marginLeft:9,marginRight:10},headerAvatar:{width:52,height:52,borderRadius:26,borderWidth:2,borderColor:BrandColors.accentPink},headerAvatarFallback:{width:52,height:52,borderRadius:26,backgroundColor:'#F8BDD0',borderWidth:2,borderColor:BrandColors.accentPink,alignItems:'center',justifyContent:'center'},headerAvatarLetter:{fontFamily:Typography.black,fontSize:20,color:BrandColors.accentRose},onlineDot:{position:'absolute',right:0,bottom:1,width:13,height:13,borderRadius:7,backgroundColor:'#21C55D',borderWidth:2,borderColor:'#FFF'},headerCopy:{flex:1,minWidth:0},headerName:{fontFamily:Typography.extraBold,fontSize:17,color:BrandColors.textDark},statusRow:{flexDirection:'row',alignItems:'center',gap:5,marginTop:2},statusDot:{width:7,height:7,borderRadius:4,backgroundColor:'#21C55D'},statusText:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textMuted},loading:{flex:1,alignItems:'center',justifyContent:'center'},messages:{paddingHorizontal:14,paddingBottom:18,flexGrow:1},dayChip:{alignSelf:'center',backgroundColor:'#FFE8EF',paddingHorizontal:18,paddingVertical:7,borderRadius:Radius.full,marginVertical:18},dayText:{fontFamily:Typography.medium,fontSize:12,color:BrandColors.textSecondary},messageLine:{flexDirection:'row',alignItems:'flex-start',marginBottom:12},ownLine:{justifyContent:'flex-end'},smallAvatar:{width:39,height:39,borderRadius:20,backgroundColor:'#F8BDD0',alignItems:'center',justifyContent:'center',overflow:'hidden',marginRight:8},smallAvatarImage:{width:39,height:39},avatarLetter:{fontFamily:Typography.black,color:BrandColors.accentRose},messageBlock:{alignItems:'flex-start'},ownBlock:{alignItems:'flex-end'},bubble:{paddingHorizontal:15,paddingVertical:11,borderRadius:19},otherBubble:{backgroundColor:'#FFF0F4',borderTopLeftRadius:6},ownBubble:{borderTopRightRadius:6},messageText:{fontFamily:Typography.regular,fontSize:15,lineHeight:21,color:BrandColors.textDark},ownText:{color:'#FFF'},messageImage:{borderRadius:14,marginBottom:7},messageMeta:{flexDirection:'row',alignItems:'center',gap:4,marginTop:4,paddingHorizontal:4},ownMeta:{alignSelf:'flex-end'},messageTime:{fontFamily:Typography.regular,fontSize:11,color:BrandColors.textMuted},replyPreview:{borderLeftWidth:3,borderLeftColor:BrandColors.accentPink,backgroundColor:'#FFE4EC',padding:7,borderRadius:7,marginBottom:7},ownReply:{borderLeftColor:'#FFF',backgroundColor:'rgba(255,255,255,.18)'},replyPreviewText:{fontFamily:Typography.medium,fontSize:12,color:BrandColors.textBody},ownReplyText:{color:'#FFF'},reactions:{flexDirection:'row',alignItems:'center',gap:4,marginTop:3},reaction:{paddingHorizontal:7,paddingVertical:2,borderRadius:12,backgroundColor:'#FFF',borderWidth:1,borderColor:BrandColors.borderLight},activeReaction:{borderColor:BrandColors.accentPink,backgroundColor:'#FFF0F4'},heart:{fontSize:19,color:BrandColors.accentPink,paddingHorizontal:4},quickActions:{paddingHorizontal:14,paddingVertical:10,gap:9,borderTopWidth:1,borderTopColor:BrandColors.borderDivider},quickAction:{height:40,paddingHorizontal:14,borderRadius:Radius.full,backgroundColor:'#FFF',flexDirection:'row',alignItems:'center',gap:7,...Shadows.sm},quickActionText:{fontFamily:Typography.semiBold,fontSize:13,color:BrandColors.textDark},quickActionPink:{fontFamily:Typography.semiBold,fontSize:13,color:BrandColors.accentPink},replyBar:{flexDirection:'row',alignItems:'center',paddingHorizontal:18,paddingVertical:8,backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:BrandColors.borderDivider},replyCopy:{flex:1},replyTitle:{fontFamily:Typography.bold,fontSize:12,color:BrandColors.accentPink},replyBody:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textBody},emojiBar:{flexDirection:'row',justifyContent:'space-around',padding:10,backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:BrandColors.borderDivider},emoji:{fontSize:25},composer:{minHeight:76,paddingHorizontal:12,paddingVertical:10,flexDirection:'row',alignItems:'center',gap:9,backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:BrandColors.borderDivider},plusButton:{width:46,height:46,borderRadius:23,backgroundColor:BrandColors.accentPink,alignItems:'center',justifyContent:'center'},inputWrap:{flex:1,minHeight:48,maxHeight:112,borderRadius:24,backgroundColor:'#F7F4F6',flexDirection:'row',alignItems:'center',paddingLeft:15,paddingRight:5},input:{flex:1,maxHeight:100,paddingVertical:10,fontFamily:Typography.regular,fontSize:15,color:BrandColors.textDark,outlineStyle:'none'} as any,inputIcon:{width:36,height:40,alignItems:'center',justifyContent:'center'},sendButton:{width:50,height:50,borderRadius:25,alignItems:'center',justifyContent:'center'},emptyConversation:{flex:1,minHeight:360,alignItems:'center',justifyContent:'center'},emptyIcon:{width:115,height:92,alignItems:'center',justifyContent:'center'},emptyIconBack:{position:'absolute',right:6,bottom:7,width:57,height:47,borderRadius:22,backgroundColor:'#FFE0E9'},emptyIconFront:{width:76,height:58,borderRadius:29,backgroundColor:'#F889AD',flexDirection:'row',alignItems:'center',justifyContent:'center',gap:7},whiteDot:{width:9,height:9,borderRadius:5,backgroundColor:'#FFF'},emptyConversationTitle:{fontFamily:Typography.extraBold,fontSize:20,color:BrandColors.textDark},emptyConversationText:{fontFamily:Typography.regular,fontSize:14,color:BrandColors.textMuted,marginTop:7,textAlign:'center'}
+  safe:{flex:1,backgroundColor:'#FFF8FA'},keyboard:{flex:1},page:{flex:1,width:'100%',maxWidth:760,alignSelf:'center',backgroundColor:'#FFF8FA',borderLeftWidth:Platform.OS==='web'?1:0,borderRightWidth:Platform.OS==='web'?1:0,borderColor:BrandColors.borderDivider},header:{minHeight:76,paddingHorizontal:10,flexDirection:'row',alignItems:'center',backgroundColor:'#FFF',borderBottomWidth:1,borderBottomColor:BrandColors.borderDivider,...Shadows.sm},headerButton:{width:46,height:46,borderRadius:23,alignItems:'center',justifyContent:'center',backgroundColor:'#FFF1F5'},headerAvatarWrap:{width:52,height:52,marginLeft:9,marginRight:10},headerAvatar:{width:52,height:52,borderRadius:26,borderWidth:2,borderColor:BrandColors.accentPink},headerAvatarFallback:{width:52,height:52,borderRadius:26,backgroundColor:'#F8BDD0',borderWidth:2,borderColor:BrandColors.accentPink,alignItems:'center',justifyContent:'center'},headerAvatarLetter:{fontFamily:Typography.black,fontSize:20,color:BrandColors.accentRose},headerCopy:{flex:1,minWidth:0},headerName:{fontFamily:Typography.extraBold,fontSize:17,color:BrandColors.textDark},statusText:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textMuted,marginTop:2},loading:{flex:1,alignItems:'center',justifyContent:'center'},messages:{paddingHorizontal:14,paddingBottom:18,flexGrow:1},dayChip:{alignSelf:'center',backgroundColor:'#FFE8EF',paddingHorizontal:18,paddingVertical:7,borderRadius:Radius.full,marginVertical:18},dayText:{fontFamily:Typography.medium,fontSize:12,color:BrandColors.textSecondary},messageLine:{flexDirection:'row',alignItems:'flex-start',marginBottom:12},ownLine:{justifyContent:'flex-end'},smallAvatar:{width:39,height:39,borderRadius:20,backgroundColor:'#F8BDD0',alignItems:'center',justifyContent:'center',overflow:'hidden',marginRight:8},smallAvatarImage:{width:39,height:39},avatarLetter:{fontFamily:Typography.black,color:BrandColors.accentRose},messageBlock:{alignItems:'flex-start'},ownBlock:{alignItems:'flex-end'},bubble:{paddingHorizontal:15,paddingVertical:11,borderRadius:19},otherBubble:{backgroundColor:'#FFF0F4',borderTopLeftRadius:6},ownBubble:{borderTopRightRadius:6},messageText:{fontFamily:Typography.regular,fontSize:15,lineHeight:21,color:BrandColors.textDark},ownText:{color:'#FFF'},messageImage:{borderRadius:14,marginBottom:7},messageMeta:{flexDirection:'row',alignItems:'center',gap:4,marginTop:4,paddingHorizontal:4},ownMeta:{alignSelf:'flex-end'},messageTime:{fontFamily:Typography.regular,fontSize:11,color:BrandColors.textMuted},replyPreview:{borderLeftWidth:3,borderLeftColor:BrandColors.accentPink,backgroundColor:'#FFE4EC',padding:7,borderRadius:7,marginBottom:7},ownReply:{borderLeftColor:'#FFF',backgroundColor:'rgba(255,255,255,.18)'},replyPreviewText:{fontFamily:Typography.medium,fontSize:12,color:BrandColors.textBody},ownReplyText:{color:'#FFF'},reactions:{flexDirection:'row',alignItems:'center',gap:4,marginTop:3},reaction:{paddingHorizontal:7,paddingVertical:2,borderRadius:12,backgroundColor:'#FFF',borderWidth:1,borderColor:BrandColors.borderLight},activeReaction:{borderColor:BrandColors.accentPink,backgroundColor:'#FFF0F4'},heart:{fontSize:19,color:BrandColors.accentPink,paddingHorizontal:4},quickActions:{paddingHorizontal:14,paddingVertical:10,gap:9,borderTopWidth:1,borderTopColor:BrandColors.borderDivider},quickAction:{height:40,paddingHorizontal:14,borderRadius:Radius.full,backgroundColor:'#FFF',flexDirection:'row',alignItems:'center',gap:7,...Shadows.sm},quickActionText:{fontFamily:Typography.semiBold,fontSize:13,color:BrandColors.textDark},quickActionPink:{fontFamily:Typography.semiBold,fontSize:13,color:BrandColors.accentPink},replyBar:{flexDirection:'row',alignItems:'center',paddingHorizontal:18,paddingVertical:8,backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:BrandColors.borderDivider},replyCopy:{flex:1},replyTitle:{fontFamily:Typography.bold,fontSize:12,color:BrandColors.accentPink},replyBody:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textBody},emojiBar:{flexDirection:'row',justifyContent:'space-around',padding:10,backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:BrandColors.borderDivider},emoji:{fontSize:25},composer:{minHeight:76,paddingHorizontal:12,paddingVertical:10,flexDirection:'row',alignItems:'center',gap:9,backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:BrandColors.borderDivider},plusButton:{width:46,height:46,borderRadius:23,backgroundColor:BrandColors.accentPink,alignItems:'center',justifyContent:'center'},inputWrap:{flex:1,minHeight:48,maxHeight:112,borderRadius:24,backgroundColor:'#F7F4F6',flexDirection:'row',alignItems:'center',paddingLeft:15,paddingRight:5},input:{flex:1,maxHeight:100,paddingVertical:10,fontFamily:Typography.regular,fontSize:15,color:BrandColors.textDark,outlineStyle:'none'} as any,inputIcon:{width:36,height:40,alignItems:'center',justifyContent:'center'},sendButton:{width:50,height:50,borderRadius:25,alignItems:'center',justifyContent:'center'},emptyConversation:{flex:1,minHeight:360,alignItems:'center',justifyContent:'center'},emptyIcon:{width:115,height:92,alignItems:'center',justifyContent:'center'},emptyIconBack:{position:'absolute',right:6,bottom:7,width:57,height:47,borderRadius:22,backgroundColor:'#FFE0E9'},emptyIconFront:{width:76,height:58,borderRadius:29,backgroundColor:'#F889AD',flexDirection:'row',alignItems:'center',justifyContent:'center',gap:7},whiteDot:{width:9,height:9,borderRadius:5,backgroundColor:'#FFF'},emptyConversationTitle:{fontFamily:Typography.extraBold,fontSize:20,color:BrandColors.textDark},emptyConversationText:{fontFamily:Typography.regular,fontSize:14,color:BrandColors.textMuted,marginTop:7,textAlign:'center'}
 });

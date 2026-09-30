@@ -514,6 +514,7 @@ export default function MuaProfilePremiumScreen() {
           }
         }}
         initialData={editingService}
+        availableTags={[...new Set((services || []).flatMap(service => service.tags || []))]}
       />
 
       <PortfolioFormModal 
