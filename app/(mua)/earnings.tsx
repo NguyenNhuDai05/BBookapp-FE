@@ -6,18 +6,19 @@ import { useRouter } from 'expo-router';
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
 import { useEarningsSnapshot } from '../../hooks/useMuaBookings';
 import { useMuaPayouts } from '../../hooks/useMuaPayouts';
+import { useMuaEligibility } from '../../hooks/useMuaEligibility';
 import { getApiError } from '../../services/api';
 
 const money=(value:number)=>`${Math.max(0,value).toLocaleString('vi-VN')}đ`;
 const labels:Record<string,string>={PENDING:'Đã gửi yêu cầu',MANUAL_ACTION_REQUIRED:'Chờ xử lý',PROCESSING:'Đang chuyển khoản',PAID:'Đã chi trả',FAILED:'Thất bại',UNKNOWN:'Đang kiểm tra'};
 
 export default function MuaEarningsScreen(){
-  const router=useRouter();const earnings=useEarningsSnapshot('me');const payouts=useMuaPayouts();
-  const refreshing=earnings.isRefetching||payouts.isRefetching;
-  const refresh=()=>{void earnings.refetch();void payouts.refetch();};
+  const router=useRouter();const earnings=useEarningsSnapshot('me');const payouts=useMuaPayouts();const eligibility=useMuaEligibility();
+  const refreshing=earnings.isRefetching||payouts.isRefetching||eligibility.isRefetching;
+  const refresh=()=>{void earnings.refetch();void payouts.refetch();void eligibility.refetch();};
   return <SafeAreaView style={styles.safe} edges={['top']}><View style={styles.header}><TouchableOpacity style={styles.back} onPress={()=>router.back()}><ArrowLeft size={23} color={BrandColors.textDark}/></TouchableOpacity><Text style={styles.title}>Thu nhập & rút tiền</Text><TouchableOpacity style={styles.back} onPress={()=>router.push('/(mua)/bank-accounts' as any)}><Building2 size={21} color={BrandColors.accentRose}/></TouchableOpacity></View>
     <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh}/>}>
-      {earnings.isLoading?<ActivityIndicator color={BrandColors.accentRose}/>:earnings.isError?<ErrorText text={getApiError(earnings.error).message}/>:earnings.data?<><View style={styles.balance}><Text style={styles.balanceLabel}>Có thể rút</Text><Text style={styles.balanceValue}>{money(earnings.data.availableTotal)}</Text><View style={styles.totals}><Small label="Đang giữ" value={earnings.data.onHoldTotal}/><Small label="Đang xử lý" value={earnings.data.payoutPendingTotal}/><Small label="Đã chi trả" value={earnings.data.paidOutTotal}/></View></View><TouchableOpacity style={[styles.withdraw,earnings.data.availableTotal<=0&&styles.disabled]} disabled={earnings.data.availableTotal<=0} onPress={()=>router.push('/(mua)/withdraw' as any)}><Text style={styles.withdrawText}>{earnings.data.availableTotal>0?'Rút toàn bộ số dư khả dụng':'Chưa có số dư có thể rút'}</Text></TouchableOpacity></>:null}
+      {earnings.isLoading||eligibility.isLoading?<ActivityIndicator color={BrandColors.accentRose}/>:earnings.isError||eligibility.isError?<ErrorText text={getApiError(earnings.error||eligibility.error).message}/>:earnings.data?<><View style={styles.balance}><Text style={styles.balanceLabel}>Có thể rút</Text><Text style={styles.balanceValue}>{money(earnings.data.availableTotal)}</Text><View style={styles.totals}><Small label="Đang giữ" value={earnings.data.onHoldTotal}/><Small label="Đang xử lý" value={earnings.data.payoutPendingTotal}/><Small label="Đã chi trả" value={earnings.data.paidOutTotal}/></View></View><TouchableOpacity style={[styles.withdraw,(earnings.data.availableTotal<=0||!eligibility.data?.canWithdraw)&&styles.disabled]} disabled={earnings.data.availableTotal<=0||!eligibility.data?.canWithdraw} onPress={()=>router.push('/(mua)/withdraw' as any)}><Text style={styles.withdrawText}>{earnings.data.availableTotal<=0?'Chưa có số dư có thể rút':eligibility.data?.canWithdraw?'Rút toàn bộ số dư khả dụng':'Cần tài khoản đã duyệt và hết cooldown'}</Text></TouchableOpacity></>:null}
       <Text style={styles.section}>Lịch sử chi trả</Text>
       {payouts.isLoading?<ActivityIndicator color={BrandColors.accentRose}/>:payouts.isError?<ErrorText text={getApiError(payouts.error).message}/>:!payouts.data?.length?<Text style={styles.empty}>Bạn chưa có yêu cầu rút tiền.</Text>:payouts.data.map(item=><TouchableOpacity key={item.id} style={styles.card} onPress={()=>router.push({pathname:'/(mua)/payouts/[id]',params:{id:item.id}} as any)}><View><Text style={styles.cardAmount}>{money(item.amount)}</Text><Text style={styles.meta}>{item.bankName||item.bankCode} · {item.maskedAccountNumber}</Text><Text style={styles.meta}>{new Date(item.createdAt).toLocaleString('vi-VN')}</Text></View><View style={styles.right}><Text style={styles.status}>{labels[item.status]}</Text><ChevronRight size={18} color={BrandColors.textMuted}/></View></TouchableOpacity>)}
     </ScrollView></SafeAreaView>;

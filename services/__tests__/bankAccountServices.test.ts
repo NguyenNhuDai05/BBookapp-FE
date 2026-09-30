@@ -1,0 +1,14 @@
+import {beforeEach,describe,expect,it,jest} from '@jest/globals';
+jest.mock('../api',()=>({api:{post:jest.fn(),put:jest.fn(),get:jest.fn(),delete:jest.fn()}}));
+import {api} from '../api';
+import {bankAccountService} from '../bankAccountService';
+import {adminBankAccountService} from '../adminBankAccountService';
+const post=api.post as jest.Mock<any>;const put=api.put as jest.Mock<any>;const get=api.get as jest.Mock<any>;
+const response={id:'bank-1',bankCode:'VCB',bankBin:'970436',bankName:'VCB',maskedAccountNumber:'**1111',accountHolderName:'A',isDefault:false,isActive:true,verificationStatus:'PENDING_ADMIN',method:'BANK',activatedAt:null,isCoolingDown:false,isUsable:false,canReceiveMoney:false};
+const request={bankCode:'VCB',bankBin:'970436',bankName:'VCB',accountNumber:'111111',accountHolderName:'A',currentPassword:'secret1',method:'BANK' as const};
+describe('shared bank account API',()=>{beforeEach(()=>{post.mockReset();put.mockReset();get.mockReset();post.mockResolvedValue({data:response});put.mockResolvedValue({data:response});get.mockResolvedValue({data:[response]});});
+it('Customer and MUA modes read the same list endpoint',async()=>{await bankAccountService.getAll();await bankAccountService.getAll();expect(get).toHaveBeenNthCalledWith(1,'/bank-accounts');expect(get).toHaveBeenNthCalledWith(2,'/bank-accounts');});
+it('creates through the shared endpoint and never requests default',async()=>{await bankAccountService.add(request);expect(post).toHaveBeenCalledWith('/bank-accounts',expect.objectContaining({bankCode:'VCB',bankBin:'970436',isDefault:false}));});
+it('updates through the shared endpoint',async()=>{await bankAccountService.update('bank-1',request);expect(put).toHaveBeenCalledWith('/bank-accounts/bank-1',expect.objectContaining({accountNumber:'111111',isDefault:false}));});
+it('sets default using password only',async()=>{await bankAccountService.setDefault('bank-1','secret1');expect(post).toHaveBeenCalledWith('/bank-accounts/bank-1/set-default',{currentPassword:'secret1'});});
+it('admin approve and reject use owner-type-free endpoints',async()=>{const item={...response,method:'BANK' as const,ownerId:'u',accountNumber:'111111',createdAt:'2026-09-30'};await adminBankAccountService.approve(item);await adminBankAccountService.reject(item);expect(post).toHaveBeenNthCalledWith(1,'/admin/bank-accounts/bank-1/approve',{});expect(post).toHaveBeenNthCalledWith(2,'/admin/bank-accounts/bank-1/reject',{});});});

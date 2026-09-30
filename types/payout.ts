@@ -1,32 +1,6 @@
 export type PayoutStatus = 'PENDING' | 'MANUAL_ACTION_REQUIRED' | 'PROCESSING' | 'PAID' | 'FAILED' | 'UNKNOWN';
 export type PayoutProvider = 'MANUAL' | 'PAYOS' | 'UNKNOWN';
 
-export interface MuaBankAccountDto {
-  id: string;
-  bankCode: string;
-  bankName?: string;
-  maskedAccountNumber: string;
-  accountHolderName: string;
-  isDefault: boolean;
-  isActive: boolean;
-  verificationStatus: string;
-  method: 'BANK' | 'MOMO';
-  qrCodeUrl?: string;
-  activatedAt: string;
-  isCoolingDown: boolean;
-}
-
-export interface UpsertMuaBankAccountRequest {
-  bankCode: string;
-  bankName?: string;
-  accountNumber: string;
-  accountHolderName: string;
-  isDefault: boolean;
-  currentPassword: string;
-  method: 'BANK' | 'MOMO';
-  qrCodeUrl?: string;
-}
-
 export interface CreatePayoutRequest {
   bankAccountId: string;
   receivableIds?: string[];
@@ -39,6 +13,7 @@ export interface MuaPayoutDto {
   status: PayoutStatus;
   provider: PayoutProvider;
   bankCode: string;
+  bankBin?: string;
   bankName?: string;
   maskedAccountNumber: string;
   accountHolderName: string;
