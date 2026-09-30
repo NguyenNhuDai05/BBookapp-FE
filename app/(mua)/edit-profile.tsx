@@ -1,10 +1,12 @@
+import { OperatingAreaFields, type OperatingArea } from '../../components/mua/OperatingAreaFields';
+import { EXPERIENCE_LEVELS } from '../../utils/muaAreas';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Check, Camera, User, FileText, MapPin, Phone, Sparkles } from 'lucide-react-native';
+import { ArrowLeft, Check, Camera, User, FileText, Phone, Sparkles } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { uploadImage } from '../../services/supabase';
@@ -26,6 +28,8 @@ export default function EditProfileScreen() {
   const [bio, setBio] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [city, setCity] = useState('');
+  const [area, setArea] = useState<OperatingArea>({ city: '' });
+  const [experienceLevel, setExperienceLevel] = useState<string | undefined>();
   const [experienceYears, setExperienceYears] = useState('');
   const [styleIds, setStyleIds] = useState<number[]>([]);
   const [instagramUrl, setInstagramUrl] = useState('');
@@ -42,6 +46,8 @@ export default function EditProfileScreen() {
         setBio(profile.bio || '');
         setPhoneNumber(profile.phoneNumber || '');
         setCity(profile.city || '');
+        setArea({ city: profile.city || '', district: profile.district, provinceCode: profile.provinceCode, districtCode: profile.districtCode });
+        setExperienceLevel(profile.experienceLevel);
         setExperienceYears(String(profile.experienceYears || ''));
         setStyleIds(profile.specialties?.map(item => item.styleId) || []);
         setInstagramUrl(profile.instagramUrl || '');
@@ -57,13 +63,14 @@ export default function EditProfileScreen() {
   const { mutateAsync: updateProfile, isPending } = useUpdateMuaProfile();
   const isSaving = isPending || isUploading;
   const initialStyleIds = profile?.specialties?.map(item => item.styleId) || [];
-  const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && experienceYears === String(profile?.experienceYears || '') && JSON.stringify([...styleIds].sort()) === JSON.stringify([...initialStyleIds].sort()) && instagramUrl === (profile?.instagramUrl || '') && facebookUrl === (profile?.facebookUrl || '');
+  const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && area.district === profile?.district && experienceLevel === profile?.experienceLevel && experienceYears === String(profile?.experienceYears || '') && JSON.stringify([...styleIds].sort()) === JSON.stringify([...initialStyleIds].sort()) && instagramUrl === (profile?.instagramUrl || '') && facebookUrl === (profile?.facebookUrl || '');
 
   const handleSave = async () => {
     if (!name.trim()) {
       setFormError('Vui lòng nhập tên hiển thị.');
       return;
     }
+    if (area.provinceCode && !area.districtCode) { setFormError('Vui lòng chọn quận/huyện.'); return; }
     setFormError('');
     const normalizedInstagram = normalizeSocialUrl(instagramUrl, 'instagram');
     const normalizedFacebook = normalizeSocialUrl(facebookUrl, 'facebook');
@@ -75,7 +82,7 @@ export default function EditProfileScreen() {
     setIsUploading(true);
     try {
       const finalAvatarUrl = await uploadImage(avatar);
-      await updateProfile({ displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceYears: Number(experienceYears) || 0, styleIds, instagramUrl: normalizedInstagram, facebookUrl: normalizedFacebook });
+      await updateProfile({ displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, ...area, city, experienceLevel, experienceYears: Number(experienceYears) || 0, styleIds, instagramUrl: normalizedInstagram, facebookUrl: normalizedFacebook });
       updateUser({ name: name.trim(), avatarUrl: finalAvatarUrl });
       appDialog.alert('Thành công', 'Đã lưu thông tin hồ sơ.');
       router.back();
@@ -186,18 +193,19 @@ export default function EditProfileScreen() {
                 placeholderTextColor={BrandColors.textMuted}
                 multiline
                 textAlignVertical="top"
+                maxLength={500}
                 numberOfLines={4}
               />
             </View>
 
             {formError ? <Text style={styles.formError}>{formError}</Text> : null}
             <ProfileInput icon={<Phone size={16} color={BrandColors.textMuted}/>} label="Số điện thoại" value={phoneNumber} onChangeText={setPhoneNumber} keyboardType="phone-pad" />
-            <ProfileInput icon={<MapPin size={16} color={BrandColors.textMuted}/>} label="Thành phố / khu vực" value={city} onChangeText={setCity} />
-            <ProfileInput icon={<Sparkles size={16} color={BrandColors.textMuted}/>} label="Số năm kinh nghiệm" value={experienceYears} onChangeText={value => setExperienceYears(value.replace(/\D/g, ''))} keyboardType="number-pad" />
+            <OperatingAreaFields value={area} onChange={value => { setArea(value); setCity(value.city); }} />
+            <View style={styles.inputGroup}><Text style={styles.label}>Kinh nghiệm</Text><View style={styles.styleChips}>{EXPERIENCE_LEVELS.map(item => <TouchableOpacity key={item.value} onPress={() => setExperienceLevel(item.value)} style={[styles.styleChip, experienceLevel === item.value && styles.styleChipSelected]}><Text style={[styles.styleChipText, experienceLevel === item.value && styles.styleChipTextSelected]}>{item.label}</Text></TouchableOpacity>)}</View></View>
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}><Sparkles size={16} color={BrandColors.textMuted}/><Text style={styles.label}>Chuyên môn</Text></View>
-              <Text style={styles.helpText}>Chọn một hoặc nhiều</Text>
-              {stylesQuery.isLoading ? <ActivityIndicator color={BrandColors.accentPink}/> : stylesQuery.isError ? <TouchableOpacity onPress={() => stylesQuery.refetch()}><Text style={styles.formError}>Không thể tải chuyên môn. Chạm để thử lại.</Text></TouchableOpacity> : <View style={styles.styleChips}>{stylesQuery.data?.map(item => { const selected = styleIds.includes(item.styleId); return <TouchableOpacity key={item.styleId} onPress={() => setStyleIds(current => selected ? current.filter(id => id !== item.styleId) : [...current,item.styleId])} style={[styles.styleChip,selected&&styles.styleChipSelected]}><Text style={[styles.styleChipText,selected&&styles.styleChipTextSelected]}>{selected?'✓ ':''}{item.name}</Text></TouchableOpacity>; })}</View>}
+              <Text style={styles.helpText}>Chọn tối đa 5 phong cách</Text>
+              {stylesQuery.isLoading ? <ActivityIndicator color={BrandColors.accentPink}/> : stylesQuery.isError ? <TouchableOpacity onPress={() => stylesQuery.refetch()}><Text style={styles.formError}>Không thể tải chuyên môn. Chạm để thử lại.</Text></TouchableOpacity> : <View style={styles.styleChips}>{stylesQuery.data?.map(item => { const selected = styleIds.includes(item.styleId); return <TouchableOpacity key={item.styleId} onPress={() => setStyleIds(current => selected ? current.filter(id => id !== item.styleId) : current.length < 5 ? [...current,item.styleId] : current)} style={[styles.styleChip,selected&&styles.styleChipSelected]}><Text style={[styles.styleChipText,selected&&styles.styleChipTextSelected]}>{selected?'✓ ':''}{item.name}</Text></TouchableOpacity>; })}</View>}
             </View>
             <View style={styles.inputGroup}><Text style={styles.sectionLabel}>Liên kết mạng xã hội</Text><Text style={styles.helpText}>Không bắt buộc</Text></View>
             <ProfileInput icon={<FileText size={16} color={BrandColors.textMuted}/>} label="Instagram" value={instagramUrl} onChangeText={setInstagramUrl} placeholder="instagram.com/username" autoCapitalize="none" keyboardType="url" />

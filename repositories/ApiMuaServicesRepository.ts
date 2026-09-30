@@ -10,6 +10,7 @@ interface BackendServiceDto {
   durationMinutes: number;
   price: number;
   imageUrl?: string;
+  imageUrls?: string[];
   tags?: string[];
   isActive?: boolean;
 }
@@ -23,6 +24,7 @@ const mapService = (service: BackendServiceDto): ServiceDto => ({
   durationMinutes: service.durationMinutes,
   price: service.price,
   imageUrl: service.imageUrl,
+  imageUrls: service.imageUrls?.length ? service.imageUrls : service.imageUrl ? [service.imageUrl] : [],
   tags: service.tags || [],
   status: service.isActive === false ? 'INACTIVE' : 'ACTIVE',
   visibility: service.isActive !== false,

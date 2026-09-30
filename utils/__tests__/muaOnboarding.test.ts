@@ -21,12 +21,16 @@ describe('MUA onboarding validation', () => {
     ['displayName', { displayName: ' ' }],
     ['phoneNumber', { phoneNumber: 'abc' }],
     ['city', { city: '' }],
-    ['bio', { bio: 'ngắn' }],
+    ['bio', { bio: 'x'.repeat(501) }],
     ['avatarUrl', { avatarUrl: '' }],
     ['styleIds', { styleIds: [] }],
-    ['address', { address: '' }],
+    ['styleIds', { styleIds: [1, 2, 3, 4, 5, 6] }],
   ])('rejects invalid %s', (field, override) => {
     expect(validateMuaOnboarding({ ...validForm, ...override })).toHaveProperty(field);
+  });
+  it('allows optional bio, phone and address and accepts exactly 500 characters', () => {
+    expect(validateMuaOnboarding({ ...validForm, bio: '', phoneNumber: undefined, address: undefined })).toEqual({});
+    expect(validateMuaOnboarding({ ...validForm, bio: 'x'.repeat(500) })).toEqual({});
   });
 });
 

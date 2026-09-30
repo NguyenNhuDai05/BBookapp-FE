@@ -14,10 +14,13 @@ export interface ServiceDto {
   status?: ServiceStatus;
   isPopular?: boolean;
   imageUrl?: string;
+  imageUrls?: string[];
   tags?: string[];
 }
 
 export interface CreateServiceRequest {
+  imageUrls?: string[];
+  isActive?: boolean;
   serviceName: string;
   description?: string;
   durationMinutes: number;

@@ -1,9 +1,11 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
+import { AlertTriangle, BriefcaseBusiness, CalendarX, LogOut, Trash2 } from 'lucide-react-native';
+import { OverlayTokens } from '../../../constants/theme';
 import { OverlayProvider } from '../OverlayProvider';
-import { AppModal } from '../AppModal';
+import { AppModal, resolveModalIcon } from '../AppModal';
 import { AppBottomSheet } from '../AppBottomSheet';
 import { DialogHost } from '../DialogHost';
 import { AppAlert, dialogStore } from '../dialogStore';
@@ -11,6 +13,25 @@ import { AppAlert, dialogStore } from '../dialogStore';
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 24, bottom: 24, left: 0, right: 0 } };
 const Wrapper = ({ children }: React.PropsWithChildren) => <SafeAreaProvider initialMetrics={metrics}><OverlayProvider>{children}</OverlayProvider></SafeAreaProvider>;
 beforeEach(() => { while (dialogStore.getSnapshot()) dialogStore.dismiss(dialogStore.getSnapshot()!.id); });
+
+it('renders a visible primary button background and keeps its action clickable', async () => {
+  const confirm = jest.fn();
+  await render(<AppModal visible variant="confirm" title="Tiếp tục" onClose={jest.fn()}
+    primaryAction={{ label: 'Tiếp tục', onPress: confirm }} />, { wrapper: Wrapper });
+  const button = screen.getByRole('button', { name: 'Tiếp tục' });
+  expect(typeof button.props.style).not.toBe('function');
+  expect(StyleSheet.flatten(button.props.style).backgroundColor).toBe(OverlayTokens.primary);
+  await fireEvent.press(button);
+  expect(confirm).toHaveBeenCalledTimes(1);
+});
+
+it('uses action-specific icons and does not treat every destructive action as deletion', () => {
+  expect(resolveModalIcon('Đăng xuất', 'destructive')).toBe(LogOut);
+  expect(resolveModalIcon('Xóa tài khoản', 'destructive')).toBe(Trash2);
+  expect(resolveModalIcon('Trở thành Makeup Artist', 'confirm')).toBe(BriefcaseBusiness);
+  expect(resolveModalIcon('Hủy lịch hẹn', 'destructive')).toBe(CalendarX);
+  expect(resolveModalIcon('Từ chối yêu cầu', 'destructive')).toBe(AlertTriangle);
+});
 
 it('blocks double submit and Back while an async confirmation is pending', async () => {
   let finish!: () => void;

@@ -1,3 +1,4 @@
+import { getMuaExperienceLabel } from '../../utils/muaAreas';
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
@@ -181,7 +182,7 @@ export default function CheckoutScreen() {
                     <Text style={styles.muaStatText}>⭐ {muaInfo?.rating || 5.0} ({muaInfo?.reviewCount || 0})</Text>
                   </View>
                   <View style={styles.muaStatBadge}>
-                    <Text style={styles.muaStatText}>💼 {muaInfo?.yearsExperience || 2} năm KN</Text>
+                    <Text style={styles.muaStatText}>💼 {getMuaExperienceLabel(muaInfo?.experienceLevel, muaInfo?.yearsExperience)}</Text>
                   </View>
                 </View>
               </View>

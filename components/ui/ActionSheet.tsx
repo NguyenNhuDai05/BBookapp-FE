@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 import { BrandColors, OverlayTokens, Radius, Spacing, Typography } from '../../constants/theme';
 import { sanitizeUiMessage } from '../../utils/uiMessage';
@@ -24,14 +24,14 @@ export function ActionSheet({ visible, title, description, actions, onClose, loa
       {actions.map(action => {
         const Icon = action.icon;
         const color = action.destructive ? OverlayTokens.destructive : OverlayTokens.primary;
-        return <Pressable key={action.id} accessibilityRole="button" accessibilityLabel={action.label} accessibilityHint={action.description}
+        return <TouchableOpacity key={action.id} accessibilityRole="button" accessibilityLabel={action.label} accessibilityHint={action.description} activeOpacity={0.75}
           accessibilityState={{ disabled: busy || action.disabled, busy: pending === action.id }} disabled={busy || action.disabled}
-          onPress={() => { void run(action); }} style={({ pressed }) => [styles.action, (pressed || busy || action.disabled) && styles.disabled]}>
+          onPress={() => { void run(action); }} style={[styles.action, (busy || action.disabled) && styles.disabled]}>
           {Icon ? <View style={styles.icon}><Icon size={22} color={color} /></View> : null}
           <View style={styles.copy}><Text style={[styles.label, action.destructive && styles.danger]}>{action.label}</Text>
             {action.description ? <Text style={styles.description}>{action.description}</Text> : null}</View>
           {pending === action.id ? <ActivityIndicator color={color} /> : <ChevronRight size={20} color={BrandColors.textMuted} />}
-        </Pressable>;
+        </TouchableOpacity>;
       })}
       {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
       <Pressable accessibilityRole="button" accessibilityLabel={cancelLabel} style={styles.cancel} disabled={busy} onPress={onClose}><Text style={styles.cancelText}>{cancelLabel}</Text></Pressable>

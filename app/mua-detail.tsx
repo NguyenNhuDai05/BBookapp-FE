@@ -1,3 +1,4 @@
+import { getMuaExperienceLabel } from '../utils/muaAreas';
 import { AppBottomSheet } from '../components/ui/AppBottomSheet';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -326,7 +327,7 @@ export default function MuaDetailScreen() {
           <View style={styles.section}>
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Địa chỉ: {muaInfo.city || 'Chưa cập nhật'}</Text>
-              <Text style={styles.emptyText}>Kinh nghiệm: {muaInfo.yearsExperience || 0} năm</Text>
+              <Text style={styles.emptyText}>Kinh nghiệm: {getMuaExperienceLabel(muaInfo.experienceLevel, muaInfo.yearsExperience)}</Text>
             </View>
           </View>
         )}

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { AlertCircle, AlertTriangle, Check, HelpCircle, Info, Trash2, X, type LucideIcon } from 'lucide-react-native';
+import { ActivityIndicator, Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AlertCircle, AlertTriangle, BriefcaseBusiness, CalendarX, Check, HelpCircle, Info, LogOut, Trash2, X, type LucideIcon } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BrandColors, OverlayTokens, Radius, Shadows, Spacing, Typography } from '../../constants/theme';
 import { sanitizeUiMessage } from '../../utils/uiMessage';
@@ -25,7 +25,17 @@ export interface AppModalProps {
   onActionError?: (error: unknown) => void;
   priority?: number;
 }
-const icons: Record<ModalVariant, LucideIcon> = { info: Info, success: Check, warning: AlertTriangle, error: AlertCircle, confirm: HelpCircle, destructive: Trash2 };
+const icons: Record<ModalVariant, LucideIcon> = { info: Info, success: Check, warning: AlertTriangle, error: AlertCircle, confirm: HelpCircle, destructive: AlertTriangle };
+
+export function resolveModalIcon(title: string, variant: ModalVariant): LucideIcon {
+  if (variant === 'confirm' || variant === 'destructive') {
+    if (/đăng xuất|log\s*out/i.test(title)) return LogOut;
+    if (/^xóa\b|^xóa\s|delete/i.test(title)) return Trash2;
+    if (/trở thành.*makeup|become.*makeup/i.test(title)) return BriefcaseBusiness;
+    if (/hủy.*(lịch|booking|đặt)/i.test(title)) return CalendarX;
+  }
+  return icons[variant];
+}
 
 export function AppModal({ visible, variant = 'info', title, description, primaryAction, secondaryAction, additionalActions = [], onClose,
   loading = false, dismissOnBackdrop = variant === 'info' || variant === 'success', icon, children, onShow, onActionError, priority }: AppModalProps) {
@@ -34,7 +44,7 @@ export function AppModal({ visible, variant = 'info', title, description, primar
   const [pending, setPending] = useState<number | null>(null);
   const [actionError, setActionError] = useState('');
   const busy = loading || pending !== null || Boolean(primaryAction?.loading || secondaryAction?.loading || additionalActions.some(action => action.loading));
-  const Icon = icon || icons[variant];
+  const Icon = icon || resolveModalIcon(title, variant);
   const color = variant === 'destructive' ? OverlayTokens.destructive : OverlayTokens.primary;
   const close = () => { if (!busy && !lock.current) onClose(); };
   const run = async (action: ModalAction, index: number) => {
@@ -62,14 +72,14 @@ export function AppModal({ visible, variant = 'info', title, description, primar
           <View style={styles.actions}>{actions.map((action, index) => {
             const secondary = action === secondaryAction;
             const danger = action.destructive || (!secondary && variant === 'destructive');
-            return <Pressable key={`${index}-${action.label}`} accessibilityRole="button" accessibilityLabel={action.label}
+            return <TouchableOpacity key={`${index}-${action.label}`} accessibilityRole="button" accessibilityLabel={action.label} activeOpacity={0.75}
               accessibilityState={{ disabled: busy || action.disabled, busy: pending === index || action.loading }}
               disabled={busy || action.disabled} onPress={() => { void run(action, index); }}
-              style={({ pressed }) => [styles.button, secondary ? styles.secondary : { backgroundColor: danger ? OverlayTokens.destructive : OverlayTokens.primary },
-                (busy || action.disabled || pressed) && styles.disabled]}>
+              style={[styles.button, secondary ? styles.secondary : { backgroundColor: danger ? OverlayTokens.destructive : OverlayTokens.primary },
+                (busy || action.disabled) && styles.disabled]}>
               {pending === index || action.loading ? <ActivityIndicator color={secondary ? OverlayTokens.text : BrandColors.textWhite} /> :
                 <Text style={[styles.buttonText, secondary && styles.secondaryText]}>{action.label}</Text>}
-            </Pressable>;
+            </TouchableOpacity>;
           })}</View>
         </ScrollView>
       </Animated.View>

@@ -1,13 +1,11 @@
-import { AppBottomSheet } from '../../ui/AppBottomSheet';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronDown, ChevronUp, CircleDollarSign, Clock3, FileText, Hash, ImagePlus, Tag, X } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
-import {ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
-
-import { Shadows, Typography } from '../../../constants/theme';
+import React, { useRef, useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppOverlay } from '../../ui/OverlayProvider';
 import { uploadImage } from '../../../services/supabase';
+import { getApiError } from '../../../services/api';
 import type { CreateServiceRequest, ServiceDto } from '../../../types/ServiceDto';
 
 interface ServiceFormModalProps {
@@ -17,175 +15,103 @@ interface ServiceFormModalProps {
   initialData?: Partial<ServiceDto> | null;
   availableTags?: string[];
 }
-
-type Field = 'name' | 'price' | 'duration';
-type Errors = Partial<Record<Field | 'submit', string>>;
-
-const digitsOnly = (value: string) => value.replace(/\D/g, '');
-const formatPrice = (value: string) => value ? Number(value).toLocaleString('vi-VN') : '';
-const normalizeTags = (values: string[]) => [...new Set(values.map(value => value.trim()).filter(Boolean))];
+const unique = (items: string[]) => [...new Set(items.map(item => item.trim()).filter(Boolean))];
+const digits = (value: string) => value.replace(/\D/g, '');
 
 export function ServiceFormModal(props: ServiceFormModalProps) {
-  if (!props.visible) return null;
-  return <ServiceFormModalContent {...props} />;
+  return props.visible ? <ServiceFormContent {...props} /> : null;
 }
-
-function ServiceFormModalContent({ visible, onClose, onSubmit, initialData, availableTags = [] }: ServiceFormModalProps) {
+function ServiceFormContent({ onClose, onSubmit, initialData, availableTags = [] }: ServiceFormModalProps) {
   const [name, setName] = useState(initialData?.name || initialData?.serviceName || '');
   const [description, setDescription] = useState(initialData?.description || '');
-  const [price, setPrice] = useState(initialData?.price ? String(Math.trunc(initialData.price)) : '');
+  const [price, setPrice] = useState(initialData?.price ? String(initialData.price) : '');
   const [duration, setDuration] = useState(initialData?.durationMinutes ? String(initialData.durationMinutes) : '');
-  const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || '');
-  const [selectedTags, setSelectedTags] = useState<string[]>(normalizeTags(initialData?.tags || []));
+  const [images, setImages] = useState<string[]>(initialData?.imageUrls?.length ? initialData.imageUrls : initialData?.imageUrl ? [initialData.imageUrl] : []);
+  const [tags, setTags] = useState<string[]>(unique(initialData?.tags || []));
+  const [tagQuery, setTagQuery] = useState('');
   const [tagsOpen, setTagsOpen] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
-  const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
-  const [errors, setErrors] = useState<Errors>({});
+  const [isActive, setIsActive] = useState(initialData?.visibility !== false && initialData?.status !== 'INACTIVE' && initialData?.status !== 'DRAFT' && initialData?.status !== 'ARCHIVED');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-
-  const suggestions = useMemo(
-    () => normalizeTags([...availableTags, ...(initialData?.tags || [])]),
-    [availableTags, initialData?.tags],
-  );
-  const valid = Boolean(name.trim() && Number(price) > 0 && Number(duration) > 0);
-
-  const fieldError = (field: Field) => {
-    if (field === 'name' && !name.trim()) return 'Vui lòng nhập tên dịch vụ';
-    if (field === 'price' && Number(price) <= 0) return 'Vui lòng nhập giá lớn hơn 0';
-    if (field === 'duration' && Number(duration) <= 0) return 'Vui lòng nhập thời gian lớn hơn 0';
-    return undefined;
-  };
-  const touch = (field: Field) => {
-    setTouched(current => ({ ...current, [field]: true }));
-    setErrors(current => ({ ...current, [field]: fieldError(field) }));
-    setFocused(null);
-  };
-  const clearError = (field: Field) => setErrors(current => ({ ...current, [field]: undefined, submit: undefined }));
-
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [4, 3], quality: 0.82 });
-    if (!result.canceled && result.assets[0]) { setImageUrl(result.assets[0].uri); setErrors(current => ({ ...current, submit: undefined })); }
-  };
-  const toggleTag = (tag: string) => setSelectedTags(current => current.includes(tag) ? current.filter(value => value !== tag) : [...current, tag]);
-
-  const handleSubmit = async () => {
-    const nextErrors: Errors = { name: fieldError('name'), price: fieldError('price'), duration: fieldError('duration') };
-    setTouched({ name: true, price: true, duration: true }); setErrors(nextErrors);
-    if (Object.values(nextErrors).some(Boolean) || submitting) return;
-    setSubmitting(true);
+  const [picking, setPicking] = useState(false);
+  const lock = useRef(false);
+  const pickLock = useRef(false);
+  const suggestions = unique([...availableTags, ...tags]);
+  const valid = name.trim().length > 0 && name.length <= 100 && description.trim().length > 0 && description.length <= 500 && Number(price) > 0 && Number(price) <= 100000000 && Number.isInteger(Number(duration)) && Number(duration) > 0 && Number(duration) <= 1440 && images.length > 0 && images.length <= 5;
+  const clear = (key: string) => setErrors(current => ({ ...current, [key]: '', submit: '' }));
+  const close = () => { if (!lock.current && !pickLock.current) onClose(); };
+  const toggleTag = (tag: string) => setTags(current => current.includes(tag) ? current.filter(item => item !== tag) : current.length < 10 ? [...current, tag] : current);
+  const pickImages = async () => {
+    if (pickLock.current || lock.current || images.length >= 5) return;
+    pickLock.current = true; setPicking(true);
     try {
-      const finalImageUrl = imageUrl ? await uploadImage(imageUrl) : undefined;
-      await onSubmit({
-        serviceName: name.trim(),
-        description: description.trim() || undefined,
-        price: Number(price),
-        durationMinutes: Number(duration),
-        imageUrl: finalImageUrl,
-        tags: selectedTags,
-      });
-      onClose();
-    } catch {
-      setErrors(current => ({ ...current, submit: 'Không thể lưu dịch vụ. Vui lòng thử lại.' }));
-    } finally { setSubmitting(false); }
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) { setErrors(current => ({ ...current, images: 'Cho phép truy cập thư viện để chọn ảnh minh họa.' })); return; }
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsMultipleSelection: true, selectionLimit: 5 - images.length, quality: .82 });
+      if (!result.canceled) {
+        setImages(current => unique([...current, ...result.assets.map(asset => asset.uri)]).slice(0, 5));
+        clear('images');
+      }
+    } catch { setErrors(current => ({ ...current, images: 'Không thể mở thư viện ảnh. Vui lòng thử lại.' })); }
+    finally { pickLock.current = false; setPicking(false); }
   };
-
-  const inputStyle = (field: Field) => [styles.inputShell, focused === field && styles.inputFocused, touched[field] && errors[field] && styles.inputError];
-
-  return <AppBottomSheet visible={visible} title={initialData ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ mới'} onClose={onClose} loading={submitting}  contentStyle={{height:'90%'}}>
-
-<ScrollView style={styles.scroll} contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <Section number="1" title="Thông tin cơ bản"/>
-          <FieldLabel text="Tên dịch vụ" required/>
-          <View style={inputStyle('name')}>
-            <Tag size={21} color="#FF5C9A"/><TextInput accessibilityLabel="Tên dịch vụ" value={name} onChangeText={value=>{setName(value);clearError('name');}} onFocus={()=>setFocused('name')} onBlur={()=>touch('name')} placeholder="Tên dịch vụ" placeholderTextColor="#A999A4" style={styles.input}/>
-            {name ? <TouchableOpacity style={styles.clear} onPress={()=>setName('')}><X size={15} color="#8D7E87"/></TouchableOpacity> : null}
+  const save = async () => {
+    if (lock.current || pickLock.current) return;
+    if (!valid) {
+      setErrors({ name: !name.trim() ? 'Vui lòng nhập tên dịch vụ.' : '', description: !description.trim() ? 'Vui lòng nhập mô tả dịch vụ.' : '',
+        price: Number(price) <= 0 || Number(price) > 100000000 ? 'Giá phải lớn hơn 0 và không quá 100.000.000đ.' : '',
+        duration: Number(duration) <= 0 || Number(duration) > 1440 ? 'Thời gian từ 1 đến 1440 phút.' : '', images: !images.length ? 'Vui lòng thêm ít nhất một ảnh.' : '' });
+      return;
+    }
+    lock.current = true; setSubmitting(true); clear('submit');
+    try {
+      const imageUrls = await Promise.all(images.map(uri => uploadImage(uri)));
+      // Retain successful uploads if saving fails so retrying does not upload them again.
+      setImages(imageUrls);
+      await onSubmit({ serviceName: name.trim(), description: description.trim(), price: Number(price), durationMinutes: Number(duration), imageUrls, imageUrl: imageUrls[0], tags, isActive });
+      onClose();
+    } catch (error) { setErrors(current => ({ ...current, submit: getApiError(error).message || 'Không thể lưu dịch vụ. Vui lòng thử lại.' })); }
+    finally { lock.current = false; setSubmitting(false); }
+  };
+  const error = (key: string) => <Text style={s.error}>{errors[key] || ' '}</Text>;
+  const tagChip = (tag: string, selected: boolean) => <TouchableOpacity key={tag} disabled={submitting} onPress={() => toggleTag(tag)} accessibilityRole="button" accessibilityLabel={selected ? `Bỏ tag ${tag}` : `Chọn tag ${tag}`} style={[s.chip, selected && s.chipSelected]}><Text style={s.chipText}>{tag}{selected ? ' ×' : ''}</Text></TouchableOpacity>;
+  return <AppOverlay visible animationType="slide" onRequestClose={close}>
+    <SafeAreaView style={s.screen} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={s.header}><TouchableOpacity onPress={close} disabled={submitting || picking} style={s.back} accessibilityLabel="Quay lại"><Text style={s.backText}>‹</Text></TouchableOpacity><View style={s.headerCopy}><Text style={s.title}>{initialData ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ mới'}</Text><Text style={s.subtitle}>Tạo dịch vụ để khách hàng có thể đặt lịch với bạn</Text></View><View style={s.back} /></View>
+        <ScrollView style={s.flex} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false}>
+          <View style={s.card}><Text style={s.section}>1. Thông tin cơ bản</Text>
+            <Label text="Tên dịch vụ" required /><TextInput accessibilityLabel="Tên dịch vụ" editable={!submitting} value={name} maxLength={100} onChangeText={value => { setName(value); clear('name'); }} placeholder="Nhập tên dịch vụ" style={s.input} /><Text style={s.counter}>{name.length}/100</Text>{error('name')}
+            <Label text="Mô tả dịch vụ" required /><TextInput accessibilityLabel="Mô tả dịch vụ" editable={!submitting} value={description} maxLength={500} onChangeText={value => { setDescription(value); clear('description'); }} placeholder="Mô tả chi tiết dịch vụ, phù hợp trong trường hợp nào, bao gồm những gì..." multiline textAlignVertical="top" style={[s.input, s.textarea]} /><Text style={s.counter}>{description.length}/500</Text>{error('description')}
           </View>
-          {touched.name && errors.name ? <ErrorText text={errors.name}/> : null}
-
-          <View style={styles.twoColumns}>
-            <View style={styles.column}><FieldLabel text="Giá (VNĐ)" required/><View style={inputStyle('price')}><CircleDollarSign size={21} color="#FF5C9A"/><TextInput accessibilityLabel="Giá dịch vụ" value={formatPrice(price)} onChangeText={value=>{setPrice(digitsOnly(value));clearError('price');}} onFocus={()=>setFocused('price')} onBlur={()=>touch('price')} placeholder="0" keyboardType="numeric" placeholderTextColor="#A999A4" style={styles.input}/></View>{touched.price&&errors.price?<ErrorText text={errors.price}/>:null}</View>
-            <View style={styles.column}><FieldLabel text="Thời gian (phút)" required/><View style={inputStyle('duration')}><Clock3 size={21} color="#FF5C9A"/><TextInput accessibilityLabel="Thời gian dịch vụ" value={duration} onChangeText={value=>{setDuration(digitsOnly(value));clearError('duration');}} onFocus={()=>setFocused('duration')} onBlur={()=>touch('duration')} placeholder="0" keyboardType="numeric" placeholderTextColor="#A999A4" style={styles.input}/><Text style={styles.suffix}>phút</Text></View>{touched.duration&&errors.duration?<ErrorText text={errors.duration}/>:null}</View>
+          <View style={s.card}><Text style={s.section}>2. Giá và thời gian</Text><View style={s.columns}>
+            <View style={s.column}><Label text="Giá (VND)" required /><TextInput accessibilityLabel="Giá dịch vụ" editable={!submitting} value={price ? Number(price).toLocaleString('vi-VN') : ''} maxLength={11} onChangeText={value => { setPrice(digits(value)); clear('price'); }} keyboardType="number-pad" placeholder="Nhập giá" style={s.input} />{error('price')}</View>
+            <View style={s.column}><Label text="Thời gian thực hiện" required /><View style={s.duration}><TextInput accessibilityLabel="Thời gian dịch vụ" editable={!submitting} value={duration} maxLength={4} onChangeText={value => { setDuration(digits(value)); clear('duration'); }} keyboardType="number-pad" placeholder="Số phút" style={s.durationInput} /><Text style={s.unit}>phút</Text></View>{error('duration')}</View>
+          </View></View>
+          <View style={s.card}><View style={s.sectionRow}><Text style={s.section}>3. Ảnh minh họa</Text><Text style={s.badge}>{images.length ? `${images.length}/5 ảnh` : 'Tối thiểu 1 ảnh'}</Text></View>
+            {!images.length && <TouchableOpacity style={s.upload} onPress={pickImages} disabled={picking || submitting}><Text style={s.uploadTitle}>Thêm ảnh dịch vụ</Text><Text style={s.subtitle}>Tải lên ảnh minh họa rõ nét về dịch vụ này (tối đa 5 ảnh)</Text><Text style={s.choose}>{picking ? 'Đang mở thư viện...' : 'Chọn ảnh'}</Text></TouchableOpacity>}
+            <View style={s.images}>{images.map((uri, index) => <View key={`${index}-${uri}`} style={s.imageWrap}><Image source={{ uri }} style={s.image} contentFit="cover" /><TouchableOpacity accessibilityLabel={`Xóa ảnh ${index + 1}`} disabled={submitting || picking} style={s.remove} onPress={() => setImages(current => current.filter((_, position) => position !== index))}><Text style={s.removeText}>×</Text></TouchableOpacity></View>)}
+              {images.length > 0 && images.length < 5 && <TouchableOpacity accessibilityLabel="Thêm ảnh minh họa" style={[s.imageWrap, s.add]} disabled={submitting || picking} onPress={pickImages}><Text style={s.addText}>{picking ? '...' : '+'}</Text></TouchableOpacity>}
+            </View>{error('images')}
           </View>
-
-          <Section number="2" title="Mô tả dịch vụ"/>
-          <View style={[styles.textAreaShell, focused==='description'&&styles.inputFocused]}><FileText size={21} color="#FF5C9A" style={styles.textAreaIcon}/><TextInput accessibilityLabel="Mô tả dịch vụ" value={description} onChangeText={setDescription} onFocus={()=>setFocused('description')} onBlur={()=>setFocused(null)} multiline textAlignVertical="top" placeholder="Mô tả dịch vụ, phong cách và những gì khách hàng sẽ nhận được" placeholderTextColor="#A999A4" style={styles.textArea}/></View>
-
-          <Section number="3" title="Hình ảnh minh họa" subtitle="Thêm hình ảnh chất lượng cao để khách hàng dễ hình dung."/>
-          {imageUrl ? <View style={styles.imagePreviewWrap}><Image source={{uri:imageUrl}} style={styles.imagePreview} contentFit="cover"/><TouchableOpacity style={styles.removeImage} onPress={()=>setImageUrl('')} accessibilityLabel="Xóa ảnh"><X size={19} color="#2B1B2A"/></TouchableOpacity><TouchableOpacity style={styles.replaceImage} onPress={pickImage}><ImagePlus size={18} color="#FF5C9A"/><Text style={styles.replaceText}>Thay ảnh</Text></TouchableOpacity></View>
-            : <TouchableOpacity style={styles.upload} onPress={pickImage} activeOpacity={.75}><View style={styles.uploadIcon}><ImagePlus size={29} color="#FF5C9A"/></View><Text style={styles.uploadTitle}>Chọn ảnh từ thiết bị</Text><Text style={styles.uploadHint}>JPG • PNG • WEBP</Text></TouchableOpacity>}
-
-          <Section number="4" title="Tags / Phân loại" subtitle="Chọn các tag phù hợp để khách hàng dễ tìm kiếm."/>
-          <TouchableOpacity style={styles.tagSelector} onPress={()=>setTagsOpen(value=>!value)}><Hash size={22} color="#FF5C9A"/><View style={styles.selectedTagArea}>{selectedTags.length ? selectedTags.map(tag=><TouchableOpacity key={tag} style={styles.selectedTag} onPress={()=>toggleTag(tag)}><Text style={styles.selectedTagText}>{tag}</Text><X size={13} color="#D13B73"/></TouchableOpacity>) : <Text style={styles.tagPlaceholder}>Chọn tags</Text>}</View>{tagsOpen?<ChevronUp size={20} color="#2B1B2A"/>:<ChevronDown size={20} color="#2B1B2A"/>}</TouchableOpacity>
-          {tagsOpen ? <View style={styles.tagPanel}>{suggestions.length ? suggestions.map(tag=><TouchableOpacity key={tag} style={[styles.suggestion,selectedTags.includes(tag)&&styles.suggestionActive]} onPress={()=>toggleTag(tag)}><Text style={[styles.suggestionText,selectedTags.includes(tag)&&styles.suggestionTextActive]}>{tag}</Text></TouchableOpacity>) : <Text style={styles.noTags}>Chưa có tag từ dữ liệu dịch vụ hiện tại.</Text>}</View> : null}
-          {suggestions.length ? <><Text style={styles.suggestionLabel}>Gợi ý tag từ dịch vụ của bạn</Text><View style={styles.suggestionRow}>{suggestions.slice(0,10).map(tag=><TouchableOpacity key={tag} style={[styles.suggestion,selectedTags.includes(tag)&&styles.suggestionActive]} onPress={()=>toggleTag(tag)}><Text style={[styles.suggestionText,selectedTags.includes(tag)&&styles.suggestionTextActive]}>{tag}</Text></TouchableOpacity>)}</View></> : null}
-          {errors.submit ? <Text style={styles.submitError}>{errors.submit}</Text> : null}
+          <View style={s.card}><Text style={s.section}>4. Tag / Từ khóa</Text><Text style={s.subtitle}>Chọn các tag phù hợp để khách hàng dễ tìm thấy dịch vụ</Text>
+            <TouchableOpacity accessibilityLabel="Chọn tag" disabled={submitting} onPress={() => setTagsOpen(current => !current)} style={s.tagSelector}><Text style={s.subtitle}>{tags.length ? `${tags.length} tag đã chọn · Bấm để chỉnh sửa` : 'Chọn tag'}</Text></TouchableOpacity>
+            <View style={s.chips}>{tags.map(tag => tagChip(tag, true))}</View>
+            {tagsOpen && <View style={s.tagPanel}><TextInput accessibilityLabel="Tìm hoặc thêm tag" value={tagQuery} maxLength={50} onChangeText={setTagQuery} placeholder="Tìm hoặc thêm tag..." style={s.input} /><View style={s.chips}>{suggestions.filter(tag => !tags.includes(tag) && tag.toLowerCase().includes(tagQuery.trim().toLowerCase())).map(tag => tagChip(tag, false))}</View>
+              {tagQuery.trim() && !suggestions.some(tag => tag.toLowerCase() === tagQuery.trim().toLowerCase()) && <TouchableOpacity disabled={tags.length >= 10} onPress={() => { toggleTag(tagQuery.trim()); setTagQuery(''); }}><Text style={s.choose}>Thêm “{tagQuery.trim()}”</Text></TouchableOpacity>}
+              <TouchableOpacity onPress={() => setTagsOpen(false)}><Text style={s.choose}>Xong</Text></TouchableOpacity></View>}
+            <Text style={s.smallLabel}>Tag thường dùng:</Text><View style={s.chips}>{suggestions.filter(tag => !tags.includes(tag)).slice(0, 5).map(tag => tagChip(tag, false))}</View>
+          </View>
+          <View style={s.card}><Text style={s.section}>5. Trạng thái hiển thị</Text><Text style={s.subtitle}>Bạn có thể lưu ở chế độ ẩn nếu chưa muốn hiển thị dịch vụ này</Text><View style={s.visibility}><Text style={s.visibilityLabel}>Hiển thị dịch vụ trên hồ sơ</Text><Switch accessibilityLabel="Hiển thị dịch vụ trên hồ sơ" value={isActive} disabled={submitting} onValueChange={setIsActive} trackColor={{ false: '#DED7DD', true: '#FF5C9A' }} thumbColor="#FFF" /></View></View>
+          {!!errors.submit && <Text accessibilityRole="alert" style={s.submitError}>{errors.submit}</Text>}
         </ScrollView>
-
-<View style={styles.footer}>
-          <TouchableOpacity style={styles.cancel} onPress={onClose} disabled={submitting}><Text style={styles.cancelText}>Hủy</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.saveTouch} onPress={handleSubmit} disabled={!valid||submitting}>
-            {valid ? <LinearGradient colors={['#FF5C9A','#FF9BC1']} start={{x:0,y:0}} end={{x:1,y:0}} style={styles.save}>{submitting?<><ActivityIndicator color="#FFF"/><Text style={styles.saveText}>Đang lưu...</Text></>:<Text style={styles.saveText}>{initialData?'Lưu thay đổi':'Lưu dịch vụ'}</Text>}</LinearGradient>
-              : <View style={[styles.save,styles.saveDisabled]}><Text style={styles.saveText}>{initialData?'Lưu thay đổi':'Lưu dịch vụ'}</Text></View>}
-          </TouchableOpacity>
-        </View>
-</AppBottomSheet>;
+        <View style={s.footer}><TouchableOpacity disabled={submitting || picking} onPress={close} style={s.cancel}><Text style={s.cancelText}>Hủy</Text></TouchableOpacity><TouchableOpacity accessibilityLabel={initialData ? 'Lưu thay đổi' : 'Lưu dịch vụ'} disabled={!valid || submitting || picking} onPress={save} style={[s.save, (!valid || submitting || picking) && s.disabled]}>{submitting ? <ActivityIndicator color="#FFF" /> : <Text style={s.saveText}>{initialData ? 'Lưu thay đổi' : 'Lưu dịch vụ'}</Text>}</TouchableOpacity></View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  </AppOverlay>;
 }
-
-function Section({number,title,subtitle}:{number:string;title:string;subtitle?:string}){return <View style={styles.section}><View style={styles.sectionTitleRow}><View style={styles.number}><Text style={styles.numberText}>{number}</Text></View><Text style={styles.sectionTitle}>{title}</Text></View>{subtitle?<Text style={styles.sectionSubtitle}>{subtitle}</Text>:null}</View>}
-function FieldLabel({text,required}:{text:string;required?:boolean}){return <Text style={styles.label}>{text}{required?<Text style={styles.required}> *</Text>:null}</Text>}
-function ErrorText({text}:{text:string}){return <Text style={styles.error}>⚠ {text}</Text>}
-
-const styles=StyleSheet.create({
-scroll:{flex:1},
-form:{paddingHorizontal:24,paddingBottom:28},
-section:{marginTop:24,marginBottom:12},
-sectionTitleRow:{flexDirection:'row',alignItems:'center',gap:11},
-number:{width:34,height:34,borderRadius:17,backgroundColor:'#FFD6E5',alignItems:'center',justifyContent:'center'},
-numberText:{fontFamily:Typography.extraBold,fontSize:17,color:'#EF376F'},
-sectionTitle:{fontFamily:Typography.extraBold,fontSize:18,color:'#2B1B2A'},
-sectionSubtitle:{fontFamily:Typography.regular,fontSize:13,lineHeight:19,color:'#7D6F78',marginTop:6},
-label:{fontFamily:Typography.semiBold,fontSize:14,color:'#2B1B2A',marginBottom:7},
-required:{color:'#E22E64'},
-inputShell:{minHeight:56,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',paddingHorizontal:14,flexDirection:'row',alignItems:'center',gap:11},
-inputFocused:{borderColor:'#FF5C9A',shadowColor:'#FF5C9A',shadowOpacity:.09,shadowRadius:7,elevation:1},
-inputError:{borderColor:'#D95A67'},
-input:{flex:1,fontFamily:Typography.regular,fontSize:15,color:'#2B1B2A',paddingVertical:12,outlineStyle:'none'} as any,
-clear:{width:32,height:32,borderRadius:16,backgroundColor:'#F1ECF0',alignItems:'center',justifyContent:'center'},
-twoColumns:{flexDirection:'row',gap:12,marginTop:18},
-column:{flex:1,minWidth:0},
-suffix:{fontFamily:Typography.medium,fontSize:12,color:'#7D6F78'},
-error:{fontFamily:Typography.regular,fontSize:12,color:'#B64753',marginTop:5},
-textAreaShell:{minHeight:142,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',flexDirection:'row',alignItems:'flex-start',padding:14},
-textAreaIcon:{marginTop:2,marginRight:10},
-textArea:{flex:1,minHeight:110,fontFamily:Typography.regular,fontSize:15,lineHeight:22,color:'#2B1B2A',padding:0,outlineStyle:'none'} as any,
-upload:{height:166,borderWidth:1.5,borderStyle:'dashed',borderColor:'#FF9CBC',borderRadius:18,backgroundColor:'#FFF7FA',alignItems:'center',justifyContent:'center'},
-uploadIcon:{width:54,height:54,borderRadius:27,backgroundColor:'#FFE5EE',alignItems:'center',justifyContent:'center'},
-uploadTitle:{fontFamily:Typography.bold,fontSize:15,color:'#2B1B2A',marginTop:10},
-uploadHint:{fontFamily:Typography.regular,fontSize:13,color:'#7D6F78',marginTop:5},
-imagePreviewWrap:{height:210,borderRadius:17,overflow:'hidden',backgroundColor:'#F4EBEF'},
-imagePreview:{width:'100%',height:'100%'},
-removeImage:{position:'absolute',right:10,top:10,width:44,height:44,borderRadius:22,backgroundColor:'#FFF',alignItems:'center',justifyContent:'center',...Shadows.sm},
-replaceImage:{position:'absolute',right:10,bottom:10,height:42,paddingHorizontal:14,borderRadius:21,backgroundColor:'#FFF',flexDirection:'row',alignItems:'center',gap:6,...Shadows.sm},
-replaceText:{fontFamily:Typography.bold,fontSize:13,color:'#FF5C9A'},
-tagSelector:{minHeight:58,borderWidth:1,borderColor:'#EADDE3',borderRadius:17,backgroundColor:'#FFF',paddingHorizontal:14,paddingVertical:8,flexDirection:'row',alignItems:'center',gap:10},
-selectedTagArea:{flex:1,flexDirection:'row',flexWrap:'wrap',gap:6},
-tagPlaceholder:{fontFamily:Typography.regular,fontSize:15,color:'#A999A4'},
-selectedTag:{height:32,paddingHorizontal:11,borderRadius:16,backgroundColor:'#FFE8F0',flexDirection:'row',alignItems:'center',gap:5},
-selectedTagText:{fontFamily:Typography.semiBold,fontSize:12,color:'#D13B73'},
-tagPanel:{marginTop:8,padding:12,borderWidth:1,borderColor:'#F2E4EA',borderRadius:16,backgroundColor:'#FFF',flexDirection:'row',flexWrap:'wrap',gap:8},
-noTags:{fontFamily:Typography.regular,fontSize:13,color:'#7D6F78'},
-suggestionLabel:{fontFamily:Typography.semiBold,fontSize:13,color:'#2B1B2A',marginTop:14,marginBottom:9},
-suggestionRow:{flexDirection:'row',flexWrap:'wrap',gap:8},
-suggestion:{minHeight:36,paddingHorizontal:14,borderWidth:1,borderColor:'#FFC5D8',borderRadius:18,backgroundColor:'#FFF5F8',alignItems:'center',justifyContent:'center'},
-suggestionActive:{backgroundColor:'#FF5C9A',borderColor:'#FF5C9A'},
-suggestionText:{fontFamily:Typography.medium,fontSize:13,color:'#E14078'},
-suggestionTextActive:{color:'#FFF'},
-submitError:{fontFamily:Typography.medium,fontSize:13,color:'#B64753',textAlign:'center',marginTop:20},
-footer:{backgroundColor:'#FFF',borderTopWidth:1,borderTopColor:'#F3E4EA',paddingHorizontal:24,paddingTop:14,flexDirection:'row',gap:12},
-cancel:{flex:0.85,height:54,borderRadius:22,borderWidth:1,borderColor:'#E3D5DC',alignItems:'center',justifyContent:'center'},
-cancelText:{fontFamily:Typography.bold,fontSize:15,color:'#2B1B2A'},
-saveTouch:{flex:1.15,height:54,borderRadius:22,overflow:'hidden'},
-save:{flex:1,flexDirection:'row',gap:8,alignItems:'center',justifyContent:'center'},
-saveDisabled:{backgroundColor:'#E7DDE3'},
-saveText:{fontFamily:Typography.bold,fontSize:15,color:'#FFF'}
+function Label({ text, required }: { text: string; required?: boolean }) { return <Text style={s.label}>{text}{required && <Text style={s.required}> *</Text>}</Text>; }
+const s = StyleSheet.create({
+  flex: { flex: 1 }, screen: { flex: 1, backgroundColor: '#FFF5F8' }, header: { flexDirection: 'row', alignItems: 'center', minHeight: 84, paddingHorizontal: 8 }, back: { width: 36, height: 44, alignItems: 'center', justifyContent: 'center' }, backText: { fontSize: 36, color: '#211A29' }, headerCopy: { flex: 1, alignItems: 'center' }, title: { fontSize: 21, fontWeight: '800', color: '#211A29' }, subtitle: { fontSize: 13, color: '#837985', lineHeight: 19, marginTop: 7 },
+  content: { paddingHorizontal: 14, paddingBottom: 16, gap: 14, width: '100%', maxWidth: 700, alignSelf: 'center' }, card: { backgroundColor: '#FFF', padding: 18, borderRadius: 22 }, section: { fontSize: 17, fontWeight: '700', color: '#211A29', flexShrink: 1 }, sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }, label: { marginTop: 18, marginBottom: 8, fontSize: 14, color: '#211A29' }, required: { color: '#FF3D7C' }, input: { minHeight: 50, borderWidth: 1, borderColor: '#E6DCE2', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: '#211A29', backgroundColor: '#FFF' }, textarea: { minHeight: 120, lineHeight: 21 }, counter: { textAlign: 'right', color: '#948B98', fontSize: 12, marginTop: 5 }, error: { minHeight: 18, fontSize: 11, color: '#B64753', marginTop: 3 }, columns: { flexDirection: 'row', gap: 12 }, column: { flex: 1, minWidth: 0 }, duration: { minHeight: 50, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#E6DCE2', borderRadius: 12, paddingHorizontal: 12 }, durationInput: { flex: 1, minWidth: 0, fontSize: 14, color: '#211A29', paddingVertical: 10 }, unit: { fontSize: 12, color: '#837985' }, badge: { color: '#FF3D7C', backgroundColor: '#FFF0F5', borderRadius: 14, paddingHorizontal: 9, paddingVertical: 5, fontSize: 11 }, upload: { minHeight: 150, marginTop: 16, padding: 18, borderWidth: 1, borderStyle: 'dashed', borderColor: '#FFBDD3', borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF8FA' }, uploadTitle: { fontSize: 15, fontWeight: '700', color: '#211A29' }, choose: { color: '#FF3D7C', fontWeight: '600', paddingVertical: 12 }, images: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 }, imageWrap: { width: '17.5%', aspectRatio: .72, borderRadius: 12 }, image: { width: '100%', height: '100%', borderRadius: 12 }, remove: { position: 'absolute', right: -5, top: -5, height: 28, width: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: '#857D87' }, removeText: { color: '#FFF', fontSize: 21 }, add: { borderWidth: 1, borderStyle: 'dashed', borderColor: '#DCD0D9', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF9FB' }, addText: { color: '#857D87', fontSize: 28 }, tagSelector: { borderWidth: 1, borderColor: '#E6DCE2', borderRadius: 12, paddingHorizontal: 12, paddingBottom: 7, minHeight: 50, justifyContent: 'center', marginTop: 12 }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 }, chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 16, backgroundColor: '#FFF2F6' }, chipSelected: { backgroundColor: '#FFE5EE' }, chipText: { color: '#E93975', fontSize: 12 }, tagPanel: { marginTop: 12 }, smallLabel: { fontSize: 12, color: '#837985', marginTop: 16 }, visibility: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 18, gap: 8 }, visibilityLabel: { flex: 1, color: '#211A29', fontSize: 14 }, footer: { flexDirection: 'row', gap: 12, paddingHorizontal: 18, paddingVertical: 12, backgroundColor: '#FFF5F8', borderTopWidth: 1, borderTopColor: '#F3E5EC' }, cancel: { flex: 1, height: 52, borderRadius: 26, borderWidth: 1, borderColor: '#E5D9E1', backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center' }, cancelText: { color: '#211A29', fontSize: 15 }, save: { flex: 1.25, height: 52, borderRadius: 26, backgroundColor: '#FF4E91', alignItems: 'center', justifyContent: 'center' }, saveText: { color: '#FFF', fontSize: 15, fontWeight: '700' }, disabled: { opacity: .45 }, submitError: { fontSize: 13, color: '#B64753', marginVertical: 12, textAlign: 'center' },
 });

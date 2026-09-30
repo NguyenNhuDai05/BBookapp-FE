@@ -45,7 +45,6 @@ export class ApiAuthRepository implements IAuthRepository {
       fullName: request.fullName,
       email: request.email,
       password: request.password,
-      phoneNumber: request.phone, // Map phone -> phoneNumber
       role: 1,
       otp: request.otp,
     };

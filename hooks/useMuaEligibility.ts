@@ -20,8 +20,17 @@ export function useSaveMuaIdentity() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: async (request: MuaIdentityVerificationRequestDto) => (await api.put('/Mua/verification/identity', request)).data as MuaEligibility,
-    onSuccess: data => client.setQueryData(MUA_ELIGIBILITY_QUERY_KEY, data),
+    onSuccess: (data, request) => {
+      client.setQueryData(MUA_ELIGIBILITY_QUERY_KEY, data);
+      client.setQueryData(['mua', 'identity'], request);
+    },
   });
+}
+
+export function useMuaIdentity() {
+  return useQuery({ queryKey: ['mua', 'identity'], queryFn: async () =>
+    (await api.get<MuaIdentityVerificationRequestDto>('/Mua/verification/identity')).data,
+    staleTime: 0, retry: 1 });
 }
 
 export function useSubmitMuaForReview() {

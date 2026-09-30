@@ -21,6 +21,8 @@ export interface ArtistDto {
   completedBookingsCount: number;
   minPrice: number | null;
   yearsExperience: number;
+  experienceLevel?: string;
+  district?: string;
   city: string;
   bio: string;
   specialties: string[];

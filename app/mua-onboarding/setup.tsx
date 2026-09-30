@@ -9,7 +9,7 @@ import { getApiError } from '../../services/api';
 import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../constants/theme';
 
 const routes: Record<string, string> = {
-  accountActive: '/(mua)/settings', basicInformation: '/(mua)/edit-profile', avatar: '/(mua)/edit-profile', phoneNumber: '/(mua)/edit-profile', city: '/(mua)/edit-profile', address: '/(mua)/edit-profile', bio: '/(mua)/edit-profile', specialty: '/(mua)/edit-profile', activeService: '/(mua)/services', publicPortfolioImages: '/(mua)/services?tab=PORTFOLIO', identityVerification: '/(mua)/identity-verification', bankAccount: '/(mua)/bank-account-form',
+  accountActive: '/(mua)/settings', basicInformation: '/(mua)/edit-profile', avatar: '/(mua)/edit-profile', phoneNumber: '/(mua)/edit-profile', city: '/(mua)/edit-profile', address: '/(mua)/edit-profile', bio: '/(mua)/edit-profile', specialty: '/(mua)/edit-profile', activeService: '/(mua)/services', publicPortfolioImages: '/(mua)/services?tab=PORTFOLIO', identityVerification: '/(mua)/identity-verification', bankAccount: '/(mua)/bank-accounts',
 };
 
 export default function MuaSetupScreen() {
@@ -41,10 +41,10 @@ export default function MuaSetupScreen() {
         <View style={styles.list}>
           {data.requirements.map((item, index) => {
             const route = routes[item.key];
-            return <TouchableOpacity key={item.key} disabled={item.isMet || !route} onPress={() => router.push(route as any)} style={[styles.row, index > 0 && styles.rowBorder]} accessibilityRole={route ? 'button' : undefined}>
+            return <TouchableOpacity key={item.key} disabled={!route} onPress={() => router.push(route as any)} style={[styles.row, index > 0 && styles.rowBorder]} accessibilityRole={route ? 'button' : undefined}>
               <View style={[styles.statusIcon, item.isMet && styles.statusIconDone]}>{item.isMet ? <CheckCircle2 size={20} color={BrandColors.statusConfirmed}/> : <Circle size={20} color={BrandColors.textMuted}/>}</View>
-              <View style={styles.rowCopy}><Text style={styles.rowTitle}>{item.label}</Text><Text style={styles.rowSubtitle}>{item.isMet ? 'Đã hoàn tất' : item.current != null && item.required != null ? `${item.current}/${item.required} đã hoàn thành` : 'Chưa hoàn tất'}</Text></View>
-              {!item.isMet && route ? <ChevronRight size={20} color={BrandColors.textMuted}/> : null}
+              <View style={styles.rowCopy}><Text style={styles.rowTitle}>{item.label}</Text><Text style={styles.rowSubtitle}>{item.isMet ? 'Đã hoàn tất · Bấm để chỉnh sửa' : item.current != null && item.required != null ? `${item.current}/${item.required} đã hoàn thành` : 'Chưa hoàn tất'}</Text></View>
+              {route ? <ChevronRight size={20} color={BrandColors.textMuted}/> : null}
             </TouchableOpacity>;
           })}
         </View>
