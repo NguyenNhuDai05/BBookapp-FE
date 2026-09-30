@@ -22,6 +22,7 @@ export function useMuaPortfolio(muaId: string) {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
     },
     onError: () => {
       appDialog.alert('Lỗi', 'Không thể thêm ảnh vào portfolio.');
@@ -35,6 +36,7 @@ export function useMuaPortfolio(muaId: string) {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
     },
   });
 
@@ -44,6 +46,7 @@ export function useMuaPortfolio(muaId: string) {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
     },
     onError: () => {
       appDialog.alert('Lỗi', 'Không thể xóa ảnh khỏi portfolio.');
@@ -56,17 +59,24 @@ export function useMuaPortfolio(muaId: string) {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
     },
   });
 
   const likeMutation = useMutation({
     mutationFn: (itemId: string) => portfolioService.toggleLike(itemId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] }),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] }),
+      queryClient.invalidateQueries({ queryKey: ['customer-explore'] }),
+    ]),
   });
 
   const saveMutation = useMutation({
     mutationFn: (itemId: string) => portfolioService.toggleSave(itemId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] }),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY] }),
+      queryClient.invalidateQueries({ queryKey: ['customer-explore'] }),
+    ]),
   });
 
   return {

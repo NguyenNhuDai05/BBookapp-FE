@@ -1,175 +1,117 @@
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import {
-  MapPin, Search, Sparkles, Star,
-} from 'lucide-react-native';
-import React from 'react';
-import {
-  ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TextInput,
-  TouchableOpacity, View,
-} from 'react-native';
-import type { ImageStyle, StyleProp } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useExplore, type ExploreFeedItem } from '../../hooks/useExplore';
-import type { ArtistDto } from '../../types/ArtistDto';
+import { ArrowRight, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react-native';
+import React, { useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SkeletonLoader } from '../../components/ui/SkeletonLoader';
+import { ExploreArtistCard, ExplorePostCard, ExploreServiceCard, ExploreSection, EXPLORE_PINK as PINK, formatExplorePrice as price } from '../../components/explore/ExploreCards';
+import { ExploreFilterSheet } from '../../components/explore/ExploreFilterSheet';
+import { getCustomerTabBarMetrics } from '../../constants/theme';
+import { useExplore } from '../../hooks/useExplore';
+import { exploreErrorMessage, isExploreSessionError } from '../../services/exploreService';
+import type { ExploreArtist, ExploreItem, ExploreKind, ExplorePost, ExploreService } from '../../types/explore';
 
-const PINK = '#C5165D';
-const SOFT_PINK = '#FFF4F7';
-
-const compact = (value: number) => value >= 1000 ? `${(value / 1000).toFixed(1)}k` : `${value}`;
-const money = (value?: number | null) => value != null ? `${Math.round(value / 1000)}K` : 'Liên hệ';
-
-function RemoteImage({ uri, style }: { uri?: string; style: StyleProp<ImageStyle> }) {
-  if (!uri) return <View style={[style, styles.imageFallback]}><Sparkles size={28} color="#E789A9" /></View>;
-  return <Image source={{ uri }} style={style} contentFit="cover" transition={180} />;
+const KINDS: { key: ExploreKind; label: string }[] = [
+  { key: 'portfolio', label: 'Tác phẩm' }, { key: 'artists', label: 'Chuyên gia' }, { key: 'services', label: 'Dịch vụ' },
+];
+function LoadingCards() {
+  return <View style={styles.skeletonGrid}>{[0, 1, 2, 3].map(id => <View key={id} style={styles.skeletonCard}>
+    <SkeletonLoader height={190} borderRadius={18} /><SkeletonLoader height={15} width="80%" style={{ marginTop: 12 }} /><SkeletonLoader height={12} width="60%" style={{ marginTop: 8 }} />
+  </View>)}</View>;
 }
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{children}</Text>
-    </View>
-  );
-}
-
-function PortfolioCard({ item, onPress }: { item: ExploreFeedItem; onPress: () => void }) {
-  return (
-    <TouchableOpacity style={styles.trendCard} activeOpacity={0.9} onPress={onPress}>
-      <RemoteImage uri={item.imageUrl} style={styles.trendImage} />
-      <View style={styles.trendOverlay} />
-      <View style={styles.trendContent}>
-        <Text style={styles.trendTitle} numberOfLines={1}>{item.title}</Text>
-        <Text style={styles.trendMeta}>{compact(item.likesCount)} lượt thích</Text>
-        <View style={styles.whitePill}><Text style={styles.whitePillText}>Xem ngay</Text></View>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-function ArtistCard({ artist, onPress }: { artist: ArtistDto; onPress: () => void }) {
-  return (
-    <TouchableOpacity style={styles.artistCard} activeOpacity={0.9} onPress={onPress}>
-      <RemoteImage uri={artist.avatar || artist.coverImage} style={styles.artistAvatar} />
-      <Text style={styles.artistName} numberOfLines={1}>{artist.name}</Text>
-      {artist.reviewCount > 0 ? <View style={styles.ratingLine}><Star size={11} color="#FFA800" fill="#FFA800" /><Text style={styles.ratingText}>{artist.rating.toFixed(1)} ({artist.reviewCount})</Text></View> : <Text style={styles.unrated}>Chưa có đánh giá</Text>}
-      <Text style={styles.fromPrice}>{artist.minPrice != null ? `Từ ${money(artist.minPrice)}` : money(null)}</Text>
-      <View style={styles.bookButton}><Text style={styles.bookButtonText}>Đặt ngay</Text></View>
-    </TouchableOpacity>
-  );
-}
-
-function NearbyCard({ artist, onPress }: { artist: ArtistDto; onPress: () => void }) {
-  return (
-    <TouchableOpacity style={styles.nearCard} activeOpacity={0.9} onPress={onPress}>
-      <View>
-        <RemoteImage uri={artist.coverImage || artist.avatar} style={styles.nearImage} />
-        {artist.reviewCount > 0 ? <View style={styles.ratingBadge}><Star size={10} color="#FFA800" fill="#FFA800" /><Text style={styles.ratingBadgeText}>{artist.rating.toFixed(1)}</Text></View> : null}
-      </View>
-      <View style={styles.nearBody}>
-        <Text style={styles.nearName} numberOfLines={1}>{artist.name}</Text>
-        {artist.city ? <View style={styles.locationLine}><MapPin size={11} color="#8D6674" /><Text style={styles.distance}>{artist.city}</Text></View> : null}
-        <Text style={styles.nearPrice}>{artist.minPrice != null ? `Từ ${money(artist.minPrice)}` : money(null)}</Text>
-        <View style={styles.nearButton}><Text style={styles.nearButtonText}>Đặt lịch</Text></View>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
 export default function ExploreScreen() {
   const router = useRouter();
-  const { artists, feed, isLoading, isRefreshing, artistsError, feedError, isFullError, refetch, searchQuery, setSearchQuery } = useExplore();
+  const insets = useSafeAreaInsets();
+  const bottom = getCustomerTabBarMetrics(insets.bottom).height;
+  const list = useRef<FlatList<ExploreItem>>(null);
+  const explore = useExplore();
+  const { home, results, items, filters, setFilters, kind, setKind, searchQuery, setSearchQuery, isTyping, isFiltered } = explore;
+  const [filterVisible, setFilterVisible] = useState(false);
   const openArtist = (id: string) => router.push({ pathname: '/mua-detail', params: { id } });
-  const openPost = (item: ExploreFeedItem) => router.push({ pathname: '/portfolio-feed', params: { muaId: item.muaId, portfolioId: item.id } });
-  const topArtists = artists.filter((artist) => artist.reviewCount > 0).sort((a, b) => b.rating - a.rating);
-
-  if (isLoading) return <SafeAreaView style={styles.safe}><View style={styles.center}><ActivityIndicator size="large" color={PINK} /></View></SafeAreaView>;
-
-  return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refetch} tintColor={PINK} colors={[PINK]} />}
-      >
-        <View style={styles.topBar}>
-          <View style={styles.searchBox}>
-            <Search size={19} color="#655B64" />
-            <TextInput
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder="Tìm trong danh sách đang hiển thị..."
-              placeholderTextColor="#8E8790"
-              style={styles.searchInput}
-            />
-          </View>
-        </View>
-
-        {isFullError ? <TouchableOpacity onPress={refetch} style={styles.fullError}><Text style={styles.errorTitle}>Không thể tải Khám phá</Text><Text style={styles.errorText}>Kiểm tra kết nối và chạm để thử lại.</Text></TouchableOpacity> : null}
-
-        {!isFullError && feedError ? <InlineError message="Không tải được tác phẩm nổi bật." onRetry={refetch} /> : null}
-        {!feedError && feed.length > 0 ? <>
-          <SectionTitle>Xu hướng makeup nổi bật</SectionTitle>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>
-            {feed.slice(0, 6).map((item) => <PortfolioCard key={item.id} item={item} onPress={() => openPost(item)} />)}
-          </ScrollView>
-        </> : null}
-
-        {!isFullError && artistsError ? <InlineError message="Không tải được danh sách chuyên gia." onRetry={refetch} /> : null}
-        {!artistsError && artists.length > 0 ? <>
-          <SectionTitle>Chuyên gia nổi bật</SectionTitle>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>
-            {artists.slice(0, 6).map((artist) => <ArtistCard key={artist.id} artist={artist} onPress={() => openArtist(artist.id)} />)}
-          </ScrollView>
-        </> : null}
-
-        {topArtists.length > 0 ? <><SectionTitle>Top MUA được đánh giá cao</SectionTitle>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>
-          {topArtists.slice(0, 5).map((artist, index) => (
-            <TouchableOpacity key={`top-${artist.id}`} style={styles.topCard} onPress={() => openArtist(artist.id)}>
-              <RemoteImage uri={artist.coverImage || artist.avatar} style={styles.topImage} />
-              <View style={styles.topShade} />
-              <View style={styles.rank}><Text style={styles.rankText}>#{index + 1}</Text></View>
-              <View style={styles.topCopy}><Text style={styles.topName}>{artist.name}</Text><Text style={styles.topMeta}>{artist.rating.toFixed(1)} · {compact(artist.reviewCount)} đánh giá</Text></View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView></> : null}
-
-        {artists.some((artist) => artist.city) ? <><SectionTitle>Theo khu vực</SectionTitle>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>
-          {artists.filter((artist) => artist.city).slice(0, 6).map((artist) => <NearbyCard key={`area-${artist.id}`} artist={artist} onPress={() => openArtist(artist.id)} />)}
-        </ScrollView></> : null}
-
-        {!isFullError && !artistsError && !feedError && artists.length === 0 && feed.length === 0 ? <View style={styles.empty}><Text style={styles.emptyTitle}>Không có kết quả phù hợp</Text><Text style={styles.emptyText}>{searchQuery ? 'Thử từ khóa khác trong dữ liệu đang hiển thị.' : 'Hiện chưa có nội dung khám phá.'}</Text></View> : null}
+  const openPost = (item: ExplorePost) => router.push({ pathname: '/portfolio-feed', params: { muaId: item.muaId, portfolioId: item.id } });
+  const openService = (item: ExploreService) => router.push({ pathname: '/mua-detail', params: { id: item.muaId, tab: 'Dịch vụ', serviceId: item.id } });
+  const browse = (next: ExploreKind) => { setKind(next); list.current?.scrollToOffset({ offset: 0, animated: true }); };
+  const filtersCount = Object.values(filters).filter(value => value !== undefined).length;
+  const province = home.data?.provinces.find(p => p.code === filters.provinceCode);
+  const style = home.data?.styles.find(s => s.id === filters.styleId);
+  const pending = isTyping || results.isLoading;
+  const showFeatured = !isFiltered && kind === 'portfolio';
+  const featuredPosts = home.data?.featuredPosts.slice(0, 3) || [];
+  const featuredIds = new Set(showFeatured ? featuredPosts.map(post => post.id) : []);
+  const gridItems = items.filter(item => !featuredIds.has(item.id));
+  const clearAndTop = () => { explore.clearFilters(); list.current?.scrollToOffset({ offset: 0, animated: true }); };
+  const renderItem = ({ item }: { item: ExploreItem }) => <View style={styles.gridCell}>
+    {kind === 'portfolio' ? <ExplorePostCard item={item as ExplorePost} onPress={() => openPost(item as ExplorePost)} /> : kind === 'artists' ?
+      <ExploreArtistCard item={item as ExploreArtist} onPress={() => openArtist(item.id)} /> : <ExploreServiceCard item={item as ExploreService} onPress={() => openService(item as ExploreService)} />}
+  </View>;
+  const header = <>
+    <View style={styles.titleRow}><View><Text style={styles.eyebrow}>B-BOOK / KHÁM PHÁ</Text><Text style={styles.heading}>Đẹp theo cách của bạn</Text></View><Sparkles size={25} color={PINK} /></View>
+    <View style={styles.searchRow}><View style={styles.searchBox}><Search size={19} color="#7E6372" />
+      <TextInput accessibilityLabel="Tìm kiếm tác phẩm, chuyên gia và dịch vụ" placeholder="Tìm phong cách, MUA, dịch vụ..." placeholderTextColor="#947F8A" style={styles.searchInput}
+        value={searchQuery} onChangeText={text => setSearchQuery(text.slice(0, 100))} returnKeyType="search" maxLength={100} />
+      {searchQuery ? <TouchableOpacity accessibilityLabel="Xóa từ khóa" onPress={() => setSearchQuery('')} style={styles.clear}><X size={16} color="#7E6372" /></TouchableOpacity> : null}
+    </View><TouchableOpacity accessibilityRole="button" accessibilityLabel="Mở bộ lọc" onPress={() => setFilterVisible(true)} style={[styles.filterButton, filtersCount > 0 && styles.filterActive]}>
+      <SlidersHorizontal size={20} color={filtersCount ? '#FFF' : PINK} />{filtersCount ? <Text style={styles.filterBadge}>{filtersCount}</Text> : null}</TouchableOpacity></View>
+    {home.data?.styles.length ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+      <TouchableOpacity style={[styles.chip, !filters.styleId && styles.chipSelected]} onPress={() => setFilters({ ...filters, styleId: undefined })}><Text style={[styles.chipText, !filters.styleId && styles.chipTextSelected]}>Tất cả phong cách</Text></TouchableOpacity>
+      {home.data.styles.map(tag => <TouchableOpacity key={tag.id} accessibilityRole="button" accessibilityState={{ selected: tag.id === filters.styleId }} style={[styles.chip, tag.id === filters.styleId && styles.chipSelected]}
+        onPress={() => setFilters({ ...filters, styleId: filters.styleId === tag.id ? undefined : tag.id })}><Text style={[styles.chipText, tag.id === filters.styleId && styles.chipTextSelected]}>{tag.name}</Text></TouchableOpacity>)}
+    </ScrollView> : null}
+    {isFiltered ? <View style={styles.activeFilters}><Text style={styles.activeText} numberOfLines={2}>{[province?.name, style?.name,
+      filters.minPrice != null ? `Từ ${price(filters.minPrice)}` : '', filters.maxPrice != null ? `Đến ${price(filters.maxPrice)}` : ''].filter(Boolean).join(' · ') || 'Kết quả tìm kiếm'}</Text>
+      <TouchableOpacity onPress={clearAndTop} style={styles.clear}><Text style={styles.moreText}>Xóa lọc</Text></TouchableOpacity></View> : null}
+    {home.isError ? <TouchableOpacity onPress={() => void home.refetch()} style={styles.errorBanner}><Text style={styles.errorText}>{exploreErrorMessage(home.error)} Chạm để thử lại.</Text></TouchableOpacity> : null}
+    {showFeatured && home.isLoading ? <View style={{ paddingHorizontal: 18, paddingTop: 16 }}><SkeletonLoader height={245} borderRadius={22} /></View> : null}
+    {showFeatured && home.data?.featuredPosts.length ? <>
+      <ExploreSection title="Cảm hứng makeup" subtitle="Những tác phẩm từ cộng đồng Makeup Artist" />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>
+        {featuredPosts.map(post => <ExplorePostCard key={post.id} featured item={post} onPress={() => openPost(post)} />)}
       </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-function InlineError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return <TouchableOpacity onPress={onRetry} style={styles.error}><Text style={styles.errorText}>{message} Chạm để thử lại.</Text></TouchableOpacity>;
+    </> : null}
+    {showFeatured && home.data?.featuredArtists.length ? <>
+      <ExploreSection title="Chuyên gia đáng khám phá" subtitle="Tìm phong cách và mức giá phù hợp với bạn" onMore={() => browse('artists')} />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>
+        {home.data.featuredArtists.map(artist => <ExploreArtistCard key={artist.id} item={artist} horizontal onPress={() => openArtist(artist.id)} />)}
+      </ScrollView>
+    </> : null}
+    {showFeatured && home.data?.featuredServices.length ? <>
+      <ExploreSection title="Khám phá dịch vụ" subtitle="Giá và thời gian do Makeup Artist cung cấp" onMore={() => browse('services')} />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>
+        {home.data.featuredServices.map(service => <ExploreServiceCard key={service.id} item={service} horizontal onPress={() => openService(service)} />)}
+      </ScrollView>
+    </> : null}
+    <ExploreSection title={isFiltered ? 'Kết quả dành cho bạn' : 'Khám phá thêm'} subtitle={kind === 'services' ? 'Sắp xếp theo giá từ thấp đến cao' : kind === 'portfolio' ? 'Tác phẩm mới nhất từ các Makeup Artist' : 'Chuyên gia đã được duyệt hồ sơ'} />
+    <View style={styles.tabs}>{KINDS.map(tab => <TouchableOpacity key={tab.key} accessibilityRole="tab" accessibilityState={{ selected: kind === tab.key }} style={[styles.tab, kind === tab.key && styles.tabSelected]} onPress={() => setKind(tab.key)}>
+      <Text style={[styles.tabText, kind === tab.key && styles.tabTextSelected]}>{tab.label}</Text></TouchableOpacity>)}</View>
+    {pending ? <LoadingCards /> : null}
+    {!pending && results.isError && items.length === 0 ? <View style={styles.empty}><Text style={styles.emptyTitle}>Chưa tải được nội dung</Text><Text style={styles.emptyText}>{exploreErrorMessage(results.error)}</Text>
+      <TouchableOpacity style={styles.primaryButton} onPress={() => void results.refetch()}><Text style={styles.primaryText}>Thử lại</Text></TouchableOpacity></View> : null}
+    {!pending && !results.isError && items.length === 0 ? <View style={styles.empty}><Sparkles size={34} color="#D990AD" /><Text style={styles.emptyTitle}>{isFiltered ? 'Chưa tìm thấy kết quả phù hợp' : 'Nội dung mới đang chờ bạn'}</Text>
+      <Text style={styles.emptyText}>{isFiltered ? 'Thử một phong cách khác hoặc mở rộng bộ lọc.' : 'Các tác phẩm, chuyên gia và dịch vụ công khai sẽ xuất hiện tại đây.'}</Text>
+      {isFiltered ? <TouchableOpacity style={styles.primaryButton} onPress={clearAndTop}><Text style={styles.primaryText}>Xóa bộ lọc</Text></TouchableOpacity> : null}</View> : null}
+  </>;
+  return <SafeAreaView style={styles.safe} edges={['top']}>
+    <FlatList ref={list} data={pending ? [] : gridItems} renderItem={renderItem} numColumns={2} keyExtractor={item => `${kind}-${item.id}`} keyboardShouldPersistTaps="handled"
+      ListHeaderComponent={header} columnWrapperStyle={styles.gridRow} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: bottom + 24 }}
+      refreshing={home.isRefetching || (results.isRefetching && !results.isFetchingNextPage)} onRefresh={() => void explore.refetch()}
+      onEndReached={() => { if (!pending && results.hasNextPage && !results.isFetching && !results.isFetchNextPageError) void results.fetchNextPage({ cancelRefetch: false }); }} onEndReachedThreshold={0.35}
+      ListFooterComponent={!pending && items.length > 0 ? <View style={styles.footer}>{results.isFetchingNextPage ? <ActivityIndicator color={PINK} /> : results.isError ?
+        <><Text style={styles.emptyText}>{exploreErrorMessage(results.error)}</Text><TouchableOpacity style={styles.secondaryButton} onPress={() => void (results.isFetchNextPageError && !isExploreSessionError(results.error) ? results.fetchNextPage({ cancelRefetch: false }) : results.refetch())}><Text style={styles.moreText}>{isExploreSessionError(results.error) ? 'Làm mới' : 'Thử lại'}</Text></TouchableOpacity></> : results.hasNextPage ?
+        <TouchableOpacity style={styles.secondaryButton} onPress={() => void results.fetchNextPage({ cancelRefetch: false })}><Text style={styles.moreText}>Xem thêm</Text><ArrowRight size={16} color={PINK} /></TouchableOpacity> : <Text style={styles.endText}>Bạn đã xem hết kết quả hiện có.</Text>}</View> : null}
+    />
+    <ExploreFilterSheet visible={filterVisible} filters={filters} provinces={home.data?.provinces || []} onClose={() => setFilterVisible(false)} onApply={next => { setFilters(next); setFilterVisible(false); list.current?.scrollToOffset({ offset: 0, animated: true }); }} />
+  </SafeAreaView>;
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: SOFT_PINK }, center: { flex: 1, alignItems: 'center', justifyContent: 'center' }, content: { paddingBottom: 128 },
-  topBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 10, paddingBottom: 15 },
-  searchBox: { height: 46, flex: 1, borderRadius: 24, backgroundColor: '#FFF', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, gap: 9 },
-  searchInput: { flex: 1, height: 46, paddingVertical: 0, fontSize: 13, color: '#33222B' }, bell: { width: 34, height: 44, alignItems: 'flex-end', justifyContent: 'center' },
-  notification: { position: 'absolute', right: 13, top: 5, width: 18, height: 18, borderRadius: 9, backgroundColor: '#C22A35', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: SOFT_PINK }, notificationText: { color: '#FFF', fontSize: 9, fontWeight: '800' },
-  categoryRow: { paddingHorizontal: 18, paddingVertical: 8, gap: 15 }, category: { width: 61, alignItems: 'center' }, categoryRing: { width: 57, height: 57, borderRadius: 29, borderWidth: 1.5, borderColor: '#F49AB9', padding: 3 }, categoryImage: { width: '100%', height: '100%', borderRadius: 26 }, categoryText: { marginTop: 6, fontSize: 11, fontWeight: '700', color: '#443039' },
-  imageFallback: { backgroundColor: '#FFE4EC', alignItems: 'center', justifyContent: 'center' }, sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingHorizontal: 18, marginTop: 29, marginBottom: 12 }, sectionTitle: { fontFamily: 'serif', fontSize: 23, lineHeight: 28, fontWeight: '800', color: '#351C2B' }, sectionAction: { fontSize: 12, color: PINK, fontWeight: '600' }, horizontal: { paddingHorizontal: 18, gap: 11 },
-  trendCard: { width: 156, height: 205, borderRadius: 21, overflow: 'hidden', backgroundColor: '#EEE' }, trendImage: { width: '100%', height: '100%' }, trendOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(20,5,14,.22)' }, trendContent: { position: 'absolute', left: 13, right: 10, bottom: 11 }, trendTitle: { color: '#FFF', fontSize: 13, fontWeight: '800' }, trendMeta: { color: '#F4E9EE', fontSize: 10, marginTop: 2 }, whitePill: { backgroundColor: '#FFF', alignSelf: 'flex-start', borderRadius: 18, marginTop: 10, paddingVertical: 7, paddingHorizontal: 13 }, whitePillText: { fontSize: 10, color: PINK, fontWeight: '800' }, dots: { height: 25, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }, dotActive: { width: 15, height: 5, borderRadius: 4, backgroundColor: PINK }, dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#F0CADA' },
-  artistCard: { width: 132, backgroundColor: '#FFF', borderRadius: 20, padding: 10, alignItems: 'center' }, artistAvatar: { width: 55, height: 55, borderRadius: 28 }, artistName: { marginTop: 7, fontSize: 12, fontWeight: '800', color: '#3D2933', maxWidth: 110 }, ratingLine: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 }, ratingText: { fontSize: 10, color: '#51434A', fontWeight: '600' }, slotPill: { backgroundColor: '#FFF0F5', borderRadius: 12, paddingHorizontal: 8, paddingVertical: 6, marginTop: 9 }, slotText: { color: '#E5437D', fontSize: 9, fontWeight: '600' }, fromPrice: { fontSize: 10, fontWeight: '700', color: '#54434B', marginVertical: 8 }, bookButton: { width: '100%', backgroundColor: PINK, borderRadius: 18, paddingVertical: 7, alignItems: 'center' }, bookButtonText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
-  promo: { marginHorizontal: 18, marginTop: 34, height: 86, borderRadius: 20, backgroundColor: '#FF699B', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 }, giftCircle: { width: 39, height: 39, borderRadius: 20, backgroundColor: 'rgba(255,255,255,.2)', alignItems: 'center', justifyContent: 'center' }, promoCopy: { flex: 1, marginLeft: 10 }, promoTitle: { color: '#FFF', fontSize: 14, fontWeight: '800' }, promoText: { color: '#FFE8F0', fontSize: 10, marginTop: 2 }, promoButton: { backgroundColor: '#FFF', borderRadius: 22, paddingHorizontal: 17, paddingVertical: 13 }, promoButtonText: { color: '#FF5790', fontSize: 11, fontWeight: '700' },
-  makeoverCard: { width: 260 }, makeoverImages: { height: 148, flexDirection: 'row', borderRadius: 20, overflow: 'hidden' }, makeoverHalf: { width: '50%', height: '100%' }, before: { position: 'absolute', left: 8, top: 8, backgroundColor: 'rgba(43,35,38,.65)', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 }, after: { position: 'absolute', right: 8, top: 8, backgroundColor: PINK, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 }, compareText: { color: '#FFF', fontSize: 8, fontWeight: '700' }, makeoverCaption: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 6, paddingTop: 9 }, makeoverName: { flex: 1, fontSize: 12, color: '#3E2D35', fontWeight: '700' }, makeoverRating: { fontSize: 10, color: '#5F5057' },
-  topCard: { width: 188, height: 132, borderRadius: 20, overflow: 'hidden' }, topImage: { width: '100%', height: '100%' }, topShade: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(31,14,21,.24)' }, rank: { position: 'absolute', top: 8, left: 8, width: 32, height: 32, borderRadius: 16, backgroundColor: '#FFD400', alignItems: 'center', justifyContent: 'center' }, rankText: { color: '#FFF', fontWeight: '900', fontSize: 12 }, topCopy: { position: 'absolute', left: 14, right: 12, bottom: 12 }, topName: { color: '#FFF', fontWeight: '800', fontSize: 14 }, topMeta: { color: '#EEE', fontSize: 9, marginTop: 2 },
-  serviceTile: { width: 112, minHeight: 103, borderRadius: 18, backgroundColor: '#FFE8EF', padding: 17, justifyContent: 'center' }, serviceName: { fontSize: 12, lineHeight: 16, color: '#462F39', fontWeight: '800', marginTop: 9 }, serviceMeta: { fontSize: 9, color: '#8A7680', marginTop: 2 },
-  nearCard: { width: 148, backgroundColor: '#FFF', borderRadius: 19, overflow: 'hidden' }, nearImage: { width: '100%', height: 130 }, ratingBadge: { position: 'absolute', top: 7, right: 7, backgroundColor: '#FFF', flexDirection: 'row', gap: 3, paddingHorizontal: 6, paddingVertical: 4, borderRadius: 10 }, ratingBadgeText: { fontSize: 9, fontWeight: '700', color: '#4C3F45' }, nearBody: { padding: 10 }, nearName: { fontSize: 13, fontWeight: '800', color: '#422D36' }, locationLine: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 }, distance: { fontSize: 9, color: '#8D6674' }, nearPrice: { color: PINK, fontWeight: '800', fontSize: 11, marginTop: 8 }, nearButton: { backgroundColor: PINK, borderRadius: 13, paddingVertical: 7, alignItems: 'center', marginTop: 8 }, nearButtonText: { color: '#FFF', fontWeight: '700', fontSize: 10 },
-  unrated: { color: '#7D6973', fontSize: 9, marginTop: 3 },
-  error: { marginHorizontal: 18, marginTop: 12, padding: 12, borderRadius: 12, backgroundColor: '#FFE2E7' },
-  fullError: { marginHorizontal: 18, marginTop: 40, padding: 22, borderRadius: 16, backgroundColor: '#FFE2E7' },
-  errorTitle: { color: '#8E1D3A', textAlign: 'center', fontSize: 16, fontWeight: '800', marginBottom: 6 },
-  errorText: { color: '#A42544', textAlign: 'center', fontSize: 12 },
-  empty: { marginHorizontal: 18, marginTop: 48, padding: 24, alignItems: 'center' },
-  emptyTitle: { color: '#442D38', fontSize: 16, fontWeight: '800' },
-  emptyText: { color: '#7D6973', fontSize: 12, textAlign: 'center', marginTop: 7 },
+  safe: { flex: 1, width: '100%', maxWidth: 720, alignSelf: 'center', backgroundColor: '#FFF7FA' }, titleRow: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  eyebrow: { color: '#9C637C', fontSize: 10, letterSpacing: 2, fontWeight: '700', marginBottom: 7 }, heading: { color: '#351C2B', fontSize: 25, fontWeight: '800' },
+  searchRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 18 }, searchBox: { flex: 1, height: 48, borderRadius: 16, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#EEDFE6', flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12 },
+  searchInput: { flex: 1, color: '#35212B', fontSize: 13, height: 48, paddingVertical: 0 }, clear: { minWidth: 32, minHeight: 40, alignItems: 'center', justifyContent: 'center' },
+  filterButton: { width: 48, height: 48, borderRadius: 16, backgroundColor: '#FFE6EF', justifyContent: 'center', alignItems: 'center' }, filterActive: { backgroundColor: PINK }, filterBadge: { position: 'absolute', top: 2, right: 3, color: '#FFF', fontSize: 10, fontWeight: '800' },
+  chips: { gap: 8, paddingHorizontal: 18, paddingTop: 14, paddingBottom: 6 }, chip: { paddingHorizontal: 15, paddingVertical: 10, borderRadius: 22, borderWidth: 1, borderColor: '#EBD6DF', backgroundColor: '#FFF' }, chipSelected: { backgroundColor: PINK, borderColor: PINK }, chipText: { color: '#775167', fontSize: 12, fontWeight: '600' }, chipTextSelected: { color: '#FFF' },
+  activeFilters: { marginHorizontal: 18, marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 10 }, activeText: { flex: 1, color: '#7B4E66', fontSize: 12, lineHeight: 19 }, moreText: { color: PINK, fontSize: 12, fontWeight: '700' }, horizontal: { paddingHorizontal: 18, gap: 12, paddingBottom: 2 },
+  tabs: { marginHorizontal: 18, marginBottom: 17, flexDirection: 'row', padding: 4, gap: 4, borderRadius: 15, backgroundColor: '#F3E4EB' }, tab: { flex: 1, paddingVertical: 11, borderRadius: 12, alignItems: 'center' }, tabSelected: { backgroundColor: '#FFF' }, tabText: { color: '#937384', fontSize: 12, fontWeight: '600' }, tabTextSelected: { color: PINK, fontWeight: '800' },
+  gridRow: { paddingHorizontal: 18, gap: 12, marginBottom: 14 }, gridCell: { flex: 1, maxWidth: '50%' }, skeletonGrid: { paddingHorizontal: 18, flexDirection: 'row', flexWrap: 'wrap', gap: 12 }, skeletonCard: { width: '48%', marginBottom: 16 },
+  empty: { paddingHorizontal: 32, paddingVertical: 35, alignItems: 'center' }, emptyTitle: { color: '#4B2C3E', fontSize: 16, fontWeight: '800', marginTop: 12 }, emptyText: { color: '#89697B', fontSize: 12, textAlign: 'center', lineHeight: 20, marginTop: 9 }, primaryButton: { minHeight: 46, backgroundColor: PINK, borderRadius: 16, paddingHorizontal: 22, paddingVertical: 13, alignItems: 'center', justifyContent: 'center', marginTop: 18 }, primaryText: { color: '#FFF', fontSize: 13, fontWeight: '700' }, secondaryButton: { minHeight: 46, borderWidth: 1, borderColor: '#E9CBDA', borderRadius: 16, paddingHorizontal: 20, paddingVertical: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7 }, footer: { paddingHorizontal: 30, paddingVertical: 22, alignItems: 'center', gap: 10 }, endText: { color: '#957A88', fontSize: 11 }, errorBanner: { marginHorizontal: 18, padding: 12, backgroundColor: '#FFE6EB', borderRadius: 14, marginTop: 12 }, errorText: { color: '#AA3050', fontSize: 12, lineHeight: 19 },
 });

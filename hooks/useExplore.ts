@@ -1,78 +1,47 @@
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getFeed, type FeedItem } from '../services/feedService';
-import { muaService } from '../services/muaService';
-
-export type ExploreFeedItem = {
-  id: string;
-  muaId: string;
-  title: string;
-  imageUrl: string;
-  imageUrls: string[];
-  authorName: string;
-  likesCount: number;
-  tags: string[];
-};
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useFocusEffect } from 'expo-router';
+import { isAxiosError } from 'axios';
+import { exploreService } from '../services/exploreService';
+import type { ExploreFilters, ExploreKind } from '../types/explore';
 
 export const useExplore = () => {
+  const client = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
-  const artistsQuery = useQuery({
-    queryKey: ['customer-explore', 'artists'],
-    queryFn: () => muaService.getArtists(),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [filters, setFilters] = useState<ExploreFilters>({});
+  const [kind, setKind] = useState<ExploreKind>('portfolio');
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  const retry = (attempt: number, error: unknown) =>
+    !(isAxiosError(error) && [400, 404, 410].includes(error.response?.status || 0)) && attempt < 1;
+  const home = useQuery({
+    queryKey: ['customer-explore', 'home'], queryFn: ({ signal }) => exploreService.home(signal),
+    staleTime: 60_000, retry,
   });
-  const feedQuery = useQuery({
-    queryKey: ['customer-explore', 'feed'],
-    queryFn: () => getFeed(1, 20),
-    select: (rawFeed): ExploreFeedItem[] => rawFeed.map((item: FeedItem) => ({
-        id: item.portfolioId,
-        muaId: item.muaId,
-        title: item.title || item.tags?.[0] || 'Phong cách nổi bật',
-        imageUrl: item.imageUrls?.[0] || '',
-        imageUrls: item.imageUrls || [],
-        authorName: item.authorName || 'Makeup Artist',
-        likesCount: item.likesCount || 0,
-        tags: item.tags || [],
-      })),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+  const results = useInfiniteQuery({
+    queryKey: ['customer-explore', 'results', kind, filters, debouncedQuery],
+    queryFn: ({ pageParam, signal }) => exploreService.search(kind, filters, debouncedQuery, pageParam, signal),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.nextCursor ?? undefined,
+    staleTime: 30_000, retry,
   });
-
-  const artists = useMemo(() => {
-    const keyword = searchQuery.trim().toLocaleLowerCase('vi');
-    if (!keyword) return artistsQuery.data || [];
-    return (artistsQuery.data || []).filter((artist) =>
-      [artist.name, artist.city, ...artist.specialties].some((value) =>
-        value?.toLocaleLowerCase('vi').includes(keyword),
-      ),
-    );
-  }, [artistsQuery.data, searchQuery]);
-
-  const feed = useMemo(() => {
-    const keyword = searchQuery.trim().toLocaleLowerCase('vi');
-    if (!keyword) return feedQuery.data || [];
-    return (feedQuery.data || []).filter((item) =>
-      [item.title, item.authorName, ...item.tags].some((value) =>
-        value?.toLocaleLowerCase('vi').includes(keyword),
-      ),
-    );
-  }, [feedQuery.data, searchQuery]);
-
-  const refetch = async () => {
-    await Promise.allSettled([artistsQuery.refetch(), feedQuery.refetch()]);
-  };
-
-  return {
-    isLoading: artistsQuery.isLoading && feedQuery.isLoading,
-    isRefreshing: artistsQuery.isRefetching || feedQuery.isRefetching,
-    artistsError: artistsQuery.error,
-    feedError: feedQuery.error,
-    isFullError: artistsQuery.isError && feedQuery.isError,
-    refetch,
-    searchQuery,
-    setSearchQuery,
-    artists,
-    feed,
+  useFocusEffect(useCallback(() => {
+    void client.invalidateQueries({ queryKey: ['customer-explore'], refetchType: 'active' });
+  }, [client]));
+  const items = useMemo(() => {
+    const seen = new Set<string>();
+    return (results.data?.pages.flatMap(page => page.items) || []).filter(item => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id); return true;
+    });
+  }, [results.data]);
+  const refetch = async () => { await Promise.allSettled([home.refetch(), results.refetch()]); };
+  const clearFilters = () => { setSearchQuery(''); setFilters({}); };
+  return { home, results, items, filters, setFilters, kind, setKind, searchQuery, setSearchQuery, clearFilters, refetch,
+    isTyping: searchQuery.trim() !== debouncedQuery,
+    isFiltered: Boolean(searchQuery.trim() || Object.values(filters).some(value => value !== undefined)),
   };
 };

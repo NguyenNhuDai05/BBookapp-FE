@@ -20,6 +20,7 @@ export const useUpdateMuaProfile = () => {
       queryClient.refetchQueries({ queryKey: ['feed'] });
       queryClient.refetchQueries({ queryKey: ['mua'] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
     },
   });
 };

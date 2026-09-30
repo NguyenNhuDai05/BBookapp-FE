@@ -7,6 +7,8 @@ const refreshServicesAndEligibility = async (queryClient: ReturnType<typeof useQ
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: ['mua-services', muaId] }),
     queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY }),
+    queryClient.invalidateQueries({ queryKey: ['customer-explore'] }),
+    queryClient.invalidateQueries({ queryKey: ['feed'] }),
   ]);
 };
 

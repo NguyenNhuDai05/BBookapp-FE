@@ -22,7 +22,7 @@ const { width } = Dimensions.get('window');
 
 export default function MuaDetailScreen() {
   const router = useRouter();
-  const { id, tab } = useLocalSearchParams<{ id: string, tab?: string }>();
+  const { id, tab, serviceId } = useLocalSearchParams<{ id: string, tab?: string, serviceId?: string }>();
   const {
     muaInfo,
     portfolio,
@@ -37,6 +37,11 @@ export default function MuaDetailScreen() {
   const [activeTab, setActiveTab] = useState(tab || 'Portfolio');
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [selectedServiceForDetail, setSelectedServiceForDetail] = useState<ServiceDto | null>(null);
+  const [dismissedServiceLink, setDismissedServiceLink] = useState<string | null>(null);
+  const serviceLink = serviceId ? `${id}:${serviceId}` : null;
+  const linkedService = serviceLink && serviceLink !== dismissedServiceLink
+    ? services?.find(item => (item.id || item.serviceId) === serviceId) : null;
+  const serviceForDetail = selectedServiceForDetail || linkedService || null;
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -347,9 +352,9 @@ export default function MuaDetailScreen() {
 
       {/* Service Detail Modal */}
       <ServiceDetailModal
-        visible={!!selectedServiceForDetail}
-        onClose={() => setSelectedServiceForDetail(null)}
-        service={selectedServiceForDetail}
+        visible={!!serviceForDetail}
+        onClose={() => { setSelectedServiceForDetail(null); setDismissedServiceLink(serviceLink); }}
+        service={serviceForDetail}
         mua={muaInfo as any}
       />
     </SafeAreaView>
