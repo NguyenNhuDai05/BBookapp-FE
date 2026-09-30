@@ -13,6 +13,7 @@ import {
   Clock,
   ArrowLeft,
   Trash2,
+  KeyRound,
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -256,6 +257,12 @@ export default function MuaSettingsScreen() {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Cài đặt ứng dụng</Text>
           <View style={styles.cardWrapper}>
+            {renderSettingRow(
+              <KeyRound size={20} color="#22152B" />,
+              "Đổi mật khẩu",
+              "Cập nhật mật khẩu đăng nhập",
+              () => router.push("/change-password" as any),
+            )}
             {renderSettingRow(
               <Bell size={20} color="#22152B" />,
               "Thông báo",

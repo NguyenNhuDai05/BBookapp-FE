@@ -8,6 +8,7 @@ import {
   History,
   LogOut,
   ShieldCheck,
+  KeyRound,
   User,
   Trash2,
 } from "lucide-react-native";
@@ -324,6 +325,12 @@ export default function ProfileScreen() {
               "Yêu thích",
               "Bài viết đã thả tim và đã lưu",
               () => router.push("/favorites" as any),
+            )}
+            {renderSettingRow(
+              <KeyRound size={20} color="#ff7c98" />,
+              "Đổi mật khẩu",
+              "Cập nhật mật khẩu đăng nhập",
+              () => router.push("/change-password" as any),
             )}
             {renderSettingRow(
               <CreditCard size={20} color="#ff7c98" />,

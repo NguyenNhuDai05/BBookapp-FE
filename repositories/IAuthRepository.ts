@@ -12,12 +12,17 @@ export interface RegisterRequest {
   password?: string;
   phone?: string;
   role?: UserRole;
+  otp: string;
 }
 
 export interface IAuthRepository {
   login(request: LoginRequest): Promise<AuthResponseDto>;
   loginWithGoogle(idToken: string): Promise<AuthResponseDto>;
   register(request: RegisterRequest): Promise<void>;
+  requestRegistrationOtp(email: string): Promise<void>;
+  requestPasswordReset(email: string): Promise<void>;
+  resetPassword(email: string, otp: string, newPassword: string): Promise<void>;
+  changePassword(currentPassword: string, newPassword: string): Promise<void>;
   getMe(): Promise<UserDto>;
   logout(): Promise<void>;
   becomeMua(request: MuaApplicationRequestDto): Promise<AuthResponseDto>;

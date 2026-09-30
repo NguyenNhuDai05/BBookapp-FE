@@ -20,6 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
 import { useAuthStore } from "../../store/useAuthStore";
 import { UserRole } from "../../types/auth";
+import { authService } from "../../services/authService";
 
 const authLogo = require("../../assets/images/B.png");
 
@@ -57,6 +58,8 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
 
   const handleGoogleToken = useCallback(
     async (idToken: string) => {
@@ -114,9 +117,21 @@ export default function RegisterScreen() {
       return;
     }
 
+    if (otpSent && !/^[0-9]{6}$/.test(otp)) {
+      setError("Vui lòng nhập đúng mã OTP gồm 6 số.");
+      return;
+    }
+
     try {
       setLoading(true);
       const trimmedEmail = email.trim();
+
+      if (!otpSent) {
+        await authService.requestRegistrationOtp(trimmedEmail);
+        setOtpSent(true);
+        Alert.alert("Đã gửi OTP", `Vui lòng kiểm tra hộp thư ${trimmedEmail}. Mã có hiệu lực trong 5 phút.`);
+        return;
+      }
 
       const success = await registerStore(
         fullName.trim(),
@@ -124,6 +139,7 @@ export default function RegisterScreen() {
         password,
         phoneNumber.trim(),
         UserRole.Customer,
+        otp,
       );
 
       if (success) {
@@ -233,6 +249,17 @@ export default function RegisterScreen() {
                 secureTextEntry
               />
 
+              {otpSent ? (
+                <AuthInput
+                  icon={<LockKeyhole size={18} color="#E46B87" />}
+                  label="Mã OTP"
+                  placeholder="Nhập 6 số trong email"
+                  value={otp}
+                  onChangeText={(value) => setOtp(value.replace(/\D/g, "").slice(0, 6))}
+                  keyboardType="phone-pad"
+                />
+              ) : null}
+
               <View style={styles.policyRow}>
                 <Pressable
                   accessibilityRole="checkbox"
@@ -264,7 +291,7 @@ export default function RegisterScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.primaryButtonText}>Tạo tài khoản</Text>
+                  <Text style={styles.primaryButtonText}>{otpSent ? "Xác nhận & tạo tài khoản" : "Gửi mã OTP"}</Text>
                 )}
               </TouchableOpacity>
 

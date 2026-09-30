@@ -21,7 +21,7 @@ interface AuthState {
   logout: () => Promise<void>;
   expireSession: () => Promise<void>;
   deleteAccount: () => Promise<void>;
-  register: (fullName: string, email: string, password?: string, phone?: string, role?: UserRole) => Promise<boolean>;
+  register: (fullName: string, email: string, password: string, phone: string, role: UserRole, otp: string) => Promise<boolean>;
   activeMode: 'CUSTOMER' | 'MUA';
   switchMode: (mode: 'CUSTOMER' | 'MUA') => void;
   updateUser: (user: Partial<UserDto>) => void;
@@ -144,11 +144,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async (fullName: string, email: string, password?: string, phone?: string, role?: UserRole) => {
+  register: async (fullName: string, email: string, password: string, phone: string, role: UserRole, otp: string) => {
     try {
       set({ isLoading: true });
 
-      await authService.register({ fullName, email, password, phone, role });
+      await authService.register({ fullName, email, password, phone, role, otp });
       set({ isLoading: false });
 
       return true;

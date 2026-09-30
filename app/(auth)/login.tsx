@@ -158,6 +158,10 @@ export default function LoginScreen() {
                 error={errors.password}
               />
 
+              <Pressable onPress={() => router.push("/(auth)/forgot-password" as any)}>
+                <Text style={styles.forgotText}>Quên mật khẩu?</Text>
+              </Pressable>
+
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={handleLogin}
@@ -370,6 +374,7 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
   },
+  forgotText: { color: "#D93D72", fontWeight: "800", textAlign: "right", marginTop: -6, marginBottom: 14 },
   disabled: { opacity: 0.72 },
   primaryButtonText: { color: "#fff", fontSize: 15, fontWeight: "900" },
   dividerRow: {
