@@ -5,6 +5,7 @@ import type { UserDto } from "../types/auth";
 import { UserRole } from "../types/auth";
 import { queryClient } from "../lib/queryClient";
 import { NotificationService } from "../services/NotificationService";
+import { signalRService } from "../services/signalRService";
 import type { MuaApplicationRequestDto } from "../types/onboarding";
 
 const TOKEN_KEY = "user_jwt_token";
@@ -160,6 +161,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
+      await signalRService.disconnect();
       await NotificationService.unregisterDevice();
       await authService.logout();
     } finally {

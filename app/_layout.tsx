@@ -27,12 +27,17 @@ export default function RootLayout() {
     if (!isAuthenticated) return;
 
     let removeNotificationListener: (() => void) | undefined;
+    let removePushTokenListener: (() => void) | undefined;
     let isDisposed = false;
 
     NotificationService.registerDevice().catch(error => console.warn('Không thể đăng ký push token', error));
+    NotificationService.addPushTokenListener().then(remove => {
+      if (isDisposed) remove();
+      else removePushTokenListener = remove;
+    });
 
     NotificationService.addNavigationListener(url => {
-      if (url.startsWith('/booking/')) router.push(url as `/booking/${string}`);
+      if (url.startsWith('/booking/') || url.startsWith('/chat/')) router.push(url as never);
     }).then(remove => {
       if (isDisposed) remove();
       else removeNotificationListener = remove;
@@ -41,6 +46,7 @@ export default function RootLayout() {
     return () => {
       isDisposed = true;
       removeNotificationListener?.();
+      removePushTokenListener?.();
     };
   }, [isAuthenticated]);
 

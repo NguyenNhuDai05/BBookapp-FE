@@ -3,6 +3,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { api } from './api';
+import { getSafeNotificationRoute } from './notificationRoutes';
 
 const STORED_EXPO_PUSH_TOKEN_KEY = 'expo_push_token';
 
@@ -121,6 +122,15 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
 }
 
 export class NotificationService {
+  private static async syncDeviceToken(token: string): Promise<void> {
+    await AsyncStorage.setItem(STORED_EXPO_PUSH_TOKEN_KEY, token);
+    await api.post('/Notification/device-token', {
+      expoPushToken: token,
+      platform: Platform.OS,
+      deviceName: Constants.deviceName ?? undefined,
+    });
+  }
+
   static async getInbox(take = 50): Promise<InboxNotification[]> {
     const response = await api.get<InboxNotification[]>('/Notification', { params: { take } });
     return response.data;
@@ -144,15 +154,27 @@ export class NotificationService {
     if (!token) return null;
 
     try {
-      await api.post('/Notification/device-token', {
-        expoPushToken: token,
-        platform: Platform.OS,
-        deviceName: Constants.deviceName ?? undefined,
-      });
+      await this.syncDeviceToken(token);
       return token;
     } catch (error: unknown) {
       console.warn('Unable to register the push token with BBook.', error);
       return null;
+    }
+  }
+
+  static async addPushTokenListener(): Promise<() => void> {
+    try {
+      const Notifications = await getNotifications();
+      if (!Notifications) return () => undefined;
+      const subscription = Notifications.addPushTokenListener(token => {
+        if (typeof token.data !== 'string') return;
+        void this.syncDeviceToken(token.data).catch(error =>
+          console.warn('Unable to refresh the push token with BBook.', error));
+      });
+      return () => subscription.remove();
+    } catch (error: unknown) {
+      console.warn('Unable to listen for push token changes.', error);
+      return () => undefined;
     }
   }
 
@@ -179,12 +201,21 @@ export class NotificationService {
       if (!Notifications) return () => undefined;
 
       const openNotification = (notification: import('expo-notifications').Notification) => {
-        const url = notification.request.content.data?.url;
-        if (typeof url === 'string') onUrl(url);
+        const notificationData = notification.request.content.data;
+        const notificationId = notificationData?.notificationId;
+        if (typeof notificationId === 'string') {
+          void this.markRead(notificationId).catch(error =>
+            console.warn('Unable to mark the opened notification as read.', error));
+        }
+        const url = getSafeNotificationRoute(notificationData?.url);
+        if (url) onUrl(url);
       };
 
       const lastResponse = Notifications.getLastNotificationResponse();
-      if (lastResponse?.notification) openNotification(lastResponse.notification);
+      if (lastResponse?.notification) {
+        openNotification(lastResponse.notification);
+        await Notifications.clearLastNotificationResponseAsync();
+      }
 
       const subscription = Notifications.addNotificationResponseReceivedListener(
         response => openNotification(response.notification),

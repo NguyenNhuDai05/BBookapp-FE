@@ -10,6 +10,7 @@ export interface ChatRoomDto {
     muaAvatar?: string;
     createdAt: string;
     lastMessage?: MessageDto;
+    unreadCount: number;
 }
 
 export interface MessageDto {
@@ -21,9 +22,10 @@ export interface MessageDto {
     replyToMessageId?: string;
     replyToContent?: string;
     replyToImageUrl?: string;
-    reactions: { emoji: string; count: number; reactedByMe: boolean }[];
+    reactions: { emoji: string; count: number; reactedByMe: boolean; userIds?: string[] }[];
     sentAt: string;
     isRead: boolean;
+    readAt?: string;
 }
 
 export const chatService = {
@@ -37,8 +39,8 @@ export const chatService = {
         return response.data;
     },
 
-    getMessages: async (roomId: string) => {
-        const response = await api.get<MessageDto[]>(`/chat/rooms/${roomId}/messages`);
+    getMessages: async (roomId: string, before?: string, limit = 50) => {
+        const response = await api.get<MessageDto[]>(`/chat/rooms/${roomId}/messages`, { params: { before, limit } });
         return response.data;
     },
 
@@ -52,18 +54,14 @@ export const chatService = {
         return response.data;
     },
 
+    markRead: async (roomId: string) => {
+        await api.post(`/chat/rooms/${roomId}/read`);
+    },
+
     uploadImage: async (uri: string) => {
         const form = new FormData();
         form.append('file', { uri, name: `chat-${Date.now()}.jpg`, type: 'image/jpeg' } as any);
         const response = await api.post<{ url: string }>('/Upload/image', form, { headers: { 'Content-Type': 'multipart/form-data' } });
         return response.data.url;
-    },
-    
-    joinRoomGroup: async (roomId: string, connectionId: string) => {
-        await api.post(`/chat/rooms/${roomId}/join?connectionId=${connectionId}`);
-    },
-
-    leaveRoomGroup: async (roomId: string, connectionId: string) => {
-        await api.post(`/chat/rooms/${roomId}/leave?connectionId=${connectionId}`);
     }
 };

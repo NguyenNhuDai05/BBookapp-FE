@@ -1,65 +1,68 @@
 import * as signalR from '@microsoft/signalr';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from './api'; // Ensure this exports the base URL
+import { API_URL } from './api';
 
-export type MessageReceivedCallback = (message: any) => void;
+export type RealtimeCallback<T = any> = (payload: T) => void;
 
 class SignalRService {
-    private connection: signalR.HubConnection | null = null;
-    private onMessageReceivedCallbacks: MessageReceivedCallback[] = [];
-    private onMessageUpdatedCallbacks: MessageReceivedCallback[] = [];
+  private connection: signalR.HubConnection | null = null;
+  private connectPromise: Promise<void> | null = null;
+  private joinedRooms = new Set<string>();
+  private messageCallbacks = new Set<RealtimeCallback>();
+  private updateCallbacks = new Set<RealtimeCallback>();
+  private readCallbacks = new Set<RealtimeCallback>();
+  private typingCallbacks = new Set<RealtimeCallback>();
 
-    public async connect() {
-        if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
-            return;
-        }
-
-        const token = await AsyncStorage.getItem('user_jwt_token');
-        
-        // Remove trailing /api if present, and add /chathub
-        const hubUrl = API_URL.replace('/api', '') + '/chathub';
-
-        this.connection = new signalR.HubConnectionBuilder()
-            .withUrl(hubUrl, {
-                accessTokenFactory: () => token || '',
-            })
-            .withAutomaticReconnect()
-            .build();
-
-        this.connection.on('ReceiveMessage', (message) => {
-            this.onMessageReceivedCallbacks.forEach(cb => cb(message));
-        });
-        this.connection.on('MessageUpdated', (message) => this.onMessageUpdatedCallbacks.forEach(cb => cb(message)));
-
-        try {
-            await this.connection.start();
-            console.log('SignalR Connected.');
-        } catch (err) {
-            console.error('SignalR Connection Error: ', err);
-            setTimeout(() => this.connect(), 5000);
-        }
+  async connect(): Promise<void> {
+    if (this.connection?.state === signalR.HubConnectionState.Connected) return;
+    if (this.connectPromise) return this.connectPromise;
+    if (!this.connection) {
+      const hubUrl = API_URL.replace(/\/api\/?$/, '') + '/chathub';
+      this.connection = new signalR.HubConnectionBuilder()
+        .withUrl(hubUrl, { accessTokenFactory: async () => (await AsyncStorage.getItem('user_jwt_token')) || '' })
+        .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+        .configureLogging(__DEV__ ? signalR.LogLevel.Information : signalR.LogLevel.Warning)
+        .build();
+      this.connection.on('ReceiveMessage', payload => this.messageCallbacks.forEach(cb => cb(payload)));
+      this.connection.on('MessageUpdated', payload => this.updateCallbacks.forEach(cb => cb(payload)));
+      this.connection.on('MessagesRead', payload => this.readCallbacks.forEach(cb => cb(payload)));
+      this.connection.on('TypingChanged', payload => this.typingCallbacks.forEach(cb => cb(payload)));
+      this.connection.onreconnected(() => { void this.rejoinRooms(); });
     }
+    this.connectPromise = this.connection.start().then(() => undefined).finally(() => { this.connectPromise = null; });
+    return this.connectPromise;
+  }
 
-    public getConnectionId(): string | null {
-        return this.connection?.connectionId || null;
-    }
+  private async rejoinRooms() {
+    if (this.connection?.state !== signalR.HubConnectionState.Connected) return;
+    await Promise.all([...this.joinedRooms].map(roomId => this.connection!.invoke('JoinRoom', roomId)));
+  }
 
-    public onMessageReceived(callback: MessageReceivedCallback) {
-        this.onMessageReceivedCallbacks.push(callback);
-    }
+  async joinRoom(roomId: string) {
+    this.joinedRooms.add(roomId);
+    await this.connect();
+    await this.connection!.invoke('JoinRoom', roomId);
+  }
 
-    public offMessageReceived(callback: MessageReceivedCallback) {
-        this.onMessageReceivedCallbacks = this.onMessageReceivedCallbacks.filter(cb => cb !== callback);
-    }
-    public onMessageUpdated(callback: MessageReceivedCallback) { this.onMessageUpdatedCallbacks.push(callback); }
-    public offMessageUpdated(callback: MessageReceivedCallback) { this.onMessageUpdatedCallbacks = this.onMessageUpdatedCallbacks.filter(cb => cb !== callback); }
+  async leaveRoom(roomId: string) {
+    this.joinedRooms.delete(roomId);
+    if (this.connection?.state === signalR.HubConnectionState.Connected) await this.connection.invoke('LeaveRoom', roomId);
+  }
 
-    public async disconnect() {
-        if (this.connection) {
-            await this.connection.stop();
-            this.connection = null;
-        }
-    }
+  async setTyping(roomId: string, isTyping: boolean) {
+    if (this.connection?.state === signalR.HubConnectionState.Connected) await this.connection.invoke('Typing', roomId, isTyping);
+  }
+
+  onMessageReceived(callback: RealtimeCallback) { this.messageCallbacks.add(callback); return () => { this.messageCallbacks.delete(callback); }; }
+  onMessageUpdated(callback: RealtimeCallback) { this.updateCallbacks.add(callback); return () => { this.updateCallbacks.delete(callback); }; }
+  onMessagesRead(callback: RealtimeCallback) { this.readCallbacks.add(callback); return () => { this.readCallbacks.delete(callback); }; }
+  onTypingChanged(callback: RealtimeCallback) { this.typingCallbacks.add(callback); return () => { this.typingCallbacks.delete(callback); }; }
+
+  async disconnect() {
+    this.joinedRooms.clear();
+    if (this.connection) await this.connection.stop();
+    this.connection = null;
+  }
 }
 
 export const signalRService = new SignalRService();
