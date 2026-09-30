@@ -10,13 +10,6 @@ const validForm = {
   avatarUrl: 'https://cdn.example.com/avatar.jpg',
   styleIds: [1, 2],
   address: '123 Nguyễn Huệ, Quận 1',
-  identityFrontUrl: 'https://cdn.example.com/front.jpg',
-  identityBackUrl: 'https://cdn.example.com/back.jpg',
-  portraitUrl: 'https://cdn.example.com/portrait.jpg',
-  certificateUrls: [],
-  portfolioUrls: ['https://cdn.example.com/work.jpg'],
-  services: [{ name: 'Trang điểm cô dâu', price: 1500000, durationMinutes: 90 }],
-  bankAccount: { bankCode: 'VCB', accountNumber: '123456789', accountHolderName: 'NGUYEN THI LINH' },
 };
 
 describe('MUA onboarding validation', () => {
@@ -32,12 +25,6 @@ describe('MUA onboarding validation', () => {
     ['avatarUrl', { avatarUrl: '' }],
     ['styleIds', { styleIds: [] }],
     ['address', { address: '' }],
-    ['identityFrontUrl', { identityFrontUrl: '' }],
-    ['identityBackUrl', { identityBackUrl: '' }],
-    ['portraitUrl', { portraitUrl: '' }],
-    ['portfolioUrls', { portfolioUrls: [] }],
-    ['services', { services: [] }],
-    ['accountNumber', { bankAccount: { ...validForm.bankAccount, accountNumber: '1' } }],
   ])('rejects invalid %s', (field, override) => {
     expect(validateMuaOnboarding({ ...validForm, ...override })).toHaveProperty(field);
   });

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { muaEligibilityService } from '../services/muaEligibilityService';
 import { api } from '../services/api';
 import type { MuaEligibility } from '../types/muaEligibility';
+import type { MuaIdentityVerificationRequestDto } from '../types/onboarding';
 
 export const MUA_ELIGIBILITY_QUERY_KEY = ['mua', 'eligibility'] as const;
 
@@ -12,6 +13,14 @@ export function useMuaEligibility(enabled = true) {
     enabled,
     staleTime: 30_000,
     retry: 1,
+  });
+}
+
+export function useSaveMuaIdentity() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (request: MuaIdentityVerificationRequestDto) => (await api.put('/Mua/verification/identity', request)).data as MuaEligibility,
+    onSuccess: data => client.setQueryData(MUA_ELIGIBILITY_QUERY_KEY, data),
   });
 }
 
