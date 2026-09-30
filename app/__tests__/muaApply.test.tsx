@@ -5,6 +5,8 @@ import * as Location from 'expo-location';
 import MuaApplyScreen from '../mua-onboarding/apply';
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn(), replace: jest.fn() }) }));
+jest.mock('../../components/location/LocationPicker', () => ({ LocationPicker: () => null }));
+jest.mock('../../services/locationService', () => ({ locationService: { catalog: jest.fn().mockResolvedValue(require('../../data/operatingAreas.json')) } }));
 jest.mock('expo-image-picker', () => ({ requestMediaLibraryPermissionsAsync: jest.fn(), launchImageLibraryAsync: jest.fn() }));
 jest.mock('expo-location', () => ({ requestForegroundPermissionsAsync: jest.fn(), getCurrentPositionAsync: jest.fn(), reverseGeocodeAsync: jest.fn(), Accuracy: { Balanced: 3 } }));
 jest.mock('../../store/useAuthStore', () => ({ useAuthStore: (selector: any) => selector({ user: { name: 'Hoàng', email: 'hoang@example.com', avatarUrl: 'https://example.com/avatar.jpg' } }) }));
@@ -16,7 +18,7 @@ jest.mock('../../services/api', () => ({ getApiError: () => ({ message: 'Lỗi' 
 jest.mock('../../components/ui/dialogStore', () => ({ AppAlert: { alert: jest.fn() } }));
 jest.mock('../../components/ui/AppBottomSheet', () => ({ AppBottomSheet: ({ visible, children }: any) => visible ? children : null }));
 
-const Wrapper = ({ children }: React.PropsWithChildren) => <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>;
+const Wrapper = ({ children }: React.PropsWithChildren) => <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } })}>{children}</QueryClientProvider>;
 
 it('prefills Customer identity, keeps email read-only and does not request GPS on mount', async () => {
   await render(<MuaApplyScreen />, { wrapper: Wrapper });
@@ -31,11 +33,15 @@ it('prefills Customer identity, keeps email read-only and does not request GPS o
 
 it('changes the operating district options when a province is selected', async () => {
   await render(<MuaApplyScreen />, { wrapper: Wrapper });
-  await fireEvent.press(screen.getByText('Chọn tỉnh / thành phố'));
+  await fireEvent.press(screen.getByRole('button', { name: /Chọn tỉnh \/ thành phố/ }));
   await fireEvent.press(screen.getByText('Thành phố Hồ Chí Minh'));
   await fireEvent.press(screen.getByText('Chọn quận / huyện'));
-  await fireEvent.press(screen.getByText('Quận Bình Thạnh'));
-  expect(screen.getByText('Quận Bình Thạnh')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('checkbox', { name: /Quận Bình Thạnh/ }));
+  await fireEvent.press(screen.getByRole('checkbox', { name: /Quận Gò Vấp/ }));
+  expect(screen.getByRole('checkbox', { name: /Quận Bình Thạnh/ }).props.accessibilityState.checked).toBe(true);
+  expect(screen.getByRole('checkbox', { name: /Quận Gò Vấp/ }).props.accessibilityState.checked).toBe(true);
+  await fireEvent.press(screen.getByText('Xong'));
+  expect(screen.getByText('Chọn thêm khu vực (2)')).toBeTruthy();
 });
 
 it('shows only a few suggestions initially and prevents choosing a sixth style', async () => {

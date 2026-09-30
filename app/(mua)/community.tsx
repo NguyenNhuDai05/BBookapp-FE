@@ -177,7 +177,11 @@ export default function MuaCommunityScreen() {
         }}
         onEndReachedThreshold={0.5}
         ListEmptyComponent={<View style={styles.empty}><UsersRound size={42} color={BrandColors.borderPink} /><Text style={styles.emptyTitle}>Chưa có bài viết</Text><Text style={styles.emptyText}>Các tác phẩm công khai của MUA sẽ xuất hiện tại đây.</Text></View>}
-        ListFooterComponent={isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={BrandColors.accentPink} /> : null}
+        ListFooterComponent={isFetchingNextPage ? <ActivityIndicator style={styles.footer} color={BrandColors.accentPink} /> : hasNextPage ? (
+          <TouchableOpacity accessibilityRole="button" onPress={() => void fetchNextPage({ cancelRefetch: false })} style={{ padding: 20, alignItems: 'center' }}>
+            <Text style={{ color: BrandColors.accentPink, fontWeight: '700' }}>Xem thêm bài viết</Text>
+          </TouchableOpacity>
+        ) : posts.length > 0 ? <Text style={{ padding: 20, textAlign: 'center', color: BrandColors.textMuted }}>Bạn đã xem hết các bài viết hiện có.</Text> : null}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />

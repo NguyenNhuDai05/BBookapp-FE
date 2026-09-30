@@ -21,6 +21,7 @@ export function useMuaPortfolio(muaId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
     onError: () => {
       appDialog.alert('Lỗi', 'Không thể thêm ảnh vào portfolio.');
@@ -33,6 +34,7 @@ export function useMuaPortfolio(muaId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
   });
 
@@ -41,6 +43,7 @@ export function useMuaPortfolio(muaId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
     onError: () => {
       appDialog.alert('Lỗi', 'Không thể xóa ảnh khỏi portfolio.');
@@ -52,6 +55,7 @@ export function useMuaPortfolio(muaId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
   });
 
