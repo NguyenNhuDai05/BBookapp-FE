@@ -1,3 +1,4 @@
+import type { OperatingArea } from './location';
 export interface PortfolioImage {
   id: string;
   localUri: string;
@@ -31,7 +32,7 @@ export interface MuaDraft {
   };
 }
 
-export interface MuaApplicationRequestDto {
+export interface MuaApplicationRequestDto extends OperatingArea {
   displayName: string;
   phoneNumber?: string;
   city: string;

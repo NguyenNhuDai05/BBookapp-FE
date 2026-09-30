@@ -46,7 +46,7 @@ export default function EditProfileScreen() {
         setBio(profile.bio || '');
         setPhoneNumber(profile.phoneNumber || '');
         setCity(profile.city || '');
-        setArea({ city: profile.city || '', district: profile.district, provinceCode: profile.provinceCode, districtCode: profile.districtCode });
+        setArea({ ...profile, city: profile.city || '' });
         setExperienceLevel(profile.experienceLevel);
         setExperienceYears(String(profile.experienceYears || ''));
         setStyleIds(profile.specialties?.map(item => item.styleId) || []);
@@ -63,14 +63,14 @@ export default function EditProfileScreen() {
   const { mutateAsync: updateProfile, isPending } = useUpdateMuaProfile();
   const isSaving = isPending || isUploading;
   const initialStyleIds = profile?.specialties?.map(item => item.styleId) || [];
-  const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && area.district === profile?.district && experienceLevel === profile?.experienceLevel && experienceYears === String(profile?.experienceYears || '') && JSON.stringify([...styleIds].sort()) === JSON.stringify([...initialStyleIds].sort()) && instagramUrl === (profile?.instagramUrl || '') && facebookUrl === (profile?.facebookUrl || '');
+  const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && JSON.stringify(area.operatingAreaIds || []) === JSON.stringify(profile?.operatingAreaIds || []) && area.latitude === profile?.latitude && area.longitude === profile?.longitude && area.publicMeetingPoint === profile?.publicMeetingPoint && area.operatingLocationLabel === profile?.operatingLocationLabel && area.operatingProvinceCode === profile?.operatingProvinceCode && !area.clearOperatingLocation && experienceLevel === profile?.experienceLevel && experienceYears === String(profile?.experienceYears || '') && JSON.stringify([...styleIds].sort()) === JSON.stringify([...initialStyleIds].sort()) && instagramUrl === (profile?.instagramUrl || '') && facebookUrl === (profile?.facebookUrl || '');
 
   const handleSave = async () => {
     if (!name.trim()) {
       setFormError('Vui lòng nhập tên hiển thị.');
       return;
     }
-    if (area.provinceCode && !area.districtCode) { setFormError('Vui lòng chọn quận/huyện.'); return; }
+    if (area.operatingProvinceCode && !area.operatingAreaIds?.length) { setFormError('Vui lòng chọn khu vực nhận khách.'); return; }
     setFormError('');
     const normalizedInstagram = normalizeSocialUrl(instagramUrl, 'instagram');
     const normalizedFacebook = normalizeSocialUrl(facebookUrl, 'facebook');

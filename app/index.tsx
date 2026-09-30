@@ -1,6 +1,6 @@
 import { Asset } from "expo-asset";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Location from "expo-location";
+
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { Dimensions, Image, Platform, StyleSheet, View } from "react-native";
@@ -44,14 +44,6 @@ export default function SplashScreen() {
           require("../assets/images/logo-bbook.png"),
         ]).catch((err) => console.log("Bỏ qua lỗi tải ảnh:", err));
 
-        const { status } =
-          await Location.requestForegroundPermissionsAsync().catch(() => ({
-            status: "denied",
-          }));
-
-        if (status !== "granted") {
-          console.log("Quyền vị trí bị từ chối.");
-        }
       } catch (error) {
         console.error("Lỗi khởi tạo:", error);
       } finally {

@@ -229,7 +229,11 @@ export default function HomeScreen() {
             }
           }}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={isFetchingNextPage ? <ActivityIndicator style={{ margin: 20 }} color={BrandColors.accentPink} /> : null}
+          ListFooterComponent={isFetchingNextPage ? <ActivityIndicator style={{ margin: 20 }} color={BrandColors.accentPink} /> : hasNextPage ? (
+            <TouchableOpacity accessibilityRole="button" onPress={() => void fetchNextPage({ cancelRefetch: false })} style={{ padding: 20, alignItems: 'center' }}>
+              <Text style={{ color: BrandColors.accentPink, fontWeight: '700' }}>Xem thêm bài viết</Text>
+            </TouchableOpacity>
+          ) : posts.length > 0 ? <Text style={{ padding: 20, textAlign: 'center', color: BrandColors.textMuted }}>Bạn đã xem hết các bài viết hiện có.</Text> : null}
           contentContainerStyle={{ paddingBottom: tabBarHeight + 16 }}
         />
         <PostActionSheet visible={Boolean(optionsPost)} authorName={optionsPost?.authorName} onClose={() => setOptionsPost(null)} />

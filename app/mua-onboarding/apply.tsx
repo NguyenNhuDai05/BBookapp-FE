@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
+import { OperatingAreaFields } from '../../components/mua/OperatingAreaFields';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Camera, ChevronDown, MapPin, Plus, X } from 'lucide-react-native';
+import { ArrowLeft, Camera, Plus, X } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,7 +17,7 @@ import { getApiError } from '../../services/api';
 import { useAuthStore } from '../../store/useAuthStore';
 import type { MuaApplicationRequestDto } from '../../types/onboarding';
 import { validateMuaOnboarding } from '../../utils/muaOnboarding';
-import { EXPERIENCE_LEVELS, matchMuaArea, muaAreas, normalizeAreaName } from '../../utils/muaAreas';
+import { EXPERIENCE_LEVELS, normalizeAreaName } from '../../utils/muaAreas';
 
 export default function MuaApplyScreen() {
   const router = useRouter();
@@ -27,9 +27,8 @@ export default function MuaApplyScreen() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<MuaApplicationRequestDto>({ displayName: user?.name || '', city: '', bio: '', avatarUrl: user?.avatarUrl || user?.avatar || '', styleIds: [] });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [sheet, setSheet] = useState<'province' | 'district' | 'styles' | null>(null);
+  const [sheet, setSheet] = useState<'styles' | null>(null);
   const [search, setSearch] = useState('');
-  const [locating, setLocating] = useState(false);
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
   const saveLock = useRef(false);
@@ -37,7 +36,6 @@ export default function MuaApplyScreen() {
   const scroll = useRef<ScrollView>(null);
   const allStyles = stylesQuery.data || [];
   const selected = allStyles.filter(item => form.styleIds.includes(item.styleId));
-  const province = muaAreas.find(item => item.code === form.provinceCode);
   const setField = <K extends keyof MuaApplicationRequestDto>(key: K, value: MuaApplicationRequestDto[K]) => {
     setForm(current => ({ ...current, [key]: value }));
     setErrors(current => ({ ...current, [key]: '', submit: '' }));
@@ -57,24 +55,6 @@ export default function MuaApplyScreen() {
       if (!result.canceled && result.assets[0]) setField('avatarUrl', result.assets[0].uri);
     } catch (error) { appDialog.alert('Không thể chọn ảnh', getApiError(error).message); }
   };
-  const locate = async () => {
-    if (locating) return;
-    setLocating(true);
-    try {
-      const permission = await Location.requestForegroundPermissionsAsync();
-      if (permission.status !== 'granted') return appDialog.alert('Chưa có quyền vị trí', 'Bạn vẫn có thể chọn khu vực thủ công.');
-      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      const [address] = await Location.reverseGeocodeAsync(position.coords);
-      const match = matchMuaArea(address?.region, address?.city, address?.district || address?.subregion);
-      if (!match.province) return appDialog.alert('Chưa tìm thấy khu vực', 'Vui lòng chọn tỉnh/thành và quận/huyện thủ công.');
-      setForm(current => ({ ...current, city: match.province!.name, provinceCode: match.province!.code,
-        district: match.district?.name, districtCode: match.district?.code,
-        latitude: position.coords.latitude, longitude: position.coords.longitude }));
-      setErrors(current => ({ ...current, city: '', district: '' }));
-      if (!match.district) appDialog.alert('Đã gợi ý tỉnh/thành', 'Vui lòng chọn thêm quận/huyện nơi bạn thường nhận khách.');
-    } catch { appDialog.alert('Không thể lấy vị trí', 'Kiểm tra GPS hoặc chọn khu vực thủ công.'); }
-    finally { setLocating(false); }
-  };
   const createStyle = async () => {
     const name = search.trim().replace(/\s+/g, ' ');
     if (!name || name.length > 100 || tagLock.current || form.styleIds.length >= 5) return;
@@ -90,7 +70,7 @@ export default function MuaApplyScreen() {
   const save = async () => {
     if (saveLock.current) return;
     const next = validateMuaOnboarding(form);
-    if (!form.districtCode) next.district = 'Vui lòng chọn quận/huyện.';
+    if (!form.operatingProvinceCode || !form.operatingAreaIds?.length) next.district = 'Vui lòng chọn ít nhất một khu vực nhận khách.';
     if (!user?.email) next.submit = 'Không tìm thấy email tài khoản. Vui lòng đăng nhập lại.';
     setErrors(next);
     if (Object.keys(next).length) { scroll.current?.scrollTo({ y: 0, animated: true }); return appDialog.alert('Thông tin chưa hoàn tất', Object.values(next)[0]); }
@@ -109,7 +89,6 @@ export default function MuaApplyScreen() {
   })}</View>;
   const fieldError = (key: string) => errors[key] ? <Text style={s.error}>{errors[key]}</Text> : null;
   const filteredStyles = allStyles.filter(item => normalizeAreaName(item.name).includes(normalizeAreaName(search)));
-  const areas = sheet === 'district' ? province?.districts || [] : muaAreas;
   const exactTag = allStyles.some(item => item.name.trim().toLocaleLowerCase() === search.trim().toLocaleLowerCase());
 
   return <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
@@ -126,11 +105,11 @@ export default function MuaApplyScreen() {
           <Text style={s.section}>2. Tên hiển thị *</Text><Text style={s.label}>Tên hiển thị</Text>
           <TextInput value={form.displayName} onChangeText={value => setField('displayName', value)} maxLength={100} placeholder="Tên Customer sẽ nhìn thấy" style={s.input} />{fieldError('displayName')}
           <Text style={s.label}>Email</Text><TextInput value={user?.email || ''} editable={false} style={[s.input, s.readonly]} />
-          <Text style={s.section}>3. Khu vực hoạt động *</Text><Text style={s.label}>Tỉnh / Thành phố</Text>
-          <TouchableOpacity style={s.select} onPress={() => open('province')}><Text style={s.selectText}>{form.city || 'Chọn tỉnh / thành phố'}</Text><ChevronDown size={18} color={BrandColors.textMuted} /></TouchableOpacity>{fieldError('city')}
-          <Text style={s.label}>Quận / Huyện</Text><TouchableOpacity disabled={!province} style={[s.select, !province && s.disabled]} onPress={() => open('district')}><Text style={s.selectText}>{form.district || 'Chọn quận / huyện'}</Text><ChevronDown size={18} color={BrandColors.textMuted} /></TouchableOpacity>{fieldError('district')}
-          <TouchableOpacity disabled={locating} onPress={locate} style={s.location}>{locating ? <ActivityIndicator color={BrandColors.accentRose} /> : <MapPin size={18} color={BrandColors.accentRose} />}<Text style={s.link}>Sử dụng vị trí hiện tại</Text></TouchableOpacity>
-          <Text style={s.helper}>Khu vực chính nơi bạn thường nhận khách. Bạn có thể thay đổi sau.</Text>
+          <Text style={s.section}>3. Khu vực hoạt động *</Text>
+          <OperatingAreaFields value={form} onChange={area => { setForm(current => ({ ...current, ...area,
+            provinceCode: area.provinceCode, district: area.district, districtCode: area.districtCode,
+            latitude: area.latitude, longitude: area.longitude, operatingLocationConfirmed: area.operatingLocationConfirmed,
+            publicMeetingPoint: area.publicMeetingPoint, operatingLocationLabel: area.operatingLocationLabel })); setErrors(current => ({ ...current, city: '', district: '' })); }} />{fieldError('city')}{fieldError('district')}
           <Text style={s.section}>4. Giới thiệu về bạn</Text><TextInput value={form.bio} onChangeText={value => setField('bio', value)} multiline maxLength={500} placeholder="Chia sẻ ngắn về kinh nghiệm, phong cách và thế mạnh makeup của bạn..." style={[s.input, s.textarea]} /><Text style={s.counter}>{form.bio.length}/500</Text>{fieldError('bio')}
           <Text style={s.section}>5. Kinh nghiệm</Text><Text style={s.helper}>Chọn mức phù hợp với bạn</Text>
           <View style={s.chips}>{EXPERIENCE_LEVELS.map(item => <TouchableOpacity key={item.value} onPress={() => setField('experienceLevel', item.value)} accessibilityRole="radio" accessibilityState={{ checked: form.experienceLevel === item.value }} style={[s.chip, form.experienceLevel === item.value && s.chipActive]}><Text style={[s.chipText, form.experienceLevel === item.value && s.chipTextActive]}>{item.label}</Text></TouchableOpacity>)}</View>
@@ -145,17 +124,14 @@ export default function MuaApplyScreen() {
         <Text style={[s.helper, s.center]}>Bạn có thể tiếp tục hoàn thiện hồ sơ sau.</Text>
       </ScrollView>
     </KeyboardAvoidingView>
-    <AppBottomSheet visible={sheet !== null} title={sheet === 'styles' ? 'Thêm phong cách' : sheet === 'district' ? 'Chọn quận / huyện' : 'Chọn tỉnh / thành phố'} onClose={() => setSheet(null)} loading={creating}>
-      <TextInput value={search} onChangeText={setSearch} placeholder={sheet === 'styles' ? 'Tìm phong cách...' : 'Tìm khu vực...'} maxLength={100} style={s.input} />
+    <AppBottomSheet visible={sheet !== null} title='Thêm phong cách' onClose={() => setSheet(null)} loading={creating}>
+      <TextInput value={search} onChangeText={setSearch} placeholder='Tìm phong cách...' maxLength={100} style={s.input} />
       <ScrollView keyboardShouldPersistTaps="handled" style={s.sheetScroll}>
-        {sheet === 'styles' ? <>
+        <>
           <Text style={s.label}>Đã chọn {form.styleIds.length}/5</Text>{chips(selected, true)}<Text style={s.label}>{search.trim() ? 'Kết quả tìm kiếm' : 'Gợi ý'}</Text>{chips(filteredStyles)}
           {search.trim() && !exactTag && <><Text style={s.helper}>{filteredStyles.length ? 'Bạn có thể thêm phong cách mới.' : 'Không tìm thấy phong cách này'}</Text><TouchableOpacity disabled={creating || form.styleIds.length >= 5} style={[s.location, form.styleIds.length >= 5 && s.disabled]} onPress={createStyle}>{creating ? <ActivityIndicator color={BrandColors.accentRose} /> : <Plus size={18} color={BrandColors.accentRose} />}<Text style={s.link}>Thêm “{search.trim()}”</Text></TouchableOpacity></>}
           {form.styleIds.length >= 5 && <Text style={s.helper}>Đã chọn đủ 5 phong cách. Bỏ một phong cách để thêm mới.</Text>}
-        </> : <><Text style={s.helper}>Danh mục tỉnh/thành và quận/huyện theo cách gọi trước sáp nhập.</Text>{areas.filter(item => normalizeAreaName(item.name).includes(normalizeAreaName(search))).map(item => <TouchableOpacity key={item.code} style={s.areaRow} onPress={() => {
-          setForm(current => sheet === 'province' ? { ...current, city: item.name, provinceCode: item.code, district: undefined, districtCode: undefined, latitude: undefined, longitude: undefined } : { ...current, district: item.name, districtCode: item.code, latitude: undefined, longitude: undefined });
-          setErrors(current => ({ ...current, city: '', district: '' })); setSheet(null);
-        }}><Text style={s.selectText}>{item.name}</Text></TouchableOpacity>)}</>}
+        </>
       </ScrollView>
       {sheet === 'styles' && <TouchableOpacity disabled={creating} onPress={() => setSheet(null)} style={s.primary}><Text style={s.primaryText}>Xong</Text></TouchableOpacity>}
     </AppBottomSheet>
@@ -179,3 +155,4 @@ const s = StyleSheet.create({
   primary: { minHeight: 52, borderRadius: 14, backgroundColor: BrandColors.accentRose, alignItems: 'center', justifyContent: 'center', marginVertical: 12 }, primaryText: { color: '#FFF', fontSize: 16, fontWeight: '800' }, disabled: { opacity: .5 }, error: { color: BrandColors.statusCancelled, fontSize: 13, marginTop: 8 }, center: { textAlign: 'center' },
   sheetScroll: { maxHeight: 360, marginTop: 12 }, areaRow: { minHeight: 48, justifyContent: 'center', borderBottomWidth: 1, borderBottomColor: BrandColors.borderLight },
 });
+

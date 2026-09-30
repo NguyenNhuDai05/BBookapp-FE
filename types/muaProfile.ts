@@ -1,3 +1,4 @@
+import type { OperatingArea } from './location';
 export type VerificationStatus = 'UNVERIFIED' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface PayoutSettingsDto {
@@ -14,7 +15,7 @@ export interface PayoutTransactionDto {
   createdAt: string;
 }
 
-export interface MuaProfileDto {
+export interface MuaProfileDto extends Omit<OperatingArea, "city"> {
   id: string;
   name: string;
   brandName?: string;
@@ -38,7 +39,7 @@ export interface MuaProfileDto {
   rating?: number;
 }
 
-export interface MuaUpdateDto {
+export interface MuaUpdateDto extends Partial<OperatingArea> {
   district?: string;
   provinceCode?: number;
   districtCode?: number;
