@@ -239,11 +239,13 @@ export default function MuaSettingsScreen() {
               <History size={20} color="#ff7c98" />,
               "Lịch sử giao dịch",
               "Xem lại các khoản thanh toán",
+              () => router.push("/(mua)/earnings" as any),
             )}
             {renderSettingRow(
               <CreditCard size={20} color="#ff7c98" />,
               "Rút tiền & Thanh toán",
               "Quản lý tài khoản ngân hàng của bạn",
+              () => router.push("/(mua)/earnings" as any),
             )}
             {renderSettingRow(
               <User size={20} color="#22152B" />,

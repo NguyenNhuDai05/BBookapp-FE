@@ -1,7 +1,7 @@
 import { api } from './api';
 import { mapRefundStatus } from '../utils/bookingStatus';
 import type { RefundSummaryDto } from '../types/booking';
-import type { AdminRefundDto, CustomerBankAccountDto, UpsertCustomerBankAccountRequest } from '../types/refund';
+import type { AdminRefundDto } from '../types/refund';
 
 const mapAdmin = (x:any):AdminRefundDto => ({
   refundId:String(x.refundId??''),bookingId:String(x.bookingId??''),customerId:String(x.customerId??''),customerName:x.customerName,
@@ -14,9 +14,6 @@ const mapAdmin = (x:any):AdminRefundDto => ({
 });
 
 export const refundService = {
-  getBankAccounts: async ():Promise<CustomerBankAccountDto[]> => (await api.get('/customer-bank-accounts')).data,
-  addBankAccount: async (request:UpsertCustomerBankAccountRequest):Promise<CustomerBankAccountDto> => (await api.post('/customer-bank-accounts',{...request,qrCodeUrl:request.qrCodeUrl||undefined})).data,
-  deleteBankAccount: async (id:string):Promise<void> => { await api.delete(`/customer-bank-accounts/${id}`); },
   setDestination: async (refundId:string,bankAccountId:string):Promise<RefundSummaryDto> => (await api.post(`/customer-refunds/${refundId}/destination`,{bankAccountId})).data,
   getAdminQueue: async ():Promise<AdminRefundDto[]> => ((await api.get('/Refund')).data as any[]).map(mapAdmin),
   getAdminById: async (id:string):Promise<AdminRefundDto> => mapAdmin((await api.get(`/Refund/${id}`)).data),

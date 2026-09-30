@@ -1,0 +1,10 @@
+import {useMutation,useQuery,useQueryClient} from '@tanstack/react-query';
+import {bankAccountService} from '../services/bankAccountService';
+import type {UpsertBankAccountRequest} from '../types/bankAccount';
+import {BANK_ACCOUNTS_QUERY_KEY,invalidateBankAccountState} from '../utils/bankAccountCache';
+const invalidate=(q:ReturnType<typeof useQueryClient>)=>invalidateBankAccountState(q);
+export const useBankAccounts=()=>useQuery({queryKey:BANK_ACCOUNTS_QUERY_KEY,queryFn:()=>bankAccountService.getAll()});
+export const useAddBankAccount=()=>{const q=useQueryClient();return useMutation({mutationFn:(request:UpsertBankAccountRequest)=>bankAccountService.add(request),retry:false,onSuccess:()=>invalidate(q)})};
+export const useUpdateBankAccount=()=>{const q=useQueryClient();return useMutation({mutationFn:({id,request}:{id:string;request:UpsertBankAccountRequest})=>bankAccountService.update(id,request),retry:false,onSuccess:()=>invalidate(q)})};
+export const useSetDefaultBankAccount=()=>{const q=useQueryClient();return useMutation({mutationFn:({id,currentPassword}:{id:string;currentPassword:string})=>bankAccountService.setDefault(id,currentPassword),retry:false,onSuccess:()=>invalidate(q)})};
+export const useDeleteBankAccount=()=>{const q=useQueryClient();return useMutation({mutationFn:(id:string)=>bankAccountService.remove(id),retry:false,onSuccess:()=>invalidate(q)})};
