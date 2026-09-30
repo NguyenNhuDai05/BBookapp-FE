@@ -47,9 +47,19 @@ export class ApiAuthRepository implements IAuthRepository {
       password: request.password,
       phoneNumber: request.phone, // Map phone -> phoneNumber
       role: 1,
+      otp: request.otp,
     };
 
     await api.post('/Auth/register', payload);
+  }
+
+  async requestRegistrationOtp(email: string): Promise<void> { await api.post('/Auth/register/request-otp', { email }); }
+  async requestPasswordReset(email: string): Promise<void> { await api.post('/Auth/forgot-password', { email }); }
+  async resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
+    await api.post('/Auth/reset-password', { email, otp, newPassword });
+  }
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await api.post('/Auth/change-password', { currentPassword, newPassword });
   }
 
   async getMe(): Promise<UserDto> {

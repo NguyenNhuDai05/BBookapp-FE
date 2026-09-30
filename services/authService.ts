@@ -22,6 +22,11 @@ class AuthService {
     await this.repository.register(request);
   }
 
+  requestRegistrationOtp(email: string) { return this.repository.requestRegistrationOtp(email); }
+  requestPasswordReset(email: string) { return this.repository.requestPasswordReset(email); }
+  resetPassword(email: string, otp: string, newPassword: string) { return this.repository.resetPassword(email, otp, newPassword); }
+  changePassword(currentPassword: string, newPassword: string) { return this.repository.changePassword(currentPassword, newPassword); }
+
   async getMe(): Promise<UserDto> {
     return this.repository.getMe();
   }
