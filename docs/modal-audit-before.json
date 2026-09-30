@@ -4,7 +4,7 @@
     {
       "file": "app/(admin)/bank-accounts/index.tsx",
       "line": 13,
-      "text": "<ConfirmDialog visible={Boolean(dialog)} title={dialog?.kind==='approve'?'Duyệt tài khoản?':'Từ chối tài khoản?'} message={dialog?`${dialog.item.bankName||dialog.item.bankCode} · ${dialog.item.accountNumber}\\n${dialog.item.accountHolderName}${dialog.kind==='approve'?'\\n\\nSau khi duyệt, tài khoản bắt đầu cooldown bảo mật 24 giờ.':''}`:''} confirmLabel={dialog?.kind==='approve'?'Duyệt':'Từ chối'} destructive={dialog?.kind==='reject'} loading={action.isPending} onCancel={()=>setDialog(null)} onConfirm={()=>{if(dialog)action.mutate(dialog)}}/>"
+      "text": "<ConfirmDialog visible={Boolean(dialog)} title={dialog?.kind==='approve'?'Duyệt tài khoản?':'Từ chối tài khoản?'} message={dialog?`${dialog.item.bankName||dialog.item.bankCode} · ${dialog.item.accountNumber}\\n${dialog.item.accountHolderName}${dialog.kind==='approve'?'\\n\\nSau khi duyệt, tài khoản có thể sử dụng ngay.':''}`:''} confirmLabel={dialog?.kind==='approve'?'Duyệt':'Từ chối'} destructive={dialog?.kind==='reject'} loading={action.isPending} onCancel={()=>setDialog(null)} onConfirm={()=>{if(dialog)action.mutate(dialog)}}/>"
     },
     {
       "file": "app/(admin)/mua-applications/[id].tsx",
