@@ -165,7 +165,7 @@ export default function LoginScreen() {
                 )}
               </TouchableOpacity>
 
-              <View style={styles.dividerRow}>
+              <View style={[styles.dividerRow, { display: 'none' }]}>
                 <View style={styles.divider} />
                 <Text style={styles.dividerText}>hoặc</Text>
                 <View style={styles.divider} />
@@ -177,6 +177,7 @@ export default function LoginScreen() {
                 disabled={googleLoading || !googleReady}
                 style={[
                   styles.googleButton,
+                  { display: 'none' },
                   (googleLoading || !googleReady) && styles.disabled,
                 ]}
               >

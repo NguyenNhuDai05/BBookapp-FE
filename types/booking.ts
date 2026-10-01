@@ -142,6 +142,7 @@ export interface BookingDto {
   rejectedAt?: string;
   disputedAt?: string;
   disputeReason?: string;
+  hasOpenComplaint?: boolean;
   paymentExpiresAt?: string;
 }
 

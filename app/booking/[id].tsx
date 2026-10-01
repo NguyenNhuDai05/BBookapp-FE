@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { ArrowLeft, MessageCircle, MapPin, Calendar, Clock, Copy, Info, RotateCcw } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
-import { useBookingDetail, useConfirmBookingCompletion, useDisputeBooking, usePayBookingDeposit } from '../../hooks/useBooking';
+import { useBookingDetail, useConfirmBookingCompletion, usePayBookingDeposit } from '../../hooks/useBooking';
+import { ComplaintEntry } from '../../components/booking/ComplaintEntry';
 import { BookingStatus } from '../../types/booking';
 import { BookingTimeline } from '../../components/BookingTimeline';
 import * as WebBrowser from 'expo-web-browser';
@@ -31,9 +32,6 @@ export default function BookingDetailScreen() {
   const { data: booking, isLoading, error } = useBookingDetail(id);
   const { mutateAsync: payDeposit, isPending: isPaying } = usePayBookingDeposit();
   const { mutate: confirmCompletion, isPending: isConfirming } = useConfirmBookingCompletion();
-  const { mutate: disputeBooking, isPending: isDisputing } = useDisputeBooking();
-  const [showDispute, setShowDispute] = useState(false);
-  const [disputeReason, setDisputeReason] = useState('');
 
   if (isLoading) {
     return (
@@ -68,10 +66,6 @@ export default function BookingDetailScreen() {
     }
   };
 
-  const handleDispute = () => {
-    if (!disputeReason.trim()) return appDialog.alert('Thiếu nội dung', 'Vui lòng nhập nội dung khiếu nại.');
-    disputeBooking({ bookingId: booking.id, reason: disputeReason.trim() }, { onSuccess: () => setShowDispute(false) });
-  };
 
   return (
     <View style={styles.container}>
@@ -214,15 +208,7 @@ export default function BookingDetailScreen() {
             <Text style={styles.paymentValueTotal}>{booking.platformFeeAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
         </View>
-        {showDispute && booking.status === 'WAITING_CUSTOMER' && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Nội dung khiếu nại</Text>
-            <TextInput style={styles.disputeInput} value={disputeReason} onChangeText={setDisputeReason} multiline placeholder="Mô tả vấn đề cần quản trị viên xử lý" />
-            <TouchableOpacity style={styles.primaryBtn} onPress={handleDispute} disabled={isDisputing}>
-              <Text style={styles.actionBtnText}>{isDisputing ? 'Đang gửi...' : 'Gửi khiếu nại'}</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        <ComplaintEntry bookingId={booking.id} customer open={booking.hasOpenComplaint} />
         {/* Actions for COMPLETED or CANCELLED */}
         {(booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED') && (
           <View style={[styles.card, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm }]}>
@@ -254,13 +240,13 @@ export default function BookingDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
-      {booking.status === 'WAITING_CUSTOMER' && (
+      {booking.status === 'WAITING_CUSTOMER' && !booking.hasOpenComplaint && (
         <View style={styles.footerRow}>
-          <TouchableOpacity style={styles.cancelBtnFlex} onPress={() => setShowDispute(true)}><Text style={styles.cancelBtnText}>Khiếu nại</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.cancelBtnFlex} onPress={() => router.push(`/booking/${booking.id}/complaint`)}><Text style={styles.cancelBtnText}>Khiếu nại</Text></TouchableOpacity>
           <TouchableOpacity style={styles.primaryBtnFlex} disabled={isConfirming} onPress={() => confirmCompletion(booking.id)}><Text style={styles.actionBtnText}>Xác nhận hoàn thành</Text></TouchableOpacity>
         </View>
       )}
-      {(booking.status === 'PENDING_CONFIRMATION' || booking.status === 'CONFIRMED') && (
+      {(booking.status === 'PENDING_CONFIRMATION' || booking.status === 'CONFIRMED') && !booking.hasOpenComplaint && (
         <View style={styles.footer}>
           <TouchableOpacity
             style={styles.cancelBtn}

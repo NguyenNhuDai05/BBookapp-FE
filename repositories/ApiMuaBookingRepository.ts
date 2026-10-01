@@ -125,6 +125,7 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       cancelledAt: b.cancelledAt,
       disputedAt: b.disputedAt,
       disputeReason: b.disputeReason,
+      hasOpenComplaint: b.hasOpenComplaint === true,
       rejectReason: b.rejectReason,
       cancellationReason: b.cancellationReason,
       cancellationPolicyRule: b.cancellationPolicyRule,
