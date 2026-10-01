@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Clock, Share2, Sparkles } from 'lucide-react-native';
+import { ArrowLeft, Share2 } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,7 +10,7 @@ import { Strings } from '../constants/strings';
 
 export default function PortfolioDetailScreen() {
   const router = useRouter();
-  const { id, muaId } = useLocalSearchParams<{ id: string; muaId: string }>();
+  const { muaId } = useLocalSearchParams<{ id: string; muaId: string }>();
 
   // Placeholder data — will be replaced when API exists
   const detail = {

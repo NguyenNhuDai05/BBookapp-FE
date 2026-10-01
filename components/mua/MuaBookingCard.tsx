@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { MapPin, Clock, Calendar as CalendarIcon, CheckCircle, XCircle } from 'lucide-react-native';
+import { CheckCircle, XCircle } from 'lucide-react-native';
 import { BrandColors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
 import type { BookingDto } from '../../types/booking';
 import { useUpdateBookingStatus } from '../../hooks/useMuaBookings';

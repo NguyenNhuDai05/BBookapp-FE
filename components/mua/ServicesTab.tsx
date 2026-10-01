@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Clock, ArrowRight } from 'lucide-react-native';
+import { Clock } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Shadows } from '../../constants/theme';
 import { Strings } from '../../constants/strings';
 import type { ServiceDto } from '../../types/ServiceDto';

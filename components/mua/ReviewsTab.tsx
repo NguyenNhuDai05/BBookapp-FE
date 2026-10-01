@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Star, ThumbsUp, Flag } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Shadows } from '../../constants/theme';

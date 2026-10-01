@@ -1,7 +1,7 @@
 import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
 import { ActionSheet } from '../../components/ui/ActionSheet';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions, Platform, useWindowDimensions, RefreshControl, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Platform, useWindowDimensions, RefreshControl, Linking } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,37 +20,6 @@ import { BrandColors } from '../../constants/theme';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { getApiError } from '../../services/api';
 import { normalizeSocialUrl } from '../../utils/socialUrl';
-
-const { width } = Dimensions.get('window');
-
-// Mock data for visual layout matching the design exactly
-const MOCK_AVATAR = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop';
-const MOCK_PORTFOLIO = [
-  {
-    id: '1',
-    imageUrl: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=400&auto=format&fit=crop',
-    title: 'Luxury Bridal Glow',
-  },
-  {
-    id: '2',
-    imageUrl: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=400&auto=format&fit=crop',
-    title: 'Tone HÃƒÂ n QuÃ¡Â»â€˜c',
-  },
-  {
-    id: '3',
-    imageUrl: 'https://images.unsplash.com/photo-1558507652-2d9626c4e67a?q=80&w=400&auto=format&fit=crop',
-    title: 'Artistic Editorial',
-  },
-  {
-    id: '4',
-    imageUrl: 'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&w=400&auto=format&fit=crop',
-    title: 'Cô dâu Luxury',
-  },
-];
-const MOCK_TRANSFORMATION = {
-  before: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop',
-  after: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=300&auto=format&fit=crop',
-};
 
 export default function MuaProfilePremiumScreen() {
   const router = useRouter();

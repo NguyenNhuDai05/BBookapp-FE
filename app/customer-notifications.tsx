@@ -6,6 +6,7 @@ import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, Touchabl
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandColors, Radius, Shadows, Spacing } from '../constants/theme';
 import { InboxNotification, NotificationService } from '../services/NotificationService';
+import { getSafeNotificationRoute } from '../services/notificationRoutes';
 
 const notificationIcon = (type: string) => {
   const props = { size: 22, color: BrandColors.accentPink };
@@ -48,7 +49,8 @@ export default function NotificationsScreen() {
 
   const openNotification = async (item: InboxNotification) => {
     if (!item.readAt) await markRead.mutateAsync(item.id);
-    if (item.url?.startsWith('/')) router.push(item.url as never);
+    const route = getSafeNotificationRoute(item.url);
+    if (route) router.push(route as never);
   };
 
   const hasUnread = inbox.data?.some(item => !item.readAt) ?? false;
@@ -64,14 +66,19 @@ export default function NotificationsScreen() {
             <Text style={styles.title}>Thông báo</Text>
             <Text style={styles.subtitle}>Cập nhật mới nhất dành cho bạn</Text>
           </View>
-          <TouchableOpacity
-            style={[styles.readAllButton, !hasUnread && styles.readAllDisabled]}
-            onPress={() => markAllRead.mutate()}
-            disabled={!hasUnread || markAllRead.isPending}
-            accessibilityLabel="Đánh dấu tất cả đã đọc"
-          >
-            <CheckCheck size={21} color={hasUnread ? BrandColors.accentPink : BrandColors.textLight} />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.readAllButton} onPress={() => router.push('/customer-refunds')} accessibilityLabel="Xem các yêu cầu hoàn tiền">
+              <CircleDollarSign size={21} color={BrandColors.accentPink} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.readAllButton, !hasUnread && styles.readAllDisabled]}
+              onPress={() => markAllRead.mutate()}
+              disabled={!hasUnread || markAllRead.isPending}
+              accessibilityLabel="Đánh dấu tất cả đã đọc"
+            >
+              <CheckCheck size={21} color={hasUnread ? BrandColors.accentPink : BrandColors.textLight} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {inbox.isLoading ? (
@@ -127,6 +134,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 23, fontWeight: '900', color: BrandColors.textDark },
   subtitle: { marginTop: 2, color: BrandColors.textMuted, fontSize: 12 },
   readAllButton: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: BrandColors.bgPink },
+  headerActions: { flexDirection: 'row', gap: 8 },
   readAllDisabled: { backgroundColor: '#F7F3F5' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
   list: { padding: Spacing.base, paddingBottom: 36, flexGrow: 1 },
