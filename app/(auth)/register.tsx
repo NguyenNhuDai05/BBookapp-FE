@@ -234,7 +234,7 @@ export default function RegisterScreen() {
                 )}
               </TouchableOpacity>
 
-              <View style={styles.dividerRow}>
+              <View style={[styles.dividerRow, { display: 'none' }]}>
                 <View style={styles.divider} />
                 <Text style={styles.dividerText}>hoặc</Text>
                 <View style={styles.divider} />
@@ -246,6 +246,7 @@ export default function RegisterScreen() {
                 disabled={googleLoading || !googleReady || !acceptedPolicy}
                 style={[
                   styles.googleButton,
+                  { display: 'none' },
                   (googleLoading || !googleReady || !acceptedPolicy) && styles.disabledButton,
                 ]}
               >

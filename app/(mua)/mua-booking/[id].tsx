@@ -8,6 +8,7 @@ import { BrandColors, Spacing, Typography, Radius } from '../../../constants/the
 import { useBookingDetail } from '../../../hooks/useBooking';
 import { useUpdateBookingStatus } from '../../../hooks/useMuaBookings';
 import { BookingTimeline } from '../../../components/BookingTimeline';
+import { ComplaintEntry } from '../../../components/booking/ComplaintEntry';
 
 export default function MuaBookingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -228,7 +229,8 @@ export default function MuaBookingDetailScreen() {
         </View>
 
         {/* Reject Reason input */}
-        {showRejectInput && booking.status === 'PENDING_CONFIRMATION' && (
+        <ComplaintEntry bookingId={booking.id} open={booking.hasOpenComplaint} />
+        {showRejectInput && booking.status === 'PENDING_CONFIRMATION' && !booking.hasOpenComplaint && (
           <View style={styles.rejectContainer}>
             <Text style={styles.rejectLabel}>Lý do từ chối:</Text>
             <TextInput

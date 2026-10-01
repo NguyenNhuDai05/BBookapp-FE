@@ -164,6 +164,7 @@ export class ApiBookingRepository implements IBookingRepository {
       cancelledAt: b.cancelledAt,
       disputedAt: b.disputedAt,
       disputeReason: b.disputeReason,
+      hasOpenComplaint: b.hasOpenComplaint === true,
       paymentExpiresAt: b.paymentExpiresAt,
       rejectReason: b.rejectReason,
       cancellationReason: b.cancellationReason,

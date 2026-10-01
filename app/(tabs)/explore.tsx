@@ -60,7 +60,7 @@ export default function ExploreScreen() {
     {isFiltered ? <View style={styles.activeFilters}><Text style={styles.activeText} numberOfLines={2}>{[province?.name, style?.name,
       filters.minPrice != null ? `Từ ${price(filters.minPrice)}` : '', filters.maxPrice != null ? `Đến ${price(filters.maxPrice)}` : ''].filter(Boolean).join(' · ') || 'Kết quả tìm kiếm'}</Text>
       <TouchableOpacity onPress={clearAndTop} style={styles.clear}><Text style={styles.moreText}>Xóa lọc</Text></TouchableOpacity></View> : null}
-    {home.isError ? <TouchableOpacity onPress={() => void home.refetch()} style={styles.errorBanner}><Text style={styles.errorText}>{exploreErrorMessage(home.error)} Chạm để thử lại.</Text></TouchableOpacity> : null}
+    {home.isError && !results.isError ? <TouchableOpacity onPress={() => void home.refetch()} style={styles.errorBanner}><Text style={styles.errorText}>Chưa tải được gợi ý Khám phá. Chạm để thử lại.</Text></TouchableOpacity> : null}
     {showFeatured && home.isLoading ? <View style={{ paddingHorizontal: 18, paddingTop: 16 }}><SkeletonLoader height={245} borderRadius={22} /></View> : null}
     {showFeatured && home.data?.featuredPosts.length ? <>
       <ExploreSection title="Cảm hứng makeup" subtitle="Những tác phẩm từ cộng đồng Makeup Artist" />
