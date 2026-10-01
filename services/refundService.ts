@@ -1,5 +1,5 @@
 import { api } from './api';
-import { mapRefundStatus } from '../utils/bookingStatus';
+import { mapRefundStatus, mapRefundSummary } from '../utils/bookingStatus';
 import type { RefundSummaryDto } from '../types/booking';
 import type { AdminRefundDto } from '../types/refund';
 
@@ -14,6 +14,11 @@ const mapAdmin = (x:any):AdminRefundDto => ({
 });
 
 export const refundService = {
+  getCustomerRefunds: async (page = 1, pageSize = 20):Promise<{items:RefundSummaryDto[];total:number;page:number;pageSize:number}> => {
+    const data = (await api.get('/customer-refunds', { params: { page, pageSize } })).data;
+    return { ...data, items: (data.items ?? []).map((item:any) => mapRefundSummary(item)!) };
+  },
+  getCustomerById: async (refundId:string):Promise<RefundSummaryDto> => mapRefundSummary((await api.get(`/customer-refunds/${refundId}`)).data)!,
   setDestination: async (refundId:string,bankAccountId:string):Promise<RefundSummaryDto> => (await api.post(`/customer-refunds/${refundId}/destination`,{bankAccountId})).data,
   getAdminQueue: async ():Promise<AdminRefundDto[]> => ((await api.get('/Refund')).data as any[]).map(mapAdmin),
   getAdminById: async (id:string):Promise<AdminRefundDto> => mapAdmin((await api.get(`/Refund/${id}`)).data),

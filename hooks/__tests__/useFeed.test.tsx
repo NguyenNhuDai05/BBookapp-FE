@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { useFeed } from '../useFeed';
 import { FeedSessionExpiredError, getFeedPage, type FeedItem } from '../../services/feedService';
+jest.mock('expo-router', () => ({ useFocusEffect: jest.fn() }));
 jest.mock('../../store/useAuthStore', () => ({ useAuthStore: (selector: (state: unknown) => unknown) => selector({ user: { id: 'viewer' } }) }));
 jest.mock('../../services/feedService', () => ({ getFeedPage: jest.fn(), FeedSessionExpiredError: class extends Error {} }));
 const post = (id: string): FeedItem => ({ portfolioId: id, muaId: 'artist', title: '', imageUrls: [], authorName: '', likesCount: 0, tags: [] });

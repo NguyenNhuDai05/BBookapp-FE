@@ -39,7 +39,7 @@ export default function RootLayout() {
     });
 
     NotificationService.addNavigationListener(url => {
-      if (url.startsWith('/booking/') || url.startsWith('/chat/')) router.push(url as never);
+      if (url.startsWith('/booking/') || url.startsWith('/chat/') || url.startsWith('/refund/')) router.push(url as never);
     }).then(remove => {
       if (isDisposed) remove();
       else removeNotificationListener = remove;

@@ -4,7 +4,7 @@ import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ArrowLeft, MessageCircle, MapPin, Calendar, Clock, Copy, Info } from 'lucide-react-native';
+import { ArrowLeft, MessageCircle, MapPin, Calendar, Clock, Copy, Info, RotateCcw } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useBookingDetail, useConfirmBookingCompletion, usePayBookingDeposit } from '../../hooks/useBooking';
 import { ComplaintEntry } from '../../components/booking/ComplaintEntry';
@@ -85,6 +85,22 @@ export default function BookingDetailScreen() {
         <View style={[styles.statusBanner, { backgroundColor: statusInfo.bg }]}>
           <Text style={[styles.statusBannerText, { color: statusInfo.color }]}>{statusInfo.label}</Text>
         </View>
+
+        {booking.refund ? (
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => router.push({ pathname: '/refund/[id]', params: { id: booking.refund!.refundId } })}
+          >
+            <View style={styles.refundLinkRow}>
+              <RotateCcw size={22} color={BrandColors.accentPink} />
+              <View style={styles.refundLinkContent}>
+                <Text style={styles.sectionTitle}>Theo dõi hoàn tiền</Text>
+                <Text style={styles.infoText}>{booking.refund.amount.toLocaleString('vi-VN')}đ</Text>
+              </View>
+              <Text style={styles.refundLinkAction}>Xem chi tiết</Text>
+            </View>
+          </TouchableOpacity>
+        ) : null}
 
         {/* Booking ID & MUA */}
         <View style={styles.card}>
@@ -328,7 +344,10 @@ divider: {
     height: 1,
     backgroundColor: '#F5F5F5',
     marginVertical: Spacing.md,
-  },
+},
+refundLinkRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+refundLinkContent: { flex: 1 },
+refundLinkAction: { color: BrandColors.accentPink, fontFamily: Typography.bold, fontSize: 13 },
 muaRow: {
     flexDirection: 'row',
     alignItems: 'center',

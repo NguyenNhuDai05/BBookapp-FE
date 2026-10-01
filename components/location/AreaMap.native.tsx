@@ -3,7 +3,8 @@ import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import type { AreaMapProps } from './AreaMap';
 export default function AreaMap({ center, points, onPick, onSelect }: AreaMapProps) {
   const map = useRef<MapView>(null);
-  useEffect(() => { map.current?.animateToRegion({ ...center, latitudeDelta: .08, longitudeDelta: .08 }, 250); }, [center.latitude, center.longitude]);
+  const { latitude, longitude } = center;
+  useEffect(() => { map.current?.animateToRegion({ latitude, longitude, latitudeDelta: .08, longitudeDelta: .08 }, 250); }, [latitude, longitude]);
   return <MapView provider={PROVIDER_GOOGLE} ref={map} style={{ width: '100%', height: 300 }} initialRegion={{ ...center, latitudeDelta: .08, longitudeDelta: .08 }}
     onPress={onPick ? event => onPick(event.nativeEvent.coordinate) : undefined}>
     {points.map(p => <React.Fragment key={p.id}>
