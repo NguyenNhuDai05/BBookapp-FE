@@ -17,8 +17,9 @@ function loadMaps() {
 }
 export default function AreaMap({ center, points, onPick, onSelect }: AreaMapProps) {
   const container = useRef<HTMLDivElement>(null); const map = useRef<any>(null);
-  const handlers = useRef({ onPick, onSelect }); handlers.current = { onPick, onSelect };
+  const handlers = useRef({ onPick, onSelect });
   const initialCenter = useRef(center); const [ready, setReady] = useState(false); const [error, setError] = useState('');
+  useEffect(() => { handlers.current = { onPick, onSelect }; }, [onPick, onSelect]);
   useEffect(() => {
     let disposed = false; let listener: any;
     if (key) loadMaps().then(() => {

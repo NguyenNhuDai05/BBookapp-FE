@@ -62,6 +62,7 @@ export const mapRefundStatus = (value: unknown): RefundStatus => {
 
 export const mapRefundSummary = (value: any): RefundSummaryDto | undefined => value ? {
   refundId: String(value.refundId ?? ''),
+  bookingId: String(value.bookingId ?? ''),
   amount: Number(value.amount ?? 0),
   status: mapRefundStatus(value.status),
   reasonCode: value.reasonCode,
@@ -107,3 +108,26 @@ export const getRefundPresentation = (
 };
 
 export const formatVnd = (amount: number) => `${Math.max(0, Number(amount) || 0).toLocaleString('vi-VN')}đ`;
+
+export const REFUND_STATUS_LABELS: Record<RefundStatus, string> = {
+  AWAITING_DESTINATION: 'Cần bổ sung tài khoản nhận tiền',
+  PENDING: 'Đã tiếp nhận yêu cầu hoàn tiền',
+  MANUAL_ACTION_REQUIRED: 'Đang chờ nhân viên xử lý',
+  PROCESSING: 'Đang chuyển tiền',
+  COMPLETED: 'Hoàn tiền thành công',
+  FAILED: 'Hoàn tiền chưa thành công',
+  UNKNOWN: 'Trạng thái đang được cập nhật',
+};
+
+export const isRefundPollingStatus = (status?: RefundStatus) =>
+  status === 'PENDING' || status === 'MANUAL_ACTION_REQUIRED' || status === 'PROCESSING';
+
+export type RefundTimelineStep = { label: string; completed: boolean; timestamp?: string };
+
+export const buildRefundTimeline = (refund: RefundSummaryDto): RefundTimelineStep[] => [
+  { label: 'Booking bị từ chối hoặc hủy', completed: true },
+  { label: 'Yêu cầu hoàn tiền được tạo', completed: Boolean(refund.createdAt), timestamp: refund.createdAt },
+  { label: 'Xác nhận tài khoản nhận tiền', completed: Boolean(refund.maskedDestinationAccountNumber) },
+  { label: 'Đang xử lý', completed: Boolean(refund.processingAt), timestamp: refund.processingAt },
+  { label: refund.status === 'FAILED' ? 'Hoàn tiền chưa thành công' : 'Hoàn tất', completed: Boolean(refund.completedAt || refund.failedAt), timestamp: refund.completedAt || refund.failedAt },
+];

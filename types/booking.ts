@@ -59,6 +59,7 @@ export type RefundStatus = 'PENDING' | 'MANUAL_ACTION_REQUIRED' | 'PROCESSING' |
 
 export interface RefundSummaryDto {
   refundId: string;
+  bookingId: string;
   amount: number;
   status: RefundStatus;
   reasonCode?: number | string;

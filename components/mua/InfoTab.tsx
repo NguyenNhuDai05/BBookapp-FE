@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Briefcase, Calendar, ChevronRight, ExternalLink, Globe, Camera, MapPin, Shield, Clock, Info, ShieldCheck } from 'lucide-react-native';
-import { BrandColors, Radius, Spacing, Shadows } from '../../constants/theme';
+import { Briefcase, Calendar, ExternalLink, Globe, Camera, MapPin, Shield } from 'lucide-react-native';
+import { BrandColors, Radius, Spacing } from '../../constants/theme';
 import { Strings } from '../../constants/strings';
 import type { ArtistDto } from '../../types/ArtistDto';
 

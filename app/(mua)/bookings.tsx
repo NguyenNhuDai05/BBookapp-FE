@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandColors, Spacing, Typography } from '../../constants/theme';
-import { useAuthStore } from '../../store/useAuthStore';
 import { useAllBookings } from '../../hooks/useMuaBookings';
 import { MuaBookingCard } from '../../components/mua/MuaBookingCard';
-import { BookingStatus } from '../../types/booking';
 import { useRouter } from 'expo-router';
 
 type TabFilter = 'PENDING' | 'CONFIRMED' | 'HISTORY';
 
 export default function MuaBookingsScreen() {
-  const { user } = useAuthStore();
   const router = useRouter();
   const muaId = "me";
   const [activeTab, setActiveTab] = useState<TabFilter>('PENDING');
