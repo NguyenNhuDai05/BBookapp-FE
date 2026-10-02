@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "BBook-app",
+    "name": "BBook",
     "slug": "BBook-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo-bbook.png",
+    "icon": "./assets/images/Logo.png",
     "scheme": "bbookapp",
     "userInterfaceStyle": "automatic",
     "updates": {
@@ -21,8 +21,8 @@
       "package": "com.bbook.app",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/logo-bbook.png"
+        "backgroundColor": "#FF8FAF",
+        "foregroundImage": "./assets/images/Logo.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -32,7 +32,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/logo-bbook.png"
+      "favicon": "./assets/images/Logo.png"
     },
     "plugins": [
       "expo-router",
