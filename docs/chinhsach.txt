@@ -13,7 +13,7 @@ Không gửi mật khẩu, OTP hoặc giấy tờ tùy thân trong nội dung c�
 
 CHÍNH SÁCH QUYỀN RIÊNG TƯ BBOOK
 
-Nhà phát triển: B-Book. Bản sửa đổi: 02/10/2026.
+Nhà phát triển: B-Book. Bản sửa đổi: 03/10/2026.
 
 
 
@@ -35,7 +35,11 @@ Xác minh MUA: ảnh hai mặt CCCD/giấy tờ tùy thân, ảnh chân dung và
 
 Vị trí: khi bạn chủ động yêu cầu và cấp quyền, app đọc vị trí hiện tại và tìm địa chỉ tương ứng. Địa chỉ, tọa độ hồ sơ MUA hoặc tọa độ nơi cung cấp dịch vụ có thể được lưu trên máy chủ. Không có cam kết tự xóa vị trí khi lịch hẹn kết thúc. Bạn có thể nhập/chọn địa điểm thủ công ở các luồng hỗ trợ cách này.
 
-Đặt lịch và tài chính: mã lịch hẹn, MUA/khách hàng, dịch vụ, thời gian, địa chỉ và tọa độ nơi cung cấp dịch vụ, ghi chú, trạng thái, số tiền và lịch sử thanh toán/đặt cọc, ví, hoàn tiền, chi trả; ngân hàng, số tài khoản hoặc tài khoản nhận tiền, tên chủ tài khoản và ảnh/URL QR. Mục đích là thực hiện lịch hẹn, thanh toán, đối soát và xử lý giao dịch.
+Đặt lịch và tài chính: mã lịch hẹn, MUA/khách hàng, dịch vụ, thời gian, địa chỉ và tọa độ nơi cung cấp dịch vụ, ghi chú, trạng thái, số tiền và lịch sử thanh toán/đặt cọc, ví, hoàn tiền, chi trả; ngân hàng, số tài khoản hoặc tài khoản nhận tiền, tên chủ tài khoản và dữ liệu QR thanh toán do nhà cung cấp trả về. Reference ảnh QR nhận tiền từ phiên bản cũ có thể còn lại để đối soát và xử lý xóa đúng chủ sở hữu. Mục đích là thực hiện lịch hẹn, thanh toán, đối soát và xử lý giao dịch.
+
+Bạn có thể tải ảnh QR ngân hàng (VietQR) để điền nhanh thông tin nhận tiền. Máy chủ kiểm tra ảnh và giải mã tạm thời trong bộ nhớ; luồng này không lưu ảnh ngân hàng gốc trong Supabase Storage. Bạn kiểm tra, chỉnh sửa và xác nhận qua form/OTP trước khi thông tin tài khoản được lưu; đọc QR không tự lưu tài khoản nhận tiền. Form tài khoản hoàn tiền cho khách hàng hỗ trợ đọc ảnh QR ngân hàng hoặc MoMo tạm thời để điền thông tin và không lưu ảnh QR trong Storage.
+
+MUA có thể tải QR nhận tiền MoMo. Ảnh được kiểm tra, đọc các trường mà bộ giải mã hỗ trợ, xử lý thành ảnh JPEG và lưu trong kho tài chính riêng tư của BBook với reference thuộc chủ tài khoản. MUA có thể xem QR của mình qua API được xác thực; quản trị viên xem đúng QR liên quan khi xử lý khoản chi trả. Ảnh không được cung cấp qua URL Supabase công khai. BBook không tự tạo QR MoMo từ số điện thoại/tên người nhận và không suy đoán tên nếu QR thiếu dữ liệu; bạn bổ sung, kiểm tra thông tin và xác nhận qua các bước của form. Việc đọc QR không xác minh chắc chắn chủ tài khoản. Bạn vẫn có thể nhập MoMo thủ công nếu không tải QR.
 
 Trao đổi và nội dung: tin nhắn và ảnh trong chat, bình luận/đánh giá/điểm đánh giá, lượt thích/lưu và nội dung khiếu nại. Luồng khiếu nại hiện tại nhận văn bản; không mô tả việc tải ảnh khiếu nại mới như một chức năng đang được hỗ trợ.
 
@@ -59,13 +63,17 @@ Luồng upload mới lưu ảnh xác minh và ảnh chat ở kho riêng tư và 
 
 4. Nhà cung cấp và trao đổi dữ liệu
 
-BBook có các tích hợp lưu trữ ảnh Supabase, thư xác thực Brevo, đăng nhập/bản đồ Google, thông báo Expo/Firebase Cloud Messaging, thanh toán PayOS và tạo QR VietQR. Backend được triển khai trên Render. Thông tin được trao đổi theo chức năng bạn sử dụng.
+BBook có các tích hợp lưu trữ ảnh Supabase, thư xác thực Brevo, đăng nhập/bản đồ Google, thông báo Expo/Firebase Cloud Messaging, thanh toán PayOS. Backend được triển khai trên Render. Thông tin được trao đổi theo chức năng bạn sử dụng.
 
-Ví dụ: Brevo nhận địa chỉ email để gửi OTP; Google xử lý thông tin đăng nhập hoặc yêu cầu bản đồ; Expo nhận token và nội dung thông báo; PayOS nhận mã đơn, số tiền, mô tả và URL kết quả để tạo liên kết thanh toán. Khi tải QR VietQR, mã ngân hàng, số tài khoản và ở một số luồng tên chủ tài khoản nằm trong yêu cầu URL.
+Ví dụ: Brevo nhận địa chỉ email để gửi OTP; Google xử lý thông tin đăng nhập hoặc yêu cầu bản đồ; Expo nhận token và nội dung thông báo; PayOS nhận mã đơn, số tiền, mô tả và URL kết quả để tạo liên kết thanh toán. QR chuyển khoản ngân hàng cho quản trị viên được tạo theo từng khoản chi trả từ dữ liệu nhận tiền và số tiền đã lưu, không gọi dịch vụ ảnh VietQR công khai để tạo ảnh đó.
 
 BBook lưu thông tin tài khoản nhận tiền và giao dịch, vì vậy không thể tuyên bố không lưu dữ liệu ngân hàng. Không có chức năng nhập/lưu số thẻ, ngày hết hạn hoặc CVV được xác định trong luồng hiện tại; chính sách không đưa ra chứng nhận PCI-DSS hay giấy phép của nhà cung cấp chưa được xác minh.
 
 Email hỗ trợ được gửi qua dịch vụ thư của bạn và Gmail của địa chỉ nhận. Dữ liệu được lưu hoặc xử lý tại từng nhà cung cấp phụ thuộc dịch vụ và cấu hình. Chính sách không khẳng định khu vực lưu trữ, thời hạn log/backup hoặc thời hạn xóa của nhà cung cấp chưa được xác nhận.
+
+Ảnh QR chuyển khoản ngân hàng được tạo khi quản trị viên mở khoản chi trả còn ở trạng thái chờ hoặc đang xử lý và chỉ được trả qua API có kiểm tra quyền Admin. Ảnh được tạo theo yêu cầu, không lưu vào Supabase Storage và không có URL ảnh công khai lâu dài. Nếu dữ liệu nhận tiền không đủ hoặc chưa hỗ trợ tạo QR hợp lệ cho phương thức đó, quản trị viên sử dụng thông tin chuyển tiền thủ công; không thay thế bằng QR được suy đoán.
+
+Đối với MoMo, quản trị viên dùng QR gốc được lưu riêng tư cho người nhận tương ứng và đối chiếu thông tin tài khoản, số tiền, mã chi trả hiển thị riêng. BBook không nhúng số tiền chi trả vào QR MoMo gốc; QR gốc có thể chứa số tiền khác. Nếu thiếu QR hoặc không truy cập được, thông tin chuyển thủ công vẫn được cung cấp. Ảnh trả qua API có kiểm tra quyền và không tạo URL ảnh công khai lâu dài.
 
 
 
@@ -99,13 +107,13 @@ Dữ liệu cá nhân MUA được dọn: giới thiệu, địa chỉ, khu vự
 
 Token thông báo đẩy, thông báo trong app, OTP theo email hiện tại, lượt thích/lưu và phản ứng tin nhắn thuộc tài khoản được xóa. Nội dung bình luận được thay thế; văn bản và liên kết ảnh tin nhắn do tài khoản gửi, nội dung/ảnh đánh giá và phản hồi MUA được bỏ. Nội dung khiếu nại đã giải quyết do tài khoản gửi được dọn. Điểm đánh giá và cấu trúc liên kết có thể còn lại. Các bản sao tên/nội dung chat trong thông báo gửi cho người nhận khác được dọn trên máy chủ khi xác định được liên kết với tài khoản đang xóa; thông báo chưa gửi tương ứng được ngừng gửi.
 
-Tài khoản ngân hàng/tài khoản nhận tiền của người đang xóa được bỏ sau khi nghĩa vụ đã tất toán; số tài khoản, tên chủ tài khoản và QR trong bản ghi hoàn tiền/chi trả thuộc người đó được dọn. Không xóa thông tin tài khoản nhận tiền thuộc bên còn lại chỉ vì bạn xóa tài khoản.
+Tài khoản ngân hàng/tài khoản nhận tiền của người đang xóa được bỏ sau khi nghĩa vụ đã tất toán; số tài khoản, tên chủ tài khoản và QR trong bản ghi hoàn tiền/chi trả thuộc người đó được dọn. Không xóa thông tin tài khoản nhận tiền thuộc bên còn lại chỉ vì bạn xóa tài khoản. QR MoMo riêng tư đã biết thuộc tài khoản cũng được đưa vào quy trình xóa file. Máy chủ chỉ ghi nhận hoàn thành dọn Storage sau khi các file đã xác định được chủ sở hữu được xác nhận không còn tồn tại; lỗi nhà cung cấp được thử lại, reference hoặc ownership chưa rõ cần hỗ trợ kiểm tra.
 
 App dọn AsyncStorage và bộ nhớ truy vấn khi máy chủ tiếp nhận xóa. Thông báo tiếp nhận không xác nhận mọi file đã được xóa: file được xử lý sau bước cơ sở dữ liệu, có kiểm tra và thử lại khi lỗi. Ảnh cũ chưa xác minh hoặc ảnh còn tham chiếu cần hỗ trợ xử lý. Email hỗ trợ là nơi nhận kết quả và tiến độ; không bảo đảm xóa mọi file đã lưu trên thiết bị. App hiển thị mã tham chiếu tài khoản sau khi tiếp nhận; hãy lưu mã này và gửi kèm email khi hỏi tiến độ, vì email hồ sơ đã được thay thế.
 
 Ngoài app, gửi thư từ email đăng ký BBook đến bbooksupport@gmail.com, tiêu đề “Yêu cầu xóa tài khoản BBook”. Nêu email hoặc mã tài khoản và yêu cầu xóa tài khoản cùng dữ liệu liên quan; có thể nêu riêng loại dữ liệu. Không gửi mật khẩu, OTP, thông tin thẻ hoặc ảnh CCCD. Nếu không còn truy cập email đăng ký, liên hệ để được hướng dẫn xác minh.
 
-Trang https://bbookmakeup.com/delete-account.html cung cấp hướng dẫn và liên kết soạn email khi được công bố. Trang không yêu cầu đăng nhập BBook hoặc cài lại app. Yêu cầu chỉ được gửi khi bạn thực sự gửi thư. Bộ phận hỗ trợ tiếp nhận, xác minh chủ tài khoản, thông báo nghĩa vụ cần giải quyết/phạm vi còn giữ và xác nhận kết quả; không có cam kết tự động hoàn tất trong 72 giờ hoặc 30 ngày.
+Trang https://bbookmakeup.com/delete-account/ cung cấp hướng dẫn và liên kết soạn email khi được công bố. Trang không yêu cầu đăng nhập BBook hoặc cài lại app. Yêu cầu chỉ được gửi khi bạn thực sự gửi thư. Bộ phận hỗ trợ tiếp nhận, xác minh chủ tài khoản, thông báo nghĩa vụ cần giải quyết/phạm vi còn giữ và xác nhận kết quả; không có cam kết tự động hoàn tất trong 72 giờ hoặc 30 ngày.
 
 
 
