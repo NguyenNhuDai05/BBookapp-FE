@@ -11,7 +11,7 @@ jest.mock('react-native-safe-area-context', () => { const { View } = require('re
 jest.mock('expo-image-picker', () => ({ requestMediaLibraryPermissionsAsync: async () => ({ granted: true }), launchImageLibraryAsync: async () => ({ canceled: false, assets: [{ uri: 'file:///test-qr.png' }] }) }));
 jest.mock('../../services/financialMediaService', () => ({ financialMediaService: { uploadMomo: (...args: unknown[]) => mockPrivateUpload(...args), preview: (...args: unknown[]) => mockPreview(...args) } }));
 jest.mock('../../services/supabase', () => ({ uploadBankQr: (...args: unknown[]) => mockDecode(...args) }));
-jest.mock('../../services/api', () => ({ getApiError: () => ({ message: 'test error' }) }));
+jest.mock('../../services/api', () => ({ getApiError: (error: any) => ({ message: 'test error', code: error?.code }) }));
 jest.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries: jest.fn() }) }));
 jest.mock('../../services/refundService', () => ({ refundService: { setDestination: jest.fn() } }));
 jest.mock('../../hooks/useBankAccounts', () => ({ useRequestBankAccountOtp: () => ({ mutateAsync: mockOtp }), useAddBankAccount: () => ({ mutateAsync: mockAdd }), useUpdateBankAccount: () => ({ mutateAsync: jest.fn() }) }));
@@ -56,6 +56,29 @@ describe.each([['MUA', MuaForm], ['refund', RefundForm]] as const)('%s receive a
     expect(screen.getByLabelText('Tên chủ tài khoản nhận tiền').props.value).toBe('');
     await fireEvent.press(screen.getByText('Tiếp tục')); expect(mockOtp).not.toHaveBeenCalled();
   });
+  it('handles MoMo multi-app without treating its opaque identifier as a phone', async () => {
+    mockDecode.mockResolvedValue({ method: 'MOMO', bankBin: '971025', accountNumber: null, accountName: null });
+    await render(<Form />);
+    await fireEvent.changeText(screen.getByLabelText('Số tài khoản nhận tiền'), '0000000000');
+    await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'), 'TEST USER');
+    await fireEvent.press(screen.getByText('Đọc ảnh QR'));
+    await fireEvent.press(screen.getByText('Chọn ảnh QR ngân hàng hoặc MoMo'));
+    await screen.findByText('Đã đọc QR MoMo đa năng. Mã nhận tiền trong QR không phải số điện thoại; hãy nhập số MoMo và tên người nhận để Admin đối chiếu.');
+    expect(screen.getByLabelText('Số tài khoản nhận tiền').props.value).toBe('0000000000');
+    expect(screen.getByLabelText('Tên chủ tài khoản nhận tiền').props.value).toBe('TEST USER');
+    expect(mockOtp).not.toHaveBeenCalled(); expect(mockAdd).not.toHaveBeenCalled();
+    if (_ === 'MUA') expect(mockPrivateUpload).toHaveBeenCalledTimes(1);
+    else expect(mockPrivateUpload).not.toHaveBeenCalled();
+  });
+  it('places the QR picker before the bank, account and holder fields', async () => {
+    const result = await render(<Form />);
+    await fireEvent.press(screen.getByText('Đọc ảnh QR'));
+    const tree = JSON.stringify(result.toJSON());
+    const picker = tree.indexOf('Chọn ảnh QR ngân hàng hoặc MoMo');
+    expect(picker).toBeGreaterThan(-1);
+    expect(picker).toBeLessThan(tree.indexOf('Số tài khoản nhận tiền'));
+    expect(picker).toBeLessThan(tree.indexOf('Tên chủ tài khoản nhận tiền'));
+  });
   it('a failed decode preserves previously entered fields and offers manual entry', async () => {
     mockDecode.mockRejectedValue(new Error('invalid QR'));
     await render(<Form />);
@@ -89,6 +112,12 @@ describe('MUA private MoMo QR',()=>{
   await waitFor(()=>expect(mockPreview).toHaveBeenCalled());expect(mockPrivateUpload).toHaveBeenCalledWith('file:///test-qr.png');expect(mockAdd).not.toHaveBeenCalled();
   await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'TEST ONLY');await fireEvent.press(screen.getByText('Tiếp tục'));await fireEvent.press(await screen.findByText('Xác nhận OTP thử nghiệm'));
   await waitFor(()=>expect(mockAdd).toHaveBeenCalledWith(expect.objectContaining({financialQrMediaId:'00000000-0000-4000-8000-000000000001',method:'MOMO'})));
+ });
+ it('distinguishes private storage failure from unreadable QR',async()=>{
+  mockPrivateUpload.mockRejectedValue({code:'FINANCIAL_QR_UNAVAILABLE'});
+  await render(<MuaForm/>);await fireEvent.press(screen.getByText('Chọn ảnh QR ngân hàng hoặc MoMo'));
+  await screen.findByText('Ảnh QR đã được đọc nhưng máy chủ chưa thể lưu riêng tư. Vui lòng thử lại; thông tin đang nhập được giữ lại.');
+  expect(mockOtp).not.toHaveBeenCalled();expect(mockAdd).not.toHaveBeenCalled();
  });
  it('private upload failure preserves fields and old reference',async()=>{
   mockParams={bankCode:'MOMO',financialQrMediaId:'00000000-0000-4000-8000-000000000001'};mockPrivateUpload.mockRejectedValue(new Error('provider unavailable'));await render(<MuaForm/>);await fireEvent.changeText(screen.getByLabelText('Số tài khoản nhận tiền'),'0000000000');await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'TEST ONLY');
