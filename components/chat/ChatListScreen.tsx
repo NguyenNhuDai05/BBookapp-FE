@@ -73,7 +73,7 @@ export default function ChatListScreen({ viewer }: Props) {
   const totalUnread = rooms.reduce((total, room) => total + room.unreadCount, 0);
   const renderRoom = ({ item, index }: { item: ChatRoomDto; index: number }) => {
     const { name, avatar } = getChatPeer(item, currentUserId);
-    const rawMessage = item.lastMessage?.content || (item.lastMessage?.imageUrl ? '📷 Đã gửi một hình ảnh' : 'Bắt đầu cuộc trò chuyện');
+    const rawMessage = item.lastMessage?.content || (item.lastMessage?.imageUrl || item.lastMessage?.imageMediaId ? '📷 Đã gửi một hình ảnh' : 'Bắt đầu cuộc trò chuyện');
     const message = item.lastMessage && currentUserId && item.lastMessage.senderId.toLowerCase() === currentUserId.toLowerCase() ? `Bạn: ${rawMessage}` : rawMessage;
     return <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Mở cuộc trò chuyện với ${name}`} activeOpacity={0.78} style={[styles.room, item.unreadCount > 0 && styles.unreadRoom, index === visibleRooms.length - 1 && styles.lastRoom]} onPress={() => router.push(`/chat/${item.chatRoomId}`)}>
       <ConversationAvatar name={name} uri={avatar} />

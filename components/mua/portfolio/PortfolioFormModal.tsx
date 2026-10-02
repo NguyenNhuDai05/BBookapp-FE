@@ -56,7 +56,7 @@ export function PortfolioFormModal({ visible, onClose, onSubmit, initialData }: 
     try {
       const finalUrls = await Promise.all(
         imageUrls.map(async (img) => {
-          return uploadImage(img);
+          return uploadImage(img, 'portfolio');
         })
       );
 

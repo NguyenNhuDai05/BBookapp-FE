@@ -11,6 +11,7 @@ import { BrandColors, Radius, Shadows, Typography } from '../../constants/theme'
 import { getApiError } from '../../services/api';
 import { authService } from '../../services/authService';
 import { ChatRoomDto, chatService, MessageDto } from '../../services/chatService';
+import { PrivateMediaImage } from '../../components/PrivateMediaImage';
 import { getChatPeer } from '../../utils/chatPeer';
 import { signalRService } from '../../services/signalRService';
 
@@ -152,7 +153,7 @@ export default function ChatRoomScreen() {
     setUploading(true);
     let uploadedImageUrl: string | undefined;
     try {
-      uploadedImageUrl = await chatService.uploadImage(result.assets[0].uri);
+      uploadedImageUrl = await chatService.uploadImage(result.assets[0].uri, id);
       const sent = await chatService.sendMessage(id, inputText.trim() || undefined, uploadedImageUrl, replyTo?.messageId);
       setMessages(previous => mergeMessages(previous, [sent]));
       setInputText(''); setReplyTo(null);
@@ -184,11 +185,11 @@ export default function ChatRoomScreen() {
         <TouchableOpacity activeOpacity={0.9} onLongPress={() => setReplyTo(item)}>
           {own ? <LinearGradient colors={['#FF6B9A', '#F43F75']} start={{x:0,y:0}} end={{x:1,y:1}} style={[styles.bubble, styles.ownBubble]}>
             {item.replyToMessageId ? <ReplyPreview item={item} own/> : null}
-            {item.imageUrl ? <Image source={{ uri: item.imageUrl }} style={[styles.messageImage,{width:imageSize,height:imageSize}]} contentFit="cover"/> : null}
+            {item.imageUrl || item.imageMediaId ? <PrivateMediaImage uri={item.imageUrl} mediaId={item.imageMediaId} style={[styles.messageImage,{width:imageSize,height:imageSize}]} contentFit="cover"/> : null}
             {item.content ? <Text style={[styles.messageText, styles.ownText]}>{item.content}</Text> : null}
           </LinearGradient> : <View style={[styles.bubble, styles.otherBubble]}>
             {item.replyToMessageId ? <ReplyPreview item={item}/> : null}
-            {item.imageUrl ? <Image source={{ uri: item.imageUrl }} style={[styles.messageImage,{width:imageSize,height:imageSize}]} contentFit="cover"/> : null}
+            {item.imageUrl || item.imageMediaId ? <PrivateMediaImage uri={item.imageUrl} mediaId={item.imageMediaId} style={[styles.messageImage,{width:imageSize,height:imageSize}]} contentFit="cover"/> : null}
             {item.content ? <Text style={styles.messageText}>{item.content}</Text> : null}
           </View>}
         </TouchableOpacity>

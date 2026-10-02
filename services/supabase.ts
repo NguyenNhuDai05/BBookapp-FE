@@ -62,7 +62,7 @@ export const uploadImageToSupabase = async (uri: string, bucketName: string = 'i
 };
 
 /** Uploads a picked device image to our API and returns a public HTTP URL. */
-export const uploadImage = async (uri: string): Promise<string> => {
+export const uploadImage = async (uri: string, purpose: 'avatar' | 'portfolio' | 'service' | 'review' = 'avatar'): Promise<string> => {
   if (!uri || (!uri.startsWith('file://') && !uri.startsWith('content://') && !uri.startsWith('blob:'))) {
     return uri;
   }
@@ -71,6 +71,7 @@ export const uploadImage = async (uri: string): Promise<string> => {
   const extension = fileName.split('.').pop()?.toLowerCase() || 'jpg';
   const contentType = extension === 'png' ? 'image/png' : extension === 'webp' ? 'image/webp' : 'image/jpeg';
   const form = new FormData();
+  form.append('purpose', purpose);
 
   if (Platform.OS === 'web') {
     const blob = await fetch(uri).then((response) => response.blob());

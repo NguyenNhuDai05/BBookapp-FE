@@ -65,7 +65,7 @@ function ServiceFormContent({ onClose, onSubmit, initialData, availableTags = []
     }
     lock.current = true; setSubmitting(true); clear('submit');
     try {
-      const imageUrls = await Promise.all(images.map(uri => uploadImage(uri)));
+      const imageUrls = await Promise.all(images.map(uri => uploadImage(uri, 'service')));
       // Retain successful uploads if saving fails so retrying does not upload them again.
       setImages(imageUrls);
       await onSubmit({ serviceName: name.trim(), description: description.trim(), price: Number(price), durationMinutes: Number(duration), imageUrls, imageUrl: imageUrls[0], tags, isActive });

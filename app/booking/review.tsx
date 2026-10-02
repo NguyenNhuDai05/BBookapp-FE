@@ -51,7 +51,7 @@ export default function ReviewScreen() {
 
     setIsUploading(true);
     try {
-      const imageUrl = imageUri ? await uploadImage(imageUri) : undefined;
+      const imageUrl = imageUri ? await uploadImage(imageUri, 'review') : undefined;
       await submitReview({
         bookingId: bookingId!,
         rating,

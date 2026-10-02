@@ -22,9 +22,11 @@ export interface MessageDto {
     senderId: string;
     content?: string;
     imageUrl?: string;
+    imageMediaId?: string;
     replyToMessageId?: string;
     replyToContent?: string;
     replyToImageUrl?: string;
+    replyToImageMediaId?: string;
     reactions: { emoji: string; count: number; reactedByMe: boolean; userIds?: string[] }[];
     sentAt: string;
     isRead: boolean;
@@ -61,10 +63,10 @@ export const chatService = {
         await api.post(`/chat/rooms/${roomId}/read`);
     },
 
-    uploadImage: async (uri: string) => {
+    uploadImage: async (uri: string, roomId: string) => {
         const form = new FormData();
         form.append('file', { uri, name: `chat-${Date.now()}.jpg`, type: 'image/jpeg' } as any);
-        const response = await api.post<{ url: string }>('/Upload/image', form, { headers: { 'Content-Type': 'multipart/form-data' } });
-        return response.data.url;
+        const response = await api.post<{ mediaId: string }>(`/chat/rooms/${roomId}/images`, form);
+        return `media:${response.data.mediaId}`;
     }
 };

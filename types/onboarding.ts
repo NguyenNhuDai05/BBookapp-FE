@@ -52,8 +52,14 @@ export interface MuaApplicationRequestDto extends OperatingArea {
 }
 
 export interface MuaIdentityVerificationRequestDto {
+  identityFrontMediaId?: string | null;
+  identityBackMediaId?: string | null;
+  portraitMediaId?: string | null;
+  certificateMediaIds?: string[];
   identityFrontUrl: string;
   identityBackUrl: string;
   portraitUrl: string;
   certificateUrls: string[];
 }
+export type MuaIdentitySubmission = Pick<MuaIdentityVerificationRequestDto,
+  'identityFrontMediaId' | 'identityBackMediaId' | 'portraitMediaId' | 'certificateMediaIds'>;

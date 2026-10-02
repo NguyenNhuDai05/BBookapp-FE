@@ -2,12 +2,13 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Camera, ImagePlus, UserRound } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { PrivateMediaImage } from '../../components/PrivateMediaImage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMuaIdentity, useSaveMuaIdentity } from '../../hooks/useMuaEligibility';
-import { uploadImage } from '../../services/supabase';
+import { uploadVerificationImage } from '../../services/verificationMediaService';
 import { getApiError } from '../../services/api';
-import type { MuaIdentityVerificationRequestDto } from '../../types/onboarding';
+import type { MuaIdentityVerificationRequestDto, MuaIdentitySubmission } from '../../types/onboarding';
 
 export default function IdentityVerificationScreen() {
   const query = useMuaIdentity();
@@ -35,7 +36,8 @@ function IdentityForm({ initial }: { initial: MuaIdentityVerificationRequestDto 
       const result = camera
         ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: .9, allowsEditing: false, cameraType: field === 'portraitUrl' ? ImagePicker.CameraType.front : ImagePicker.CameraType.back })
         : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: .9, allowsEditing: false });
-      if (!result.canceled && result.assets[0]) setImages(current => ({ ...current, [field]: result.assets[0].uri }));
+      if (!result.canceled && result.assets[0]) setImages(current => ({ ...current, [field]: result.assets[0].uri,
+        [field === 'identityFrontUrl' ? 'identityFrontMediaId' : field === 'identityBackUrl' ? 'identityBackMediaId' : 'portraitMediaId']: null }));
       setSource(null);
     } catch { setError('Không thể mở camera hoặc thư viện ảnh. Vui lòng thử lại.'); }
     finally { lock.current = false; setBusy(false); }
@@ -44,16 +46,25 @@ function IdentityForm({ initial }: { initial: MuaIdentityVerificationRequestDto 
     if (lock.current || !ready) return;
     lock.current = true; setBusy(true); setError('');
     try {
-      const [identityFrontUrl, identityBackUrl, portraitUrl] = await Promise.all([uploadImage(images.identityFrontUrl), uploadImage(images.identityBackUrl), uploadImage(images.portraitUrl)]);
-      const request = { ...images, identityFrontUrl, identityBackUrl, portraitUrl };
-      setImages(request);
+      // Reuse durable IDs, never submit signed preview URLs. Persist each successful
+      // upload in local state so retrying another failed photo does not upload it again.
+      const ensure = async (url: string, id: string | null | undefined, purpose: 'identity-front' | 'identity-back' | 'portrait', key: 'identityFrontMediaId' | 'identityBackMediaId' | 'portraitMediaId') => {
+        if (id) return id;
+        const uploaded = await uploadVerificationImage(url, purpose);
+        setImages(current => ({ ...current, [key]: uploaded }));
+        return uploaded;
+      };
+      const identityFrontMediaId = await ensure(images.identityFrontUrl, images.identityFrontMediaId, 'identity-front', 'identityFrontMediaId');
+      const identityBackMediaId = await ensure(images.identityBackUrl, images.identityBackMediaId, 'identity-back', 'identityBackMediaId');
+      const portraitMediaId = await ensure(images.portraitUrl, images.portraitMediaId, 'portrait', 'portraitMediaId');
+      const request: MuaIdentitySubmission = { identityFrontMediaId, identityBackMediaId, portraitMediaId, certificateMediaIds: images.certificateMediaIds || [] };
       await save.mutateAsync(request);
       router.replace('/mua-onboarding/setup');
     } catch (err) { setError(getApiError(err).message || 'Không thể lưu xác minh. Vui lòng thử lại.'); }
     finally { lock.current = false; setBusy(false); }
   };
   const document = (label: string, field: 'identityFrontUrl' | 'identityBackUrl') => <View style={s.document}>
-    {images[field] ? <Image source={{ uri: images[field] }} style={s.documentImage} /> : <View style={s.placeholder}><ImagePlus size={30} color="#FF4E91" /></View>}
+    {images[field] ? <PrivateMediaImage uri={images[field]} mediaId={field === 'identityFrontUrl' ? images.identityFrontMediaId : images.identityBackMediaId} style={s.documentImage} /> : <View style={s.placeholder}><ImagePlus size={30} color="#FF4E91" /></View>}
     <View style={s.documentCopy}><Text style={s.label}>{label}</Text><Text style={s.helper}>Chụp hoặc tải ảnh</Text><TouchableOpacity disabled={busy} accessibilityLabel={`Thay ảnh ${label}`} onPress={() => setSource(source === field ? null : field)}><Text style={s.link}>{images[field] ? 'Thay ảnh' : 'Thêm ảnh'}</Text></TouchableOpacity></View>
     {source === field && <View style={s.sources}><TouchableOpacity disabled={busy} onPress={() => capture(field, true)}><Text style={s.link}>Chụp ảnh</Text></TouchableOpacity><TouchableOpacity disabled={busy} onPress={() => capture(field, false)}><Text style={s.link}>Chọn từ máy</Text></TouchableOpacity></View>}
   </View>;
@@ -62,7 +73,7 @@ function IdentityForm({ initial }: { initial: MuaIdentityVerificationRequestDto 
     <View style={s.steps}><View style={s.step}><Text style={s.stepNumber}>1</Text><Text style={s.stepLabel}>CCCD</Text></View><View style={s.track} /><View style={s.step}><Text style={[s.stepNumber, step === 1 && s.inactive]}>2</Text><Text style={s.stepLabel}>Khuôn mặt</Text></View></View>
     <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
       {step === 1 ? <View style={s.card}><Text style={s.heading}>Chụp ảnh CCCD</Text><Text style={s.helper}>Ảnh rõ nét, không bị lóa, đầy đủ bốn góc.</Text>{document('Mặt trước', 'identityFrontUrl')}{document('Mặt sau', 'identityBackUrl')}<View style={s.notice}><Text style={s.noticeTitle}>Lưu ý:</Text><Text style={s.helper}>• Không dùng ảnh chụp màn hình{ '\n' }• Thông tin phải còn hiệu lực{ '\n' }• Giấy tờ chỉ dùng để xét duyệt, không hiển thị công khai</Text></View></View> : <View style={s.card}>
-        <Text style={s.heading}>Chụp ảnh khuôn mặt</Text><Text style={s.helper}>Chụp ảnh chính diện để admin đối chiếu với ảnh trên CCCD.</Text><View style={s.face}>{images.portraitUrl ? <Image source={{ uri: images.portraitUrl }} style={s.faceImage} /> : <UserRound size={90} color="#E7A3BC" />}</View>
+        <Text style={s.heading}>Chụp ảnh khuôn mặt</Text><Text style={s.helper}>Chụp ảnh chính diện để admin đối chiếu với ảnh trên CCCD.</Text><View style={s.face}>{images.portraitUrl ? <PrivateMediaImage uri={images.portraitUrl} mediaId={images.portraitMediaId} style={s.faceImage} /> : <UserRound size={90} color="#E7A3BC" />}</View>
         <Text style={s.guidance}>✓ Giữ khuôn mặt chính diện, rõ toàn bộ khuôn mặt{ '\n' }✓ Đảm bảo ánh sáng đầy đủ{ '\n' }✓ Không đeo kính hoặc khẩu trang</Text>
         <TouchableOpacity disabled={busy} onPress={() => capture('portraitUrl', true)} style={s.capture}><Camera size={18} color="#FF4E91" /><Text style={s.link}>{images.portraitUrl ? 'Chụp lại khuôn mặt' : 'Chụp ảnh khuôn mặt'}</Text></TouchableOpacity>
         <Text style={s.helper}>Ảnh đã chụp chưa đồng nghĩa với danh tính đã được xác thực. Admin sẽ kiểm tra khi bạn gửi hồ sơ.</Text>
