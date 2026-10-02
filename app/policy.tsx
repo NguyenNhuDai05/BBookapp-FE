@@ -22,10 +22,11 @@ const policyAsset = require("../docs/chinhsach.txt");
 const isMainHeading = (line: string) =>
   line === "MÀN HÌNH CHẤP THUẬN KHI ĐĂNG KÝ (IN-APP CONSENT SCREEN - CLIENT)" ||
   line === "THỎA THUẬN ĐIỀU KHOẢN DỊCH VỤ DÀNH CHO NGƯỜI TIÊU DÙNG" ||
-  line === "CHÍNH SÁCH BẢO VỆ DỮ LIỆU CÁ NHÂN NGƯỜI TIÊU DÙNG";
+  line === "CHÍNH SÁCH BẢO VỆ DỮ LIỆU CÁ NHÂN NGƯỜI TIÊU DÙNG" ||
+  line === "CHÍNH SÁCH QUYỀN RIÊNG TƯ BBOOK";
 
 const isSectionHeading = (line: string) =>
-  line === "CĂN CỨ PHÁP LÝ" || /^Điều \d+\./.test(line);
+  line === "CĂN CỨ PHÁP LÝ" || /^Điều \d+\./.test(line) || /^\d+\./.test(line);
 
 export default function PolicyScreen() {
   const router = useRouter();
@@ -83,7 +84,7 @@ export default function PolicyScreen() {
         <View style={styles.headerCopy}>
           <Text style={styles.eyebrow}>B-BOOK</Text>
           <Text style={styles.title}>Chính sách & điều khoản</Text>
-          <Text style={styles.subtitle}>Thông tin áp dụng cho tài khoản khách hàng</Text>
+          <Text style={styles.subtitle}>Thông tin áp dụng cho khách hàng và Makeup Artist</Text>
         </View>
       </LinearGradient>
 
@@ -111,7 +112,7 @@ export default function PolicyScreen() {
           <View style={styles.documentCard}>
             <View style={styles.documentBadge}>
               <FileCheck2 size={17} color="#C94473" />
-              <Text style={styles.documentBadgeText}>Văn bản chính thức</Text>
+              <Text style={styles.documentBadgeText}>Thông tin sử dụng và dữ liệu</Text>
             </View>
             {lines.map((line, index) => {
               if (!line.trim()) return <View key={index} style={styles.spacer} />;

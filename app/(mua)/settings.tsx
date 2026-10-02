@@ -63,10 +63,12 @@ export default function MuaSettingsScreen() {
 
   const performAccountDeletion = async () => {
     if (isDeletingAccount) return;
+    const referenceCode = authUser?.id;
     try {
       setIsDeletingAccount(true);
       await deleteAccount();
       router.replace("/(auth)/login" as any);
+      appDialog.alert("Đã tiếp nhận yêu cầu xóa", `${referenceCode ? `Mã tham chiếu: ${referenceCode}. Hãy lưu mã này để hỏi tiến độ.\n\n` : ''}Tài khoản đã bị vô hiệu hóa. Việc xóa file được xử lý trên máy chủ; dữ liệu cũ cần xác minh có thể cần hỗ trợ. Liên hệ bbooksupport@gmail.com để nhận kết quả. Lịch sử giao dịch tối thiểu có thể còn được giữ để đối soát.`);
     } catch (error: any) {
       const message = error?.response?.data?.message || error?.message || "Không thể xóa tài khoản. Vui lòng thử lại.";
       appDialog.alert("Chưa thể xóa tài khoản", message);
@@ -77,7 +79,7 @@ export default function MuaSettingsScreen() {
 
   const handleDeleteAccount = () => {
     if (isDeletingAccount) return;
-    const warning = "Tài khoản MUA và dữ liệu cá nhân sẽ bị xóa vĩnh viễn. Bạn cần hoàn tất booking, hoàn tiền và doanh thu chờ đối soát trước khi xóa.";
+    const warning = "Sau khi đủ điều kiện, tài khoản sẽ bị vô hiệu hóa và hồ sơ cá nhân được dọn. File CCCD, chân dung, chứng chỉ và ảnh thuộc tài khoản được xóa trên máy chủ theo quy trình có kiểm tra; ảnh cũ chưa xác minh được chủ sở hữu cần hỗ trợ xử lý. Lịch sử giao dịch tối thiểu và mã liên kết có thể còn được giữ để đối soát. Bạn cần hoàn tất lịch hẹn, hoàn tiền, chi trả và số dư trước khi xóa. Hành động này không thể hoàn tác.";
 
     appDialog.alert("Xóa tài khoản", warning, [
       { text: "Hủy", style: "cancel" },
