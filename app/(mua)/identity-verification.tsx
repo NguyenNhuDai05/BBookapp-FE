@@ -50,7 +50,13 @@ function IdentityForm({ initial }: { initial: MuaIdentityVerificationRequestDto 
       // upload in local state so retrying another failed photo does not upload it again.
       const ensure = async (url: string, id: string | null | undefined, purpose: 'identity-front' | 'identity-back' | 'portrait', key: 'identityFrontMediaId' | 'identityBackMediaId' | 'portraitMediaId') => {
         if (id) return id;
-        const uploaded = await uploadVerificationImage(url, purpose);
+        let uploaded: string;
+        try { uploaded = await uploadVerificationImage(url, purpose); }
+        catch (err) {
+          setStep(purpose === 'portrait' ? 2 : 1);
+          const label = purpose === 'identity-front' ? 'Mặt trước CCCD' : purpose === 'identity-back' ? 'Mặt sau CCCD' : 'Ảnh khuôn mặt';
+          throw new Error(`${label}: ${getApiError(err).message || 'Không thể tải ảnh. Vui lòng thử lại.'}`);
+        }
         setImages(current => ({ ...current, [key]: uploaded }));
         return uploaded;
       };

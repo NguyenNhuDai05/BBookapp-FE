@@ -3,6 +3,7 @@ import * as picker from 'expo-image-picker';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import SetupScreen from '../mua-onboarding/setup';
 import IdentityScreen from '../(mua)/identity-verification';
+import { uploadVerificationImage } from '../../services/verificationMediaService';
 
 const mockPush = jest.fn();
 const mockSave = jest.fn(async () => ({}));
@@ -15,7 +16,7 @@ jest.mock('expo-image-picker', () => ({
   launchImageLibraryAsync: jest.fn(async () => ({ canceled: false, assets: [{ uri: 'file:///new-library.jpg' }] })),
 }));
 jest.mock('../../services/verificationMediaService', () => ({ uploadVerificationImage: jest.fn(async (_uri: string, purpose: string) => `new-${purpose}-id`) }));
-jest.mock('../../services/api', () => ({ getApiError: () => ({ message: 'Lỗi' }) }));
+jest.mock('../../services/api', () => ({ getApiError: (error: Error) => ({ message: error.message }) }));
 jest.mock('../../components/ui/dialogStore', () => ({ AppAlert: { alert: jest.fn() } }));
 jest.mock('../../hooks/useMuaEligibility', () => ({
   useMuaEligibility: () => ({ data: { completionPercentage: 100, verificationStatus: 'Draft', missingRequirements: [], requirements: [
@@ -70,4 +71,17 @@ it('allows selecting a document from the device and preserves the other photos',
   await fireEvent.press(screen.getByLabelText('Tiếp theo'));
   await fireEvent.press(screen.getByLabelText('Lưu xác minh'));
   expect(mockSave).toHaveBeenLastCalledWith({ identityFrontMediaId: 'new-identity-front-id', identityBackMediaId: 'back-id', portraitMediaId: 'portrait-id', certificateMediaIds: ['certificate-id'] });
+});
+
+it('identifies a failing CCCD photo and returns to the document step without saving', async () => {
+  mockSave.mockClear();
+  jest.mocked(uploadVerificationImage).mockRejectedValueOnce(new Error('Ảnh vượt quá 24 megapixel.'));
+  await render(<IdentityScreen />);
+  await fireEvent.press(screen.getByLabelText('Thay ảnh Mặt trước'));
+  await fireEvent.press(screen.getByText('Chọn từ máy'));
+  await fireEvent.press(screen.getByLabelText('Tiếp theo'));
+  await fireEvent.press(screen.getByLabelText('Lưu xác minh'));
+  expect(screen.getByText('Mặt trước CCCD: Ảnh vượt quá 24 megapixel.')).toBeTruthy();
+  expect(screen.getByText('Chụp ảnh CCCD')).toBeTruthy();
+  expect(mockSave).not.toHaveBeenCalled();
 });
