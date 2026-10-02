@@ -16,10 +16,10 @@ export function ComplaintEntry({ bookingId, customer = false, open = false }: { 
   if (query.isError) return <TouchableOpacity style={s.card} onPress={() => query.refetch()}><Text style={s.copy}>Chưa tải được hỗ trợ booking. Chạm để thử lại.</Text></TouchableOpacity>;
   const { eligibility, history } = query.data!;
   if (!customer && !history.length) return null;
-  if (customer && !eligibility.canCreateComplaint && !history.length) return null;
+  if (customer && !eligibility.canCreateComplaint && !history.length) return <View style={s.card}><Text style={s.title}>Hỗ trợ booking</Text><Text style={s.copy}>Liên hệ bbooksupport@gmail.com và cung cấp mã booking để được hỗ trợ. Không gửi mật khẩu, OTP hoặc ảnh giấy tờ.</Text></View>;
   return <View style={s.card}>
     <Text style={s.title}>{open || eligibility.activeComplaintId ? 'Booking đang có khiếu nại' : 'Hỗ trợ booking'}</Text>
-    <Text style={s.copy}>{open || eligibility.activeComplaintId ? 'Bạn có thể theo dõi và bổ sung bằng chứng. Việc hủy hoặc xác nhận hoàn tất tạm dừng trong lúc admin xử lý.' : eligibility.complaintDeadline ? `Có thể khiếu nại đến ${new Date(eligibility.complaintDeadline).toLocaleString('vi-VN')}.` : 'Báo vấn đề để B-Book hỗ trợ giải quyết.'}</Text>
+    <Text style={s.copy}>{open || eligibility.activeComplaintId ? 'Bạn có thể theo dõi và bổ sung bằng chứng. Việc hủy hoặc xác nhận hoàn tất tạm dừng trong lúc admin xử lý.' : eligibility.complaintDeadline ? `Có thể gửi yêu cầu hỗ trợ đến ${new Date(eligibility.complaintDeadline).toLocaleString('vi-VN')}. Khoản chưa chi trả có thể bị tạm dừng; khoản đã chi trả cần admin đối soát, không tự động hoàn tiền.` : 'Báo vấn đề để B-Book hỗ trợ giải quyết.'}</Text>
     <TouchableOpacity style={s.button} onPress={() => router.push({ pathname: '/booking/[id]/complaint', params: { id: bookingId } })}><Text style={s.buttonText}>{history.length ? 'Xem hồ sơ khiếu nại' : 'Báo vấn đề / Khiếu nại'}</Text></TouchableOpacity>
   </View>;
 }

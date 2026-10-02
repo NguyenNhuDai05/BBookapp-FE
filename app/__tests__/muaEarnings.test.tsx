@@ -1,0 +1,39 @@
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react-native';
+import Earnings from '../(mua)/earnings';
+const mockRefresh=jest.fn();
+const mockPush=jest.fn();
+const mockFocus:{callback?:()=>void}={};
+const mockSnapshot={onHoldTotal:6600,availableTotal:0,frozenTotal:2000,payoutPendingTotal:0,paidOutTotal:21480,receivables:[{id:'held',bookingId:'booking-held',status:0,netAmount:6600,availableAt:'2026-10-03T00:00:00Z'},{id:'frozen',bookingId:'booking-frozen',status:2,netAmount:2000},{id:'paid',bookingId:'booking-paid',status:4,netAmount:6600}]};
+jest.mock('expo-router',()=>({useRouter:()=>({push:mockPush,back:jest.fn()}),useFocusEffect:(callback:()=>void)=>{mockFocus.callback=callback;}}));
+jest.mock('../../hooks/useMuaBookings',()=>({useEarningsSnapshot:()=>({data:mockSnapshot,refetch:mockRefresh})}));
+jest.mock('../../hooks/useMuaPayouts',()=>({useMuaPayouts:()=>({data:[{id:'payout',amount:6600,status:'PAID',bankName:'MB Bank',maskedAccountNumber:'****5244',createdAt:'2026-09-29T00:00:00Z',paidAt:'2026-09-30T00:00:00Z'}],refetch:mockRefresh})}));
+jest.mock('../../hooks/useMuaEligibility',()=>({useMuaEligibility:()=>({data:{canWithdraw:false},refetch:mockRefresh})}));
+jest.mock('../../services/api',()=>({getApiError:()=>({message:'error'})}));
+beforeEach(()=>{mockRefresh.mockClear();mockPush.mockClear();});
+it('shows distinct held booking and frozen funds without reclassifying paid income',async()=>{
+ await render(<Earnings/>);
+ expect(screen.getByText('Booking: booking-held')).toBeTruthy();
+ expect(screen.getByText('Booking: booking-frozen')).toBeTruthy();
+ expect(screen.queryByText('Booking: booking-paid')).toBeNull();
+ expect(screen.getByText('Tạm khóa')).toBeTruthy();
+ expect(screen.getByText('21.480đ')).toBeTruthy();
+ expect(screen.getByText(/Thu nhập được mở để yêu cầu rút ngay/)).toBeTruthy();
+ expect(screen.queryByText(/thời hạn khiếu nại 48 giờ/)).toBeNull();
+ await fireEvent.press(screen.getByText('Booking: booking-held'));
+ expect(mockPush).toHaveBeenCalledWith({pathname:'/(mua)/mua-booking/[id]',params:{id:'booking-held'}});
+ await fireEvent.press(screen.getByText('Chưa có số dư có thể rút'));
+ expect(mockPush).toHaveBeenCalledTimes(1);
+});
+it('refreshes balances, payouts and eligibility on each screen focus',async()=>{
+ await render(<Earnings/>);
+ mockFocus.callback?.();
+ expect(mockRefresh).toHaveBeenCalledTimes(3);
+ mockFocus.callback?.();
+ expect(mockRefresh).toHaveBeenCalledTimes(6);
+});
+it('shows payment completion date rather than request creation date',async()=>{
+ await render(<Earnings/>);
+ expect(screen.getByText(new Date('2026-09-30T00:00:00Z').toLocaleString('vi-VN'))).toBeTruthy();
+ expect(screen.queryByText(new Date('2026-09-29T00:00:00Z').toLocaleString('vi-VN'))).toBeNull();
+});
