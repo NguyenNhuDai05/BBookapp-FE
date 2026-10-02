@@ -48,7 +48,7 @@ export const useEarningsSnapshot = (muaId: string) => {
   return useQuery({
     queryKey: ['mua-earnings', muaId],
     queryFn: () => muaBookingService.getEarningsSnapshot(),
-    staleTime: 5 * 60 * 1000, // 5 min
+    staleTime: 0, // Refresh financial state when returning to the screen.
     retry: false,
   });
 };

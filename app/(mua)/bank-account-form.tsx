@@ -1,5 +1,5 @@
 import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import * as ImagePicker from 'expo-image-picker';
@@ -10,6 +10,7 @@ import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../constan
 import { getApiError } from '../../services/api';
 import { BankOption, normalizeAccountHolder, normalizeBankSearch, VIETNAM_BANKS } from '../../constants/banks';
 import { uploadBankQr } from '../../services/supabase';
+import { financialMediaService } from '../../services/financialMediaService';
 import { getBankAccountErrorMessage } from '../../utils/bankAccountStatus';
 import { FeedbackDialog } from '../../components/common/FeedbackDialog';
 import { BankAccountOtpDialog } from '../../components/bank/BankAccountOtpDialog';
@@ -19,7 +20,7 @@ export default function BankAccountFormScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const submitLock = useRef(false);
-  const params = useLocalSearchParams<{ id?: string; bankCode?: string; bankName?: string; holder?: string }>();
+  const params = useLocalSearchParams<{ id?: string; bankCode?: string; bankName?: string; holder?: string; financialQrMediaId?: string }>();
   const editing = Boolean(params.id);
   const initialBank = VIETNAM_BANKS.find(bank => bank.code === params.bankCode)
     ?? (params.bankCode ? { name: params.bankName || params.bankCode, fullName: params.bankName || '', code: params.bankCode, bin: '', color: BrandColors.accentRose } : undefined);
@@ -28,16 +29,17 @@ export default function BankAccountFormScreen() {
   const [holder, setHolder] = useState(normalizeAccountHolder(params.holder || ''));
   const [bankPickerVisible, setBankPickerVisible] = useState(false);
   const [search, setSearch] = useState('');
-  const [qrCodeUrl,setQrCodeUrl]=useState('');
+
   const [qrLocalUri,setQrLocalUri]=useState('');
+  const [financialQrMediaId,setFinancialQrMediaId]=useState(params.financialQrMediaId||'');
+  const [privateQrImage,setPrivateQrImage]=useState('');
+  useEffect(()=>{let cancelled=false;setPrivateQrImage('');if(financialQrMediaId)financialMediaService.preview(financialQrMediaId).then(image=>{if(!cancelled)setPrivateQrImage(image);}).catch(()=>{});return()=>{cancelled=true;};},[financialQrMediaId]);
   const [scanningQr,setScanningQr]=useState(false);
   const [entryMode,setEntryMode]=useState<'MANUAL'|'SCAN'>('MANUAL');
   const [feedback,setFeedback]=useState<{title:string;message:string;error?:boolean;navigate?:boolean}|null>(null);
   const isMomo=selectedBank?.code==='MOMO';
-  const generatedQrUrl=!isMomo&&selectedBank&&/^\d{5,30}$/.test(accountNumber)?`https://img.vietqr.io/image/${encodeURIComponent(selectedBank.bin)}-${encodeURIComponent(accountNumber)}-compact2.png?accountName=${encodeURIComponent(holder.trim())}`:'';
-  const effectiveQrUrl=entryMode==='SCAN'?qrCodeUrl:generatedQrUrl;
-  const valid = Boolean(selectedBank) && (isMomo?/^(0|84)\d{8,10}$/.test(accountNumber):/^\d{5,30}$/.test(accountNumber)) && /^[A-Z]+(?: [A-Z]+)*$/.test(holder.trim()) && holder.trim().length >= 2 && /^https:\/\//.test(effectiveQrUrl) && !(entryMode==='MANUAL'&&isMomo);
-  const draft=useMemo(()=>valid&&selectedBank?{bankCode:selectedBank.code,bankBin:selectedBank.bin,bankName:selectedBank.name,accountNumber,accountHolderName:holder.trim().toUpperCase(),method:(isMomo?'MOMO':'BANK') as 'MOMO'|'BANK',qrCodeUrl:effectiveQrUrl}:undefined,[valid,selectedBank,accountNumber,holder,isMomo,effectiveQrUrl]);
+  const valid = Boolean(selectedBank) && (isMomo?/^(0|84)\d{8,10}$/.test(accountNumber):/^\d{5,30}$/.test(accountNumber)) && /^[A-Z]+(?: [A-Z]+)*$/.test(holder.trim()) && holder.trim().length >= 2;
+  const draft=useMemo(()=>valid&&selectedBank?{bankCode:selectedBank.code,bankBin:selectedBank.bin,bankName:selectedBank.name,accountNumber,accountHolderName:holder.trim().toUpperCase(),method:(isMomo?'MOMO':'BANK') as 'MOMO'|'BANK',...(isMomo&&financialQrMediaId?{financialQrMediaId}:{})}:undefined,[valid,selectedBank,accountNumber,holder,isMomo,financialQrMediaId]);
   const otpFlow=useBankAccountOtpFlow(params.id,draft);const pending=otpFlow.isSending||otpFlow.isConfirming;
   const filteredBanks = useMemo(() => {
     const keyword = normalizeBankSearch(search.trim());
@@ -45,6 +47,7 @@ export default function BankAccountFormScreen() {
   }, [search]);
 
   const chooseBank = (bank: BankOption) => {
+    if(bank.code!==selectedBank?.code){setFinancialQrMediaId('');setQrLocalUri('');}
     setSelectedBank(bank);
     setSearch('');
     setBankPickerVisible(false);
@@ -61,17 +64,21 @@ export default function BankAccountFormScreen() {
       const decoded = await uploadBankQr(uri);
       const bank = decoded.method === 'MOMO' ? VIETNAM_BANKS.find(x => x.code === 'MOMO') : VIETNAM_BANKS.find(x => x.bin === decoded.bankBin);
       if (!bank) throw new Error(`Ngân hàng BIN ${decoded.bankBin || ''} chưa được hỗ trợ.`);
+      if (decoded.accountNumber && !/^\d+$/.test(decoded.accountNumber)) throw new Error('Định dạng tài khoản trong QR chưa được form hỗ trợ.');
+      const financial = decoded.method==='MOMO' ? await financialMediaService.uploadMomo(uri) : null;
+      if(financial && financial.accountNumber && decoded.accountNumber && financial.accountNumber!==decoded.accountNumber)throw new Error('QR đã thay đổi.');
+      setFinancialQrMediaId(financial?.financialQrMediaId||'');
       setSelectedBank(bank);
-      if (decoded.accountNumber) setAccountNumber(decoded.accountNumber.replace(/\D/g, ''));
+      if (decoded.accountNumber) setAccountNumber(decoded.accountNumber);
       if (decoded.accountName) setHolder(normalizeAccountHolder(decoded.accountName));
-      setQrCodeUrl(decoded.url); setQrLocalUri(uri);
+      setQrLocalUri(uri);
       if (!decoded.accountName) setFeedback({title:'Đã đọc QR',message:'QR không chứa tên chủ tài khoản. Vui lòng nhập và admin sẽ đối chiếu trước khi chuyển.'});
-    } catch (error) { setFeedback({title:'Không đọc được QR',message:getApiError(error).message,error:true}); }
+    } catch (error) { setFeedback({title:'Không đọc được QR',message:'Không đọc được thông tin từ mã QR. Bạn có thể thử ảnh khác hoặc nhập thủ công.',error:true}); }
     finally { setScanningQr(false); }
   };
 
   const submit = async () => {
-    if (!valid || !selectedBank || pending || submitLock.current) return;
+    if (!valid || !selectedBank || pending || scanningQr || submitLock.current) return;
     submitLock.current = true;
     try {
       await otpFlow.send();
@@ -87,14 +94,15 @@ export default function BankAccountFormScreen() {
     <View style={styles.header}><TouchableOpacity style={styles.back} onPress={() => router.back()} disabled={pending} accessibilityLabel="Quay lại"><ArrowLeft size={23} color={BrandColors.textDark}/></TouchableOpacity><Text style={styles.title}>{editing ? 'Cập nhật tài khoản' : 'Thêm tài khoản'}</Text><View style={styles.back}/></View>
     <KeyboardAvoidingView style={styles.keyboard} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={8}>
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: Math.max(insets.bottom, Spacing.lg) + Spacing.xl }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-        <View style={styles.modeTabs}><TouchableOpacity style={[styles.modeTab,entryMode==='MANUAL'&&styles.modeTabActive]} onPress={()=>{setEntryMode('MANUAL');setQrCodeUrl('');setQrLocalUri('');}}><Text style={[styles.modeText,entryMode==='MANUAL'&&styles.modeTextActive]}>Nhập tài khoản</Text></TouchableOpacity><TouchableOpacity style={[styles.modeTab,entryMode==='SCAN'&&styles.modeTabActive]} onPress={()=>setEntryMode('SCAN')}><Text style={[styles.modeText,entryMode==='SCAN'&&styles.modeTextActive]}>Đọc ảnh QR</Text></TouchableOpacity></View>
+        <View style={styles.modeTabs}><TouchableOpacity style={[styles.modeTab,entryMode==='MANUAL'&&styles.modeTabActive]} onPress={()=>{setEntryMode('MANUAL');setQrLocalUri('');}}><Text style={[styles.modeText,entryMode==='MANUAL'&&styles.modeTextActive]}>Nhập tài khoản</Text></TouchableOpacity><TouchableOpacity style={[styles.modeTab,entryMode==='SCAN'&&styles.modeTabActive]} onPress={()=>setEntryMode('SCAN')}><Text style={[styles.modeText,entryMode==='SCAN'&&styles.modeTextActive]}>Đọc ảnh QR</Text></TouchableOpacity></View>
         <View style={styles.field}><Text style={styles.label}>Ngân hàng *</Text><TouchableOpacity style={[styles.bankSelect, selectedBank && styles.bankSelectActive]} onPress={() => setBankPickerVisible(true)} activeOpacity={0.8}><BankMark bank={selectedBank}/><View style={styles.bankSelectCopy}>{selectedBank ? <><Text style={styles.bankSelectedName}>{selectedBank.name}</Text><Text style={styles.bankSelectedFull} numberOfLines={1}>{selectedBank.fullName}</Text></> : <Text style={styles.placeholder}>Chọn ngân hàng</Text>}</View><ChevronDown size={20} color={BrandColors.textMuted}/></TouchableOpacity></View>
-        <View style={styles.field}><Text style={styles.label}>{editing ? 'Nhập lại số tài khoản *' : 'Số tài khoản *'}</Text><TextInput style={styles.input} value={accountNumber} onChangeText={value => setAccountNumber(value.replace(/\D/g, ''))} placeholder="Nhập số tài khoản" placeholderTextColor={BrandColors.textLight} keyboardType="number-pad" inputMode="numeric" maxLength={30} returnKeyType="next"/>{accountNumber.length > 0 && accountNumber.length < 5 ? <Text style={styles.validation}>Số tài khoản cần ít nhất 5 chữ số.</Text> : null}</View>
-        <View style={styles.field}><Text style={styles.label}>Tên chủ tài khoản *</Text><TextInput style={styles.input} value={holder} onChangeText={value => setHolder(normalizeAccountHolder(value))} autoCapitalize="characters" autoCorrect={false} maxLength={150}/><Text style={styles.helper}>Nhập tên không dấu, viết IN HOA và trùng khớp với thông tin tại ngân hàng.</Text></View>
-        {entryMode==='SCAN'?<View style={styles.field}><Text style={styles.label}>Ảnh QR cần kiểm tra *</Text><TouchableOpacity style={styles.qrPicker} onPress={pickQr} disabled={scanningQr}>{scanningQr?<ActivityIndicator color={BrandColors.accentRose}/>:qrLocalUri?<Image source={{uri:qrLocalUri}} style={styles.qrImage}/>:<><ImagePlus size={28} color={BrandColors.accentRose}/><Text style={styles.qrText}>Chọn ảnh QR ngân hàng hoặc MoMo</Text></>}</TouchableOpacity><Text style={styles.helper}>Hệ thống đọc QR rồi điền ngân hàng và số tài khoản để bạn kiểm tra.</Text></View>:generatedQrUrl?<View style={styles.field}><Text style={styles.label}>QR được tạo từ tài khoản</Text><Image source={{uri:generatedQrUrl}} style={styles.generatedQr}/><Text style={styles.helper}>QR được tạo tự động từ thông tin phía trên.</Text></View>:isMomo?<Text style={styles.validation}>MoMo không hỗ trợ tự tạo QR. Hãy chọn “Đọc ảnh QR”.</Text>:null}
+        <View style={styles.field}><Text style={styles.label}>{editing ? 'Nhập lại số tài khoản *' : 'Số tài khoản *'}</Text><TextInput style={styles.input} accessibilityLabel="Số tài khoản nhận tiền" value={accountNumber} onChangeText={value => setAccountNumber(value.replace(/\D/g, ''))} placeholder="Nhập số tài khoản" placeholderTextColor={BrandColors.textLight} keyboardType="number-pad" inputMode="numeric" maxLength={30} returnKeyType="next"/>{accountNumber.length > 0 && accountNumber.length < 5 ? <Text style={styles.validation}>Số tài khoản cần ít nhất 5 chữ số.</Text> : null}</View>
+        <View style={styles.field}><Text style={styles.label}>Tên chủ tài khoản *</Text><TextInput style={styles.input} accessibilityLabel="Tên chủ tài khoản nhận tiền" value={holder} onChangeText={value => setHolder(normalizeAccountHolder(value))} autoCapitalize="characters" autoCorrect={false} maxLength={150}/><Text style={styles.helper}>Nhập tên không dấu, viết IN HOA và trùng khớp với thông tin tại ngân hàng.</Text></View>
+        {entryMode==='SCAN'||isMomo?<View style={styles.field}><Text style={styles.label}>{isMomo?'QR nhận tiền MoMo (lưu riêng tư)':'Đọc ảnh QR ngân hàng (không lưu trên máy chủ)'}</Text><TouchableOpacity accessibilityLabel={isMomo?"QR MoMo riêng tư":"Đọc QR ngân hàng"} style={styles.qrPicker} onPress={pickQr} disabled={scanningQr||pending}>{scanningQr?<><ActivityIndicator color={BrandColors.accentRose}/><Text style={styles.qrText}>Đang đọc mã QR...</Text></>:(isMomo?privateQrImage:qrLocalUri)?<Image source={{uri:isMomo?privateQrImage:qrLocalUri}} style={styles.qrImage}/>:<><ImagePlus size={28} color={BrandColors.accentRose}/><Text style={styles.qrText}>Chọn ảnh QR ngân hàng hoặc MoMo</Text></>}</TouchableOpacity><Text style={styles.helper}>{isMomo?'QR MoMo được lưu riêng tư để Admin chuyển tiền. Bạn có thể nhập thủ công nếu không tải QR. Kiểm tra đúng người nhận trước khi xác nhận.':'Ảnh ngân hàng chỉ dùng để điền thông tin, không lưu trong Storage. Hãy kiểm tra ngân hàng, số tài khoản và tên người nhận.'}</Text></View>:null}
+        {isMomo&&financialQrMediaId?<TouchableOpacity onPress={()=>{setFinancialQrMediaId('');setQrLocalUri('');}} disabled={pending||scanningQr}><Text style={styles.helper}>Bỏ QR, nhận tiền thủ công</Text></TouchableOpacity>:null}
         {editing?<Text style={styles.warning}>Thay đổi thông tin nhận tiền sẽ khiến tài khoản phải được duyệt lại và không còn là mặc định.</Text>:<Text style={styles.helper}>Sau khi xác minh email, tài khoản vẫn cần Admin đối chiếu và duyệt.</Text>}
         <View style={styles.infoBox}><Landmark size={19} color={BrandColors.textSecondary}/><Text style={styles.infoText}>Hãy kiểm tra chính xác thông tin. Tiền thanh toán sẽ được chuyển tới tài khoản này sau khi hệ thống xác nhận.</Text></View>
-        <TouchableOpacity style={[styles.submit, (!valid || pending) && styles.submitDisabled]} disabled={!valid || pending} onPress={submit} activeOpacity={0.85}>{pending ? <ActivityIndicator color="#FFF"/> : <Text style={styles.submitText}>Tiếp tục</Text>}</TouchableOpacity>
+        <TouchableOpacity style={[styles.submit, (!valid || pending || scanningQr) && styles.submitDisabled]} disabled={!valid || pending || scanningQr} onPress={submit} activeOpacity={0.85}>{pending ? <ActivityIndicator color="#FFF"/> : <Text style={styles.submitText}>Tiếp tục</Text>}</TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
     <AppBottomSheet visible={bankPickerVisible} title="Chọn ngân hàng" onClose={()=>setBankPickerVisible(false)}   contentStyle={{height:'75%'}}>
@@ -155,6 +163,6 @@ modeTab:{flex:1,minHeight:44,alignItems:'center',justifyContent:'center',borderR
 modeTabActive:{backgroundColor:'#FFF'},
 modeText:{fontFamily:Typography.semiBold,color:BrandColors.textSecondary},
 modeTextActive:{color:BrandColors.accentRose},
-generatedQr:{width:220,height:220,alignSelf:'center',resizeMode:'contain',backgroundColor:'#FFF',borderRadius:Radius.base},
+
 warning:{fontFamily:Typography.semiBold,fontSize:12,lineHeight:18,color:'#9A6700',backgroundColor:'#FFF4CE',padding:Spacing.md,borderRadius:Radius.base,marginTop:Spacing.sm}
 });

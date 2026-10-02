@@ -2,10 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookingService } from '../services/bookingService';
 import { CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
 import { getApiError } from '../services/api';
+import { MUA_ELIGIBILITY_QUERY_KEY } from './useMuaEligibility';
 
 const invalidateBookingState = (queryClient: ReturnType<typeof useQueryClient>, bookingId?: string) => {
   queryClient.invalidateQueries({ queryKey: ['userBookings'] });
   queryClient.invalidateQueries({ queryKey: ['mua-bookings'] });
+  queryClient.invalidateQueries({ queryKey: ['mua-earnings'] });
+  queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
   if (bookingId) queryClient.invalidateQueries({ queryKey: ['bookingDetail', bookingId] });
 };
 
@@ -119,6 +122,8 @@ export const useConfirmBookingCompletion = () => {
       queryClient.invalidateQueries({ queryKey: ['userBookings'] });
       queryClient.invalidateQueries({ queryKey: ['bookingDetail', data.id] });
       queryClient.invalidateQueries({ queryKey: ['mua-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['mua-earnings'] });
+      queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
     },
     onError: (error, bookingId) => {
       if (getApiError(error).status === 409) invalidateBookingState(queryClient, bookingId);

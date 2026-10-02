@@ -208,6 +208,7 @@ export default function BookingDetailScreen() {
             <Text style={styles.paymentValueTotal}>{booking.platformFeeAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
         </View>
+        {booking.status === 'WAITING_CUSTOMER' && !booking.hasOpenComplaint && <View style={styles.card}><Text style={{fontFamily:Typography.regular,color:BrandColors.textDark,lineHeight:22}}>Bạn có 24 giờ sau khi MUA gửi hoàn thành để xác nhận hoặc báo vấn đề.{booking.customerConfirmationDeadline ? ' Hạn phản hồi: '+new Date(booking.customerConfirmationDeadline).toLocaleString('vi-VN')+'.' : ''} Sau hạn này hệ thống có thể tự hoàn thành và mở khoản thu nhập để MUA yêu cầu chi trả nếu không có vấn đề chưa xử lý.</Text></View>}
         <ComplaintEntry bookingId={booking.id} customer open={booking.hasOpenComplaint} />
         {/* Actions for COMPLETED or CANCELLED */}
         {(booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED') && (
@@ -243,7 +244,7 @@ export default function BookingDetailScreen() {
       {booking.status === 'WAITING_CUSTOMER' && !booking.hasOpenComplaint && (
         <View style={styles.footerRow}>
           <TouchableOpacity style={styles.cancelBtnFlex} onPress={() => router.push(`/booking/${booking.id}/complaint`)}><Text style={styles.cancelBtnText}>Khiếu nại</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.primaryBtnFlex} disabled={isConfirming} onPress={() => confirmCompletion(booking.id)}><Text style={styles.actionBtnText}>Xác nhận hoàn thành</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.primaryBtnFlex} disabled={isConfirming} onPress={() => appDialog.alert('Xác nhận dịch vụ hoàn thành', 'Chỉ xác nhận khi dịch vụ đã hoàn thành. Khoản thu nhập của MUA sẽ được mở để yêu cầu chi trả. Nếu có vấn đề, hãy chọn Khiếu nại trước khi xác nhận; bạn vẫn có thể liên hệ hỗ trợ sau đó.', [{ text: 'Quay lại', style: 'cancel' }, { text: 'Xác nhận hoàn thành', onPress: () => confirmCompletion(booking.id) }])}><Text style={styles.actionBtnText}>Xác nhận hoàn thành</Text></TouchableOpacity>
         </View>
       )}
       {(booking.status === 'PENDING_CONFIRMATION' || booking.status === 'CONFIRMED') && !booking.hasOpenComplaint && (

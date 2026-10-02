@@ -46,7 +46,7 @@ export default function MuaCompleteBookingScreen() {
 
     try {
       await updateStatus({ bookingId: id, status: 'WAITING_CUSTOMER' });
-      appDialog.alert('Thành công', 'Đã gửi xác nhận hoàn thành. Vui lòng chờ khách hàng xác nhận để nhận thanh toán.');
+      appDialog.alert('Thành công', 'Đã gửi yêu cầu xác nhận. Khách hàng có 24 giờ để xác nhận hoặc báo vấn đề; sau hạn này hệ thống có thể tự hoàn thành. Khi booking hoàn thành và không có nghĩa vụ chưa xử lý, bạn có thể gửi yêu cầu rút tiền.');
       router.replace('/(mua)/bookings');
     } catch (error) {
       appDialog.alert('Không thể hoàn thành', getApiError(error).message);

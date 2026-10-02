@@ -30,7 +30,6 @@ export const uploadImage = async (uri: string, purpose: 'avatar' | 'portfolio' |
 };
 
 export type BankQrScanResult = {
-  url: string;
   method: 'BANK' | 'MOMO';
   bankBin?: string;
   accountNumber?: string;
@@ -39,7 +38,7 @@ export type BankQrScanResult = {
   requiresManualAccountNumber: boolean;
 };
 
-/** Uploads and decodes a bank/MoMo receive QR. The server rejects unrelated QR codes. */
+/** Decodes a bank/MoMo receive QR without storing the image. */
 export const uploadBankQr = async (uri: string): Promise<BankQrScanResult> => {
   const fileName = uri.split('/').pop()?.split('?')[0] || `bank-qr-${Date.now()}.jpg`;
   const extension = fileName.split('.').pop()?.toLowerCase() || 'jpg';
@@ -52,5 +51,14 @@ export const uploadBankQr = async (uri: string): Promise<BankQrScanResult> => {
     form.append('file', { uri, name: fileName, type: contentType } as any);
   }
   const response = await api.post<BankQrScanResult>('/Upload/bank-qr', form);
-  return { ...response.data, url: normalizeMediaUrl(response.data.url) };
+  const data = response.data;
+  // Explicit allowlist also discards financial image URLs from an older backend.
+  return {
+    method: data.method,
+    bankBin: data.bankBin,
+    accountNumber: data.accountNumber,
+    accountName: data.accountName,
+    requiresManualAccountName: data.requiresManualAccountName,
+    requiresManualAccountNumber: data.requiresManualAccountNumber,
+  };
 };

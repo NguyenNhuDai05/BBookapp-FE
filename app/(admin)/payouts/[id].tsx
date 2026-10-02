@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, AlertTriangle, RefreshCw } from 'lucide-react-native';
@@ -9,6 +9,7 @@ import { AdminStatusBadge } from '../../../components/admin/AdminStatusBadge';
 import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../../constants/theme';
 import { useAdminPayout, useCompleteAdminPayout, useFailAdminPayout, useStartAdminPayout } from '../../../hooks/useAdminPayouts';
 import { getApiError } from '../../../services/api';
+import { adminPayoutService } from '../../../services/adminPayoutService';
 
 const money=(value:number)=>`${Math.max(0,value).toLocaleString('vi-VN')}đ`;
 const date=(value?:string)=>value?new Date(value).toLocaleString('vi-VN'):'—';
@@ -25,6 +26,15 @@ export default function AdminPayoutDetailScreen(){
   const [notice,setNotice]=useState<{tone:'success'|'error'|'warning';text:string}|null>(null);
   const [uncertain,setUncertain]=useState(false);
   const payout=query.data;
+  const [transferQr,setTransferQr]=useState<{payoutId:string;amount:number;imageDataUrl:string;kind?:string;containsPayoutAmount?:boolean}|null>(null);
+  const [qrError,setQrError]=useState('');
+  useEffect(()=>{
+    let active=true; setTransferQr(null); setQrError('');
+    if(payout&&['PENDING','MANUAL_ACTION_REQUIRED','PROCESSING'].includes(payout.status)) {
+      adminPayoutService.getTransferQr(id).then(value=>{if(active)setTransferQr(value);}).catch(error=>{if(active)setQrError(getApiError(error).message);});
+    }
+    return()=>{active=false;};
+  },[id,payout?.status,payout?.amount]);
   const submitting=start.isPending||complete.isPending||fail.isPending;
 
   const reconcile=async(expected?:string)=>{
@@ -69,7 +79,11 @@ export default function AdminPayoutDetailScreen(){
       {notice?<View style={[styles.notice,notice.tone==='error'&&styles.noticeError,notice.tone==='warning'&&styles.noticeWarning]}><Text style={styles.noticeText}>{notice.text}</Text></View>:null}
       {uncertain?<View style={styles.uncertain}><AlertTriangle size={20} color="#9A3A12"/><View style={{flex:1}}><Text style={styles.uncertainTitle}>Kết quả thao tác chưa được xác minh</Text><Text style={styles.uncertainText}>Các nút tài chính đang bị khóa để tránh gửi lặp.</Text></View><TouchableOpacity style={styles.refresh} onPress={()=>reconcile()} disabled={query.isFetching}>{query.isFetching?<ActivityIndicator color={BrandColors.accentPink}/>:<RefreshCw size={20} color={BrandColors.accentPink}/>}</TouchableOpacity></View>:null}
       <View style={styles.amountCard}><Text style={styles.label}>Số tiền chi trả</Text><Text style={styles.amount}>{money(payout.amount)}</Text><Text style={styles.provider}>Phương thức: {payout.provider==='MANUAL'?'Thủ công':payout.provider}</Text></View>
-      <Section title="Tài khoản nhận"><Row label="Ngân hàng" value={bank}/><Row label="Chủ tài khoản" value={payout.accountHolderName||'—'}/><Row label="Số tài khoản" value={payout.accountNumber||payout.maskedAccountNumber||'—'}/>{payout.qrCodeUrl?<><Image source={{uri:payout.qrCodeUrl}} style={{width:240,height:240,alignSelf:'center',borderRadius:16}} resizeMode="contain"/><Text style={{textAlign:'center',color:BrandColors.statusCancelled,marginTop:8}}>Đối chiếu số tài khoản trước khi quét QR.</Text></>:null}</Section>
+      <Section title="Tài khoản nhận"><Row label="Ngân hàng" value={bank}/><Row label="Chủ tài khoản" value={payout.accountHolderName||'—'}/><Row label="Số tài khoản" value={payout.accountNumber||payout.maskedAccountNumber||'—'}/></Section>
+      {['PENDING','MANUAL_ACTION_REQUIRED','PROCESSING'].includes(payout.status)?<Section title="QR chuyển khoản payout">
+        {transferQr?.payoutId===payout.id&&transferQr.amount===payout.amount?<Image accessibilityLabel="QR chuyển khoản payout" source={{uri:transferQr.imageDataUrl}} style={{width:280,height:280,alignSelf:'center',resizeMode:'contain'}}/>:qrError?<Text>{qrError}</Text>:<ActivityIndicator/>}
+        <Text>{payout.bankCode==='MOMO'?'QR MoMo gốc của người nhận; BBook không nhúng số tiền payout vào QR. QR gốc có thể chứa số tiền khác. Luôn nhập/kiểm tra đúng số tiền và mã payout hiển thị ở trên trong ứng dụng MoMo.':'QR ngân hàng được tạo cho đúng số tiền và mã payout này.'} Bắt đầu xử lý trước khi chuyển; đối chiếu tên người nhận. Quét QR không tự xác nhận đã chi trả.</Text>
+      </Section>:null}
       <Section title="Thông tin xử lý"><Row label="Trạng thái" value={payout.status}/><Row label="Ngày tạo" value={date(payout.createdAt)}/><Row label="Bắt đầu xử lý" value={date(payout.processingAt)}/><Row label="Đã chi trả" value={date(payout.paidAt)}/><Row label="Mã tham chiếu" value={payout.providerReference||'—'}/><Row label="Số khoản đối soát" value={String(payout.receivableIds.length)}/></Section>
       {payout.failureCode||payout.failureMessage?<Section title="Thông tin thất bại"><Row label="Mã lỗi" value={payout.failureCode||'—'}/><Row label="Lý do" value={payout.failureMessage||'—'}/><Row label="Thời điểm" value={date(payout.failedAt)}/></Section>:null}
       <View style={styles.actions}>
