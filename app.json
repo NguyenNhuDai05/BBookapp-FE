@@ -25,7 +25,8 @@
         "foregroundImage": "./assets/images/Logo.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": [
+      "permissions": [],
+      "blockedPermissions": [
         "android.permission.READ_CALENDAR",
         "android.permission.WRITE_CALENDAR"
       ]
@@ -49,12 +50,6 @@
         }
       ],
       "expo-asset",
-      [
-        "expo-calendar",
-        {
-          "calendarPermission": "Allow BBook to access your calendar to sync appointments."
-        }
-      ],
       [
         "expo-notifications",
         {
