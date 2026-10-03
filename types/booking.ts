@@ -58,6 +58,7 @@ export type BookingPaymentStatus = 'CREATED' | 'PENDING' | 'PAID' | 'FAILED' | '
 export type RefundStatus = 'PENDING' | 'MANUAL_ACTION_REQUIRED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'AWAITING_DESTINATION' | 'UNKNOWN';
 
 export interface RefundSummaryDto {
+  destinationNeedsConfirmation?:boolean;
   refundId: string;
   bookingId: string;
   amount: number;

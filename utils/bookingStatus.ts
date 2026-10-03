@@ -61,6 +61,7 @@ export const mapRefundStatus = (value: unknown): RefundStatus => {
 };
 
 export const mapRefundSummary = (value: any): RefundSummaryDto | undefined => value ? {
+  destinationNeedsConfirmation:Boolean(value.destinationNeedsConfirmation),
   refundId: String(value.refundId ?? ''),
   bookingId: String(value.bookingId ?? ''),
   amount: Number(value.amount ?? 0),
