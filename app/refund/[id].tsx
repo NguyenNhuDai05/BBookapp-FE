@@ -67,9 +67,10 @@ export default function CustomerRefundDetailScreen() {
           <Text style={styles.bookingCode}>Booking {item.bookingId}</Text>
         </View>
 
+        {item.destinationNeedsConfirmation?<View style={styles.card}><Text>Tài khoản nhận tiền trước đó không còn khả dụng. Vui lòng chọn lại tài khoản nhận hoàn tiền.</Text></View>:null}
         {item.status === 'AWAITING_DESTINATION' ? (
           <TouchableOpacity style={styles.primaryButton} onPress={() => router.push({ pathname:'/refund-destination', params:{ refundId:item.refundId, bookingId:item.bookingId } } as never)}>
-            <Landmark size={19} color="#FFF" /><Text style={styles.primaryText}>Thêm tài khoản nhận tiền</Text>
+            <Landmark size={19} color="#FFF" /><Text style={styles.primaryText}>Chọn lại tài khoản nhận tiền</Text>
           </TouchableOpacity>
         ) : null}
 

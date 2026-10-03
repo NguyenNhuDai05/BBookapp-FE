@@ -14,7 +14,7 @@ describe('bank-flow screen contracts',()=>{
   it('admin approval uses a cross-platform confirmation and owner-type-free service calls',()=>{
     const screen=source('app','(admin)','bank-accounts','index.tsx');
     const service=source('services','adminBankAccountService.ts');
-    expect(screen).toContain('<ConfirmDialog');
+    expect(screen).toContain('<AppModal');
     expect(screen).not.toContain('Alert.alert');
     expect(screen).not.toContain('window.confirm');
     expect(service).toContain('/admin/bank-accounts/${item.id}/approve');
