@@ -34,7 +34,7 @@ export default function HomeScreen() {
   const toggleLiked = useFavoriteFeedStore(s => s.toggleLiked);
   const toggleSaved = useFavoriteFeedStore(s => s.toggleSaved);
   const [fullImage, setFullImage] = useState<string | null>(null);
-  const [optionsPost, setOptionsPost] = useState<{ authorName?: string } | null>(null);
+  const [optionsPost, setOptionsPost] = useState<{ authorName?: string; muaId?: string; authorId?: string; id?: string; portfolioId?: string } | null>(null);
   const [commentItem, setCommentItem] = useState<any | null>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState('');
@@ -153,7 +153,7 @@ export default function HomeScreen() {
     router.push('/checkout');
   };
 
-  const openPostOptions = (item: { authorName?: string }) => setOptionsPost(item);
+  const openPostOptions = (item: { authorName?: string; muaId?: string; authorId?: string; id?: string; portfolioId?: string }) => setOptionsPost(item);
 
   const header = <HomeFeedHeader avatarUrl={authUser?.avatarUrl || authUser?.avatar} unreadCount={unreadCount}
     onNotificationsPress={() => router.push('/customer-notifications')}
@@ -236,7 +236,7 @@ export default function HomeScreen() {
           ) : posts.length > 0 ? <Text style={{ padding: 20, textAlign: 'center', color: BrandColors.textMuted }}>Bạn đã xem hết các bài viết hiện có.</Text> : null}
           contentContainerStyle={{ paddingBottom: tabBarHeight + 16 }}
         />
-        <PostActionSheet visible={Boolean(optionsPost)} authorName={optionsPost?.authorName} onClose={() => setOptionsPost(null)} />
+        <PostActionSheet visible={Boolean(optionsPost)} authorName={optionsPost?.authorName} authorId={optionsPost?.authorId || optionsPost?.muaId} portfolioId={optionsPost?.portfolioId || optionsPost?.id} onClose={() => setOptionsPost(null)} />
         <AppOverlay visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
           <View style={styles.imageModal}>
             <TouchableOpacity style={styles.closeModal} onPress={() => setFullImage(null)}>

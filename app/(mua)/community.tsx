@@ -32,7 +32,7 @@ export default function MuaCommunityScreen() {
   const toggleSaved = useFavoriteFeedStore(state => state.toggleSaved);
   const [commentItem, setCommentItem] = useState<PortfolioItemDto | null>(null);
   const [fullImage, setFullImage] = useState<string | null>(null);
-  const [optionsPost, setOptionsPost] = useState<{ authorName?: string } | null>(null);
+  const [optionsPost, setOptionsPost] = useState<{ authorName?: string; muaId?: string; authorId?: string; id?: string; portfolioId?: string } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [busyPostId, setBusyPostId] = useState<string | null>(null);
   const { draft, setMua, addService, resetDraft, setLastViewedPortfolioId } = useBookingStore();
@@ -186,7 +186,7 @@ export default function MuaCommunityScreen() {
         showsVerticalScrollIndicator={false}
       />
       <PortfolioCommentsSheet item={commentItem} onClose={() => setCommentItem(null)} />
-      <PostActionSheet visible={Boolean(optionsPost)} authorName={optionsPost?.authorName} reportOnly onClose={() => setOptionsPost(null)} />
+      <PostActionSheet visible={Boolean(optionsPost)} authorName={optionsPost?.authorName} authorId={optionsPost?.authorId || optionsPost?.muaId} portfolioId={optionsPost?.portfolioId || optionsPost?.id} onClose={() => setOptionsPost(null)} />
       <AppOverlay visible={Boolean(fullImage)} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
         <View style={styles.imageModal}>
           <TouchableOpacity style={styles.closeImage} onPress={() => setFullImage(null)}><X size={28} color="#FFF" /></TouchableOpacity>

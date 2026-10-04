@@ -1,3 +1,4 @@
+import { SafetyButton } from '../moderation/SafetyButton';
 import { AppBottomSheet } from '../ui/AppBottomSheet';
 import React, { useEffect, useState } from 'react';
 import {ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
@@ -94,12 +95,12 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
                   <View style={styles.avatar}><Text>{(comment.userName || 'U')[0]}</Text></View>
                   <View style={styles.bubble}>
                     <Text style={styles.user}>{comment.userName || 'Người dùng'}</Text>
-                    <Text style={styles.content}>{comment.content}</Text>
+                    <Text style={styles.content}>{comment.content}</Text><SafetyButton target={{ type: 'Comment', id: comment.id }} ownerId={comment.userId} />
                     <TouchableOpacity onPress={() => setReplyingTo(comment)}><Text style={styles.replyAction}>Trả lời</Text></TouchableOpacity>
                     {(comment.replies || []).map(reply => (
                       <View key={reply.id} style={styles.reply}>
                         <Text style={styles.user}>{reply.userName || 'Người dùng'}</Text>
-                        <Text style={styles.content}>{reply.content}</Text>
+                        <Text style={styles.content}>{reply.content}</Text><SafetyButton target={{ type: 'Comment', id: reply.id }} ownerId={reply.userId} />
                       </View>
                     ))}
                   </View>
