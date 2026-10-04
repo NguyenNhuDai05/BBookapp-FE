@@ -243,6 +243,7 @@ export default function MuaSettingsScreen() {
           <Text style={styles.sectionHeader}>Cài đặt ứng dụng</Text>
           {authUser?.isDemoAccount ? renderSettingRow(<ShieldCheck size={20} color="#22152B"/>, 'Thông tin xác minh mẫu', 'Xem giấy tờ mẫu · Hồ sơ bản nháp', () => router.push('/(mua)/identity-verification')) : null}
           <View style={styles.cardWrapper}>
+            <TouchableOpacity onPress={() => router.push('/blocked-users' as any)} style={{ padding: 18 }}><Text>Người dùng bị chặn →</Text></TouchableOpacity>
             {renderSettingRow(
               <KeyRound size={20} color="#22152B" />,
               "Đổi mật khẩu",

@@ -1,3 +1,5 @@
+import { PostActionSheet } from '../../components/feed/PostActionSheet';
+import { SafetyButton } from '../../components/moderation/SafetyButton';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -94,6 +96,7 @@ export default function ChatRoomScreen() {
 
   const isCustomer = Boolean(roomInfo && currentUserId && roomInfo.customerId.toLowerCase() === currentUserId.toLowerCase());
   const peer = roomInfo ? getChatPeer(roomInfo, currentUserId) : null;
+  const [safetyOpen, setSafetyOpen] = useState(false);
   const otherName = peer?.name || 'Đang tải...';
   const otherAvatar = peer?.avatar;
 
@@ -193,6 +196,7 @@ export default function ChatRoomScreen() {
             {item.content ? <Text style={styles.messageText}>{item.content}</Text> : null}
           </View>}
         </TouchableOpacity>
+        <SafetyButton target={{ type: 'Message', id: item.messageId }} ownerId={item.senderId} />
         <View style={[styles.messageMeta, own && styles.ownMeta]}>
           <Text style={styles.messageTime}>{new Date(item.sentAt).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}</Text>
           {own && item.isRead ? <CheckCheck size={15} color={BrandColors.accentPink}/> : null}
@@ -212,7 +216,7 @@ export default function ChatRoomScreen() {
           <TouchableOpacity style={styles.headerButton} onPress={goBack} accessibilityLabel="Quay lại"><ArrowLeft size={25} color={BrandColors.accentRose}/></TouchableOpacity>
           <View style={styles.headerAvatarWrap}>{otherAvatar ? <Image source={{uri:otherAvatar}} style={styles.headerAvatar} contentFit="cover"/> : <View style={styles.headerAvatarFallback}><Text style={styles.headerAvatarLetter}>{otherName.charAt(0).toUpperCase()}</Text></View>}</View>
           <View style={styles.headerCopy}><Text style={styles.headerName} numberOfLines={1}>{otherName}</Text><Text style={styles.statusText}>{otherTyping ? 'Đang nhập...' : 'Tin nhắn riêng'}</Text></View>
-          <TouchableOpacity style={styles.headerButton} accessibilityLabel="Tùy chọn"><MoreVertical size={24} color={BrandColors.accentRose}/></TouchableOpacity>
+          <TouchableOpacity style={styles.headerButton} accessibilityLabel="Tùy chọn" onPress={() => setSafetyOpen(true)}><MoreVertical size={24} color={BrandColors.accentRose}/></TouchableOpacity><PostActionSheet visible={safetyOpen} authorId={peer?.id} authorName={otherName} onClose={() => setSafetyOpen(false)} />
         </View>
 
         {loading ? <View style={styles.loading}><ActivityIndicator size="large" color={BrandColors.accentPink}/></View> : <FlatList ref={flatListRef} data={messages} keyExtractor={item=>item.messageId} renderItem={renderMessage} showsVerticalScrollIndicator={false} contentContainerStyle={styles.messages} onScroll={({nativeEvent})=>{if(nativeEvent.contentOffset.y<24) void loadOlder();}} scrollEventThrottle={160} ListHeaderComponent={<View>{loadingOlder ? <ActivityIndicator color={BrandColors.accentPink}/> : null}<View style={styles.dayChip}><Text style={styles.dayText}>Hôm nay</Text></View></View>} ListEmptyComponent={<View style={styles.emptyConversation}><MessageCircleEmpty/><Text style={styles.emptyConversationTitle}>Hãy bắt đầu trò chuyện</Text><Text style={styles.emptyConversationText}>Gửi lời chào hoặc câu hỏi để bắt đầu tư vấn.</Text></View>}/>}

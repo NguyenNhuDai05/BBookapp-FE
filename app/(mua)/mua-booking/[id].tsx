@@ -215,7 +215,7 @@ export default function MuaBookingDetailScreen() {
               <Text style={styles.priceValueBold}>{booking.totalAmount.toLocaleString()}đ</Text>
             </View>
             <View style={styles.priceRow}>
-              <Text style={styles.priceLabelDeposit}>Đã cọc ({booking.paymentMethod})</Text>
+              <Text style={styles.priceLabelDeposit}>{review ? 'Khoản cọc mẫu' : `Đã cọc (${booking.paymentMethod})`}</Text>
               <Text style={styles.priceValueDeposit}>-{booking.depositAmount.toLocaleString()}đ</Text>
             </View>
             <View style={styles.priceRow}>

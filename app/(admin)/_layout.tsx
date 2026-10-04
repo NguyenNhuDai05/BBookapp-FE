@@ -4,6 +4,7 @@ export default function AdminLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="dashboard" />
+      <Stack.Screen name="moderation" />
       <Stack.Screen name="private-media" />
       <Stack.Screen name="payouts/index" />
       <Stack.Screen name="payouts/[id]" />

@@ -303,6 +303,7 @@ export default function ProfileScreen() {
               "Bài viết đã thả tim và đã lưu",
               () => router.push("/favorites" as any),
             )}
+            <TouchableOpacity onPress={() => router.push('/blocked-users' as any)} style={{ padding: 18 }}><Text>Người dùng bị chặn →</Text></TouchableOpacity>
             {renderSettingRow(
               <KeyRound size={20} color="#ff7c98" />,
               "Đổi mật khẩu",

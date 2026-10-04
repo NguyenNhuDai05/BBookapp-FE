@@ -1,3 +1,4 @@
+import { SafetyButton } from '../moderation/SafetyButton';
 import { AppBottomSheet } from '../ui/AppBottomSheet';
 import React, { useState } from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator, TextInput} from 'react-native';
@@ -241,9 +242,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
                   <Text style={styles.helpfulText}>Hữu ích (0)</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity>
-                  <Text style={styles.reportText}>Báo cáo</Text>
-                </TouchableOpacity>
+                <SafetyButton target={{ type: 'Review', id: review.reviewId }} ownerId={review.customerId} />
               </View>
             </View>
           ))

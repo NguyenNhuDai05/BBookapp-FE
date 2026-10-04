@@ -9,11 +9,13 @@ Kiểm tra dịch vụ, địa điểm, thời gian, giá và thông tin đặt 
 Khi khách hàng xác nhận hoặc hệ thống tự xác nhận booking hoàn thành, thu nhập MUA được mở để gửi yêu cầu rút ngay nếu không có khiếu nại hoặc nghĩa vụ chưa giải quyết; tiền vào tài khoản nhận vẫn chờ admin xử lý chuyển khoản. Khách hàng có 24 giờ để xác nhận hoặc báo vấn đề sau khi MUA gửi hoàn thành. Trong 48 giờ sau hoàn thành, khách hàng có thể gửi hồ sơ hỗ trợ trong app; ngoài thời gian này có thể liên hệ bbooksupport@gmail.com. Yêu cầu hỗ trợ có thể tạm dừng khoản chưa chi trả; khoản đã chi trả cần đối soát thủ công, không tự động thu hồi hoặc hoàn tiền.
 
 3. Nội dung và hỗ trợ
+Không đăng nội dung tình dục hoặc ảnh khỏa thân, bạo lực phản cảm, đe dọa, quấy rối, thù ghét, lừa đảo, spam hoặc nội dung xâm phạm quyền của người khác. Các quy tắc này áp dụng cho bài đăng, ảnh, bình luận, đánh giá và tin nhắn.
+Bạn có thể báo cáo nội dung hoặc người dùng từ các nút báo cáo trong ứng dụng. Đội ngũ quản trị xem xét báo cáo và có thể gỡ nội dung vi phạm. Bạn có thể chặn người dùng để ngăn tương tác mới và bỏ chặn tại mục Người dùng đã chặn. Chặn không hủy lịch hẹn hoặc nghĩa vụ thanh toán đã có.
 Không gửi mật khẩu, OTP hoặc giấy tờ tùy thân trong nội dung công khai. Để phản ánh vấn đề dịch vụ hoặc nội dung, sử dụng chức năng được hỗ trợ trong app hoặc liên hệ bbooksupport@gmail.com. Xem Chính sách quyền riêng tư bên dưới về dữ liệu và giới hạn của quy trình xóa hiện tại.
 
 CHÍNH SÁCH QUYỀN RIÊNG TƯ BBOOK
 
-Nhà phát triển: B-Book. Bản sửa đổi: 03/10/2026.
+Nhà phát triển: B-Book. Bản sửa đổi: 04/10/2026.
 
 
 
@@ -126,3 +128,6 @@ Trang https://bbookmakeup.com/delete-account/ cung cấp hướng dẫn và liê
 Bạn có thể chỉnh sửa các trường được hỗ trợ trong hồ sơ và quản lý quyền của thiết bị. Để yêu cầu chỉnh sửa dữ liệu khác, nêu câu hỏi về dữ liệu hoặc yêu cầu xóa, liên hệ bbooksupport@gmail.com.
 
 Ngày sửa đổi là ngày chuẩn bị nội dung này, không phải bằng chứng trang đã được công bố. Khi chức năng hoặc cách xử lý dữ liệu thay đổi, nội dung cần được cập nhật tương ứng.
+
+Báo cáo nội dung và chặn người dùng
+Khi bạn gửi báo cáo, BBook lưu tài khoản gửi báo cáo, nội dung/người dùng được báo cáo, lý do và mô tả bạn nhập để quản trị viên xem xét. Quản trị viên có thể xem đúng nội dung bị báo cáo, kể cả tin nhắn hoặc ảnh chat đó; chức năng này không cấp quyền xem toàn bộ cuộc trò chuyện. BBook lưu quan hệ chặn để hạn chế tương tác mới. Khi xử lý xóa tài khoản, quan hệ chặn được xóa và mô tả/ghi chú báo cáo liên quan được làm trống; mã tham chiếu và quyết định xử lý có thể được giữ để bảo đảm nội dung đã gỡ không xuất hiện lại. Liên hệ bbooksupport@gmail.com nếu cần hỗ trợ về dữ liệu này.
