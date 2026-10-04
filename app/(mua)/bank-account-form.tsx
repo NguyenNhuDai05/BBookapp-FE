@@ -1,3 +1,5 @@
+import { useAuthStore as useReviewAuth } from '../../store/useAuthStore';
+import { ReviewReadOnlyScreen } from '../../components/ReviewReadOnlyScreen';
 import { normalizeMomoPhone, isMomoPhone } from '../../utils/momoPhone';
 import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -17,7 +19,7 @@ import { FeedbackDialog } from '../../components/common/FeedbackDialog';
 import { BankAccountOtpDialog } from '../../components/bank/BankAccountOtpDialog';
 import { useBankAccountOtpFlow } from '../../hooks/useBankAccountOtpFlow';
 
-export default function BankAccountFormScreen() {
+function BankAccountFormScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const submitLock = useRef(false);
@@ -169,3 +171,8 @@ modeTextActive:{color:BrandColors.accentRose},
 
 warning:{fontFamily:Typography.semiBold,fontSize:12,lineHeight:18,color:'#9A6700',backgroundColor:'#FFF4CE',padding:Spacing.md,borderRadius:Radius.base,marginTop:Spacing.sm}
 });
+
+export default function ProtectedBankAccountFormScreen() {
+  const review = useReviewAuth(state => state.user?.isDemoAccount === true);
+  return review ? <ReviewReadOnlyScreen/> : <BankAccountFormScreen/>;
+}

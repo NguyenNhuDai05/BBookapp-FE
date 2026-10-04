@@ -131,3 +131,4 @@ describe('MUA private MoMo QR',()=>{
   await screen.findByText('Không đọc được thông tin từ mã QR. Bạn có thể thử ảnh khác hoặc nhập thủ công.');expect(screen.getByLabelText('Tên chủ tài khoản nhận tiền').props.value).toBe('TEST ONLY');await fireEvent.press(screen.getByText('Tiếp tục'));await waitFor(()=>expect(mockOtp).toHaveBeenCalledWith(expect.objectContaining({request:expect.objectContaining({financialQrMediaId:'00000000-0000-4000-8000-000000000001'})})));
  });
 });
+jest.mock('../../store/useAuthStore', () => ({ useAuthStore: (selector: (state: { user: null }) => unknown) => selector({ user: null }) }));

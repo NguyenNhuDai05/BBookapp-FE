@@ -1,3 +1,5 @@
+import { useAuthStore as useReviewAuth } from '../store/useAuthStore';
+import { ReviewReadOnlyScreen } from '../components/ReviewReadOnlyScreen';
 import { financialMediaService } from '../services/financialMediaService';
 import { normalizeMomoPhone, isMomoPhone } from '../utils/momoPhone';
 import { AppBottomSheet } from '../components/ui/AppBottomSheet';
@@ -19,7 +21,7 @@ import { BankAccountOtpDialog } from '../components/bank/BankAccountOtpDialog';
 import { useBankAccountOtpFlow } from '../hooks/useBankAccountOtpFlow';
 import { getBankAccountErrorMessage } from '../utils/bankAccountStatus';
 
-export default function RefundBankAccountFormScreen() {
+function RefundBankAccountFormScreen() {
   const router = useRouter(); const insets = useSafeAreaInsets(); const queryClient = useQueryClient(); const submitLock = useRef(false);
   const { refundId, bookingId, id, bankBin, bankName, holder:initialHolder, method, financialQrMediaId:initialMediaId } = useLocalSearchParams<{ refundId?: string; bookingId?: string; id?:string; bankBin?:string; bankName?:string; holder?:string; method?:'BANK'|'MOMO';financialQrMediaId?:string }>();
   const editing=Boolean(id);
@@ -90,3 +92,8 @@ search:{minHeight:50,flexDirection:'row',alignItems:'center',gap:9,backgroundCol
 searchInput:{flex:1,fontFamily:Typography.regular,fontSize:15,color:BrandColors.textDark},
 bankRow:{minHeight:66,flexDirection:'row',alignItems:'center',gap:Spacing.md,borderBottomWidth:1,borderBottomColor:BrandColors.borderDivider}
 });
+
+export default function ProtectedRefundBankAccountFormScreen() {
+  const review = useReviewAuth(state => state.user?.isDemoAccount === true);
+  return review ? <ReviewReadOnlyScreen/> : <RefundBankAccountFormScreen/>;
+}

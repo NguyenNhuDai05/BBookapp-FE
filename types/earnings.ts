@@ -22,6 +22,8 @@ export interface MuaReceivableDto {
 }
 
 export interface MuaEarningsDto {
+  canRequestSimulatedPayout?: boolean;
+  permittedSimulationBankAccountId?: string | null;
   onHoldTotal: number;
   availableTotal: number;
   frozenTotal: number;

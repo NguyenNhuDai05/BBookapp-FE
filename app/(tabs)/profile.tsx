@@ -1,3 +1,6 @@
+import { ReviewNotice } from '../../components/ReviewNotice';
+import { REVIEW_PASSWORD_NOTICE, REVIEW_PROTECTED_NOTICE } from '../../utils/playReview';
+import { getApiError } from '../../services/api';
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
@@ -119,7 +122,7 @@ export default function ProfileScreen() {
   };
 
   const performAccountDeletion = async () => {
-    if (isDeletingAccount) return;
+    if (authUser?.isDemoAccount || isDeletingAccount) return;
     const referenceCode = authUser?.id;
     try {
       setIsDeletingAccount(true);
@@ -127,7 +130,7 @@ export default function ProfileScreen() {
       router.replace("/login" as any);
       appDialog.alert("Đã tiếp nhận yêu cầu xóa", `${referenceCode ? `Mã tham chiếu: ${referenceCode}. Hãy lưu mã này để hỏi tiến độ.\n\n` : ''}Tài khoản đã bị vô hiệu hóa. Việc xóa file được xử lý trên máy chủ; dữ liệu cũ cần xác minh có thể cần hỗ trợ. Liên hệ bbooksupport@gmail.com để nhận kết quả. Lịch sử giao dịch tối thiểu có thể còn được giữ để đối soát.`);
     } catch (error: any) {
-      const message = error?.response?.data?.message || error?.message || "Không thể xóa tài khoản. Vui lòng thử lại.";
+      const message = getApiError(error).message;
       appDialog.alert("Chưa thể xóa tài khoản", message);
     } finally {
       setIsDeletingAccount(false);
@@ -171,6 +174,7 @@ export default function ProfileScreen() {
   ) => (
     <TouchableOpacity
       style={styles.rowItem}
+      disabled={authUser?.isDemoAccount === true && (title === 'Đổi mật khẩu' || title === 'Xóa tài khoản' || title === 'Chỉnh sửa thông tin')}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -233,6 +237,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        {authUser?.isDemoAccount ? <ReviewNotice/> : null}
         {/* HEADER GRADIENT BANNER (Đồng bộ bộ màu từ màn Splash của bạn) */}
         <LinearGradient
           colors={["#ffffff", "#feabb3", "#ff7c98", "#f5446a"]}
@@ -301,13 +306,13 @@ export default function ProfileScreen() {
             {renderSettingRow(
               <KeyRound size={20} color="#ff7c98" />,
               "Đổi mật khẩu",
-              "Cập nhật mật khẩu đăng nhập",
+              authUser?.isDemoAccount ? REVIEW_PASSWORD_NOTICE : "Cập nhật mật khẩu đăng nhập",
               () => router.push("/change-password" as any),
             )}
             {renderSettingRow(
               <CreditCard size={20} color="#ff7c98" />,
               "Tài khoản nhận hoàn tiền",
-              "Khai báo tài khoản ngân hàng để nhận tiền hoàn",
+              authUser?.isDemoAccount ? "Xem tài khoản mẫu đã được chuẩn bị" : "Khai báo tài khoản ngân hàng để nhận tiền hoàn",
               () => router.push("/refund-destination" as any),
             )}
             {!isMuaAccount &&
@@ -347,7 +352,7 @@ export default function ProfileScreen() {
             {renderSettingRow(
               isDeletingAccount ? <ActivityIndicator color="#F5446A" /> : <Trash2 size={20} color="#F5446A" />,
               isDeletingAccount ? "Đang xóa tài khoản..." : "Xóa tài khoản",
-              "Xóa vĩnh viễn tài khoản và dữ liệu cá nhân",
+              authUser?.isDemoAccount ? REVIEW_PROTECTED_NOTICE : "Xóa vĩnh viễn tài khoản và dữ liệu cá nhân",
               handleDeleteAccount,
               true,
             )}

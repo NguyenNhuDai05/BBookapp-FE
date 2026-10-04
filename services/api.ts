@@ -3,6 +3,7 @@ import axios from "axios";
 import { Platform } from "react-native";
 import { normalizeMediaUrlsInPayload } from "../utils/mediaUrl";
 import { sanitizeUiMessage } from "../utils/uiMessage";
+import { reviewErrorMessage } from '../utils/playReview';
 
 const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
 
@@ -73,7 +74,7 @@ export const getApiError = (error: unknown) => {
   return {
     status: error.response?.status,
     code: payload?.code ?? payload?.Code,
-    message: sanitizeUiMessage(
+    message: reviewErrorMessage(payload?.code ?? payload?.Code) ?? sanitizeUiMessage(
       firstValidationMessage ??
       payload?.message ??
       payload?.Message ??

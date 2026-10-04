@@ -10,8 +10,8 @@ export class ApiMuaRepository implements IMuaRepository {
   }
 
   async getArtistById(id: string): Promise<ArtistDto | null> {
-    const { data } = await api.get<MuaProfileResponse | null>(`/Mua/${id}`);
-    return data ? mapMuaProfile(data) : null;
+    const { data } = await api.get<(MuaProfileResponse & { services?: ServiceResponse[] }) | null>(`/Mua/${id}`);
+    return data ? { ...mapMuaProfile(data), services: (data.services || []).map(mapService) } : null;
   }
 
   async getArtistServices(id: string): Promise<ServiceDto[]> {
@@ -45,6 +45,8 @@ export class ApiMuaRepository implements IMuaRepository {
     }));
   }
 }
+
+const mapService = (s: ServiceResponse): ServiceDto => ({ id: s.serviceId, serviceId: s.serviceId, name: s.serviceName || '', serviceName: s.serviceName ?? undefined, description: s.description, durationMinutes: s.durationMinutes, price: s.price, category: s.category || '', travelAvailable: Boolean(s.travelAvailable), visibility: s.visibility !== false, status: s.status || 'ACTIVE', imageUrl: s.imageUrl, imageUrls: s.imageUrls?.length ? s.imageUrls : s.imageUrl ? [s.imageUrl] : [] });
 
 type MuaProfileResponse = {
   muaId: string;

@@ -1,3 +1,6 @@
+import { useAuthStore } from '../../../store/useAuthStore';
+import { ReviewNotice } from '../../../components/ReviewNotice';
+import { REVIEW_FINANCIAL_NOTICE } from '../../../utils/playReview';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { AppAlert as appDialog } from '../../../components/ui/dialogStore';
@@ -13,6 +16,7 @@ import { getApiError } from '../../../services/api';
 export default function MuaCompleteBookingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const review=useAuthStore(state=>state.user?.isDemoAccount===true);
 
   const { data: booking, isLoading } = useBookingDetail(id);
   const { mutateAsync: updateStatus, isPending } = useUpdateBookingStatus(booking?.mua.id || 'me');
@@ -39,7 +43,7 @@ export default function MuaCompleteBookingScreen() {
 
   const handleComplete = async () => {
     if (isPending) return;
-    if (images.length === 0) {
+    if (!review && images.length === 0) {
       appDialog.alert('Bắt buộc', 'Vui lòng tải lên ít nhất 1 hình ảnh kết quả makeup để hoàn thành đơn!');
       return;
     }
@@ -72,6 +76,7 @@ export default function MuaCompleteBookingScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        {review?<ReviewNotice message={REVIEW_FINANCIAL_NOTICE}/>:null}
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>Mã đơn: #{id.substring(0, 8)}</Text>
           <Text style={styles.infoText}>Khách hàng: {booking?.customer?.name}</Text>
@@ -79,7 +84,7 @@ export default function MuaCompleteBookingScreen() {
           <Text style={styles.infoHighlight}>Cần thu thêm: {booking?.remainingAmount?.toLocaleString()}đ</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Hình ảnh kết quả Makeup</Text>
+        {review?<ReviewNotice message="Bạn có thể gửi yêu cầu xác nhận cho lịch mẫu. Khách hàng mẫu không tự xác nhận hoàn thành."/>:<><Text style={styles.sectionTitle}>Hình ảnh kết quả Makeup</Text>
         <Text style={styles.sectionDesc}>
           Vui lòng tải lên 1-5 hình ảnh cho thấy bạn đã hoàn thành dịch vụ cho khách hàng. Hình ảnh này có thể dùng làm portfolio của bạn.
         </Text>
@@ -101,13 +106,14 @@ export default function MuaCompleteBookingScreen() {
             </TouchableOpacity>
           )}
         </View>
+        </>}
       </ScrollView>
 
       <View style={styles.bottomBar}>
         <TouchableOpacity
-          style={[styles.submitBtn, (images.length === 0 || isPending) && styles.submitBtnDisabled]}
+          style={[styles.submitBtn, ((!review && images.length === 0) || isPending) && styles.submitBtnDisabled]}
           onPress={handleComplete}
-          disabled={images.length === 0 || isPending}
+          disabled={(!review && images.length === 0) || isPending}
         >
           {isPending ? (
             <ActivityIndicator color="#FFF" />

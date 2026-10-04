@@ -11,9 +11,12 @@ interface BackendTokenDto {
   email: string;
   role: number | string;
   hasMuaProfile: boolean;
+  isDemoAccount?: boolean;
 }
 
 interface BackendUserDto {
+  isDemoAccount?: boolean;
+  demoCounterpartMuaId?: string | null;
   userId: string;
   fullName?: string;
   email?: string;
@@ -73,6 +76,8 @@ export class ApiAuthRepository implements IAuthRepository {
       avatar: data.avatarUrl,
       avatarUrl: data.avatarUrl,
       hasMuaProfile: data.hasMuaProfile,
+      isDemoAccount: data.isDemoAccount === true,
+      demoCounterpartMuaId: data.demoCounterpartMuaId ?? null,
       createdAt: data.createdAt,
     };
   }
@@ -103,6 +108,8 @@ export class ApiAuthRepository implements IAuthRepository {
         email: data.email,
         role: mapBackendRole(data.role),
         hasMuaProfile: data.hasMuaProfile,
+        isDemoAccount: data.isDemoAccount === true,
+        demoCounterpartMuaId: null,
         createdAt: new Date().toISOString()
       },
     };

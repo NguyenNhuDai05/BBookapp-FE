@@ -6,6 +6,7 @@ import { UserRole } from "../types/auth";
 import { queryClient } from "../lib/queryClient";
 import { NotificationService } from "../services/NotificationService";
 import { signalRService } from "../services/signalRService";
+import { useBookingStore } from './useBookingStore';
 import type { MuaApplicationRequestDto } from "../types/onboarding";
 
 const TOKEN_KEY = "user_jwt_token";
@@ -93,8 +94,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
       await AsyncStorage.setItem(ACTIVE_MODE_KEY, 'CUSTOMER');
 
+      const user = res.user.isDemoAccount ? await authService.getMe() : res.user;
+      queryClient.clear();
+      useBookingStore.getState().resetDraft();
+
       set({
-        user: res.user,
+        user,
         isAuthenticated: true,
         isLoading: false,
         activeMode: 'CUSTOMER',
@@ -102,7 +107,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       return true;
     } catch {
-      set({ isLoading: false });
+      await get().expireSession();
       return false;
     }
   },
@@ -113,8 +118,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const res = await authService.loginWithGoogle(idToken);
       await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
       await AsyncStorage.setItem(ACTIVE_MODE_KEY, 'CUSTOMER');
+      const user = res.user.isDemoAccount ? await authService.getMe() : res.user;
+      queryClient.clear();
+      useBookingStore.getState().resetDraft();
       set({
-        user: res.user,
+        user,
         isAuthenticated: true,
         isLoading: false,
         activeMode: 'CUSTOMER',
@@ -168,6 +176,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await AsyncStorage.removeItem(TOKEN_KEY);
       await AsyncStorage.removeItem(ACTIVE_MODE_KEY);
       queryClient.clear();
+      useBookingStore.getState().resetDraft();
 
       set({
         user: null,
@@ -180,6 +189,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   expireSession: async () => {
     await Promise.all([AsyncStorage.removeItem(TOKEN_KEY), AsyncStorage.removeItem(ACTIVE_MODE_KEY)]);
     queryClient.clear();
+    useBookingStore.getState().resetDraft();
     set({ user: null, isAuthenticated: false, isLoading: false, activeMode: 'CUSTOMER' });
   },
 

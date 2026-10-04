@@ -1,3 +1,4 @@
+import { ReviewReadOnlyScreen } from '../../components/ReviewReadOnlyScreen';
 import { OperatingAreaFields, type OperatingArea } from '../../components/mua/OperatingAreaFields';
 import { EXPERIENCE_LEVELS } from '../../utils/muaAreas';
 import React, { useState, useEffect } from 'react';
@@ -16,7 +17,7 @@ import { useMuaStyles } from '../../hooks/useMuaStyles';
 import { normalizeSocialUrl } from '../../utils/socialUrl';
 
 
-export default function EditProfileScreen() {
+function EditProfileScreen() {
   const router = useRouter();
   const { user, updateUser } = useAuthStore();
   const muaId = 'me';
@@ -348,3 +349,8 @@ styleChipSelected:{backgroundColor:BrandColors.accentPink,borderColor:BrandColor
 styleChipText:{fontFamily:Typography.medium,fontSize:13,color:BrandColors.textBody},
 styleChipTextSelected:{color:'#FFF'}
 });
+
+export default function ProtectedEditProfileScreen() {
+  const review = useAuthStore(state => state.user?.isDemoAccount === true);
+  return review ? <ReviewReadOnlyScreen/> : <EditProfileScreen/>;
+}

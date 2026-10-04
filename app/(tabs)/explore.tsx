@@ -10,6 +10,8 @@ import { getCustomerTabBarMetrics } from '../../constants/theme';
 import { useExplore } from '../../hooks/useExplore';
 import { exploreErrorMessage, isExploreSessionError } from '../../services/exploreService';
 import type { ExploreArtist, ExploreItem, ExploreKind, ExplorePost, ExploreService } from '../../types/explore';
+import { useAuthStore } from '../../store/useAuthStore';
+import { ReviewNotice } from '../../components/ReviewNotice';
 
 const KINDS: { key: ExploreKind; label: string }[] = [
   { key: 'portfolio', label: 'Tác phẩm' }, { key: 'artists', label: 'Chuyên gia' }, { key: 'services', label: 'Dịch vụ' },
@@ -21,6 +23,7 @@ function LoadingCards() {
 }
 export default function ExploreScreen() {
   const router = useRouter();
+  const reviewUser = useAuthStore(state => state.user);
   const insets = useSafeAreaInsets();
   const bottom = getCustomerTabBarMetrics(insets.bottom).height;
   const list = useRef<FlatList<ExploreItem>>(null);
@@ -45,6 +48,7 @@ export default function ExploreScreen() {
       <ExploreArtistCard item={item as ExploreArtist} onPress={() => openArtist(item.id)} /> : <ExploreServiceCard item={item as ExploreService} onPress={() => openService(item as ExploreService)} />}
   </View>;
   const header = <>
+    {reviewUser?.isDemoAccount && reviewUser.demoCounterpartMuaId ? <TouchableOpacity accessibilityRole="button" onPress={() => openArtist(reviewUser.demoCounterpartMuaId!)}><ReviewNotice title="MUA mẫu cho đánh giá" message="Xem hồ sơ, chọn dịch vụ và trải nghiệm đặt lịch với MUA mẫu." /></TouchableOpacity> : null}
     <View style={styles.titleRow}><View><Text style={styles.eyebrow}>B-BOOK / KHÁM PHÁ</Text><Text style={styles.heading}>Đẹp theo cách của bạn</Text></View><Sparkles size={25} color={PINK} /></View>
     <View style={styles.searchRow}><View style={styles.searchBox}><Search size={19} color="#7E6372" />
       <TextInput accessibilityLabel="Tìm kiếm tác phẩm, chuyên gia và dịch vụ" placeholder="Tìm phong cách, MUA, dịch vụ..." placeholderTextColor="#947F8A" style={styles.searchInput}

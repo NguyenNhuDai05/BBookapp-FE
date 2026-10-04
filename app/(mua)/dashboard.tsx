@@ -12,6 +12,7 @@ import { Bell, BriefcaseBusiness, CalendarClock, Images, UsersRound } from 'luci
 import { useMuaEligibility } from '../../hooks/useMuaEligibility';
 import { MuaCompletionCard } from '../../components/mua/MuaCompletionCard';
 import { ErrorView } from '../../components/ui/ErrorView';
+import { ReviewNotice } from '../../components/ReviewNotice';
 import { getApiError } from '../../services/api';
 
 export default function MuaDashboard() {
@@ -63,7 +64,7 @@ export default function MuaDashboard() {
           </TouchableOpacity>
         </View>
 
-        {eligibilityError ? <ErrorView message="Không thể tải trạng thái hồ sơ" onRetry={refetchEligibility} /> : eligibility ? <View style={styles.completionWrap}><MuaCompletionCard eligibility={eligibility} compact onContinue={() => router.push('/mua-onboarding/setup')} /></View> : null}
+        {user?.isDemoAccount ? <ReviewNotice/> : eligibilityError ? <ErrorView message="Không thể tải trạng thái hồ sơ" onRetry={refetchEligibility} /> : eligibility ? <View style={styles.completionWrap}><MuaCompletionCard eligibility={eligibility} compact onContinue={() => router.push('/mua-onboarding/setup')} /></View> : null}
 
         <View style={styles.quickActions}>
           <TouchableOpacity style={styles.quickAction} onPress={() => router.push('/(mua)/services')}><BriefcaseBusiness size={21} color={BrandColors.accentRose}/><Text style={styles.quickText}>Dịch vụ</Text></TouchableOpacity>

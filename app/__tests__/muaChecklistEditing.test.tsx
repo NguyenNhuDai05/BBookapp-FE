@@ -85,3 +85,4 @@ it('identifies a failing CCCD photo and returns to the document step without sav
   expect(screen.getByText('Chụp ảnh CCCD')).toBeTruthy();
   expect(mockSave).not.toHaveBeenCalled();
 });
+jest.mock('../../store/useAuthStore', () => ({ useAuthStore: (selector: (state: { user: null }) => unknown) => selector({ user: null }) }));

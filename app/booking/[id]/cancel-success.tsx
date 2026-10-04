@@ -1,3 +1,6 @@
+import { useAuthStore } from '../../../store/useAuthStore';
+import { ReviewNotice } from '../../../components/ReviewNotice';
+import { REVIEW_FINANCIAL_NOTICE } from '../../../utils/playReview';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -10,6 +13,7 @@ import { PaymentStatus } from '../../../types/booking';
 
 export default function CancelSuccessScreen() {
   const router = useRouter();
+  const review=useAuthStore(state=>state.user?.isDemoAccount===true);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: booking, isLoading, isError, refetch, isFetching } = useBookingDetail(id);
   const isCancelled = booking?.status === 'CANCELLED';
@@ -73,6 +77,7 @@ export default function CancelSuccessScreen() {
           Đơn đặt lịch <Text style={styles.bold}>{booking.id}</Text> với chuyên gia <Text style={styles.bold}>{booking.mua.name}</Text> đã được hủy.
         </Text>
 
+        {review?<ReviewNotice title="Hoàn tiền mẫu" message={REVIEW_FINANCIAL_NOTICE}/>:null}
         {refundPresentation && (
           <View style={styles.refundBox}>
             <Text style={styles.refundTitle}>{refundPresentation.label}</Text>
@@ -86,11 +91,11 @@ export default function CancelSuccessScreen() {
                 <Text style={styles.bold}>{formatVnd(booking.refund?.amount ?? booking.cancellationRefundAmount ?? 0)}</Text>
               </Text>
             )}
-            <Text style={styles.refundText}>{refundPresentation.description}</Text>
+            <Text style={styles.refundText}>{review ? REVIEW_FINANCIAL_NOTICE : refundPresentation.description}</Text>
           </View>
         )}
 
-        {booking.refund?.status === 'AWAITING_DESTINATION' && (
+        {!review && booking.refund?.status === 'AWAITING_DESTINATION' && (
           <TouchableOpacity style={styles.retryButton} onPress={() => router.push({ pathname: '/refund-destination', params: { refundId: booking.refund!.refundId, bookingId: booking.id } } as any)}>
             <Text style={styles.retryText}>Thêm tài khoản nhận tiền</Text>
           </TouchableOpacity>

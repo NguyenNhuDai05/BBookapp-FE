@@ -1,3 +1,6 @@
+import { ReviewNotice } from '../../components/ReviewNotice';
+import { REVIEW_PASSWORD_NOTICE, REVIEW_PROTECTED_NOTICE } from '../../utils/playReview';
+import { getApiError } from '../../services/api';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import {
@@ -62,7 +65,7 @@ export default function MuaSettingsScreen() {
   };
 
   const performAccountDeletion = async () => {
-    if (isDeletingAccount) return;
+    if (authUser?.isDemoAccount || isDeletingAccount) return;
     const referenceCode = authUser?.id;
     try {
       setIsDeletingAccount(true);
@@ -70,7 +73,7 @@ export default function MuaSettingsScreen() {
       router.replace("/(auth)/login" as any);
       appDialog.alert("Đã tiếp nhận yêu cầu xóa", `${referenceCode ? `Mã tham chiếu: ${referenceCode}. Hãy lưu mã này để hỏi tiến độ.\n\n` : ''}Tài khoản đã bị vô hiệu hóa. Việc xóa file được xử lý trên máy chủ; dữ liệu cũ cần xác minh có thể cần hỗ trợ. Liên hệ bbooksupport@gmail.com để nhận kết quả. Lịch sử giao dịch tối thiểu có thể còn được giữ để đối soát.`);
     } catch (error: any) {
-      const message = error?.response?.data?.message || error?.message || "Không thể xóa tài khoản. Vui lòng thử lại.";
+      const message = getApiError(error).message;
       appDialog.alert("Chưa thể xóa tài khoản", message);
     } finally {
       setIsDeletingAccount(false);
@@ -96,6 +99,7 @@ export default function MuaSettingsScreen() {
   ) => (
     <TouchableOpacity
       style={styles.rowItem}
+      disabled={authUser?.isDemoAccount === true && (title === 'Đổi mật khẩu' || title === 'Xóa tài khoản' || title === 'Chỉnh sửa hồ sơ')}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -179,7 +183,7 @@ export default function MuaSettingsScreen() {
                 ) : (
                   <>
                     <Clock size={14} color="#FFF" />
-                    <Text style={styles.verificationText}>Chờ duyệt ({profile?.verificationStatus})</Text>
+                    <Text style={styles.verificationText}>{authUser?.isDemoAccount ? "Tài khoản đánh giá · Hồ sơ bản nháp" : `Chờ duyệt (${profile?.verificationStatus})`}</Text>
                   </>
                 )}
               </View>
@@ -190,19 +194,20 @@ export default function MuaSettingsScreen() {
         {/* STATS OVERLAPPING CARD */}
         <View style={styles.statsCard}>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statNumber}>{authUser?.isDemoAccount ? profile?.reviewCount ?? 0 : 12}</Text>
             <Text style={styles.statLabel}>Lượt Đặt</Text>
           </View>
           <View style={[styles.statBox, styles.statBorder]}>
-            <Text style={styles.statNumber}>4.9</Text>
+            <Text style={styles.statNumber}>{authUser?.isDemoAccount ? profile?.rating ?? 0 : 4.9}</Text>
             <Text style={styles.statLabel}>Đánh giá</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>VIP</Text>
+            <Text style={styles.statNumber}>{authUser?.isDemoAccount ? "—" : "VIP"}</Text>
             <Text style={styles.statLabel}>Hạng MUA</Text>
           </View>
         </View>
 
+        {authUser?.isDemoAccount ? <ReviewNotice/> : null}
         {/* SETTINGS SECTIONS */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Quản lý dịch vụ</Text>
@@ -210,7 +215,7 @@ export default function MuaSettingsScreen() {
             {renderSettingRow(
               <BriefcaseBusiness size={20} color="#ff7c98" />,
               "Dịch vụ & Portfolio",
-              "Thêm hoặc cập nhật hình ảnh dự án",
+              authUser?.isDemoAccount ? "Xem dịch vụ và portfolio mẫu" : "Thêm hoặc cập nhật hình ảnh dự án",
               () => router.push("/(mua)/services" as any),
             )}
             {renderSettingRow(
@@ -236,11 +241,12 @@ export default function MuaSettingsScreen() {
 
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Cài đặt ứng dụng</Text>
+          {authUser?.isDemoAccount ? renderSettingRow(<ShieldCheck size={20} color="#22152B"/>, 'Thông tin xác minh mẫu', 'Xem giấy tờ mẫu · Hồ sơ bản nháp', () => router.push('/(mua)/identity-verification')) : null}
           <View style={styles.cardWrapper}>
             {renderSettingRow(
               <KeyRound size={20} color="#22152B" />,
               "Đổi mật khẩu",
-              "Cập nhật mật khẩu đăng nhập",
+              authUser?.isDemoAccount ? REVIEW_PASSWORD_NOTICE : "Cập nhật mật khẩu đăng nhập",
               () => router.push("/change-password" as any),
             )}
             {renderSettingRow(
@@ -261,7 +267,7 @@ export default function MuaSettingsScreen() {
             {renderSettingRow(
               isDeletingAccount ? <ActivityIndicator color="#F5446A" /> : <Trash2 size={20} color="#F5446A" />,
               isDeletingAccount ? "Đang xóa tài khoản..." : "Xóa tài khoản",
-              "Xóa vĩnh viễn tài khoản và dữ liệu cá nhân",
+              authUser?.isDemoAccount ? REVIEW_PROTECTED_NOTICE : "Xóa vĩnh viễn tài khoản và dữ liệu cá nhân",
               handleDeleteAccount,
               true,
             )}

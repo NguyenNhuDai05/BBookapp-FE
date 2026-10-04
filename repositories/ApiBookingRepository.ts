@@ -4,6 +4,12 @@ import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, Cance
 import { mapBookingPaymentStatus, mapBookingStatus, mapPaymentStatus, mapRefundSummary } from '../utils/bookingStatus';
 
 export class ApiBookingRepository implements IBookingRepository {
+  async performDemoAction(bookingId: string, action: import('../utils/playReview').DemoBookingAction): Promise<BookingDto> {
+    const paths = { paymentSucceed: 'demo-payment/succeed', counterpartAccept: 'demo-counterpart/accept', counterpartReject: 'demo-counterpart/reject' };
+    if (!Object.prototype.hasOwnProperty.call(paths, action)) throw new Error('Thao tác không hợp lệ.');
+    await api.post(`/Booking/${bookingId}/${paths[action]}`);
+    return this.getBookingDetail(bookingId);
+  }
   async getAvailableTimeSlots(muaId: string, date: string, durationMinutes: number): Promise<TimeSlotDto[]> {
     const { data } = await api.get<unknown>(`/Mua/${muaId}/availability`, {
       params: { date, duration: durationMinutes },
@@ -50,6 +56,7 @@ export class ApiBookingRepository implements IBookingRepository {
     const { data } = await api.post(`/Booking/${bookingId}/deposit-payment`);
     return {
       paymentId: data.paymentId,
+      provider: data.provider === 1 || String(data.provider).toUpperCase() === 'SIMULATED' ? 'SIMULATED' : data.provider === 0 || String(data.provider).toUpperCase() === 'PAYOS' ? 'PAYOS' : 'UNKNOWN',
       bookingId: data.bookingId,
       orderCode: data.orderCode,
       amount: data.amount,
@@ -117,6 +124,7 @@ export class ApiBookingRepository implements IBookingRepository {
 
     return {
       id: b.bookingId,
+      availableDemoActions: Array.isArray(b.availableDemoActions) ? b.availableDemoActions.filter((a: unknown) => typeof a === 'string') : [],
       mua: {
         id: b.muaId,
         name: b.muaName || 'MUA',

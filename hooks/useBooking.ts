@@ -12,6 +12,16 @@ const invalidateBookingState = (queryClient: ReturnType<typeof useQueryClient>, 
   if (bookingId) queryClient.invalidateQueries({ queryKey: ['bookingDetail', bookingId] });
 };
 
+export const useDemoBookingAction = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    retry: false,
+    mutationFn: ({ bookingId, action }: { bookingId: string; action: import('../utils/playReview').DemoBookingAction }) => bookingService.performDemoAction(bookingId, action),
+    onSuccess: data => queryClient.setQueryData(['bookingDetail', data.id], data),
+    onSettled: (_, __, request) => invalidateBookingState(queryClient, request.bookingId),
+  });
+};
+
 export const useAvailableTimeSlots = (muaId: string, date: string, durationMinutes: number) => {
   return useQuery({
     queryKey: ['timeSlots', muaId, date, durationMinutes],

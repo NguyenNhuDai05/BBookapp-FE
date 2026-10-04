@@ -5,13 +5,14 @@ import { ServiceDto } from '../../../types/ServiceDto';
 import { Edit2, Archive, Trash2, EyeOff, RotateCcw } from 'lucide-react-native';
 
 interface ServiceListProps {
+  readOnly?: boolean;
   services: ServiceDto[];
   onEdit: (service: ServiceDto) => void;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-export function ServiceList({ services, onEdit, onArchive, onDelete }: ServiceListProps) {
+export function ServiceList({ services, onEdit, onArchive, onDelete, readOnly = false }: ServiceListProps) {
   if (services.length === 0) {
     return (
       <View style={styles.emptyState}>
@@ -45,7 +46,7 @@ export function ServiceList({ services, onEdit, onArchive, onDelete }: ServiceLi
             ) : null}
           </View>
 
-          <View style={styles.actions}>
+          {!readOnly && <View style={styles.actions}>
             <TouchableOpacity style={styles.actionBtn} onPress={() => onEdit(service)}>
               <Edit2 size={16} color={BrandColors.textDark} />
               <Text style={styles.actionText}>Sửa</Text>
@@ -58,7 +59,7 @@ export function ServiceList({ services, onEdit, onArchive, onDelete }: ServiceLi
               <Trash2 size={16} color={BrandColors.statusCancelled} />
               <Text style={[styles.actionText, { color: BrandColors.statusCancelled }]}>Xóa</Text>
             </TouchableOpacity>
-          </View>
+          </View>}
         </View>
       ))}
     </View>

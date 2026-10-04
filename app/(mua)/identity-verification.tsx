@@ -9,12 +9,16 @@ import { useMuaIdentity, useSaveMuaIdentity } from '../../hooks/useMuaEligibilit
 import { uploadVerificationImage } from '../../services/verificationMediaService';
 import { getApiError } from '../../services/api';
 import type { MuaIdentityVerificationRequestDto, MuaIdentitySubmission } from '../../types/onboarding';
+import { useAuthStore } from '../../store/useAuthStore';
+import { ReviewNotice } from '../../components/ReviewNotice';
 
 export default function IdentityVerificationScreen() {
   const query = useMuaIdentity();
   const router = useRouter();
+  const review = useAuthStore(state => state.user?.isDemoAccount === true);
   if (query.isPending) return <SafeAreaView style={s.center}><ActivityIndicator color="#FF4E91" /><Text>Đang tải ảnh xác minh...</Text></SafeAreaView>;
   if (query.isError || !query.data) return <SafeAreaView style={s.center}><Text>Không thể tải ảnh xác minh.</Text><TouchableOpacity onPress={() => query.refetch()}><Text style={s.link}>Thử lại</Text></TouchableOpacity><TouchableOpacity onPress={() => router.back()}><Text style={s.link}>Quay lại</Text></TouchableOpacity></SafeAreaView>;
+  if (review) return <SafeAreaView style={s.screen} edges={['top', 'bottom']}><View style={s.header}><TouchableOpacity accessibilityLabel="Quay lại" onPress={() => router.back()} style={s.back}><ArrowLeft size={22} color="#291E2D" /></TouchableOpacity><Text style={s.title}>Thông tin xác minh mẫu</Text></View><ScrollView contentContainerStyle={s.content}><ReviewNotice message="Thông tin xác minh mẫu đã được chuẩn bị cho tài khoản đánh giá. Hồ sơ vẫn là bản nháp, chưa được xác minh." />{([['Mặt trước', 'identityFrontUrl', 'identityFrontMediaId'], ['Mặt sau', 'identityBackUrl', 'identityBackMediaId'], ['Chân dung', 'portraitUrl', 'portraitMediaId']] as const).map(([label, url, media]) => <View key={url} style={s.card}><Text style={s.heading}>{label}</Text><PrivateMediaImage uri={query.data![url]} mediaId={query.data![media]} style={{ width: '100%', height: 240 }} /></View>)}</ScrollView></SafeAreaView>;
   return <IdentityForm initial={query.data} />;
 }
 function IdentityForm({ initial }: { initial: MuaIdentityVerificationRequestDto }) {

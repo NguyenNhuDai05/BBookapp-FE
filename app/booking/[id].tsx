@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -7,10 +7,17 @@ import { Image } from 'expo-image';
 import { ArrowLeft, MessageCircle, MapPin, Calendar, Clock, Copy, Info, RotateCcw } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useBookingDetail, useConfirmBookingCompletion, usePayBookingDeposit } from '../../hooks/useBooking';
+import { useAuthStore } from '../../store/useAuthStore';
+import { REVIEW_FINANCIAL_NOTICE } from '../../utils/playReview';
+import { ReviewNotice } from '../../components/ReviewNotice';
+import { ReviewCounterpartActions } from '../../components/booking/ReviewCounterpartActions';
+import { SamplePaymentConfirmation } from '../../components/booking/SamplePaymentConfirmation';
+import type { BookingPaymentDto } from '../../types/booking';
+import { getApiError } from '../../services/api';
 import { ComplaintEntry } from '../../components/booking/ComplaintEntry';
 import { BookingStatus } from '../../types/booking';
 import { BookingTimeline } from '../../components/BookingTimeline';
-import * as WebBrowser from 'expo-web-browser';
+import { openDepositCheckout } from '../../services/bookingPaymentFlow';
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: string }> = {
   PENDING_PAYMENT: { label: 'Chờ thanh toán cọc', color: '#FF9800', bg: '#FFF3E0' },
@@ -28,6 +35,8 @@ const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: s
 
 export default function BookingDetailScreen() {
   const router = useRouter();
+  const user = useAuthStore(state => state.user);
+  const [samplePayment, setSamplePayment] = useState<BookingPaymentDto | null>(null);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: booking, isLoading, error } = useBookingDetail(id);
   const { mutateAsync: payDeposit, isPending: isPaying } = usePayBookingDeposit();
@@ -57,12 +66,10 @@ export default function BookingDetailScreen() {
   const handlePayDeposit = async () => {
     try {
       const payment = await payDeposit(booking.id);
-      if (!payment.checkoutUrl) throw new Error('payOS không trả về đường dẫn thanh toán.');
-      await WebBrowser.openBrowserAsync(payment.checkoutUrl);
+      if (await openDepositCheckout(payment, user?.isDemoAccount === true) === 'sample') { setSamplePayment(payment); return; }
       router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } });
     } catch (err: any) {
-      const payload = err.response?.data;
-      appDialog.alert('Không thể thanh toán cọc', payload?.message || payload?.Message || err.message);
+      appDialog.alert('Không thể thanh toán cọc', getApiError(err).message);
     }
   };
 
@@ -81,6 +88,8 @@ export default function BookingDetailScreen() {
 
 
         <BookingTimeline booking={booking} />
+        {user?.isDemoAccount ? <ReviewNotice message={REVIEW_FINANCIAL_NOTICE} title={booking.refund ? 'Hoàn tiền mẫu' : 'Giao dịch mẫu'} /> : null}
+        <ReviewCounterpartActions booking={booking}/>
 
         <View style={[styles.statusBanner, { backgroundColor: statusInfo.bg }]}>
           <Text style={[styles.statusBannerText, { color: statusInfo.color }]}>{statusInfo.label}</Text>
@@ -196,7 +205,7 @@ export default function BookingDetailScreen() {
             <Text style={styles.paymentValueTotal}>{booking.totalAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
           <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>Đã cọc qua {booking.paymentMethod}</Text>
+            <Text style={styles.paymentLabel}>{user?.isDemoAccount ? 'Khoản cọc mẫu' : `Đã cọc qua ${booking.paymentMethod}`}</Text>
             <Text style={styles.paymentValuePaid}>- {booking.depositAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
           <View style={styles.paymentRow}>
@@ -232,6 +241,7 @@ export default function BookingDetailScreen() {
           </View>
         )}
       </ScrollView>
+      {samplePayment ? <SamplePaymentConfirmation payment={samplePayment} onClose={() => setSamplePayment(null)} onSuccess={() => setSamplePayment(null)} /> : null}
 
       {/* Cancel Action */}
       {booking.status === 'PENDING_PAYMENT' && (

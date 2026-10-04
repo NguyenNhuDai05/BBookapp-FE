@@ -3,6 +3,9 @@ import { ApiBookingRepository } from '../repositories/ApiBookingRepository';
 import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
 
 class BookingService {
+  performDemoAction(bookingId: string, action: import('../utils/playReview').DemoBookingAction) {
+    return this.repository.performDemoAction(bookingId, action);
+  }
   private repository: IBookingRepository;
 
   constructor(repository: IBookingRepository) {
