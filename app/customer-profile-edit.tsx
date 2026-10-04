@@ -1,3 +1,4 @@
+import { ReviewReadOnlyScreen } from '../components/ReviewReadOnlyScreen';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Camera, Save } from 'lucide-react-native';
@@ -11,7 +12,7 @@ import { uploadImage } from '../services/supabase';
 import { userService, type UserProfile } from '../services/userService';
 import { useAuthStore } from '../store/useAuthStore';
 
-export default function CustomerProfileEditScreen() {
+function CustomerProfileEditScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const updateUser = useAuthStore(state => state.updateUser);
@@ -151,3 +152,8 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.6 },
   saveText: { color: '#FFF', fontSize: 15, fontWeight: '800' },
 });
+
+export default function ProtectedCustomerProfileEditScreen() {
+  const review = useAuthStore(state => state.user?.isDemoAccount === true);
+  return review ? <ReviewReadOnlyScreen/> : <CustomerProfileEditScreen/>;
+}

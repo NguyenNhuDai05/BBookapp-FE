@@ -4,10 +4,13 @@ import { muaService } from '../services/muaService';
 import { ArtistDto } from '../types/ArtistDto';
 import { ServiceDto } from '../types/ServiceDto';
 import { useReviews } from './useReviews';
+import { useAuthStore } from '../store/useAuthStore';
 
 export type TabType = 'portfolio' | 'services' | 'reviews' | 'info';
 
 export function useMuaDetail(id: string) {
+  const user = useAuthStore(state => state.user);
+  const sampleCounterpart = user?.isDemoAccount === true && user.demoCounterpartMuaId === id;
   const [activeTab, setActiveTab] = useState<TabType>('portfolio');
 
   // Fetch Artist Detail
@@ -36,7 +39,7 @@ export function useMuaDetail(id: string) {
   } = useQuery({
     queryKey: ['mua-services', id],
     queryFn: () => muaService.getArtistServices(id),
-    enabled: !!id,
+    enabled: !!id && !sampleCounterpart,
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
@@ -72,7 +75,7 @@ export function useMuaDetail(id: string) {
   return {
     muaInfo,
     portfolio,
-    services,
+    services: sampleCounterpart ? muaInfo?.services || [] : services,
     reviews,
     activeTab,
     loading,

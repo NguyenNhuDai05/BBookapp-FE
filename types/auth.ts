@@ -12,6 +12,8 @@ export interface UserDto {
   avatarUrl?: string;
   role: UserRole;
   hasMuaProfile?: boolean;
+  isDemoAccount?: boolean;
+  demoCounterpartMuaId?: string | null;
   createdAt: string;
 }
 

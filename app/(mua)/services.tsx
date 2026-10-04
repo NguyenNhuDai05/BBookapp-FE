@@ -1,3 +1,5 @@
+import { useAuthStore } from '../../store/useAuthStore';
+import { ReviewNotice } from '../../components/ReviewNotice';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,8 +17,9 @@ import { useMuaEligibility } from '../../hooks/useMuaEligibility';
 type TabType = 'SERVICES' | 'PORTFOLIO';
 
 export default function MuaManagementScreen() {
+  const review=useAuthStore(state=>state.user?.isDemoAccount===true);
   const muaId = "me";
-  
+
   const { tab } = useLocalSearchParams<{ tab?: string }>();
   const [activeTab, setActiveTab] = useState<TabType>(tab === 'PORTFOLIO' ? 'PORTFOLIO' : 'SERVICES');
   const [isServiceModalVisible, setIsServiceModalVisible] = useState(false);
@@ -66,13 +69,13 @@ export default function MuaManagementScreen() {
       </View>
 
       <View style={styles.tabContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'SERVICES' && styles.tabBtnActive]}
           onPress={() => setActiveTab('SERVICES')}
         >
           <Text style={[styles.tabText, activeTab === 'SERVICES' && styles.tabTextActive]}>Dịch vụ</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tabBtn, activeTab === 'PORTFOLIO' && styles.tabBtnActive]}
           onPress={() => setActiveTab('PORTFOLIO')}
         >
@@ -80,12 +83,12 @@ export default function MuaManagementScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>{review?<ReviewNotice/>:null}
         {activeTab === 'SERVICES' ? (
           <>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Danh sách dịch vụ ({services.length})</Text>
-              <TouchableOpacity style={styles.addBtn} onPress={handleOpenAddService}>
+              <TouchableOpacity disabled={review} style={styles.addBtn} onPress={handleOpenAddService}>
                 <Plus size={16} color="#FFF" />
                 <Text style={styles.addBtnText}>Thêm mới</Text>
               </TouchableOpacity>
@@ -93,8 +96,8 @@ export default function MuaManagementScreen() {
             {isLoadingServices ? (
               <ActivityIndicator size="large" color={BrandColors.accentRose} style={{ marginTop: Spacing.xl }} />
             ) : (
-              <ServiceList 
-                services={services} 
+              <ServiceList readOnly={review}
+                services={services}
                 onEdit={handleEditService}
                 onArchive={handleArchiveService}
                 onDelete={handleDeleteService}
@@ -105,7 +108,7 @@ export default function MuaManagementScreen() {
           <>
             <View style={styles.sectionHeader}>
               <View><Text style={styles.sectionTitle}>Hình ảnh Portfolio ({portfolio.length})</Text>{portfolioRequirement?.required != null ? <Text style={styles.requirementHint}>{portfolioRequirement.current || 0}/{portfolioRequirement.required} ảnh công khai</Text> : null}</View>
-              <TouchableOpacity style={styles.addBtn} onPress={() => setIsPortfolioModalVisible(true)}>
+              <TouchableOpacity disabled={review} style={styles.addBtn} onPress={() => setIsPortfolioModalVisible(true)}>
                 <Plus size={16} color="#FFF" />
                 <Text style={styles.addBtnText}>Tải ảnh lên</Text>
               </TouchableOpacity>
@@ -113,7 +116,7 @@ export default function MuaManagementScreen() {
             {isLoadingPortfolio ? (
               <ActivityIndicator size="large" color={BrandColors.accentRose} style={{ marginTop: Spacing.xl }} />
             ) : (
-              <PortfolioGrid 
+              <PortfolioGrid readOnly={review}
                 items={portfolio}
                 onDelete={(id) => deleteItem(id)}
                 onToggleVisibility={(id, isHidden) => setVisibility({ itemId: id, isHidden })}
@@ -123,15 +126,15 @@ export default function MuaManagementScreen() {
         )}
       </ScrollView>
 
-      <ServiceFormModal 
-        visible={isServiceModalVisible}
+      <ServiceFormModal
+        visible={!review && isServiceModalVisible}
         onClose={() => setIsServiceModalVisible(false)}
         onSubmit={handleSaveService}
         initialData={editingService}
         availableTags={[...new Set(services.flatMap(service => service.tags || []))]}
       />
       <PortfolioFormModal
-        visible={isPortfolioModalVisible}
+        visible={!review && isPortfolioModalVisible}
         onClose={() => setIsPortfolioModalVisible(false)}
         onSubmit={async data => { await createPortfolioItem(data); setIsPortfolioModalVisible(false); }}
       />

@@ -1,5 +1,5 @@
 export type PayoutStatus = 'PENDING' | 'MANUAL_ACTION_REQUIRED' | 'PROCESSING' | 'PAID' | 'FAILED' | 'UNKNOWN';
-export type PayoutProvider = 'MANUAL' | 'PAYOS' | 'UNKNOWN';
+export type PayoutProvider = 'MANUAL' | 'PAYOS' | 'SIMULATED' | 'UNKNOWN';
 
 export interface CreatePayoutRequest {
   bankAccountId: string;

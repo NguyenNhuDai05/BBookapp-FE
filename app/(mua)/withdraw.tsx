@@ -14,10 +14,16 @@ import { useMuaEligibility } from '../../hooks/useMuaEligibility';
 import { getApiError } from '../../services/api';
 import { canSubmitWithdraw, getBankAccountErrorMessage, getBankAccountPresentation, isBankAccountSelectable } from '../../utils/bankAccountStatus';
 
+import { useAuthStore } from '../../store/useAuthStore';
+import { canRequestSamplePayout, REVIEW_FINANCIAL_NOTICE } from '../../utils/playReview';
+import { ReviewNotice } from '../../components/ReviewNotice';
+
 const money = (value: number) => `${Math.max(0, value).toLocaleString('vi-VN')}đ`;
 
 export default function WithdrawScreen() {
   const router = useRouter();
+  const user = useAuthStore(state => state.user);
+  const review = user?.isDemoAccount === true;
   const earnings = useEarningsSnapshot('me');
   const banks = useBankAccounts();
   const create = useCreateMuaPayout();
@@ -27,7 +33,9 @@ export default function WithdrawScreen() {
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [key] = useState(() => Crypto.randomUUID());
-  const selectedId = selected || (banks.data?.find(item => item.isDefault && isBankAccountSelectable(item))?.id ?? banks.data?.find(isBankAccountSelectable)?.id);
+  const permittedId = earnings.data?.permittedSimulationBankAccountId;
+  const visibleBanks = review ? banks.data?.filter(bank => bank.id === permittedId) : banks.data;
+  const selectedId = review ? permittedId ?? undefined : selected || (banks.data?.find(item => item.isDefault && isBankAccountSelectable(item))?.id ?? banks.data?.find(isBankAccountSelectable)?.id);
   const selectedBank = banks.data?.find(item => item.id === selectedId);
   const availableIds = useMemo(
     () => earnings.data?.receivables.filter(item => item.status === 1).map(item => item.id) ?? [],
@@ -35,7 +43,7 @@ export default function WithdrawScreen() {
   );
   const amount = earnings.data?.availableTotal ?? 0;
   const loading = earnings.isLoading || banks.isLoading || eligibility.isLoading;
-  const canSubmit = amount > 0 && canSubmitWithdraw(eligibility.data?.canWithdraw===true,selectedBank) && !create.isPending;
+  const canSubmit = amount > 0 && (review ? canRequestSamplePayout(user, earnings.data) && selectedBank?.id === permittedId : canSubmitWithdraw(eligibility.data?.canWithdraw===true,selectedBank)) && !create.isPending;
 
   const openConfirmation = () => {
     if (!canSubmit) return;
@@ -44,7 +52,7 @@ export default function WithdrawScreen() {
   };
 
   const confirmWithdraw = async () => {
-    if (!selectedId || amount <= 0 || create.isPending || submitLock.current) return;
+    if (!canSubmit || !selectedId || amount <= 0 || create.isPending || submitLock.current) return;
     submitLock.current = true;
     setSubmitError('');
     try {
@@ -63,20 +71,20 @@ export default function WithdrawScreen() {
   };
 
   return <SafeAreaView style={styles.safe} edges={['top']}>
-    <View style={styles.header}><TouchableOpacity style={styles.back} onPress={() => router.back()} disabled={create.isPending}><ArrowLeft size={23} color={BrandColors.textDark}/></TouchableOpacity><Text style={styles.title}>Rút tiền</Text><View style={styles.back}/></View>
-    <ScrollView contentContainerStyle={styles.content}>
+    <View style={styles.header}><TouchableOpacity style={styles.back} onPress={() => router.back()} disabled={create.isPending}><ArrowLeft size={23} color={BrandColors.textDark}/></TouchableOpacity><Text style={styles.title}>{review?'Rút tiền mẫu':'Rút tiền'}</Text><View style={styles.back}/></View>
+    <ScrollView contentContainerStyle={styles.content}>{review?<ReviewNotice message={REVIEW_FINANCIAL_NOTICE}/>:null}
       {loading ? <ActivityIndicator color={BrandColors.accentRose}/> : earnings.isError || banks.isError || eligibility.isError ? <Text style={styles.error}>{getApiError(earnings.error || banks.error || eligibility.error).message}</Text> : <>
         <View style={styles.amountCard}><Text style={styles.label}>Số tiền yêu cầu</Text><Text style={styles.amount}>{money(amount)}</Text><Text style={styles.caption}>{availableIds.length} khoản thu nhập khả dụng</Text></View>
-        <View style={styles.sectionRow}><Text style={styles.section}>Tài khoản nhận</Text><TouchableOpacity onPress={() => router.push('/(mua)/bank-account-form' as any)}><Text style={styles.link}>Thêm mới</Text></TouchableOpacity></View>
-        {!banks.data?.length ? <TouchableOpacity style={styles.empty} onPress={() => router.push('/(mua)/bank-account-form' as any)}><Building2 size={30} color={BrandColors.textMuted}/><Text style={styles.emptyText}>Thêm tài khoản ngân hàng trước khi rút tiền.</Text></TouchableOpacity> : banks.data.map(bank => {const state=getBankAccountPresentation(bank);return <TouchableOpacity key={bank.id} style={[styles.bank, selectedId === bank.id && styles.bankSelected,!state.selectable&&styles.bankDisabled]} onPress={() => state.selectable&&setSelected(bank.id)} disabled={!state.selectable}><View style={{flex:1}}><Text style={styles.bankName}>{bank.bankName || bank.bankCode}</Text><Text style={styles.bankMeta}>{bank.maskedAccountNumber} · {bank.accountHolderName}</Text><Text style={[styles.bankState,state.selectable&&styles.bankStateUsable]}>{state.label}</Text></View>{selectedId === bank.id ? <CheckCircle2 size={22} color={BrandColors.accentRose}/> : <Circle size={22} color={BrandColors.textMuted}/>}</TouchableOpacity>})}
-        <Text style={styles.notice}>Số tiền được Backend tính từ các khoản phải thu khả dụng. Sau khi gửi, yêu cầu sẽ chờ Admin kiểm tra và chuyển khoản.</Text>
+        <View style={styles.sectionRow}><Text style={styles.section}>Tài khoản nhận</Text><TouchableOpacity disabled={review} onPress={() => router.push('/(mua)/bank-account-form' as any)}><Text style={styles.link}>Thêm mới</Text></TouchableOpacity></View>
+        {!visibleBanks?.length ? <TouchableOpacity disabled={review} style={styles.empty} onPress={() => router.push('/(mua)/bank-account-form' as any)}><Building2 size={30} color={BrandColors.textMuted}/><Text style={styles.emptyText}>{review ? 'Tài khoản mẫu hiện chưa khả dụng. Vui lòng làm mới thu nhập.' : 'Thêm tài khoản ngân hàng trước khi rút tiền.'}</Text></TouchableOpacity> : visibleBanks!.map(bank => {const state=getBankAccountPresentation(bank);const selectable=review?canRequestSamplePayout(user,earnings.data)&&bank.id===permittedId:state.selectable;return <TouchableOpacity key={bank.id} style={[styles.bank, selectedId === bank.id && styles.bankSelected,!selectable&&styles.bankDisabled]} onPress={() => selectable&&setSelected(bank.id)} disabled={!selectable}><View style={{flex:1}}><Text style={styles.bankName}>{bank.bankName || bank.bankCode}</Text><Text style={styles.bankMeta}>{bank.maskedAccountNumber} · {bank.accountHolderName}</Text><Text style={[styles.bankState,state.selectable&&styles.bankStateUsable]}>{review?'Tài khoản mẫu · '+state.label:state.label}</Text></View>{selectedId === bank.id ? <CheckCircle2 size={22} color={BrandColors.accentRose}/> : <Circle size={22} color={BrandColors.textMuted}/>}</TouchableOpacity>})}
+        <Text style={styles.notice}>{review ? REVIEW_FINANCIAL_NOTICE : 'Số tiền được Backend tính từ các khoản phải thu khả dụng. Sau khi gửi, yêu cầu sẽ chờ Admin kiểm tra và chuyển khoản.'}</Text>
         {submitError ? <Text style={styles.error}>{submitError}</Text> : null}
         <TouchableOpacity style={[styles.submit, !canSubmit && styles.disabled]} disabled={!canSubmit} onPress={openConfirmation}>{create.isPending ? <ActivityIndicator color="#FFF"/> : <Text style={styles.submitText}>Xác nhận rút {money(amount)}</Text>}</TouchableOpacity>
       </>}
     </ScrollView>
 
     <AppModal visible={confirmationVisible} title="Xác nhận rút tiền" variant="confirm"
-    description="Tiền sẽ được chuyển tới tài khoản dưới đây sau khi yêu cầu được xử lý."
+    description={review ? REVIEW_FINANCIAL_NOTICE : "Tiền sẽ được chuyển tới tài khoản dưới đây sau khi yêu cầu được xử lý."}
     loading={create.isPending} onClose={()=>setConfirmationVisible(false)}
     primaryAction={{label:'Gửi yêu cầu',onPress:confirmWithdraw,loading:create.isPending}}
     secondaryAction={{label:'Quay lại',onPress:()=>setConfirmationVisible(false)}}>

@@ -15,6 +15,7 @@ import { DialogHost } from '../components/ui/DialogHost';
 
 export default function RootLayout() {
   const canRenderRoute = useProtectedRoute();
+  const review = useAuthStore(state => state.user?.isDemoAccount === true);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   // Register synchronously before child screens can start protected queries.
@@ -26,7 +27,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || review) return;
 
     let removeNotificationListener: (() => void) | undefined;
     let removePushTokenListener: (() => void) | undefined;
@@ -50,7 +51,7 @@ export default function RootLayout() {
       removeNotificationListener?.();
       removePushTokenListener?.();
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, review]);
 
   if (!canRenderRoute) {
     return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFF6F8' }}><ActivityIndicator size="large" color="#F55389" /></View>;

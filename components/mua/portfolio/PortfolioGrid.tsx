@@ -6,12 +6,13 @@ import { BrandColors, Radius, Spacing, Typography } from '../../../constants/the
 import { Eye, EyeOff, Star, Trash2 } from 'lucide-react-native';
 
 interface PortfolioGridProps {
+  readOnly?: boolean;
   items: PortfolioItemDto[];
   onDelete: (id: string) => void;
   onToggleVisibility?: (id: string, isHidden: boolean) => void;
 }
 
-export function PortfolioGrid({ items, onDelete, onToggleVisibility }: PortfolioGridProps) {
+export function PortfolioGrid({ items, onDelete, onToggleVisibility, readOnly = false }: PortfolioGridProps) {
   const { width } = useWindowDimensions();
   const isDesktop = width > 768;
   const numColumns = isDesktop ? 6 : 3;
@@ -51,7 +52,7 @@ export function PortfolioGrid({ items, onDelete, onToggleVisibility }: Portfolio
           />
           
           {/* Overlay Actions */}
-          <View style={styles.overlayActions}>
+          {!readOnly && <View style={styles.overlayActions}>
             <TouchableOpacity style={styles.visibilityBtn} onPress={() => onToggleVisibility?.(item.id, !item.isHidden)} accessibilityLabel={item.isHidden ? 'Hiện tác phẩm' : 'Ẩn tác phẩm'}>
               {item.isHidden ? <Eye size={14} color="#FFF"/> : <EyeOff size={14} color="#FFF"/>}
             </TouchableOpacity>
@@ -61,7 +62,7 @@ export function PortfolioGrid({ items, onDelete, onToggleVisibility }: Portfolio
             >
               <Trash2 size={14} color="#FFF" />
             </TouchableOpacity>
-          </View>
+          </View>}
 
           {item.isCover && (
             <View style={styles.coverBadge}>

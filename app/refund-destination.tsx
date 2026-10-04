@@ -1,3 +1,5 @@
+import { useAuthStore } from '../store/useAuthStore';
+import BankAccountsScreen from './(mua)/bank-accounts';
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,7 +18,7 @@ import type { BankAccount } from '../types/bankAccount';
 
 const securityStyles=StyleSheet.create({badge:{fontFamily:Typography.bold,fontSize:10,color:'#9A6700',backgroundColor:'#FFF4CE',paddingHorizontal:8,paddingVertical:3,borderRadius:Radius.full},text:{fontFamily:Typography.regular,fontSize:11,color:'#9A6700',marginTop:5}});
 
-export default function RefundDestinationScreen(){
+function RefundDestinationScreen(){
   const router=useRouter();const queryClient=useQueryClient();const submitLock=useRef(false);
   const {refundId,bookingId}=useLocalSearchParams<{refundId?:string;bookingId?:string}>();
   const [deleteId,setDeleteId]=useState<string|null>(null);const [defaultId,setDefaultId]=useState<string|null>(null);
@@ -39,3 +41,5 @@ export default function RefundDestinationScreen(){
 }
 
 const styles=StyleSheet.create({safe:{flex:1,backgroundColor:BrandColors.bgPrimary},header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',padding:Spacing.md},icon:{width:44,height:44,alignItems:'center',justifyContent:'center'},title:{fontFamily:Typography.bold,fontSize:20,color:BrandColors.textDark},notice:{marginHorizontal:Spacing.base,backgroundColor:BrandColors.bgPink,padding:Spacing.md,borderRadius:Radius.md},noticeText:{fontFamily:Typography.semiBold,fontSize:13,color:BrandColors.textBody},list:{padding:Spacing.base,flexGrow:1},card:{flexDirection:'row',alignItems:'center',backgroundColor:'#FFF',borderWidth:1,borderColor:BrandColors.borderLight,borderRadius:Radius.md,padding:Spacing.md,marginBottom:Spacing.sm},cardDisabled:{opacity:.58},copy:{flex:1},usable:{color:BrandColors.statusConfirmed},row:{flexDirection:'row',alignItems:'center',gap:8},bank:{fontFamily:Typography.bold,fontSize:16,color:BrandColors.textDark},defaultBadge:{fontFamily:Typography.bold,fontSize:10,color:BrandColors.statusConfirmed,backgroundColor:BrandColors.statusConfirmedBg,paddingHorizontal:8,paddingVertical:3,borderRadius:Radius.full},number:{fontFamily:Typography.bold,fontSize:15,color:BrandColors.textBody,marginTop:7},holder:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textSecondary,marginTop:3},defaultButton:{alignSelf:'flex-start',flexDirection:'row',alignItems:'center',gap:6,marginTop:10,paddingHorizontal:12,paddingVertical:8,borderRadius:Radius.full,backgroundColor:BrandColors.bgPinkLight},defaultButtonText:{fontFamily:Typography.bold,fontSize:12,color:BrandColors.accentRose},action:{width:42,height:42,alignItems:'center',justifyContent:'center'},empty:{alignItems:'center',justifyContent:'center',paddingTop:80,paddingHorizontal:Spacing.xl},emptyTitle:{fontFamily:Typography.bold,fontSize:17,color:BrandColors.textDark,marginTop:Spacing.md},emptyText:{fontFamily:Typography.regular,color:BrandColors.textMuted,textAlign:'center',marginTop:5,marginBottom:Spacing.md},add:{backgroundColor:BrandColors.accentRose,borderRadius:Radius.full,paddingHorizontal:20,paddingVertical:12},addText:{fontFamily:Typography.bold,color:'#FFF'},error:{margin:Spacing.base,padding:Spacing.md,color:BrandColors.statusCancelled,backgroundColor:BrandColors.statusCancelledBg,borderRadius:Radius.md}});
+
+export default function ReviewAwareRefundDestination(){const review=useAuthStore(state=>state.user?.isDemoAccount===true);return review?<BankAccountsScreen/>:<RefundDestinationScreen/>;}

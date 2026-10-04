@@ -1,3 +1,5 @@
+import { useAuthStore as useReviewAuth } from '../../store/useAuthStore';
+import { ReviewReadOnlyScreen } from '../../components/ReviewReadOnlyScreen';
 import React, { useMemo } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
@@ -12,7 +14,7 @@ const routes: Record<string, string> = {
   accountActive: '/(mua)/settings', basicInformation: '/(mua)/edit-profile', avatar: '/(mua)/edit-profile', phoneNumber: '/(mua)/edit-profile', city: '/(mua)/edit-profile', address: '/(mua)/edit-profile', bio: '/(mua)/edit-profile', specialty: '/(mua)/edit-profile', activeService: '/(mua)/services', publicPortfolioImages: '/(mua)/services?tab=PORTFOLIO', identityVerification: '/(mua)/identity-verification', bankAccount: '/(mua)/bank-accounts',
 };
 
-export default function MuaSetupScreen() {
+function MuaSetupScreen() {
   const router = useRouter();
   const { data, isLoading, isError, refetch, isRefetching } = useMuaEligibility();
   const submitReview = useSubmitMuaForReview();
@@ -89,3 +91,8 @@ rowCopy:{flex:1,paddingVertical:12},
 rowTitle:{fontFamily:Typography.semiBold,fontSize:15,color:BrandColors.textDark},
 rowSubtitle:{fontFamily:Typography.regular,fontSize:12,color:BrandColors.textMuted,marginTop:3}
 });
+
+export default function ProtectedMuaSetupScreen() {
+  const review = useReviewAuth(state => state.user?.isDemoAccount === true);
+  return review ? <ReviewReadOnlyScreen/> : <MuaSetupScreen/>;
+}

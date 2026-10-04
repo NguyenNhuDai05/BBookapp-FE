@@ -1,3 +1,5 @@
+import { useAuthStore } from '../../store/useAuthStore';
+import { ReviewNotice } from '../../components/ReviewNotice';
 import { ActionSheet } from '../../components/ui/ActionSheet';
 import React, { useRef, useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
@@ -65,7 +67,9 @@ export default function PortfolioFeedScreen() {
     }
   };
 
+  const review=useAuthStore(state=>state.user?.isDemoAccount===true);
   const openOptions = (item: any) => {
+    if(review)return;
     setSelectedPost(item);
     setOptionsVisible(true);
   };
@@ -106,6 +110,7 @@ export default function PortfolioFeedScreen() {
         <View style={{ width: 28 }} />
       </View>
 
+      {review?<ReviewNotice/>:null}
       <FlatList
         ref={flatListRef}
         data={portfolio || []}

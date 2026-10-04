@@ -78,12 +78,13 @@ export interface RefundSummaryDto {
 }
 
 export interface BookingPaymentDto {
+  provider?: 'PAYOS' | 'SIMULATED' | 'UNKNOWN';
   paymentId: string;
   bookingId: string;
   orderCode: number;
   amount: number;
   status: BookingPaymentStatus;
-  checkoutUrl: string;
+  checkoutUrl?: string | null;
   qrCode?: string;
   expiresAt: string;
   paidAt?: string;
@@ -97,6 +98,7 @@ export interface CustomerMinimalDto {
 }
 
 export interface BookingDto {
+  availableDemoActions?: string[];
   id: string;
   mua: MuaMinimalDto;
   customer: CustomerMinimalDto;

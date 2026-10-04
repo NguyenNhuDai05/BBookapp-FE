@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useRouter } from 'expo-router';
 import * as Crypto from 'expo-crypto';
-import * as WebBrowser from 'expo-web-browser';
+import { openDepositCheckout } from '../../services/bookingPaymentFlow';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import {
@@ -21,6 +21,8 @@ import { AddressPickerSheet } from '../../components/booking/AddressPickerSheet'
 import { getApiError } from '../../services/api';
 import { useAuthStore } from '../../store/useAuthStore';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { SamplePaymentConfirmation } from '../../components/booking/SamplePaymentConfirmation';
+import type { BookingPaymentDto } from '../../types/booking';
 
 function createLocalBookingDate(date: string, time: string) {
   const [year, month, day] = date.split('-').map(Number);
@@ -40,6 +42,8 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const activeMode = useAuthStore(state => state.activeMode);
+  const review = useAuthStore(state => state.user?.isDemoAccount === true);
+  const [samplePayment, setSamplePayment] = useState<BookingPaymentDto | null>(null);
   const switchMode = useAuthStore(state => state.switchMode);
   const {
     draft, setAddress, setDate, setTime, updateServiceParticipantsCount, removeService
@@ -130,11 +134,10 @@ export default function CheckoutScreen() {
       createdBookingId = booking.id;
 
       const payment = await payDeposit(booking.id);
-      if (!payment.checkoutUrl) {
-        throw new Error('payOS không trả về đường dẫn thanh toán.');
+      if (await openDepositCheckout(payment, review) === 'sample') {
+        setSamplePayment(payment);
+        return;
       }
-
-      await WebBrowser.openBrowserAsync(payment.checkoutUrl);
       router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } });
     } catch (error: unknown) {
       const apiError = getApiError(error);
@@ -344,13 +347,13 @@ export default function CheckoutScreen() {
         <Text style={styles.sectionTitlePlain}>Phương thức thanh toán</Text>
 
         <PaymentMethodItem
-          title="Chuyển khoản QR"
-          subtitle="Thanh toán an toàn qua payOS"
+          title={review ? 'Thanh toán mẫu' : 'Chuyển khoản QR'}
+          subtitle={review ? 'Không có tiền thật được chuyển' : 'Thanh toán an toàn qua payOS'}
           icon={<QrCode size={20} color={BrandColors.accentPink} />}
           isSelected
           onSelect={() => undefined}
         />
-        <Text style={styles.paymentMethodHelp}>Quét QR bằng ứng dụng ngân hàng của bạn</Text>
+        <Text style={styles.paymentMethodHelp}>{review ? 'Khoản cọc mẫu được xác nhận trong ứng dụng.' : 'Quét QR bằng ứng dụng ngân hàng của bạn'}</Text>
       </ScrollView>
 
       {/* Footer */}
@@ -381,6 +384,7 @@ export default function CheckoutScreen() {
         selectedDate={draft.date}
         onSelectDate={handleDateSelect}
       />
+      {samplePayment ? <SamplePaymentConfirmation payment={samplePayment} onClose={() => { setSamplePayment(null); router.replace(`/booking/${samplePayment.bookingId}`); }} onSuccess={() => { setSamplePayment(null); router.replace(`/booking/${samplePayment.bookingId}`); }} /> : null}
 
       {timeSheetVisible ? (
         <TimePickerSheet

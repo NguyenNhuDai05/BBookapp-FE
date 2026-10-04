@@ -1,3 +1,6 @@
+import { useAuthStore } from '../../store/useAuthStore';
+import { ReviewNotice } from '../../components/ReviewNotice';
+import { REVIEW_FINANCIAL_NOTICE } from '../../utils/playReview';
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { AlertCircle, ArrowLeft, Check, Circle, Landmark, RefreshCw } from 'lucide-react-native';
@@ -14,6 +17,7 @@ const formatDate = (value?: string) => value
 
 export default function CustomerRefundDetailScreen() {
   const router = useRouter();
+  const review=useAuthStore(state=>state.user?.isDemoAccount===true);
   const { id } = useLocalSearchParams<{ id: string }>();
   const [focused, setFocused] = useState(false);
   const refund = useQuery({
@@ -61,6 +65,7 @@ export default function CustomerRefundDetailScreen() {
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refund.isRefetching} onRefresh={refetch} tintColor={BrandColors.accentPink} />}
       >
+        {review?<ReviewNotice title="Hoàn tiền mẫu" message={REVIEW_FINANCIAL_NOTICE}/>:null}
         <View style={styles.hero}>
           <Text style={styles.amount}>{formatVnd(item.amount)}</Text>
           <Text style={[styles.status, item.status === 'FAILED' && styles.failed]}>{REFUND_STATUS_LABELS[item.status]}</Text>
@@ -68,7 +73,7 @@ export default function CustomerRefundDetailScreen() {
         </View>
 
         {item.destinationNeedsConfirmation?<View style={styles.card}><Text>Tài khoản nhận tiền trước đó không còn khả dụng. Vui lòng chọn lại tài khoản nhận hoàn tiền.</Text></View>:null}
-        {item.status === 'AWAITING_DESTINATION' ? (
+        {!review && item.status === 'AWAITING_DESTINATION' ? (
           <TouchableOpacity style={styles.primaryButton} onPress={() => router.push({ pathname:'/refund-destination', params:{ refundId:item.refundId, bookingId:item.bookingId } } as never)}>
             <Landmark size={19} color="#FFF" /><Text style={styles.primaryText}>Chọn lại tài khoản nhận tiền</Text>
           </TouchableOpacity>

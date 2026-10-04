@@ -1,3 +1,6 @@
+import { useAuthStore } from '../../store/useAuthStore';
+import { ReviewNotice } from '../../components/ReviewNotice';
+import { REVIEW_FINANCIAL_NOTICE } from '../../utils/playReview';
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -10,6 +13,7 @@ import * as WebBrowser from 'expo-web-browser';
 
 export default function CheckoutSuccessScreen() {
   const router = useRouter();
+  const review=useAuthStore(state=>state.user?.isDemoAccount===true);
   const { bookingId } = useLocalSearchParams<{ bookingId?: string }>();
   const { data: booking, isLoading } = useBookingDetail(bookingId || '', true);
   const { draft, resetDraft } = useBookingStore();
@@ -20,11 +24,11 @@ export default function CheckoutSuccessScreen() {
     // A synchronous guard is enough and remains safe on Android when there is
     // no in-app browser session left to dismiss.
     try {
-      WebBrowser.dismissBrowser();
+      if (!review) WebBrowser.dismissBrowser();
     } catch {
       // The checkout result is still determined by the backend webhook/polling.
     }
-  }, []);
+  }, [review]);
 
   const handleGoHome = () => {
     resetDraft();
@@ -63,7 +67,7 @@ export default function CheckoutSuccessScreen() {
             <Text style={styles.waitingEyebrow}>ĐANG XỬ LÝ THANH TOÁN</Text>
             <Text style={styles.waitingTitle}>Đang xác nhận tiền cọc</Text>
             <Text style={styles.waitingSubtitle}>
-              payOS đang gửi kết quả thanh toán về BeautyBook. Quá trình này thường chỉ mất vài giây.
+              {review ? 'Vui lòng xem chi tiết lịch đặt để kiểm tra trạng thái thanh toán mẫu.' : 'payOS đang gửi kết quả thanh toán về BeautyBook. Quá trình này thường chỉ mất vài giây.'}
             </Text>
 
             <View style={styles.waitingNotice}>
@@ -93,6 +97,7 @@ export default function CheckoutSuccessScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {review?<ReviewNotice message={REVIEW_FINANCIAL_NOTICE}/>:null}
         {/* Success Header */}
         <View style={styles.successHeader}>
           <View style={styles.checkIconWrapper}>
@@ -122,12 +127,12 @@ export default function CheckoutSuccessScreen() {
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Thời gian</Text>
-            <Text style={styles.infoValue}>{draft.time} - {draft.date}</Text>
+            <Text style={styles.infoValue}>{review ? booking.time : draft.time} - {review ? booking.date : draft.date}</Text>
           </View>
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Địa điểm</Text>
-            <Text style={styles.infoValue} numberOfLines={2}>{draft.address}</Text>
+            <Text style={styles.infoValue} numberOfLines={2}>{review ? booking.address : draft.address}</Text>
           </View>
 
           <View style={styles.divider} />

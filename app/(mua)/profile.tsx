@@ -16,6 +16,7 @@ import { useReviews } from '../../hooks/useReviews';
 import { ServiceFormModal } from '../../components/mua/services/ServiceFormModal';
 import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioFormModal';
 import ReviewTabContent from '../../components/mua/ReviewTabContent';
+import { ReviewNotice } from '../../components/ReviewNotice';
 import { BrandColors } from '../../constants/theme';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { getApiError } from '../../services/api';
@@ -24,6 +25,7 @@ import { normalizeSocialUrl } from '../../utils/socialUrl';
 export default function MuaProfilePremiumScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const review=user?.isDemoAccount===true;
   const { width } = useWindowDimensions();
   const isDesktop = width > 768;
   const numColumns = isDesktop ? 6 : 3;
@@ -52,11 +54,13 @@ export default function MuaProfilePremiumScreen() {
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<any>(null);
 
   const handleServiceOptions = (svc: any) => {
+    if(review)return;
     setSelectedService(svc);
     setIsServiceOptionsVisible(true);
   };
 
   const handlePortfolioOptions = (item: any) => {
+    if(review)return;
     setSelectedPortfolioItem(item);
     setIsPortfolioOptionsVisible(true);
   };
@@ -136,6 +140,7 @@ export default function MuaProfilePremiumScreen() {
         style={StyleSheet.absoluteFill}
       />
 
+      {review?<ReviewNotice/>:null}
       {/* Top Header */}
       <View style={styles.header}>
         {/* Placeholder for back arrow if needed */}
@@ -200,7 +205,7 @@ export default function MuaProfilePremiumScreen() {
               <Text style={[styles.igName, { marginBottom: 0 }]}>
                 {displayName}
               </Text>
-              <CheckCircle2 size={14} color="#1DA1F2" style={{ marginLeft: 4 }} />
+              {!review && <CheckCircle2 size={14} color="#1DA1F2" style={{ marginLeft: 4 }} />}
             </View>
             <Text style={styles.igBioCategory}>Nghệ sĩ trang điểm</Text>
             <Text style={styles.igBioText}>{displayBio}</Text>
@@ -214,7 +219,7 @@ export default function MuaProfilePremiumScreen() {
           <View style={styles.igActionRow}>
             <TouchableOpacity
               style={styles.igPrimaryBtn}
-              onPress={() => router.push('/(mua)/edit-profile' as any)}
+              disabled={review} onPress={() => router.push('/(mua)/edit-profile' as any)}
             >
               <Text style={styles.igPrimaryBtnText}>Chỉnh sửa trang</Text>
             </TouchableOpacity>
@@ -251,7 +256,7 @@ export default function MuaProfilePremiumScreen() {
         <View style={styles.section}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Tác phẩm của bạn</Text>
-            <TouchableOpacity onPress={() => setIsPortfolioModalVisible(true)} hitSlop={{top:10, bottom:10, left:10, right:10}}>
+            <TouchableOpacity disabled={review} onPress={() => setIsPortfolioModalVisible(true)} hitSlop={{top:10, bottom:10, left:10, right:10}}>
               <Plus size={24} color={BrandColors.textDark} />
             </TouchableOpacity>
           </View>
@@ -299,7 +304,7 @@ export default function MuaProfilePremiumScreen() {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Các dịch vụ cung cấp</Text>
               {(services && services.length > 0) ? (
-                <TouchableOpacity onPress={() => setIsServiceModalVisible(true)}>
+                <TouchableOpacity disabled={review} onPress={() => setIsServiceModalVisible(true)}>
                   <Plus size={24} color={BrandColors.textDark} />
                 </TouchableOpacity>
               ) : null}
@@ -343,7 +348,7 @@ export default function MuaProfilePremiumScreen() {
                   </TouchableOpacity>
 
                   <View style={styles.serviceAction}>
-                    <TouchableOpacity onPress={() => handleServiceOptions(svc)} hitSlop={{top:15, bottom:15, left:15, right:15}}>
+                    <TouchableOpacity disabled={review} onPress={() => handleServiceOptions(svc)} hitSlop={{top:15, bottom:15, left:15, right:15}}>
                       <MoreVertical size={20} color="#666" />
                     </TouchableOpacity>
                     <Text style={styles.servicePrice}>{(svc.price || 0).toLocaleString('vi-VN')}đ</Text>
@@ -408,7 +413,7 @@ export default function MuaProfilePremiumScreen() {
 <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>Chi tiết tác phẩm</Text>
                 <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
-                  <TouchableOpacity onPress={() => handlePortfolioOptions(selectedPortfolioItem)}>
+                  <TouchableOpacity disabled={review} onPress={() => handlePortfolioOptions(selectedPortfolioItem)}>
                     <MoreVertical size={24} color={BrandColors.textDark} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setSelectedPortfolioItem(null)}>
@@ -439,7 +444,7 @@ export default function MuaProfilePremiumScreen() {
 </> : null}</AppBottomSheet>
 
       <ServiceFormModal
-        visible={isServiceModalVisible}
+        visible={!review && isServiceModalVisible}
         onClose={() => { setIsServiceModalVisible(false); setEditingService(null); }}
         onSubmit={async (data) => {
           if (editingService) {
@@ -453,7 +458,7 @@ export default function MuaProfilePremiumScreen() {
       />
 
       <PortfolioFormModal
-        visible={isPortfolioModalVisible}
+        visible={!review && isPortfolioModalVisible}
         onClose={() => { setIsPortfolioModalVisible(false); setEditingPortfolioItem(null); }}
         onSubmit={async (data) => {
           if (editingPortfolioItem) {
@@ -465,18 +470,18 @@ export default function MuaProfilePremiumScreen() {
         initialData={editingPortfolioItem}
       />
 
-        <ActionSheet visible={isServiceOptionsVisible} title="Tùy chọn dịch vụ" onClose={()=>setIsServiceOptionsVisible(false)} actions={[
+        <ActionSheet visible={!review && isServiceOptionsVisible} title="Tùy chọn dịch vụ" onClose={()=>setIsServiceOptionsVisible(false)} actions={[
           {id:'edit',label:'Chỉnh sửa dịch vụ',icon:Edit2,onPress:()=>{setIsServiceOptionsVisible(false);setSelectedService(null);setEditingService(selectedService);setIsServiceModalVisible(true);}},
           {id:'delete',label:'Xóa dịch vụ',icon:Trash2,destructive:true,onPress:()=>{setIsServiceOptionsVisible(false);setDeleteServiceVisible(true);}},
         ]} />
 
-        <ActionSheet visible={isPortfolioOptionsVisible} title="Tùy chọn bài viết" onClose={()=>setIsPortfolioOptionsVisible(false)} actions={[
+        <ActionSheet visible={!review && isPortfolioOptionsVisible} title="Tùy chọn bài viết" onClose={()=>setIsPortfolioOptionsVisible(false)} actions={[
           {id:'edit',label:'Chỉnh sửa tác phẩm',icon:Edit2,onPress:()=>{setIsPortfolioOptionsVisible(false);setEditingPortfolioItem(selectedPortfolioItem);setIsPortfolioModalVisible(true);}},
           {id:'delete',label:'Xóa tác phẩm',icon:Trash2,destructive:true,onPress:()=>{setIsPortfolioOptionsVisible(false);setDeletePortfolioVisible(true);}},
         ]} />
 
-        <ConfirmDialog visible={deleteServiceVisible} title="Xóa dịch vụ" message="Bạn có chắc chắn muốn xóa dịch vụ này?" confirmLabel="Xóa" destructive loading={deleteService.isPending} onCancel={() => { setDeleteServiceVisible(false); setSelectedService(null); }} onConfirm={confirmDeleteService}/>
-        <ConfirmDialog visible={deletePortfolioVisible} title="Xóa tác phẩm" message="Bạn có chắc chắn muốn xóa tác phẩm này khỏi Portfolio?" confirmLabel="Xóa" destructive loading={isDeletingPortfolio} onCancel={() => { setDeletePortfolioVisible(false); setSelectedPortfolioItem(null); }} onConfirm={confirmDeletePortfolio}/>
+        <ConfirmDialog visible={!review && deleteServiceVisible} title="Xóa dịch vụ" message="Bạn có chắc chắn muốn xóa dịch vụ này?" confirmLabel="Xóa" destructive loading={deleteService.isPending} onCancel={() => { setDeleteServiceVisible(false); setSelectedService(null); }} onConfirm={confirmDeleteService}/>
+        <ConfirmDialog visible={!review && deletePortfolioVisible} title="Xóa tác phẩm" message="Bạn có chắc chắn muốn xóa tác phẩm này khỏi Portfolio?" confirmLabel="Xóa" destructive loading={isDeletingPortfolio} onCancel={() => { setDeletePortfolioVisible(false); setSelectedPortfolioItem(null); }} onConfirm={confirmDeletePortfolio}/>
 
       </SafeAreaView>
   );

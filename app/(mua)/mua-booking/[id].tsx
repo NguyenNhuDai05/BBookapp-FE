@@ -1,3 +1,7 @@
+import { useAuthStore } from '../../../store/useAuthStore';
+import { ReviewNotice } from '../../../components/ReviewNotice';
+import { REVIEW_FINANCIAL_NOTICE } from '../../../utils/playReview';
+import { getApiError } from '../../../services/api';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, TextInput } from 'react-native';
 import { AppAlert as appDialog } from '../../../components/ui/dialogStore';
@@ -13,9 +17,10 @@ import { ComplaintEntry } from '../../../components/booking/ComplaintEntry';
 export default function MuaBookingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const review=useAuthStore(state=>state.user?.isDemoAccount===true);
 
   const { data: booking, isLoading, isError } = useBookingDetail(id);
-  const { mutate: updateStatus, isPending: isUpdating } = useUpdateBookingStatus(booking?.mua.id || 'me');
+  const { mutate: updateStatus, isPending: isUpdating, error: statusError } = useUpdateBookingStatus(booking?.mua.id || 'me');
 
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectInput, setShowRejectInput] = useState(false);
@@ -97,7 +102,7 @@ export default function MuaBookingDetailScreen() {
         <View style={styles.iconBtn} />
       </View>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.content}>{review?<ReviewNotice message={REVIEW_FINANCIAL_NOTICE}/>:null}{statusError?<Text accessibilityRole="alert">{getApiError(statusError).message}</Text>:null}
 
         <BookingTimeline booking={booking} />
 

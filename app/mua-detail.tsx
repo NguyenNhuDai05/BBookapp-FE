@@ -1,3 +1,5 @@
+import { useAuthStore } from '../store/useAuthStore';
+import { ReviewNotice } from '../components/ReviewNotice';
 import { getMuaExperienceLabel } from '../utils/muaAreas';
 import { AppBottomSheet } from '../components/ui/AppBottomSheet';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -33,6 +35,8 @@ export default function MuaDetailScreen() {
     refetch,
   } = useMuaDetail(id);
 
+  const user=useAuthStore(state=>state.user);
+  const sample=user?.isDemoAccount===true && user.demoCounterpartMuaId===id;
   const follow = useFollow(id);
   const [activeTab, setActiveTab] = useState(tab || 'Portfolio');
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
@@ -163,11 +167,12 @@ export default function MuaDetailScreen() {
             </View>
           </View>
 
+          {sample?<ReviewNotice title="MUA mẫu cho đánh giá" message="Hồ sơ và dịch vụ mẫu được chuẩn bị để trải nghiệm đặt lịch. Giờ trống được kiểm tra khi chọn ngày hẹn."/>:null}
           {/* Bio Section */}
           <View style={styles.igBioContainer}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
               <Text style={[styles.igName, { marginBottom: 0 }]}>{displayName}</Text>
-              <CheckCircle2 size={14} color="#1DA1F2" style={{ marginLeft: 4 }} />
+              {!sample&&<CheckCircle2 size={14} color="#1DA1F2" style={{ marginLeft: 4 }} />}
             </View>
             <Text style={styles.igBioCategory}>Nghệ sĩ trang điểm</Text>
             <Text style={styles.igBioText}>{displayBio}</Text>

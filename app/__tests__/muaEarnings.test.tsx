@@ -37,3 +37,4 @@ it('shows payment completion date rather than request creation date',async()=>{
  expect(screen.getByText(new Date('2026-09-30T00:00:00Z').toLocaleString('vi-VN'))).toBeTruthy();
  expect(screen.queryByText(new Date('2026-09-29T00:00:00Z').toLocaleString('vi-VN'))).toBeNull();
 });
+jest.mock('../../store/useAuthStore', () => ({ useAuthStore: (selector: (state: { user: null }) => unknown) => selector({ user: null }) }));
