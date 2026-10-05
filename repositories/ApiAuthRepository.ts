@@ -52,7 +52,18 @@ export class ApiAuthRepository implements IAuthRepository {
   }
 
   async requestRegistrationOtp(email: string): Promise<void> { await api.post('/Auth/register/request-otp', { email }); }
-  async requestPasswordReset(email: string): Promise<void> { await api.post('/Auth/forgot-password', { email }); }
+  async requestPasswordReset(email: string) {
+    const { data } = await api.post('/Auth/forgot-password', { email });
+    return { resendAfterSeconds: data.resendAfterSeconds ?? 60, expiresInSeconds: data.expiresInSeconds ?? 300 };
+  }
+  async verifyPasswordResetOtp(email: string, otp: string) {
+    const { data } = await api.post('/Auth/reset-password/verify-otp', { email, otp });
+    if (!data.resetToken) throw new Error('Không thể xác minh mã. Vui lòng thử lại.');
+    return { resetToken: data.resetToken as string, expiresInSeconds: data.expiresInSeconds ?? 300 };
+  }
+  async completePasswordReset(email: string, resetToken: string, newPassword: string): Promise<void> {
+    await api.post('/Auth/reset-password/complete', { email, resetToken, newPassword });
+  }
   async resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
     await api.post('/Auth/reset-password', { email, otp, newPassword });
   }
