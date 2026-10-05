@@ -1,7 +1,7 @@
 import { ReviewReadOnlyScreen } from '../../components/ReviewReadOnlyScreen';
 import { OperatingAreaFields, type OperatingArea } from '../../components/mua/OperatingAreaFields';
 import { EXPERIENCE_LEVELS } from '../../utils/muaAreas';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import * as ImagePicker from 'expo-image-picker';
@@ -14,6 +14,7 @@ import { uploadImage } from '../../services/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile, useUpdateMuaProfile } from '../../hooks/useMuaProfile';
 import { useMuaStyles } from '../../hooks/useMuaStyles';
+import { getApiError } from '../../services/api';
 import { normalizeSocialUrl } from '../../utils/socialUrl';
 
 
@@ -38,16 +39,28 @@ function EditProfileScreen() {
   const [formError, setFormError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const stylesQuery = useMuaStyles();
+  const initialized = useRef(false);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (profile) {
+        if (initialized.current) return;
+        initialized.current = true;
         setAvatar(profile.avatarUrl || '');
         setName(profile.name || profile.brandName || user?.name || '');
         setBio(profile.bio || '');
         setPhoneNumber(profile.phoneNumber || '');
         setCity(profile.city || '');
-        setArea({ ...profile, city: profile.city || '' });
+        setArea({
+          city: profile.city || '', district: profile.district,
+          provinceCode: profile.provinceCode, districtCode: profile.districtCode,
+          operatingProvinceCode: profile.operatingProvinceCode,
+          operatingAreaIds: profile.operatingAreaIds,
+          latitude: profile.latitude, longitude: profile.longitude,
+          operatingLocationConfirmed: profile.operatingLocationConfirmed,
+          publicMeetingPoint: profile.publicMeetingPoint,
+          operatingLocationLabel: profile.operatingLocationLabel,
+        });
         setExperienceLevel(profile.experienceLevel);
         setExperienceYears(String(profile.experienceYears || ''));
         setStyleIds(profile.specialties?.map(item => item.styleId) || []);
@@ -83,12 +96,12 @@ function EditProfileScreen() {
     setIsUploading(true);
     try {
       const finalAvatarUrl = await uploadImage(avatar);
-      await updateProfile({ displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, ...area, city, experienceLevel, experienceYears: Number(experienceYears) || 0, styleIds, instagramUrl: normalizedInstagram, facebookUrl: normalizedFacebook });
+      await updateProfile({ ...area, displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceLevel, experienceYears: Number(experienceYears) || 0, styleIds, instagramUrl: normalizedInstagram, facebookUrl: normalizedFacebook });
       updateUser({ name: name.trim(), avatarUrl: finalAvatarUrl });
       appDialog.alert('Thành công', 'Đã lưu thông tin hồ sơ.');
-      router.back();
-    } catch {
-      setFormError('Không thể lưu hồ sơ. Vui lòng kiểm tra kết nối và thử lại.');
+      router.replace('/(mua)/profile');
+    } catch (error) {
+      setFormError(getApiError(error).message || 'Không thể lưu hồ sơ. Vui lòng kiểm tra kết nối và thử lại.');
     } finally {
       setIsUploading(false);
     }
@@ -127,7 +140,7 @@ function EditProfileScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} accessibilityLabel="Quay lại">
+        <TouchableOpacity style={styles.headerBtn} onPress={() => router.replace('/(mua)/profile')} accessibilityLabel="Quay lại">
           <ArrowLeft size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chỉnh sửa trang</Text>
@@ -156,7 +169,7 @@ function EditProfileScreen() {
                   <User size={60} color="#A855F7" />
                 </View>
               )}
-              <TouchableOpacity style={styles.cameraBtn} onPress={handleChangeAvatar}>
+              <TouchableOpacity style={styles.cameraBtn} onPress={handleChangeAvatar} disabled={isSaving} accessibilityLabel="Thay đổi ảnh đại diện">
                 <Camera size={20} color="#FFF" />
               </TouchableOpacity>
             </View>

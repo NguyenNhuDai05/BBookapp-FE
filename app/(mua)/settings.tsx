@@ -2,7 +2,11 @@ import { ReviewNotice } from '../../components/ReviewNotice';
 import { REVIEW_PASSWORD_NOTICE, REVIEW_PROTECTED_NOTICE } from '../../utils/playReview';
 import { getApiError } from '../../services/api';
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { Image } from 'expo-image';
+import { useQueryClient } from '@tanstack/react-query';
+import { MUA_ELIGIBILITY_QUERY_KEY } from '../../hooks/useMuaEligibility';
+import { getMuaListingLabel, getMuaStatusLabel } from '../../utils/muaStatus';
 import {
   Bell,
   BriefcaseBusiness,
@@ -18,8 +22,8 @@ import {
   Trash2,
   KeyRound,
 } from "lucide-react-native";
-import React, { useState } from "react";
-import {ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { useCallback, useState } from "react";
+import {ActivityIndicator, AppState, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useAuthStore } from "../../store/useAuthStore";
 import { useMuaProfile } from "../../hooks/useMuaProfile";
@@ -31,7 +35,21 @@ export default function MuaSettingsScreen() {
   const muaId = "me";
 
   // Fetch MUA data from backend
-  const { data: profile, isLoading, error, refetch } = useMuaProfile(muaId);
+  const { data: profile, isLoading, isRefetching, error, refetch } = useMuaProfile(muaId);
+  const cache = useQueryClient();
+  const refresh = useCallback(() => {
+    void refetch();
+    void cache.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
+  }, [refetch, cache]);
+  useFocusEffect(useCallback(() => {
+    refresh();
+    const listener = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
+    const timer = setInterval(() => { if (AppState.currentState === 'active') refresh(); }, 30_000);
+    return () => { listener.remove(); clearInterval(timer); };
+  }, [refresh]));
+  const displayName = profile?.name || authUser?.name || 'Makeup Artist';
+  const avatarUrl = profile?.avatarUrl || authUser?.avatarUrl;
+  const [failedAvatar, setFailedAvatar] = useState<string | null>(null);
 
   // Handle Logout
   const handleLogout = () => {
@@ -134,7 +152,7 @@ export default function MuaSettingsScreen() {
     );
   }
 
-  if (error) {
+  if (error && !profile) {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>⚠️ Lỗi kết nối dữ liệu</Text>
@@ -153,6 +171,7 @@ export default function MuaSettingsScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refresh} tintColor="#F5446A" colors={['#F5446A']} />}
       >
         {/* HEADER GRADIENT BANNER */}
         <LinearGradient
@@ -169,11 +188,11 @@ export default function MuaSettingsScreen() {
           </TouchableOpacity>
           <View style={[styles.userInfoContainer, { marginTop: 40 }]}>
             <View style={styles.avatarCircle}>
-              <Text style={styles.avatarEmoji}>{authUser?.name?.charAt(0) || "M"}</Text>
+              {avatarUrl && failedAvatar !== avatarUrl ? <Image accessibilityLabel="Ảnh đại diện MUA" source={{ uri: avatarUrl }} style={styles.avatarImage} contentFit="cover" onError={() => setFailedAvatar(avatarUrl)} /> : <Text style={styles.avatarEmoji}>{displayName.charAt(0)}</Text>}
             </View>
             <View style={styles.userTextDetails}>
-              <Text style={styles.userName}>{authUser?.name}</Text>
-              <Text style={styles.userEmail}>{authUser?.email}</Text>
+              <Text style={styles.userName} numberOfLines={2}>{displayName}</Text>
+              <Text style={styles.userEmail} numberOfLines={1} ellipsizeMode="middle" accessibilityLabel={authUser?.email} selectable>{authUser?.email}</Text>
               <View style={styles.verificationBadge}>
                 {profile?.verificationStatus === "APPROVED" ? (
                   <>
@@ -183,10 +202,11 @@ export default function MuaSettingsScreen() {
                 ) : (
                   <>
                     <Clock size={14} color="#FFF" />
-                    <Text style={styles.verificationText}>{authUser?.isDemoAccount ? "Tài khoản đánh giá · Hồ sơ bản nháp" : `Chờ duyệt (${profile?.verificationStatus})`}</Text>
+                    <Text style={styles.verificationText}>{authUser?.isDemoAccount ? "Tài khoản đánh giá · Hồ sơ bản nháp" : getMuaStatusLabel(profile?.verificationStatus)}</Text>
                   </>
                 )}
               </View>
+              {getMuaListingLabel(profile?.profileStatus) ? <Text style={styles.listingText}>{getMuaListingLabel(profile?.profileStatus)}</Text> : null}
             </View>
           </View>
         </LinearGradient>
@@ -194,15 +214,15 @@ export default function MuaSettingsScreen() {
         {/* STATS OVERLAPPING CARD */}
         <View style={styles.statsCard}>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{authUser?.isDemoAccount ? profile?.reviewCount ?? 0 : 12}</Text>
+            <Text style={styles.statNumber}>{profile?.reviewCount ?? 0}</Text>
             <Text style={styles.statLabel}>Lượt Đặt</Text>
           </View>
           <View style={[styles.statBox, styles.statBorder]}>
-            <Text style={styles.statNumber}>{authUser?.isDemoAccount ? profile?.rating ?? 0 : 4.9}</Text>
+            <Text style={styles.statNumber}>{(profile?.rating ?? 0).toFixed(1)}</Text>
             <Text style={styles.statLabel}>Đánh giá</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{authUser?.isDemoAccount ? "—" : "VIP"}</Text>
+            <Text style={[styles.statNumber, styles.bronzeRank]}>Đồng</Text>
             <Text style={styles.statLabel}>Hạng MUA</Text>
           </View>
         </View>
@@ -259,6 +279,7 @@ export default function MuaSettingsScreen() {
               <ShieldCheck size={20} color="#22152B" />,
               "Điều khoản & Bảo mật",
               "Chính sách cho MUA",
+              () => router.push('/policy'),
             )}
           </View>
         </View>
@@ -338,7 +359,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   avatarEmoji: { fontSize: 36, color: "#f5446a", fontWeight: "bold" },
-  userTextDetails: { flex: 1, justifyContent: "center" },
+  avatarImage: { width: 76, height: 76, borderRadius: 38 },
+  bronzeRank: { color: '#A5673F' },
+  userTextDetails: { flex: 1, minWidth: 0, justifyContent: "center" },
   userName: { fontSize: 22, fontWeight: "800", color: "#FFF" },
   userEmail: {
     fontSize: 14,
@@ -362,6 +385,7 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontWeight: "600",
   },
+  listingText: { color: '#FFF', fontSize: 12, marginTop: 6 },
   statsCard: {
     flexDirection: "row",
     backgroundColor: "#FFF",

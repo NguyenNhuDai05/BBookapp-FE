@@ -5,7 +5,6 @@ import React, { useCallback, useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const authLogo = require("../../assets/images/B.png");
@@ -14,7 +13,6 @@ export default function LoginScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ email?: string; registered?: string }>();
   const login = useAuthStore((state) => state.login);
-  const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
 
   const [email, setEmail] = useState(params.email || "");
   const [password, setPassword] = useState("");
@@ -27,27 +25,6 @@ export default function LoginScreen() {
     router.replace("/(tabs)/home" as any);
   }, [router]);
 
-  const handleGoogleToken = useCallback(
-    async (idToken: string) => {
-      const success = await loginWithGoogleToken(idToken);
-
-      if (success) {
-        goHome();
-        return true;
-      }
-
-      appDialog.alert(
-        "Đăng nhập Google thất bại",
-        "Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc sử dụng email và mật khẩu.",
-      );
-
-      return false;
-    },
-    [goHome, loginWithGoogleToken],
-  );
-
-  const { googleLoading, googleReady, signInWithGoogle } =
-    useGoogleOAuth(handleGoogleToken);
 
   const handleLogin = async () => {
     const localErrors: { email?: string; password?: string } = {};
@@ -88,13 +65,6 @@ export default function LoginScreen() {
     );
   };
 
-  const handleGooglePress = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error: any) {
-      appDialog.alert("Google OAuth", error?.message || "Không thể mở Google OAuth.");
-    }
-  };
 
   return (
     <LinearGradient colors={["#FFE2D7", "#F799A5", "#F55389"]} style={styles.bg}>
@@ -165,33 +135,6 @@ export default function LoginScreen() {
                 )}
               </TouchableOpacity>
 
-              <View style={[styles.dividerRow, { display: 'none' }]}>
-                <View style={styles.divider} />
-                <Text style={styles.dividerText}>hoặc</Text>
-                <View style={styles.divider} />
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={handleGooglePress}
-                disabled={googleLoading || !googleReady}
-                style={[
-                  styles.googleButton,
-                  { display: 'none' },
-                  (googleLoading || !googleReady) && styles.disabled,
-                ]}
-              >
-                {googleLoading ? (
-                  <ActivityIndicator color="#F55389" />
-                ) : (
-                  <>
-                    <View style={styles.googleMark}>
-                      <Text style={styles.googleMarkText}>G</Text>
-                    </View>
-                    <Text style={styles.googleText}>Tiếp tục với Google</Text>
-                  </>
-                )}
-              </TouchableOpacity>
 
               <Pressable
                 onPress={() => router.push("/register" as any)}
@@ -368,35 +311,6 @@ const styles = StyleSheet.create({
   forgotText: { color: "#D93D72", fontWeight: "800", textAlign: "right", marginTop: -6, marginBottom: 14 },
   disabled: { opacity: 0.72 },
   primaryButtonText: { color: "#fff", fontSize: 15, fontWeight: "900" },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginVertical: 18,
-  },
-  divider: { flex: 1, height: 1, backgroundColor: "#F2CAD2" },
-  dividerText: { color: "#B57F8D", fontWeight: "800", fontSize: 12 },
-  googleButton: {
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#F0C4CD",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  googleMark: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFF0F4",
-  },
-  googleMarkText: { color: "#F55389", fontSize: 16, fontWeight: "900" },
-  googleText: { color: "#4D2636", fontWeight: "900", fontSize: 14 },
   switchRow: { flexDirection: "row", justifyContent: "center", marginTop: 18 },
   switchText: { color: "#8D6674", fontWeight: "700" },
   switchAction: { color: "#F55389", fontWeight: "900" },

@@ -1,12 +1,9 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { Check, Eye, EyeOff, LockKeyhole, Mail, Sparkles, UserRound } from "lucide-react-native";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGoogleOAuth } from "../../hooks/useGoogleOAuth";
-import { useAuthStore } from "../../store/useAuthStore";
 import { useRegistrationStore } from "../../store/useRegistrationStore";
 import { authService } from "../../services/authService";
 
@@ -36,7 +33,6 @@ const getRegisterErrorMessage = (err: any) => {
 export default function RegisterScreen() {
   const router = useRouter();
 
-  const loginWithGoogleToken = useAuthStore((state) => state.loginWithGoogleToken);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -47,27 +43,6 @@ export default function RegisterScreen() {
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
 
-  const handleGoogleToken = useCallback(
-    async (idToken: string) => {
-      const success = await loginWithGoogleToken(idToken);
-
-      if (success) {
-        router.replace("/(tabs)/home" as any);
-        return true;
-      }
-
-      appDialog.alert(
-        "Đăng ký Google thất bại",
-        "Không thể xác thực tài khoản Google. Vui lòng thử lại hoặc đăng ký bằng email.",
-      );
-
-      return false;
-    },
-    [loginWithGoogleToken, router],
-  );
-
-  const { googleLoading, googleReady, signInWithGoogle } =
-    useGoogleOAuth(handleGoogleToken);
 
   const handleRegister = async () => {
     setError("");
@@ -117,18 +92,6 @@ export default function RegisterScreen() {
     }
   };
 
-  const handleGooglePress = async () => {
-    if (!acceptedPolicy) {
-      setError("Vui lòng đọc và đồng ý với chính sách trước khi đăng ký.");
-      return;
-    }
-
-    try {
-      await signInWithGoogle();
-    } catch (err: any) {
-      appDialog.alert("Google OAuth", err?.message || "Không thể mở Google OAuth.");
-    }
-  };
 
   return (
     <LinearGradient colors={["#FFE2D7", "#F799A5", "#F55389"]} style={styles.bg}>
@@ -234,33 +197,6 @@ export default function RegisterScreen() {
                 )}
               </TouchableOpacity>
 
-              <View style={[styles.dividerRow, { display: 'none' }]}>
-                <View style={styles.divider} />
-                <Text style={styles.dividerText}>hoặc</Text>
-                <View style={styles.divider} />
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={handleGooglePress}
-                disabled={googleLoading || !googleReady || !acceptedPolicy}
-                style={[
-                  styles.googleButton,
-                  { display: 'none' },
-                  (googleLoading || !googleReady || !acceptedPolicy) && styles.disabledButton,
-                ]}
-              >
-                {googleLoading ? (
-                  <ActivityIndicator color="#F55389" />
-                ) : (
-                  <>
-                    <View style={styles.googleMark}>
-                      <Text style={styles.googleMarkText}>G</Text>
-                    </View>
-                    <Text style={styles.googleText}>Tiếp tục với Google</Text>
-                  </>
-                )}
-              </TouchableOpacity>
 
               <Pressable onPress={() => router.replace("/login" as any)} style={styles.switchRow}>
                 <Text style={styles.switchText}>Đã có tài khoản?</Text>
@@ -443,35 +379,6 @@ const styles = StyleSheet.create({
   checkboxChecked: { backgroundColor: "#F55389", borderColor: "#F55389" },
   policyText: { flex: 1, color: "#795565", fontSize: 13, lineHeight: 19, fontWeight: "600" },
   policyLink: { color: "#D93D72", fontWeight: "900", textDecorationLine: "underline" },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginVertical: 18,
-  },
-  divider: { flex: 1, height: 1, backgroundColor: "#F2CAD2" },
-  dividerText: { color: "#B57F8D", fontWeight: "800", fontSize: 12 },
-  googleButton: {
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#F0C4CD",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  googleMark: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFF0F4",
-  },
-  googleMarkText: { color: "#F55389", fontSize: 16, fontWeight: "900" },
-  googleText: { color: "#4D2636", fontWeight: "900", fontSize: 14 },
   switchRow: { flexDirection: "row", justifyContent: "center", marginTop: 18 },
   switchText: { color: "#8D6674", fontWeight: "700" },
   switchAction: { color: "#F55389", fontWeight: "900" },
