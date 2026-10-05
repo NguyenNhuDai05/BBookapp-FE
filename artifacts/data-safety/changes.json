@@ -1,0 +1,107 @@
+[
+  {
+    "row": 12,
+    "question": "PSL_SUPPORT_DATA_DELETION_BY_USER",
+    "response": "DATA_DELETION_YES",
+    "before": "",
+    "after": "true"
+  },
+  {
+    "row": 14,
+    "question": "PSL_SUPPORT_DATA_DELETION_BY_USER",
+    "response": "DATA_DELETION_NO_AUTO_DELETED",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 15,
+    "question": "PSL_DATA_DELETION_URL",
+    "response": "",
+    "before": "",
+    "after": "https://bbookmakeup.com/delete-account/"
+  },
+  {
+    "row": 52,
+    "question": "PSL_DATA_TYPES_APP_PERFORMANCE",
+    "response": "PSL_CRASH_LOGS",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 594,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_CRASH_LOGS:PSL_DATA_USAGE_COLLECTION_AND_SHARING",
+    "response": "PSL_DATA_USAGE_ONLY_COLLECTED",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 596,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_CRASH_LOGS:PSL_DATA_USAGE_EPHEMERAL",
+    "response": "",
+    "before": "false",
+    "after": ""
+  },
+  {
+    "row": 597,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_CRASH_LOGS:DATA_USAGE_USER_CONTROL",
+    "response": "PSL_DATA_USAGE_USER_CONTROL_OPTIONAL",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 600,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_CRASH_LOGS:DATA_USAGE_COLLECTION_PURPOSE",
+    "response": "PSL_ANALYTICS",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 613,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:PSL_DATA_USAGE_COLLECTION_AND_SHARING",
+    "response": "PSL_DATA_USAGE_ONLY_COLLECTED",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 615,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:PSL_DATA_USAGE_EPHEMERAL",
+    "response": "",
+    "before": "false",
+    "after": ""
+  },
+  {
+    "row": 616,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:DATA_USAGE_USER_CONTROL",
+    "response": "PSL_DATA_USAGE_USER_CONTROL_OPTIONAL",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 619,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_PERFORMANCE_DIAGNOSTICS:DATA_USAGE_COLLECTION_PURPOSE",
+    "response": "PSL_ANALYTICS",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 768,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:DATA_USAGE_USER_CONTROL",
+    "response": "PSL_DATA_USAGE_USER_CONTROL_OPTIONAL",
+    "before": "true",
+    "after": ""
+  },
+  {
+    "row": 769,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:DATA_USAGE_USER_CONTROL",
+    "response": "PSL_DATA_USAGE_USER_CONTROL_REQUIRED",
+    "before": "",
+    "after": "true"
+  },
+  {
+    "row": 771,
+    "question": "PSL_DATA_USAGE_RESPONSES:PSL_DEVICE_ID:DATA_USAGE_COLLECTION_PURPOSE",
+    "response": "PSL_ANALYTICS",
+    "before": "true",
+    "after": ""
+  }
+]

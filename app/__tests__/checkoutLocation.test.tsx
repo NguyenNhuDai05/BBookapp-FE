@@ -3,6 +3,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import Checkout from '../checkout';
 import { useBookingStore } from '../../store/useBookingStore';
 const mockCreate = jest.fn(); const mockPay = jest.fn(); const mockPush = jest.fn();
+const mockCopy = jest.fn().mockResolvedValue(true); const mockMap = jest.fn().mockResolvedValue(true);
+jest.mock('expo-clipboard', () => ({ setStringAsync: (...args: unknown[]) => mockCopy(...args) }));
+jest.mock('../../services/externalNavigation', () => ({ externalMapUri: () => 'geo:test', openExternalMap: (...args: unknown[]) => mockMap(...args) }));
 let mockArtist = { id: 'mua', name: 'Artist', allowCustomerVisit: true, workLocationAddress: 'Server studio address', workLocationName: 'Studio' };
 jest.mock('react-native-safe-area-context', () => ({ ...jest.requireActual('react-native-safe-area-context'), useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) }));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, replace: jest.fn(), back: jest.fn() }) }));
@@ -37,6 +40,20 @@ it('customer destination keeps manually entered address and optional GPS', async
 it('hides studio option when consent is off, and blocks a stale studio draft', async () => {
   useBookingStore.getState().setWorkLocation('mua', 'Stale studio'); mockArtist.allowCustomerVisit = false;
   await render(<Checkout />); expect(screen.queryByText(/Đến nơi làm việc của MUA/)).toBeNull();
+  expect(screen.queryByText('Mở bản đồ')).toBeNull();
   await fireEvent.press(screen.getByText('Xác nhận và thanh toán')); expect(mockCreate).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByText('○ MUA đến địa điểm của bạn')); expect(screen.getByText('Customer address')).toBeTruthy();
+});
+it('copies and opens only the public workplace selected by the customer on explicit taps', async () => {
+  await render(<Checkout />);
+  expect(screen.queryByText('Sao chép địa chỉ')).toBeNull();
+  await fireEvent.press(screen.getByText('○ Đến nơi làm việc của MUA'));
+  expect(mockCopy).not.toHaveBeenCalled(); expect(mockMap).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByText('Sao chép địa chỉ'));
+  await waitFor(() => expect(mockCopy).toHaveBeenCalledWith('Server studio address'));
+  await waitFor(() => expect(screen.getByText('Đã sao chép địa chỉ')).toBeTruthy());
+  await fireEvent.press(screen.getByText('Mở bản đồ'));
+  await waitFor(() => expect(mockMap).toHaveBeenCalledWith(expect.objectContaining({ address: 'Server studio address', label: 'Studio' })));
+  await fireEvent.press(screen.getByText('○ MUA đến địa điểm của bạn'));
+  expect(screen.queryByText('Mở bản đồ')).toBeNull();
 });
