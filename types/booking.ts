@@ -106,6 +106,10 @@ export interface BookingDto {
   date: string; // YYYY-MM-DD
   time: string; // HH:mm
   address: string;
+  serviceLatitude?: number | null;
+  serviceLongitude?: number | null;
+  serviceLocationType?: 'CUSTOMER_ADDRESS' | 'MUA_WORK_LOCATION' | null;
+  serviceLocationName?: string | null;
   locationType: 'AT_STUDIO' | 'HOME_SERVICE';
   note?: string;
   status: BookingStatus;
@@ -150,12 +154,15 @@ export interface BookingDto {
 }
 
 export interface CreateBookingRequest {
+  serviceLocationType?: 'CUSTOMER_ADDRESS' | 'MUA_WORK_LOCATION';
   idempotencyKey: string;
   muaId: string;
   services: { serviceId: string; participantsCount: number }[];
   date: string;
   time: string;
   address: string;
+  serviceLatitude?: number;
+  serviceLongitude?: number;
   note?: string;
   paymentMethod: string;
 }

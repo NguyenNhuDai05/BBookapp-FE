@@ -71,7 +71,10 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "B-Book dùng vị trí để gợi ý khu vực làm việc cho Makeup Artist khi bạn chủ động yêu cầu."
+          "locationWhenInUsePermission": "BBook dùng vị trí khi bạn chủ động tìm MUA gần bạn, thêm nơi làm việc hoặc chọn địa điểm booking.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": false
         }
       ],
       "expo-web-browser",

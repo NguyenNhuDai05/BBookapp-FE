@@ -1,10 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
-import * as Crypto from 'expo-crypto';
+import { ActivityIndicator, Linking, Platform, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { AppBottomSheet } from '../ui/AppBottomSheet';
-import AreaMap from './AreaMap';
-import { DeviceLocationError, getDeviceLocation, locationService, resolveDeviceLocation } from '../../services/locationService';
-import { getApiError } from '../../services/api';
+import { DeviceLocationError, getDeviceLocation } from '../../services/locationService';
 import type { SelectedLocation } from '../../types/location';
 
 type LocationPickerProps = {
@@ -12,59 +9,48 @@ type LocationPickerProps = {
   value?: SelectedLocation;
   onClose: () => void;
   onSelect: (point: SelectedLocation) => void;
-  allowAddressSearch?: boolean;
 };
-
-export function LocationPicker({ visible, value, onClose, onSelect, allowAddressSearch = true }: LocationPickerProps) {
-  return <AppBottomSheet visible={visible} title="Chọn vị trí" onClose={onClose}>
-    {visible ? <LocationPickerContent value={value} onClose={onClose} onSelect={onSelect} allowAddressSearch={allowAddressSearch} /> : null}
+export function LocationPicker({ visible, value, onClose, onSelect }: LocationPickerProps) {
+  return <AppBottomSheet visible={visible} title="Vị trí hiện tại" onClose={onClose}>
+    {visible ? <GpsPickerContent value={value} onClose={onClose} onSelect={onSelect} /> : null}
   </AppBottomSheet>;
 }
-
-function LocationPickerContent({ value, onClose, onSelect, allowAddressSearch }: Omit<LocationPickerProps, 'visible'>) {
-  const [search, setSearch] = useState(''); const [candidate, setCandidate] = useState<SelectedLocation | undefined>(value);
-  const [suggestions, setSuggestions] = useState<{ id: string; label: string }[]>([]);
-  const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [blocked, setBlocked] = useState(false);
-  const [initialSession] = useState(() => Crypto.randomUUID());
-  const session = useRef(initialSession); const generation = useRef(0); const busyLock = useRef(false); const mounted = useRef(true);
-
-  useEffect(() => () => { mounted.current = false; generation.current++; }, []);
-
-  useEffect(() => {
-    if (!allowAddressSearch || search.trim().length < 2) return;
-    const controller = new AbortController();
-    const timer = setTimeout(() => {
-      locationService.search(search.trim(), session.current, controller.signal).then(rows => {
-        if (!controller.signal.aborted) { setSuggestions(rows); setError(rows.length ? '' : 'Không tìm thấy địa điểm. Hãy thử tên cụ thể hơn.'); }
-      }).catch(e => { if (!controller.signal.aborted) { setSuggestions([]); setError(getApiError(e).message); } });
-    }, 400);
-    return () => { clearTimeout(timer); controller.abort(); };
-  }, [search, allowAddressSearch]);
-
-  const updateSearch = (next: string) => {
-    setSearch(next);
-    if (next.trim().length < 2) { setSuggestions([]); setError(''); }
-  };
-
-  const run = async (action: () => Promise<SelectedLocation>, endSearch = false) => {
+function GpsPickerContent({ value, onClose, onSelect }: Omit<LocationPickerProps, 'visible'>) {
+  const [candidate, setCandidate] = useState(value);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [blocked, setBlocked] = useState(false);
+  const mounted = useRef(true);
+  const busyLock = useRef(false);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const locate = async () => {
     if (busyLock.current) return;
-    const current = generation.current; busyLock.current = true; setBusy(true); setError(''); setBlocked(false);
-    try { const point = await action(); if (mounted.current && current === generation.current) { setCandidate(point); if (endSearch) { session.current = Crypto.randomUUID(); setSearch(''); setSuggestions([]); } } }
-    catch (e) { if (mounted.current && current === generation.current) { setError(e instanceof DeviceLocationError ? e.message : getApiError(e).message); setBlocked(e instanceof DeviceLocationError && e.code === 'BLOCKED'); } }
-    finally { if (mounted.current && current === generation.current) { busyLock.current = false; setBusy(false); } }
+    busyLock.current = true; setBusy(true); setError(''); setBlocked(false);
+    try {
+      const point = await getDeviceLocation();
+      if (mounted.current) setCandidate({ ...point, label: 'Vị trí GPS đã xác nhận' });
+    } catch (e) {
+      if (mounted.current) {
+        setError(e instanceof DeviceLocationError ? e.message : 'Không thể lấy vị trí hiện tại. Bạn vẫn có thể chọn khu vực thủ công.');
+        setBlocked(e instanceof DeviceLocationError && e.code === 'BLOCKED');
+      }
+    } finally {
+      busyLock.current = false;
+      if (mounted.current) setBusy(false);
+    }
   };
   return <>
-    <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 550 }}>
-      {allowAddressSearch && <TextInput accessibilityLabel="Tìm địa điểm" value={search} onChangeText={updateSearch} placeholder="Nhập địa điểm hoặc địa chỉ..." style={s.input} />}
-      {suggestions.map(row => <TouchableOpacity key={row.id} style={s.row} disabled={busy} onPress={() => run(() => locationService.select(row.id, session.current), true)}><Text>{row.label}</Text></TouchableOpacity>)}
-      {suggestions.length > 0 && <Text style={s.helper}>Google Maps</Text>}
-      <TouchableOpacity disabled={busy} style={s.secondary} onPress={() => run(async () => resolveDeviceLocation(await getDeviceLocation()))}><Text style={s.link}>Sử dụng vị trí hiện tại</Text></TouchableOpacity>
-      {busy && <ActivityIndicator color="#D82D75" />}{!!error && <Text style={s.error}>{error}</Text>}
-      {blocked && Platform.OS !== 'web' && <TouchableOpacity onPress={() => { void Linking.openSettings(); }}><Text style={s.link}>Mở cài đặt quyền vị trí</Text></TouchableOpacity>}
-      <AreaMap center={candidate || { latitude: 10.7769, longitude: 106.7009 }} points={candidate ? [{ ...candidate, id: 'origin', title: candidate.label }] : []} onPick={point => { generation.current++; busyLock.current = false; setBusy(false); setError(''); setBlocked(false); setCandidate({ ...point, label: 'Điểm đã chọn trên bản đồ' }); }} />
-      <Text style={s.helper}>Chạm bản đồ để điều chỉnh. Vị trí chỉ được lưu khi bạn xác nhận.</Text>{candidate && <Text style={s.row}>{candidate.label}</Text>}
-    </ScrollView>
-    <TouchableOpacity accessibilityRole="button" disabled={!candidate || busy} style={[s.button, (!candidate || busy) && { opacity: .4 }]} onPress={() => { if (candidate) onSelect(candidate); onClose(); }}><Text style={s.white}>Xác nhận vị trí</Text></TouchableOpacity>
+    <Text style={s.helper}>GPS chỉ xác định vị trí, không tạo hoặc thay đổi địa chỉ. Vị trí chỉ được chọn khi bạn xác nhận.</Text>
+    <TouchableOpacity accessibilityRole="button" disabled={busy} style={s.secondary} onPress={() => { void locate(); }}>
+      <Text style={s.link}>{candidate ? 'Dùng lại vị trí hiện tại' : 'Dùng vị trí hiện tại'}</Text>
+    </TouchableOpacity>
+    {busy && <ActivityIndicator color="#D82D75" />}
+    {!!error && <Text style={s.error}>{error}</Text>}
+    {blocked && Platform.OS !== 'web' && <TouchableOpacity onPress={() => { void Linking.openSettings(); }}><Text style={s.link}>Mở cài đặt quyền vị trí</Text></TouchableOpacity>}
+    {candidate && <Text style={s.helper}>✓ Đã xác nhận vị trí GPS</Text>}
+    <TouchableOpacity accessibilityRole="button" disabled={!candidate || busy} style={[s.button, (!candidate || busy) && { opacity: .4 }]} onPress={() => { if (candidate) { onSelect(candidate); onClose(); } }}>
+      <Text style={s.white}>Xác nhận vị trí</Text>
+    </TouchableOpacity>
   </>;
 }
-const s = StyleSheet.create({ input: { borderWidth: 1, borderColor: '#E5DCE0', borderRadius: 12, padding: 12, minHeight: 48 }, row: { paddingVertical: 12 }, helper: { color: '#756A70', fontSize: 12, paddingVertical: 8 }, error: { color: '#B3261E', paddingVertical: 8 }, link: { color: '#C5165D', fontWeight: '600' }, secondary: { paddingVertical: 15 }, button: { padding: 15, backgroundColor: '#D82D75', borderRadius: 16, alignItems: 'center', marginTop: 12 }, white: { color: 'white', fontWeight: '700' } });
+const s = StyleSheet.create({ helper: { color: '#756A70', fontSize: 13, paddingVertical: 8 }, error: { color: '#B3261E', paddingVertical: 8 }, link: { color: '#C5165D', fontWeight: '600' }, secondary: { paddingVertical: 15 }, button: { padding: 15, backgroundColor: '#D82D75', borderRadius: 16, alignItems: 'center', marginTop: 12 }, white: { color: 'white', fontWeight: '700' } });

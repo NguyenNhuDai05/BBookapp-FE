@@ -51,6 +51,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       ]);
 
       if (!token) {
+        queryClient.clear();
+        useBookingStore.getState().resetDraft();
         await AsyncStorage.removeItem(ACTIVE_MODE_KEY);
         set({
           user: null,
@@ -73,6 +75,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return true;
     } catch {
       await Promise.all([AsyncStorage.removeItem(TOKEN_KEY), AsyncStorage.removeItem(ACTIVE_MODE_KEY)]);
+      queryClient.clear();
+      useBookingStore.getState().resetDraft();
 
       set({
         user: null,
@@ -176,6 +180,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await authService.deleteAccount();
       await AsyncStorage.clear();
       queryClient.clear();
+      useBookingStore.getState().resetDraft();
       set({
         user: null,
         isAuthenticated: false,

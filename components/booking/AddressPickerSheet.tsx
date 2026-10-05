@@ -1,9 +1,10 @@
 import { AppBottomSheet } from '../ui/AppBottomSheet';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { AppAlert as appDialog } from '../ui/dialogStore';
 
-import * as Location from 'expo-location';
+import { DeviceLocationError, getDeviceLocation } from '../../services/locationService';
+import type { Coordinate } from '../../types/location';
 import {Crosshair, MapPin, Search} from 'lucide-react-native';
 
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
@@ -11,47 +12,39 @@ import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme'
 interface AddressPickerSheetProps {
   visible: boolean;
   value: string;
+  coordinates?: Coordinate;
   onClose: () => void;
-  onSelectAddress: (address: string) => void;
+  onSelectAddress: (address: string, coordinates?: Coordinate) => void;
 }
 
-function formatGeocodedAddress(place: Location.LocationGeocodedAddress) {
-  return [place.name, place.street, place.district, place.subregion, place.city, place.region, place.country]
-    .filter((part, index, values): part is string => Boolean(part) && values.indexOf(part) === index)
-    .join(', ');
-}
-
-export function AddressPickerSheet({ visible, value, onClose, onSelectAddress }: AddressPickerSheetProps) {
+export function AddressPickerSheet({ visible, value, coordinates, onClose, onSelectAddress }: AddressPickerSheetProps) {
   const [address, setAddress] = useState(value);
+  const [point, setPoint] = useState(coordinates);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState('');
+  const [blocked, setBlocked] = useState(false);
+  const mounted = useRef(true);
+  const busyLock = useRef(false);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
   const useCurrentLocation = async () => {
-    if (isLocating) return;
+    if (busyLock.current) return;
+    busyLock.current = true;
     setIsLocating(true);
     setLocationError('');
+    setBlocked(false);
 
     try {
-      const currentPermission = await Location.getForegroundPermissionsAsync();
-      const permission = currentPermission.status === Location.PermissionStatus.GRANTED
-        ? currentPermission
-        : await Location.requestForegroundPermissionsAsync();
-
-      if (permission.status !== Location.PermissionStatus.GRANTED) {
-        setLocationError('Không thể truy cập vị trí. Bạn vẫn có thể nhập địa chỉ thủ công.');
-        return;
-      }
-
-      const current = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      const places = await Location.reverseGeocodeAsync(current.coords);
-      const formatted = places[0] ? formatGeocodedAddress(places[0]) : '';
-
-      if (!formatted) throw new Error('Không thể xác định địa chỉ từ vị trí hiện tại.');
-      setAddress(formatted);
+      const current = await getDeviceLocation();
+      if (mounted.current) setPoint(current);
     } catch (error: any) {
-      setLocationError(error?.message || 'Không thể lấy vị trí hiện tại. Vui lòng nhập địa chỉ thủ công.');
+      if (mounted.current) {
+        setLocationError(error instanceof DeviceLocationError ? error.message : 'Không thể lấy vị trí hiện tại. Bạn vẫn có thể nhập địa chỉ thủ công.');
+        setBlocked(error instanceof DeviceLocationError && error.code === 'BLOCKED');
+      }
     } finally {
-      setIsLocating(false);
+      busyLock.current = false;
+      if (mounted.current) setIsLocating(false);
     }
   };
 
@@ -61,7 +54,7 @@ export function AddressPickerSheet({ visible, value, onClose, onSelectAddress }:
       appDialog.alert('Thiếu địa chỉ', 'Vui lòng nhập hoặc chọn địa chỉ thực hiện.');
       return;
     }
-    onSelectAddress(normalized);
+    onSelectAddress(normalized, point);
     onClose();
   };
 
@@ -71,24 +64,27 @@ export function AddressPickerSheet({ visible, value, onClose, onSelectAddress }:
 <TouchableOpacity style={styles.locationOption} onPress={useCurrentLocation} disabled={isLocating} activeOpacity={0.75}>
             <View style={styles.optionIcon}>{isLocating ? <ActivityIndicator color={BrandColors.accentPink} /> : <Crosshair size={21} color={BrandColors.accentPink} />}</View>
             <View style={styles.optionCopy}>
-              <Text style={styles.optionTitle}>{isLocating ? 'Đang xác định vị trí...' : 'Sử dụng vị trí hiện tại'}</Text>
-              <Text style={styles.optionSubtitle}>Lấy vị trí từ thiết bị</Text>
+              <Text style={styles.optionTitle}>{isLocating ? 'Đang xác định vị trí...' : point ? 'Dùng lại vị trí hiện tại' : 'Dùng vị trí hiện tại'}</Text>
+              <Text style={styles.optionSubtitle}>Không bắt buộc · GPS không tạo địa chỉ</Text>
             </View>
           </TouchableOpacity>
 
 {locationError ? (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>{locationError}</Text>
-              {Platform.OS !== 'web' ? <TouchableOpacity onPress={() => Linking.openSettings()}><Text style={styles.settingsLink}>Mở cài đặt</Text></TouchableOpacity> : null}
+              {blocked && Platform.OS !== 'web' ? <TouchableOpacity onPress={() => Linking.openSettings()}><Text style={styles.settingsLink}>Mở cài đặt</Text></TouchableOpacity> : null}
             </View>
           ) : null}
 
-<Text style={styles.inputLabel}>Hoặc nhập địa chỉ</Text>
+{point && <View><Text style={styles.optionSubtitle}>✓ Đã chọn vị trí GPS. Hãy nhập và kiểm tra địa chỉ bên dưới; GPS không tự thay đổi khi bạn sửa địa chỉ.</Text><TouchableOpacity onPress={() => setPoint(undefined)}><Text style={styles.settingsLink}>Bỏ vị trí GPS</Text></TouchableOpacity></View>}
+<Text style={styles.inputLabel}>Địa chỉ thực hiện *</Text>
 
 <View style={styles.inputContainer}>
             <Search size={19} color={BrandColors.textMuted} />
             <TextInput
               value={address}
+              accessibilityLabel="Địa chỉ thực hiện"
+              maxLength={500}
               onChangeText={setAddress}
               placeholder="Số nhà, đường, phường/xã, tỉnh/thành..."
               placeholderTextColor={BrandColors.textMuted}
@@ -100,7 +96,7 @@ export function AddressPickerSheet({ visible, value, onClose, onSelectAddress }:
             />
           </View>
 
-<TouchableOpacity style={[styles.confirmButton, !address.trim() && styles.confirmButtonDisabled]} onPress={confirmAddress} disabled={!address.trim()} activeOpacity={0.82}>
+<TouchableOpacity accessibilityRole="button" style={[styles.confirmButton, !address.trim() && styles.confirmButtonDisabled]} onPress={confirmAddress} disabled={!address.trim()} activeOpacity={0.82}>
             <MapPin size={18} color={BrandColors.textWhite} />
             <Text style={styles.confirmText}>Xác nhận địa chỉ</Text>
           </TouchableOpacity>

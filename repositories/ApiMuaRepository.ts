@@ -49,6 +49,11 @@ export class ApiMuaRepository implements IMuaRepository {
 const mapService = (s: ServiceResponse): ServiceDto => ({ id: s.serviceId, serviceId: s.serviceId, name: s.serviceName || '', serviceName: s.serviceName ?? undefined, description: s.description, durationMinutes: s.durationMinutes, price: s.price, category: s.category || '', travelAvailable: Boolean(s.travelAvailable), visibility: s.visibility !== false, status: s.status || 'ACTIVE', imageUrl: s.imageUrl, imageUrls: s.imageUrls?.length ? s.imageUrls : s.imageUrl ? [s.imageUrl] : [] });
 
 type MuaProfileResponse = {
+  workLocationName?: string | null;
+  workLocationAddress?: string | null;
+  allowCustomerVisit?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
   muaId: string;
   fullName?: string | null;
   avatarUrl?: string | null;
@@ -90,6 +95,11 @@ type PortfolioResponse = {
 };
 
 const mapMuaProfile = (m: MuaProfileResponse): ArtistDto => ({
+        allowCustomerVisit: m.allowCustomerVisit === true && !!m.workLocationAddress?.trim(),
+        workLocationName: m.allowCustomerVisit === true && m.workLocationAddress?.trim() ? m.workLocationName || undefined : undefined,
+        workLocationAddress: m.allowCustomerVisit === true ? m.workLocationAddress?.trim() || undefined : undefined,
+        latitude: m.allowCustomerVisit === true && m.workLocationAddress?.trim() ? m.latitude ?? undefined : undefined,
+        longitude: m.allowCustomerVisit === true && m.workLocationAddress?.trim() ? m.longitude ?? undefined : undefined,
         id: m.muaId,
         name: m.fullName || 'Chuyên gia',
         avatar: m.avatarUrl || '',

@@ -1,57 +1,46 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { LocationPicker } from './LocationPicker';
-import AreaMap from './AreaMap';
 import { AppBottomSheet } from '../ui/AppBottomSheet';
-import { locationService, directionsUrl } from '../../services/locationService';
+import { locationService } from '../../services/locationService';
 import { getApiError } from '../../services/api';
 import { operatingCatalog } from '../../utils/operatingAreas';
 import { normalizeAreaName } from '../../utils/muaAreas';
-import type { NearbyArtist, SelectedLocation } from '../../types/location';
+import type { SelectedLocation } from '../../types/location';
 
 export function ExploreNearby({ onOpenArtist, searchQuery }: { onOpenArtist: (id: string) => void; searchQuery: string }) {
   const [location, setLocation] = useState<SelectedLocation>();
   const [provinceCode, setProvinceCode] = useState<number>(); const [areaId, setAreaId] = useState<string>();
   const [picker, setPicker] = useState(false); const [areaSheet, setAreaSheet] = useState(false); const [areaSearch, setAreaSearch] = useState('');
-  const [radius, setRadius] = useState(10); const [page, setPage] = useState(1); const [mapMode, setMapMode] = useState(false);
-  const [keyword, setKeyword] = useState(searchQuery); const [routeError, setRouteError] = useState('');
+  const [radius, setRadius] = useState(10); const [page, setPage] = useState(1);
+  const [keyword, setKeyword] = useState(searchQuery);
   useEffect(() => { const timer = setTimeout(() => { setKeyword(searchQuery.trim()); setPage(1); }, 400); return () => clearTimeout(timer); }, [searchQuery]);
   const province = operatingCatalog.provinces.find(p => p.code === provinceCode);
   const query = useQuery({ queryKey: ['nearby-muas', location?.latitude, location?.longitude, provinceCode, areaId, radius, page, keyword],
     queryFn: ({ signal }) => locationService.nearby({ latitude: location?.latitude, longitude: location?.longitude, radiusKm: radius, provinceCode, areaId, page, q: keyword || undefined }, signal),
     enabled: !!location || !!provinceCode, staleTime: 30000, retry: 1 });
   const items = query.data?.items || [];
-  const points = items.filter(a => a.latitude != null && a.longitude != null).map(a => ({ id: a.muaId, title: a.fullName, latitude: a.latitude!, longitude: a.longitude!, approximate: a.locationPrecision === 'APPROXIMATE' }));
-  const center = location || points[0];
-  const navigate = async (artist: NearbyArtist) => {
-    if (!location || !artist.canGetDirections || artist.latitude == null || artist.longitude == null) return;
-    setRouteError(''); try { await Linking.openURL(directionsUrl(location, { latitude: artist.latitude, longitude: artist.longitude })); }
-    catch { setRouteError('Không mở được ứng dụng bản đồ. Vui lòng thử lại.'); }
-  };
   return <View style={s.container}>
     <Text style={s.title}>Tìm MUA quanh bạn</Text>
-    <TouchableOpacity style={s.input} onPress={() => setPicker(true)}><Text style={s.pink}>{location?.label || 'Nhập địa điểm / Sử dụng vị trí hiện tại'} ▾</Text></TouchableOpacity>
+    <TouchableOpacity style={s.input} onPress={() => setPicker(true)}><Text style={s.pink}>{location ? 'Đã chọn vị trí GPS · Cập nhật' : 'Dùng vị trí hiện tại'} ▾</Text></TouchableOpacity>
     <TouchableOpacity style={s.areaButton} onPress={() => { setAreaSearch(''); setAreaSheet(true); }}><Text>{province ? `${province.name}${areaId ? ` · ${province.areas.find(a => a.id === areaId)?.name || ''}` : ''}` : 'Hoặc chọn tỉnh/thành, khu vực'} ▾</Text></TouchableOpacity>
     {location && <View style={s.controls}>{[5,10,20,50].map(km => <TouchableOpacity key={km} style={[s.chip, radius === km && s.active]} onPress={() => { setRadius(km); setPage(1); }}><Text style={radius === km ? s.white : s.pink}>{km} km</Text></TouchableOpacity>)}</View>}
     {(location || provinceCode) && <>
-      <View style={s.controls}><TouchableOpacity style={[s.chip, !mapMode && s.active]} onPress={() => setMapMode(false)}><Text style={!mapMode ? s.white : s.pink}>Danh sách</Text></TouchableOpacity><TouchableOpacity style={[s.chip, mapMode && s.active]} onPress={() => setMapMode(true)}><Text style={mapMode ? s.white : s.pink}>Bản đồ</Text></TouchableOpacity>
+      <View style={s.controls}>
       <TouchableOpacity style={s.chip} onPress={() => { setLocation(undefined); setProvinceCode(undefined); setAreaId(undefined); setPage(1); }}><Text>Xóa vị trí</Text></TouchableOpacity></View>
-      <Text style={s.helper}>{location ? 'Khoảng cách đường thẳng từ địa điểm bạn chọn. Vị trí riêng của MUA hiển thị gần đúng.' : 'Đang tìm theo khu vực; chưa tính khoảng cách.'}</Text>
+      <Text style={s.helper}>{location ? 'Khoảng cách ước tính theo đường thẳng từ vị trí GPS đã chọn, không phải quãng đường đi xe.' : 'Đang tìm theo khu vực; chưa tính khoảng cách.'}</Text>
       {query.isFetching && <ActivityIndicator color="#C5165D" />}
       {query.isError && <TouchableOpacity onPress={() => { void query.refetch(); }}><Text style={s.error}>{getApiError(query.error).message} · Chạm để thử lại</Text></TouchableOpacity>}
       {!query.isFetching && !query.isError && items.length === 0 && <Text style={s.helper}>Chưa có MUA phù hợp. Hãy tăng bán kính hoặc chọn khu vực khác.</Text>}
-      {mapMode && center && <AreaMap center={center} points={location ? [{ ...location, id: 'origin', title: 'Địa điểm bạn chọn' }, ...points] : points} onSelect={id => { if (id !== 'origin') onOpenArtist(id); }} />}
       {items.map(artist => <View key={artist.muaId} style={s.card}>
         <TouchableOpacity style={s.artist} onPress={() => onOpenArtist(artist.muaId)}>
           {artist.avatarUrl ? <Image source={{ uri: artist.avatarUrl }} style={s.avatar} /> : <View style={[s.avatar, { backgroundColor: '#FCE1EC' }]} />}
           <View style={{ flex: 1 }}><Text style={s.name}>{artist.fullName}</Text><Text style={s.helper}>{artist.distanceKm != null ? `Cách khoảng ${artist.distanceKm.toFixed(1).replace('.', ',')} km` : artist.city}</Text>
           <Text>{artist.minPrice != null ? `Từ ${artist.minPrice.toLocaleString('vi-VN')} đ` : 'Liên hệ'}</Text></View>
         </TouchableOpacity>
-        <View style={s.controls}><TouchableOpacity style={s.chip} onPress={() => onOpenArtist(artist.muaId)}><Text style={s.pink}>Xem hồ sơ</Text></TouchableOpacity>
-        {artist.canGetDirections && location ? <TouchableOpacity style={s.chip} onPress={() => { void navigate(artist); }}><Text style={s.pink}>Chỉ đường đến điểm hẹn</Text></TouchableOpacity> : <Text style={s.helper}>{artist.canGetDirections ? 'Chọn vị trí xuất phát để chỉ đường' : 'Điểm hoạt động gần đúng'}</Text>}</View>
+        <View style={s.controls}><TouchableOpacity style={s.chip} onPress={() => onOpenArtist(artist.muaId)}><Text style={s.pink}>Xem hồ sơ</Text></TouchableOpacity></View>
       </View>)}
-      {!!routeError && <Text style={s.error}>{routeError}</Text>}
       {!!query.data && query.data.total > query.data.pageSize && <View style={s.controls}>
         <TouchableOpacity disabled={page <= 1 || query.isFetching} style={s.chip} onPress={() => setPage(p => p - 1)}><Text>Trước</Text></TouchableOpacity><Text>Trang {page} / {Math.ceil(query.data.total / query.data.pageSize)}</Text>
         <TouchableOpacity disabled={page * query.data.pageSize >= query.data.total || query.isFetching} style={s.chip} onPress={() => setPage(p => p + 1)}><Text>Sau</Text></TouchableOpacity>

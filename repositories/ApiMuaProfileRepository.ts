@@ -30,6 +30,7 @@ export class ApiMuaProfileRepository implements IMuaProfileRepository {
       operatingLocationConfirmed: !!data.operatingLocationConfirmed,
       publicMeetingPoint: !!data.publicMeetingPoint,
       operatingLocationLabel: data.operatingLocationLabel ?? undefined,
+      workLocationName: data.workLocationName ?? undefined, workLocationAddress: data.workLocationAddress ?? undefined, allowCustomerVisit: data.allowCustomerVisit === true,
       experienceLevel: data.experienceLevel ?? undefined,
       experienceYears: Number(data.experienceYears) || 0,
       specialization: data.specialization || '',
@@ -44,7 +45,10 @@ export class ApiMuaProfileRepository implements IMuaProfileRepository {
   }
 
   async updateProfile(data: MuaUpdateDto): Promise<void> {
-    await api.put('/Mua/profile', data);
+    const payload = { ...data };
+    // Unchanged legacy private GPS is not silently migrated into a workplace.
+    if (data.workLocationName == null && data.workLocationAddress == null && !data.clearWorkLocation && !data.allowCustomerVisit) delete payload.allowCustomerVisit;
+    await api.put('/Mua/profile', payload);
   }
 
   async getPayoutSettings(muaId: string): Promise<PayoutSettingsDto | null> {

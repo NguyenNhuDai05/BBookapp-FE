@@ -4,7 +4,7 @@ import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ArrowLeft, MessageCircle, MapPin, Calendar, Clock, Copy, Info, RotateCcw } from 'lucide-react-native';
+import { ArrowLeft, MessageCircle, Calendar, Clock, Copy, RotateCcw } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useBookingDetail, useConfirmBookingCompletion, usePayBookingDeposit } from '../../hooks/useBooking';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -18,6 +18,7 @@ import { ComplaintEntry } from '../../components/booking/ComplaintEntry';
 import { BookingStatus } from '../../types/booking';
 import { BookingTimeline } from '../../components/BookingTimeline';
 import { openDepositCheckout } from '../../services/bookingPaymentFlow';
+import { BookingLocationCard } from '../../components/booking/BookingLocationCard';
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: string }> = {
   PENDING_PAYMENT: { label: 'Chờ thanh toán cọc', color: '#FF9800', bg: '#FFF3E0' },
@@ -150,28 +151,8 @@ export default function BookingDetailScreen() {
             <Text style={styles.infoText}>Giờ hẹn: {booking.time}</Text>
           </View>
           <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <MapPin size={18} color={BrandColors.accentPink} />
-            <View style={styles.addressBlock}>
-              <Text style={styles.locationType}>
-                {booking.locationType === 'AT_STUDIO' ? 'Làm tại Studio' : 'Làm tận nơi'}
-              </Text>
-              <Text style={styles.infoText}>{booking.address}</Text>
-            </View>
-          </View>
+          <BookingLocationCard key={booking.id} booking={booking} authorized={!!user?.id && (user.id === booking.customer.id || user.id === booking.mua.id)} />
         </View>
-
-        {/* Notes */}
-        {booking.note && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Ghi chú từ khách hàng</Text>
-            <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <Info size={18} color={BrandColors.textSecondary} />
-                <Text style={styles.noteText}>{booking.note}</Text>
-              </View>
-            </View>
-        )}
 
         {/* Services */}
         <View style={styles.card}>

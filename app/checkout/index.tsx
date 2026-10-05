@@ -1,6 +1,6 @@
 import { getMuaExperienceLabel } from '../../utils/muaAreas';
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useRouter } from 'expo-router';
 import * as Crypto from 'expo-crypto';
@@ -46,7 +46,7 @@ export default function CheckoutScreen() {
   const [samplePayment, setSamplePayment] = useState<BookingPaymentDto | null>(null);
   const switchMode = useAuthStore(state => state.switchMode);
   const {
-    draft, setAddress, setDate, setTime, updateServiceParticipantsCount, removeService
+    draft, setAddress, setWorkLocation, useCustomerAddress, setDate, setTime, setNote, updateServiceParticipantsCount, removeService
   } = useBookingStore();
 
   const [dateSheetVisible, setDateSheetVisible] = useState(false);
@@ -80,7 +80,10 @@ export default function CheckoutScreen() {
   const isPending = isCreating || isPaying;
 
   const totalDuration = draft.services.reduce((sum, s) => sum + (s.durationMinutes * s.participantsCount), 0);
-  const isFormValid = Boolean(draft.address.trim() && draft.date && draft.time && draft.services.length > 0);
+  const workplace = draft.location?.mode === 'MUA_WORK_LOCATION' ? draft.location : null;
+  const workplaceAvailable = muaInfo?.allowCustomerVisit === true && !!muaInfo.workLocationAddress?.trim();
+  const validLocation = workplace ? workplaceAvailable && workplace.sourceMuaId === draft.mua.id : !!draft.address.trim();
+  const isFormValid = Boolean(validLocation && draft.date && draft.time && draft.services.length > 0);
   const expectedEndTime = draft.time
     ? new Date(createLocalBookingDate(draft.date || '2000-01-01', draft.time).getTime() + totalDuration * 60_000)
       .toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
@@ -97,7 +100,7 @@ export default function CheckoutScreen() {
       setModeDialogVisible(true);
       return;
     }
-    if (!draft.address.trim() || !draft.date || !draft.time || draft.services.length === 0) {
+    if (!validLocation || !draft.date || !draft.time || draft.services.length === 0) {
       appDialog.alert('Chưa đủ thông tin', 'Vui lòng chọn địa chỉ, ngày, giờ và ít nhất một dịch vụ.');
       return;
     }
@@ -115,7 +118,10 @@ export default function CheckoutScreen() {
         services: draft.services.map(s => ({ serviceId: s.id, participantsCount: s.participantsCount })),
         date: draft.date,
         time: draft.time,
-        address: draft.address,
+        serviceLocationType: workplace ? 'MUA_WORK_LOCATION' as const : 'CUSTOMER_ADDRESS' as const,
+        address: workplace ? '' : draft.address,
+        serviceLatitude: workplace ? undefined : draft.addressCoordinates?.latitude,
+        serviceLongitude: workplace ? undefined : draft.addressCoordinates?.longitude,
         note: draft.note,
         paymentMethod: draft.paymentMethod,
       };
@@ -198,6 +204,11 @@ export default function CheckoutScreen() {
           <Text style={styles.sectionHeadingText}>Địa chỉ thực hiện</Text>
         </View>
         <View style={styles.card}>
+          <TouchableOpacity accessibilityRole="radio" accessibilityState={{ checked: !workplace }} onPress={useCustomerAddress} style={styles.addressRow}><Text style={styles.addressText}>{!workplace ? '●' : '○'} MUA đến địa điểm của bạn</Text></TouchableOpacity>
+          {workplaceAvailable && <TouchableOpacity accessibilityRole="radio" accessibilityState={{ checked: !!workplace }} onPress={() => setWorkLocation(draft.mua!.id, muaInfo!.workLocationAddress!, muaInfo!.workLocationName)} style={styles.addressRow}><Text style={styles.addressText}>{workplace ? '●' : '○'} Đến nơi làm việc của MUA</Text></TouchableOpacity>}
+          {workplace ? <>
+            {workplaceAvailable ? <><Text style={styles.locationNoteLabel}>Bạn sẽ đến: {muaInfo?.workLocationName || 'Nơi làm việc của MUA'}</Text><Text style={styles.addressText}>{muaInfo?.workLocationAddress}</Text></> : <Text style={styles.addressText}>Nơi làm việc này hiện không nhận khách. Hãy chọn MUA đến địa điểm của bạn.</Text>}
+          </> : <>
           <View style={styles.addressRow}>
             <View style={styles.iconBox}>
               <MapPin size={20} color={BrandColors.accentPink} />
@@ -209,6 +220,9 @@ export default function CheckoutScreen() {
               <Text style={styles.changeText}>{draft.address ? 'Thay đổi' : 'Chọn'}</Text>
             </TouchableOpacity>
           </View>
+          </>}
+          <Text style={styles.locationNoteLabel}>Chi tiết địa điểm / Ghi chú (không bắt buộc)</Text>
+          <TextInput accessibilityLabel="Chi tiết địa điểm hoặc ghi chú" value={draft.note} onChangeText={setNote} maxLength={1000} multiline textAlignVertical="top" placeholder="Ví dụ: tòa nhà, tầng, số căn hộ hoặc cách tìm địa điểm..." placeholderTextColor={BrandColors.textMuted} style={styles.locationNoteInput} />
         </View>
 
         <View style={styles.sectionHeading}>
@@ -401,6 +415,7 @@ export default function CheckoutScreen() {
         <AddressPickerSheet
           visible
           value={draft.address}
+          coordinates={draft.addressCoordinates}
           onClose={() => setAddressSheetVisible(false)}
           onSelectAddress={setAddress}
         />
@@ -440,6 +455,8 @@ const PaymentMethodItem = ({ title, subtitle, icon, isSelected, onSelect }: any)
 );
 
 const styles = StyleSheet.create({
+  locationNoteLabel: { fontFamily: Typography.semiBold, color: BrandColors.textDark, fontSize: 13, marginTop: Spacing.md, marginBottom: Spacing.sm },
+  locationNoteInput: { fontFamily: Typography.regular, fontSize: 14, color: BrandColors.textDark, borderWidth: 1, borderColor: BrandColors.borderLight, borderRadius: Radius.md, padding: Spacing.md, minHeight: 80 },
   container: {
     flex: 1,
     backgroundColor: '#FAFAFA',
