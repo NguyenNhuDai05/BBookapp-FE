@@ -50,3 +50,29 @@ it('keeps the current account when server refuses account deletion', async () =>
   await expect(useAuthStore.getState().deleteAccount()).rejects.toThrow();
   expect(useAuthStore.getState().user).toEqual(reviewer); expect(useAuthStore.getState().isAuthenticated).toBe(true);
 });
+
+it('restores an email account after restart, logs out, and logs in again', async () => {
+  const normal = { ...reviewer, isDemoAccount: false, role: UserRole.Customer, hasMuaProfile: false };
+  (authService.login as jest.Mock).mockResolvedValue({ accessToken: 'email-token', user: normal });
+  expect(await useAuthStore.getState().login(normal.email, 'secret123')).toBe(true);
+  useAuthStore.setState({ user: null, isAuthenticated: false });
+  (authService.getMe as jest.Mock).mockResolvedValue(normal);
+  expect(await useAuthStore.getState().initialize()).toBe(true);
+  expect(useAuthStore.getState().user).toEqual(normal);
+  await useAuthStore.getState().logout();
+  expect(await AsyncStorage.getItem('user_jwt_token')).toBeNull();
+  expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  expect(await useAuthStore.getState().initialize()).toBe(false);
+  expect(await useAuthStore.getState().login(normal.email, 'secret123')).toBe(true);
+});
+
+it('clears rejected credentials and invalid persisted sessions', async () => {
+  (authService.login as jest.Mock).mockRejectedValue(new Error('Unauthorized'));
+  expect(await useAuthStore.getState().login('an@example.com', 'wrong123')).toBe(false);
+  expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  await AsyncStorage.setItem('user_jwt_token', 'expired-token');
+  (authService.getMe as jest.Mock).mockRejectedValue(new Error('Unauthorized'));
+  expect(await useAuthStore.getState().initialize()).toBe(false);
+  expect(await AsyncStorage.getItem('user_jwt_token')).toBeNull();
+  expect(useAuthStore.getState().user).toBeNull();
+});

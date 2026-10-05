@@ -7,7 +7,8 @@ export const useMuaProfile = (muaId: string) => {
   return useQuery({
     queryKey: ['mua-profile', muaId],
     queryFn: () => muaProfileService.getProfile(muaId),
-    staleTime: 60 * 60 * 1000, // 1 hour, profile doesn't change often
+    staleTime: 30_000,
+    refetchOnMount: 'always',
   });
 };
 

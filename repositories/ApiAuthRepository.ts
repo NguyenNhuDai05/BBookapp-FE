@@ -38,10 +38,6 @@ export class ApiAuthRepository implements IAuthRepository {
     return this.mapToAuthResponse(response.data);
   }
 
-  async loginWithGoogle(idToken: string): Promise<AuthResponseDto> {
-    const response = await api.post<BackendTokenDto>('/Auth/google', { idToken });
-    return this.mapToAuthResponse(response.data);
-  }
 
   async register(request: RegisterRequest): Promise<void> {
     const payload = {

@@ -16,7 +16,6 @@ export interface RegisterRequest {
 
 export interface IAuthRepository {
   login(request: LoginRequest): Promise<AuthResponseDto>;
-  loginWithGoogle(idToken: string): Promise<AuthResponseDto>;
   register(request: RegisterRequest): Promise<void>;
   requestRegistrationOtp(email: string): Promise<void>;
   requestPasswordReset(email: string): Promise<void>;

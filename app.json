@@ -75,13 +75,7 @@
         }
       ],
       "expo-web-browser",
-      "expo-status-bar",
-      [
-        "@react-native-google-signin/google-signin/app.plugin.js",
-        {
-          "iosUrlScheme": "com.googleusercontent.apps.129215624749-tbj60ogmgd2miunfraln6aboat5810u5"
-        }
-      ]
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true,

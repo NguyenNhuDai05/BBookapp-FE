@@ -1,3 +1,4 @@
+import { PostActionSheet } from '../components/feed/PostActionSheet';
 import { AppBottomSheet } from '../components/ui/AppBottomSheet';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import {View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions, TextInput} from 'react-native';
@@ -21,6 +22,7 @@ export default function CustomerPortfolioFeedScreen() {
   const { muaInfo } = useMuaDetail(muaId as string);
   const setLastViewedPortfolioId = useBookingStore(s => s.setLastViewedPortfolioId);
   const queryClient = useQueryClient();
+  const [optionsItem, setOptionsItem] = useState<any | null>(null);
   const [fullImage, setFullImage] = useState<string | null>(null);
   const [commentItem, setCommentItem] = useState<any | null>(null);
   const [comments, setComments] = useState<any[]>([]);
@@ -125,7 +127,7 @@ export default function CustomerPortfolioFeedScreen() {
       onImagePress={setFullImage}
       onAddService={() => addPostService(item)}
       onAuthorPress={() => router.back()}
-      // No onOptions since this is customer view
+      onOptions={() => setOptionsItem(item)}
     />
   );
 
@@ -152,6 +154,7 @@ export default function CustomerPortfolioFeedScreen() {
           { length: Dimensions.get('window').width + 200, offset: (Dimensions.get('window').width + 200) * index, index }
         )}
       />
+      <PostActionSheet visible={!!optionsItem} authorName={muaInfo?.name} authorId={optionsItem?.authorId || String(muaId)} portfolioId={optionsItem?.id || optionsItem?.portfolioId} onClose={() => setOptionsItem(null)} />
       <AppOverlay visible={!!fullImage} transparent animationType="fade" onRequestClose={() => setFullImage(null)}>
         <View style={styles.imageModal}><TouchableOpacity style={styles.closeModal} onPress={() => setFullImage(null)}><X size={28} color="#FFF" /></TouchableOpacity>{fullImage && <Image source={{ uri: fullImage }} style={styles.fullImage} contentFit="contain" />}</View>
       </AppOverlay>

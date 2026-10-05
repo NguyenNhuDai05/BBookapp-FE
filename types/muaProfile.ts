@@ -1,5 +1,5 @@
 import type { OperatingArea } from './location';
-export type VerificationStatus = 'UNVERIFIED' | 'PENDING' | 'APPROVED' | 'REJECTED';
+export type VerificationStatus = 'UNVERIFIED' | 'DRAFT' | 'PENDING' | 'PENDINGREVIEW' | 'APPROVED' | 'REJECTED';
 
 export interface PayoutSettingsDto {
   bankName: string;
@@ -21,6 +21,7 @@ export interface MuaProfileDto extends Omit<OperatingArea, "city"> {
   brandName?: string;
   avatarUrl?: string;
   verificationStatus: VerificationStatus;
+  profileStatus?: string;
   rejectionReason?: string;
   bio?: string;
   phoneNumber?: string;

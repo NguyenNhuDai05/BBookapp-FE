@@ -18,7 +18,6 @@ interface AuthState {
   isLoading: boolean;
   initialize: () => Promise<boolean>;
   login: (email: string, password?: string) => Promise<boolean>;
-  loginWithGoogleToken: (idToken: string) => Promise<boolean>;
   becomeMUA: (request: MuaApplicationRequestDto) => Promise<boolean>;
   logout: () => Promise<void>;
   expireSession: () => Promise<void>;
@@ -108,28 +107,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return true;
     } catch {
       await get().expireSession();
-      return false;
-    }
-  },
-
-  loginWithGoogleToken: async (idToken: string) => {
-    try {
-      set({ isLoading: true });
-      const res = await authService.loginWithGoogle(idToken);
-      await AsyncStorage.setItem(TOKEN_KEY, res.accessToken);
-      await AsyncStorage.setItem(ACTIVE_MODE_KEY, 'CUSTOMER');
-      const user = res.user.isDemoAccount ? await authService.getMe() : res.user;
-      queryClient.clear();
-      useBookingStore.getState().resetDraft();
-      set({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-        activeMode: 'CUSTOMER',
-      });
-      return true;
-    } catch {
-      set({ isLoading: false });
       return false;
     }
   },

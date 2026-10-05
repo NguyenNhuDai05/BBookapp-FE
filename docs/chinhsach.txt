@@ -15,119 +15,200 @@ Không gửi mật khẩu, OTP hoặc giấy tờ tùy thân trong nội dung c�
 
 CHÍNH SÁCH QUYỀN RIÊNG TƯ BBOOK
 
-Nhà phát triển: B-Book. Bản sửa đổi: 04/10/2026.
+Bản sửa đổi: 05/10/2026 · Dành cho người từ đủ 18 tuổi
 
+## 1. Phạm vi và thông tin liên hệ
 
+BBook là nền tảng kết nối khách hàng với Makeup Artist (MUA), hỗ trợ người dùng tìm kiếm MUA, xem hồ sơ và dịch vụ, đặt lịch, trao đổi và sử dụng các chức năng liên quan đến dịch vụ trang điểm.
 
-1. Phạm vi và liên hệ
+Tên nhà phát triển và vận hành được sử dụng trong tài liệu này là B-Book. Website chính thức là bbookmakeup.com. Các câu hỏi liên quan đến dữ liệu cá nhân, quyền riêng tư hoặc yêu cầu xóa tài khoản có thể được gửi đến bbooksupport@gmail.com.
 
-BBook kết nối khách hàng với Makeup Artist (MUA) để xem hồ sơ, dịch vụ, đặt lịch và trao đổi về dịch vụ trang điểm. Tên nhà phát triển dùng trong tài liệu này là B-Book. Website: bbookmakeup.com. Liên hệ về dữ liệu và yêu cầu xóa: bbooksupport@gmail.com.
+Chính sách này giải thích những dữ liệu BBook xử lý khi bạn sử dụng dịch vụ, lý do sử dụng, trường hợp dữ liệu có thể được cung cấp cho bên khác, cách dữ liệu được bảo vệ và lưu giữ, cũng như cách bạn yêu cầu xóa tài khoản và dữ liệu liên quan.
 
-Chính sách áp dụng cho dữ liệu xử lý khi dùng các chức năng hiện có của BBook. Ứng dụng hướng đến người từ đủ 18 tuổi. Chính sách không mô tả một chức năng AI thử makeup hoặc nhận diện sinh trắc học.
+BBook hướng đến người dùng từ đủ 18 tuổi. Chính sách này áp dụng cho các chức năng hiện có của BBook. Trong phiên bản hiện tại, BBook không sử dụng AI để nhận diện khuôn mặt hoặc tạo dữ liệu sinh trắc học trong quy trình xác minh MUA.
 
+## 2. Dữ liệu BBook xử lý
 
+### Tài khoản và đăng nhập
 
-2. Dữ liệu thu thập và mục đích
+Khi bạn đăng ký và sử dụng BBook, chúng tôi xử lý những thông tin cần thiết để tạo và quản lý tài khoản như tên, email, số điện thoại khi được cung cấp, mã tài khoản, ảnh đại diện, vai trò, trạng thái tài khoản và ngày tạo tài khoản.
 
-Tài khoản: tên, email, số điện thoại khi cung cấp, mã tài khoản, vai trò, trạng thái, ngày tạo, ảnh đại diện; dữ liệu xác thực gồm giá trị băm mật khẩu và mã OTP dạng băm cùng thời hạn/trạng thái sử dụng. Khi đăng nhập Google, thông tin đăng nhập Google được kiểm tra để tạo hoặc truy cập tài khoản. App lưu token đăng nhập và chế độ sử dụng trên thiết bị để duy trì phiên.
+Mật khẩu không được lưu dưới dạng văn bản thông thường. Thông tin phục vụ xác thực như mật khẩu và OTP được bảo vệ bằng cơ chế phù hợp. OTP có thời hạn sử dụng và được dùng cho các bước xác thực tương ứng.
 
-Hồ sơ MUA: giới thiệu, kinh nghiệm, chuyên môn, khu vực hoạt động, địa chỉ/điểm gặp, tọa độ và liên kết mạng xã hội; portfolio, dịch vụ, ảnh và các thông tin do bạn nhập. Các dữ liệu này phục vụ việc giới thiệu, tìm kiếm và lựa chọn MUA.
+Phiên bản này hỗ trợ đăng ký và đăng nhập bằng email, mật khẩu. Email được dùng để gửi OTP xác minh đăng ký và khôi phục mật khẩu.
 
-Xác minh MUA: ảnh hai mặt CCCD/giấy tờ tùy thân, ảnh chân dung và chứng chỉ được lưu để quản trị viên xét duyệt, cùng trạng thái và lý do xét duyệt. Chụp hoặc tải ảnh không tự động chứng minh danh tính. Phiên bản này không có luồng tạo vector khuôn mặt hay nhận diện khuôn mặt bằng AI trong quy trình này.
+Một số thông tin phiên đăng nhập được lưu trên thiết bị để bạn không phải đăng nhập lại mỗi lần mở ứng dụng.
 
-Vị trí: khi bạn chủ động yêu cầu và cấp quyền, app đọc vị trí hiện tại và tìm địa chỉ tương ứng. Địa chỉ, tọa độ hồ sơ MUA hoặc tọa độ nơi cung cấp dịch vụ có thể được lưu trên máy chủ. Không có cam kết tự xóa vị trí khi lịch hẹn kết thúc. Bạn có thể nhập/chọn địa điểm thủ công ở các luồng hỗ trợ cách này.
+### Hồ sơ Makeup Artist
 
-Đặt lịch và tài chính: mã lịch hẹn, MUA/khách hàng, dịch vụ, thời gian, địa chỉ và tọa độ nơi cung cấp dịch vụ, ghi chú, trạng thái, số tiền và lịch sử thanh toán/đặt cọc, ví, hoàn tiền, chi trả; ngân hàng, số tài khoản hoặc tài khoản nhận tiền, tên chủ tài khoản và dữ liệu QR thanh toán do nhà cung cấp trả về. Reference ảnh QR nhận tiền từ phiên bản cũ có thể còn lại để đối soát và xử lý xóa đúng chủ sở hữu. Mục đích là thực hiện lịch hẹn, thanh toán, đối soát và xử lý giao dịch.
+Khi đăng ký trở thành MUA, bạn có thể cung cấp tên hiển thị, ảnh đại diện, phần giới thiệu, kinh nghiệm, chuyên môn hoặc phong cách makeup, khu vực hoạt động, địa điểm làm việc, portfolio, dịch vụ và hình ảnh liên quan.
 
-Khách hàng và MUA có thể tải ảnh QR ngân hàng (VietQR) để điền nhanh thông tin nhận tiền. Máy chủ kiểm tra ảnh và giải mã tạm thời trong bộ nhớ; luồng thông thường không lưu ảnh ngân hàng gốc trong Supabase Storage. Đọc QR không tự lưu tài khoản nhận tiền: bạn kiểm tra, chỉnh sửa và xác nhận thông tin qua form và bước xác thực được yêu cầu trước khi thông tin có cấu trúc được lưu.
+MUA cũng có thể chủ động thêm liên kết mạng xã hội vào hồ sơ. Những thông tin này được sử dụng để xây dựng hồ sơ nghề nghiệp, hỗ trợ tìm kiếm và giúp khách hàng lựa chọn MUA phù hợp.
 
-Khách hàng và MUA có thể cung cấp QR nhận tiền MoMo. Ảnh được kiểm tra, đọc các trường mà bộ giải mã hỗ trợ, xử lý thành ảnh JPEG và lưu trong kho tài chính riêng tư của BBook với reference thuộc chủ tài khoản. Chủ tài khoản xem QR của mình qua API được xác thực; quản trị viên có quyền xem đúng QR liên quan khi xét duyệt tài khoản nhận tiền hoặc xử lý chi trả/hoàn tiền. Ảnh không được cung cấp qua URL Supabase công khai. BBook không tự tạo QR MoMo từ số điện thoại/tên người nhận và không suy đoán trường thiếu; QR có thể không chứa đủ thông tin tài khoản. Bạn bổ sung, kiểm tra và xác nhận thông tin qua các bước của form. Đọc QR không chứng minh quyền sở hữu tài khoản nhận tiền; bạn có thể nhập MoMo thủ công nếu không tải QR.
+Một số thông tin của hồ sơ MUA được hiển thị công khai trên BBook theo chức năng của ứng dụng.
 
-Trao đổi và nội dung: tin nhắn và ảnh trong chat, bình luận/đánh giá/điểm đánh giá, lượt thích/lưu và nội dung khiếu nại. Luồng khiếu nại hiện tại nhận văn bản; không mô tả việc tải ảnh khiếu nại mới như một chức năng đang được hỗ trợ.
+### Xác minh MUA
 
-Thông báo và vận hành: token thông báo đẩy, nền tảng, tên thiết bị, trạng thái và thời điểm đăng ký token; thông báo trong app và thông tin lỗi được ghi trong quá trình vận hành. Lượt truy cập ảnh xác minh được ghi với mã ảnh và mã người truy cập. Nội dung bạn gửi email hỗ trợ cũng thuộc dữ liệu yêu cầu hỗ trợ.
+Để xét duyệt và xác minh MUA, BBook có thể yêu cầu ảnh mặt trước và mặt sau giấy tờ tùy thân, ảnh chân dung và chứng chỉ hoặc tài liệu chuyên môn nếu MUA cung cấp.
 
-Để giới hạn yêu cầu, ngăn lạm dụng và bảo vệ hoạt động dịch vụ, máy chủ có thể xử lý mã người dùng/tài khoản hoặc địa chỉ IP của kết nối. Chức năng giới hạn yêu cầu này không dùng IP để suy ra vị trí địa lý và không duy trì một trường lịch sử IP riêng trong cơ sở dữ liệu ứng dụng. Thời hạn nhật ký hạ tầng phụ thuộc cấu hình nhà cung cấp, chưa được xác nhận trong tài liệu này.
+Những dữ liệu này được sử dụng để quản trị viên kiểm tra hồ sơ và hỗ trợ quá trình xét duyệt. Giấy tờ xác minh và ảnh chân dung không được hiển thị công khai trên hồ sơ MUA.
 
-Khi khách hàng xác nhận hoặc hệ thống tự xác nhận booking hoàn thành, thu nhập MUA được mở để gửi yêu cầu rút ngay nếu không có khiếu nại hoặc nghĩa vụ chưa giải quyết; tiền vào tài khoản nhận vẫn chờ admin xử lý chuyển khoản. Khách hàng có 24 giờ để xác nhận hoặc báo vấn đề sau khi MUA gửi hoàn thành. Trong 48 giờ sau hoàn thành, khách hàng có thể gửi hồ sơ hỗ trợ trong app; ngoài thời gian này có thể liên hệ bbooksupport@gmail.com. Yêu cầu hỗ trợ có thể tạm dừng khoản chưa chi trả; khoản đã chi trả cần đối soát thủ công, không tự động thu hồi hoặc hoàn tiền.
+Việc tải ảnh lên không tự động chứng minh danh tính của người dùng. Việc xét duyệt được thực hiện bởi quản trị viên, không phải xác minh khuôn mặt tự động.
 
+### Vị trí
 
+BBook chỉ truy cập vị trí thiết bị khi bạn chủ động sử dụng chức năng cần vị trí và cấp quyền cho ứng dụng.
 
-3. Quyền truy cập và khả năng hiển thị
+Vị trí có thể được sử dụng để gợi ý địa chỉ, thiết lập khu vực hoạt động của MUA, tìm kiếm MUA phù hợp ở gần hoặc xác định địa điểm cung cấp dịch vụ. Tại những chức năng hỗ trợ nhập địa điểm thủ công, bạn vẫn có thể tự nhập hoặc lựa chọn địa điểm thay vì sử dụng vị trí hiện tại.
 
-App yêu cầu camera hoặc quyền chọn ảnh khi bạn chụp/chọn ảnh, quyền vị trí khi bạn yêu cầu lấy vị trí và quyền thông báo cho thông báo đẩy. Bạn có thể quản lý các quyền trong cài đặt thiết bị. Từ chối quyền có thể làm chức năng tương ứng không hoạt động; không cần cung cấp giấy tờ trong nội dung công khai.
+Địa chỉ hoặc tọa độ liên quan đến hồ sơ MUA và booking có thể được lưu khi cần thiết để cung cấp chức năng tương ứng.
 
-Avatar, hồ sơ công khai, portfolio, ảnh dịch vụ và đánh giá có thể được người khác xem theo chức năng. Nội dung lịch hẹn được cung cấp cho các bên liên quan. Chat được trao đổi giữa các thành viên cuộc trò chuyện; quản trị viên xử lý dữ liệu theo quyền của từng chức năng.
+Đối với điểm gặp của MUA, vị trí chi tiết chỉ được hiển thị công khai khi MUA chủ động cho phép công khai điểm gặp. Nếu MUA không lựa chọn công khai, BBook không hiển thị vị trí chi tiết đó như một phần của hồ sơ công khai. Chức năng tìm MUA gần bạn có thể hiển thị khoảng cách gần đúng từ vị trí này. BBook không có chức năng theo dõi vị trí thiết bị trong nền.
 
-Hồ sơ MUA trên marketplace có thể hiển thị tên hiển thị, avatar, giới thiệu, kinh nghiệm, phong cách, khu vực hoạt động, dịch vụ, portfolio, điểm đánh giá và liên kết mạng xã hội MUA tự thêm vào hồ sơ công khai. API danh sách/chi tiết marketplace không trả email đăng nhập hoặc số điện thoại tài khoản. Thông tin liên hệ vẫn được cung cấp cho chính chủ và quản trị viên trong luồng hồ sơ/xét duyệt được phân quyền. Tên điểm gặp và tọa độ chỉ được hiển thị công khai khi MUA bật điểm gặp công khai và xác nhận vị trí; khi chưa đáp ứng cả hai điều kiện, API marketplace không trả tên điểm gặp hoặc tọa độ riêng tư. Tọa độ của điểm gặp được công khai để xem trên bản đồ khi MUA chọn công khai; hãy chỉ chọn địa điểm bạn đồng ý chia sẻ. Tìm kiếm gần đây có thể dùng điểm hoạt động đã xác nhận để tính khoảng cách; với điểm chưa công khai, máy chủ làm tròn tọa độ trước khi tính và không trả tọa độ hoặc tên điểm riêng tư trong kết quả.
+### Booking và giao dịch
 
-Luồng upload mới lưu ảnh xác minh và ảnh chat ở kho riêng tư và cấp liên kết truy cập tạm thời sau kiểm tra quyền. Ảnh xác minh có thể được chủ tài khoản và quản trị viên có quyền xem; ảnh chat được cấp cho thành viên cuộc trò chuyện. Ảnh vẫn được lưu trên máy chủ, không phải chỉ xử lý tạm trên thiết bị. Không có mã hóa đầu cuối được cam kết trong chính sách này.
+Khi bạn đặt lịch, BBook xử lý những thông tin cần thiết để thực hiện booking như khách hàng, MUA, dịch vụ được chọn, thời gian, địa điểm cung cấp dịch vụ, ghi chú, trạng thái booking và số tiền liên quan.
 
-Ảnh nhạy cảm tải lên bằng phiên bản cũ cần được xử lý riêng bằng quy trình chuyển đổi và dọn dữ liệu. Tài liệu này không xác nhận toàn bộ ảnh cũ trong môi trường đang chạy đã được chuyển hoặc xóa.
+Trong quá trình thanh toán và hoàn tất dịch vụ, BBook cũng có thể lưu thông tin về tiền đặt cọc, thanh toán, hoàn tiền, khoản thu nhập của MUA, yêu cầu chi trả và lịch sử giao dịch cần thiết để đối soát.
 
+Những thông tin này được sử dụng để thực hiện booking, theo dõi quá trình cung cấp dịch vụ, xử lý giao dịch và giải quyết các vấn đề hoặc khiếu nại phát sinh.
 
+### Thông tin nhận tiền và QR
 
-4. Nhà cung cấp và trao đổi dữ liệu
+Khi cần nhận tiền từ BBook, khách hàng hoặc MUA có thể cung cấp ngân hàng hoặc phương thức nhận tiền, số tài khoản hoặc thông tin định danh tài khoản và tên chủ tài khoản.
 
-BBook có các tích hợp lưu trữ ảnh Supabase, thư xác thực Brevo, đăng nhập/bản đồ Google, thông báo Expo/Firebase Cloud Messaging, thanh toán PayOS. Backend được triển khai trên Render. Thông tin được trao đổi theo chức năng bạn sử dụng.
+BBook không yêu cầu người dùng cung cấp số thẻ ngân hàng, ngày hết hạn hoặc mã CVV trong các chức năng hiện tại.
 
-Ví dụ: Brevo nhận địa chỉ email để gửi OTP; Google xử lý thông tin đăng nhập hoặc yêu cầu bản đồ; Expo nhận token và nội dung thông báo; PayOS nhận mã đơn, số tiền, mô tả và URL kết quả để tạo liên kết thanh toán. QR chuyển khoản ngân hàng cho quản trị viên được tạo theo từng khoản chi trả/hoàn tiền từ dữ liệu nhận tiền và số tiền đã lưu, không gọi dịch vụ ảnh VietQR công khai để tạo ảnh đó.
+Nếu bạn tải QR ngân hàng lên để điền nhanh thông tin nhận tiền, hệ thống có thể đọc các trường được hỗ trợ từ ảnh. Chức năng đọc QR ngân hàng xử lý ảnh để lấy thông tin và không lưu ảnh gốc vào kho ảnh. Thông tin đọc từ QR vẫn cần được người dùng kiểm tra và xác nhận trước khi lưu.
 
-BBook lưu thông tin tài khoản nhận tiền và giao dịch, vì vậy không thể tuyên bố không lưu dữ liệu ngân hàng. Không có chức năng nhập/lưu số thẻ, ngày hết hạn hoặc CVV được xác định trong luồng hiện tại; chính sách không đưa ra chứng nhận PCI-DSS hay giấy phép của nhà cung cấp chưa được xác minh.
+Đối với MoMo, người dùng có thể cung cấp QR nhận tiền. Khi QR này cần được lưu để phục vụ việc xét duyệt hoặc xử lý giao dịch, ảnh được lưu ở khu vực riêng tư và gắn với tài khoản đã cung cấp. QR MoMo không được hiển thị công khai trên hồ sơ.
 
-Email hỗ trợ được gửi qua dịch vụ thư của bạn và Gmail của địa chỉ nhận. Dữ liệu được lưu hoặc xử lý tại từng nhà cung cấp phụ thuộc dịch vụ và cấu hình. Chính sách không khẳng định khu vực lưu trữ, thời hạn log/backup hoặc thời hạn xóa của nhà cung cấp chưa được xác nhận.
+Chủ tài khoản có thể xem QR của mình theo chức năng được hỗ trợ. Quản trị viên được phân quyền có thể truy cập QR khi cần xét duyệt thông tin nhận tiền, xử lý chi trả hoặc hoàn tiền.
 
-Ảnh QR chuyển khoản ngân hàng được tạo khi quản trị viên mở khoản chi trả/hoàn tiền đủ điều kiện của luồng tương ứng và chỉ được trả qua API có kiểm tra quyền Admin. Ảnh được tạo theo yêu cầu, không lưu vào Supabase Storage và không có URL ảnh công khai lâu dài. Nếu dữ liệu nhận tiền không đủ hoặc chưa hỗ trợ tạo QR hợp lệ cho phương thức đó, quản trị viên sử dụng thông tin chuyển tiền thủ công; không thay thế bằng QR được suy đoán.
+Việc hệ thống đọc được QR không chứng minh quyền sở hữu tài khoản nhận tiền. BBook cũng không tự suy đoán những thông tin còn thiếu từ QR.
 
-Đối với MoMo, quản trị viên dùng QR gốc được lưu riêng tư cho người nhận tương ứng và đối chiếu thông tin tài khoản, số tiền, mã chi trả/hoàn tiền hiển thị riêng. BBook không nhúng số tiền chi trả/hoàn tiền vào QR MoMo gốc; QR gốc có thể chứa số tiền khác. Nếu thiếu QR hoặc không truy cập được, thông tin chuyển thủ công vẫn được cung cấp. Ảnh trả qua API có kiểm tra quyền và không tạo URL ảnh công khai lâu dài.
+### Tin nhắn, đánh giá và nội dung người dùng
 
+Khi sử dụng các chức năng tương tác, BBook có thể xử lý nội dung tin nhắn, ảnh gửi trong cuộc trò chuyện, đánh giá, điểm đánh giá, bình luận, phản hồi, lượt thích, nội dung đã lưu, lượt theo dõi MUA, báo cáo nội dung, chặn người dùng và thông tin liên quan đến khiếu nại hoặc yêu cầu hỗ trợ.
 
+Tin nhắn và ảnh chat được sử dụng để hỗ trợ trao đổi giữa những người tham gia cuộc trò chuyện. Ảnh chat được lưu riêng tư và được cung cấp cho những người tham gia cuộc trò chuyện. Khi một tin nhắn bị báo cáo, quản trị viên được phân quyền có thể xem nội dung và ảnh của tin nhắn đó để xử lý báo cáo.
 
-5. Lưu giữ dữ liệu
+BBook không tuyên bố rằng tin nhắn được mã hóa đầu cuối.
 
-BBook lưu dữ liệu hồ sơ, ảnh, chat, lịch hẹn và giao dịch để cung cấp các chức năng tương ứng. Đăng xuất hoặc gỡ app không tự động xóa tài khoản. Khi yêu cầu xóa đủ điều kiện được tiếp nhận, dữ liệu cá nhân được dọn trong cơ sở dữ liệu và việc xóa file được đưa vào hàng đợi trên máy chủ.
+### Thông báo, bảo mật và vận hành
 
-OTP có hạn sử dụng để xác thực; hết hạn không đồng nghĩa bản ghi đã được xóa. Khi xử lý xóa tài khoản, bản ghi OTP gắn với email hiện tại và token thông báo đẩy của tài khoản được xóa. Liên kết ảnh riêng tư có hạn truy cập; hết hạn liên kết không xóa file gốc.
+Để gửi thông báo, BBook có thể xử lý mã nhận thông báo của thiết bị, nền tảng, tên thiết bị nếu có và nội dung cần thiết để gửi thông báo. Thông báo tin nhắn có thể bao gồm tên người gửi và phần xem trước nội dung; những thông tin này được chuyển qua dịch vụ gửi thông báo và có thể xuất hiện trên màn hình thiết bị tùy cài đặt của bạn.
 
-Lịch sử booking và giao dịch đã tất toán giữ các mã, số tiền, trạng thái và mốc thời gian cần thiết cho đối soát; địa chỉ, tọa độ nơi cung cấp dịch vụ, ghi chú/lý do dạng văn bản, thông tin ngân hàng của tài khoản đang xóa và payload thanh toán không còn cần thiết được loại bỏ. Bản ghi tài khoản/hồ sơ và một số mã liên kết được giữ để bảo toàn quan hệ dữ liệu. Đây không phải cam kết rằng mọi dữ liệu còn lại đã được ẩn danh không thể liên kết lại.
+Máy chủ và nhà cung cấp hạ tầng cũng có thể xử lý địa chỉ IP, nhật ký lỗi và một số thông tin kỹ thuật cần thiết để bảo vệ hệ thống, hạn chế yêu cầu bất thường, ngăn lạm dụng và khắc phục lỗi.
 
-Điểm đánh giá và cấu trúc cuộc trò chuyện/lịch sử dịch vụ có thể còn lại sau khi nội dung do tài khoản gửi được dọn. Nội dung do bên còn lại tạo không tự động bị xóa theo yêu cầu của một người. Khi có giao dịch hoặc khiếu nại chưa hoàn tất, yêu cầu được ghi nhận nhưng chưa thực hiện xóa dữ liệu cần để giải quyết; sau khi hoàn tất cần xác nhận xử lý xóa lại.
+BBook không sử dụng địa chỉ IP trong chức năng này để xây dựng lịch sử vị trí của người dùng.
 
-Ảnh xác minh, ảnh chat và QR MoMo trong kho tài chính riêng tư có bản ghi chủ sở hữu trên máy chủ, cùng ảnh public được ghi nhận chủ sở hữu bằng luồng upload mới, được xử lý xóa thật khỏi Storage nếu không còn tham chiếu cần xử lý. Máy chủ xác nhận file không còn tồn tại trước khi ghi hoàn tất. Nếu nhà cung cấp lỗi, hệ thống giữ checkpoint để thử lại. Ảnh public cũ chưa có bằng chứng chủ sở hữu, ảnh còn được tài khoản khác tham chiếu hoặc nguồn cũ có thay đổi phải được hỗ trợ kiểm tra; không được coi là đã xóa chỉ vì URL trong hồ sơ đã bị bỏ.
+## 3. BBook sử dụng dữ liệu như thế nào?
 
-Tài khoản từng dùng luồng upload cũ hoặc đã xóa bằng phiên bản trước cần đối soát cả ảnh không còn URL trong database. Không tự suy ra rằng mọi file thuộc tài khoản cũ đã được tìm thấy; trạng thái cần kiểm tra được giữ đến khi bộ phận hỗ trợ xác minh phạm vi và kết quả.
+Dữ liệu được sử dụng để cung cấp và vận hành những chức năng mà người dùng lựa chọn sử dụng trên BBook. Điều này bao gồm việc tạo và quản lý tài khoản, xác thực đăng nhập, xây dựng hồ sơ MUA, tìm kiếm MUA, quản lý booking, hỗ trợ trao đổi giữa khách hàng và MUA, xử lý thanh toán và hoàn tiền, xét duyệt MUA, gửi thông báo và hỗ trợ người dùng.
 
-BBook hiện chưa áp dụng một thời hạn xóa tự động thống nhất cho lịch sử giao dịch, mã liên kết và nhật ký vận hành. Không dùng thiếu sót trong xử lý ảnh cũ như một lý do lưu giữ pháp lý. Bộ phận hỗ trợ thông báo phạm vi còn lại, lý do và tiến độ khi xử lý yêu cầu; không cam kết mọi yêu cầu hoặc mọi bản sao được xóa trong 72 giờ hay 30 ngày.
+Một số dữ liệu cũng được sử dụng để bảo vệ tài khoản, phòng chống lạm dụng, xử lý khiếu nại, kiểm tra hoạt động bất thường, sửa lỗi và duy trì độ ổn định của dịch vụ.
 
-Thời hạn log hạ tầng, vòng đời backup, cache và dữ liệu tại từng nhà cung cấp phụ thuộc cấu hình/dịch vụ chưa được xác nhận trong tài liệu này. Việc xóa trên máy chủ BBook không xác nhận các bản sao trên thiết bị, bản sao người khác đã lưu hoặc dữ liệu nhà cung cấp tự giữ đã được xóa. Liên hệ hỗ trợ để yêu cầu kiểm tra phạm vi này.
+BBook không bán thông tin cá nhân của người dùng.
 
+## 4. Ai có thể xem thông tin của bạn?
 
+Thông tin được hiển thị phụ thuộc vào loại dữ liệu và chức năng bạn sử dụng.
 
-6. Yêu cầu xóa tài khoản và dữ liệu
+Hồ sơ công khai của MUA có thể bao gồm tên hiển thị, avatar, phần giới thiệu, kinh nghiệm, phong cách makeup, khu vực hoạt động, dịch vụ, portfolio, điểm đánh giá và liên kết mạng xã hội mà MUA chủ động thêm.
 
-Trong app, khách hàng mở Cá nhân → Xóa tài khoản; MUA mở Cài đặt → Xóa tài khoản. Máy chủ kiểm tra lịch hẹn, tiền đặt cọc, thanh toán, hoàn tiền, chi trả, khiếu nại và số dư. Nếu còn nghĩa vụ chưa giải quyết, yêu cầu được ghi nhận và bạn được hướng dẫn liên hệ hỗ trợ; tài khoản chưa bị xóa bởi thao tác đó.
+Email đăng nhập, số điện thoại tài khoản, giấy tờ xác minh và thông tin tài khoản nhận tiền không được hiển thị như thông tin công khai trên marketplace.
 
-Khi đủ điều kiện, tài khoản bị vô hiệu hóa, tên và email được thay bằng giá trị nội bộ, số điện thoại và liên kết avatar được bỏ, thông tin xác thực mật khẩu được thay thế. Token đăng nhập cũ bị từ chối trên các yêu cầu mới; kết nối chat được thu hồi. Không thể khôi phục tài khoản đã xóa bằng cách đăng nhập lại; đăng ký mới không khôi phục dữ liệu cũ.
+Thông tin cần thiết của một booking được cung cấp cho khách hàng và MUA tham gia booking đó. Nội dung chat được cung cấp cho những người tham gia cuộc trò chuyện.
 
-Dữ liệu cá nhân MUA được dọn: giới thiệu, địa chỉ, khu vực/tọa độ, mạng xã hội, liên kết CCCD hai mặt, chân dung, chứng chỉ và thông tin xét duyệt. Lịch làm việc, ngày nghỉ, khu vực hoạt động, phong cách và quan hệ theo dõi được xóa. Portfolio bị ẩn và bỏ nội dung/ảnh; dịch vụ bị vô hiệu hóa và bỏ nội dung/ảnh. Một số bản ghi gốc còn giữ mã liên kết với lịch sử dịch vụ.
+Quản trị viên BBook được phân quyền có thể truy cập những thông tin cần thiết để xét duyệt MUA, kiểm tra thông tin xác minh, xét duyệt tài khoản nhận tiền, xử lý booking, chi trả, hoàn tiền, khiếu nại, báo cáo nội dung và yêu cầu hỗ trợ. Việc xử lý báo cáo có thể bao gồm xem tin nhắn hoặc ảnh bị báo cáo.
 
-Token thông báo đẩy, thông báo trong app, OTP theo email hiện tại, lượt thích/lưu và phản ứng tin nhắn thuộc tài khoản được xóa. Nội dung bình luận được thay thế; văn bản và liên kết ảnh tin nhắn do tài khoản gửi, nội dung/ảnh đánh giá và phản hồi MUA được bỏ. Nội dung khiếu nại đã giải quyết do tài khoản gửi được dọn. Điểm đánh giá và cấu trúc liên kết có thể còn lại. Các bản sao tên/nội dung chat trong thông báo gửi cho người nhận khác được dọn trên máy chủ khi xác định được liên kết với tài khoản đang xóa; thông báo chưa gửi tương ứng được ngừng gửi.
+## 5. Các dịch vụ bên thứ ba
 
-Tài khoản ngân hàng/tài khoản nhận tiền của người đang xóa được bỏ sau khi nghĩa vụ đã tất toán; số tài khoản, tên chủ tài khoản và QR trong bản ghi hoàn tiền/chi trả thuộc người đó được dọn. Không xóa thông tin tài khoản nhận tiền thuộc bên còn lại chỉ vì bạn xóa tài khoản. QR MoMo riêng tư đã biết thuộc tài khoản cũng được đưa vào quy trình xóa file. Máy chủ chỉ ghi nhận hoàn thành dọn Storage sau khi các file đã xác định được chủ sở hữu được xác nhận không còn tồn tại; lỗi nhà cung cấp được thử lại, reference hoặc ownership chưa rõ cần hỗ trợ kiểm tra.
+Để cung cấp các chức năng của BBook, chúng tôi sử dụng một số dịch vụ bên thứ ba.
 
-App dọn AsyncStorage và bộ nhớ truy vấn khi máy chủ tiếp nhận xóa. Thông báo tiếp nhận không xác nhận mọi file đã được xóa: file được xử lý sau bước cơ sở dữ liệu, có kiểm tra và thử lại khi lỗi. Ảnh cũ chưa xác minh hoặc ảnh còn tham chiếu cần hỗ trợ xử lý. Email hỗ trợ là nơi nhận kết quả và tiến độ; không bảo đảm xóa mọi file đã lưu trên thiết bị. App hiển thị mã tham chiếu tài khoản sau khi tiếp nhận; hãy lưu mã này và gửi kèm email khi hỏi tiến độ, vì email hồ sơ đã được thay thế.
+Supabase được tích hợp để lưu trữ tệp. Dữ liệu tài khoản, hồ sơ và giao dịch được lưu trong cơ sở dữ liệu của hệ thống BBook. Render cung cấp hạ tầng triển khai máy chủ. Brevo hỗ trợ gửi email như email OTP. Google được sử dụng cho một số chức năng bản đồ hoặc địa điểm. Expo hỗ trợ gửi thông báo đẩy; trên Android, việc chuyển thông báo đến thiết bị sử dụng Firebase Cloud Messaging. PayOS hỗ trợ luồng thanh toán của BBook.
 
-Ngoài app, gửi thư từ email đăng ký BBook đến bbooksupport@gmail.com, tiêu đề “Yêu cầu xóa tài khoản BBook”. Nêu email hoặc mã tài khoản và yêu cầu xóa tài khoản cùng dữ liệu liên quan; có thể nêu riêng loại dữ liệu. Không gửi mật khẩu, OTP, thông tin thẻ hoặc ảnh CCCD. Nếu không còn truy cập email đăng ký, liên hệ để được hướng dẫn xác minh.
+Khi bạn sử dụng chức năng liên quan, BBook chỉ cung cấp cho nhà cung cấp những dữ liệu cần thiết để thực hiện chức năng đó. Ví dụ, địa chỉ email có thể được xử lý để gửi OTP, mã nhận thông báo và nội dung thông báo được sử dụng để gửi thông báo và thông tin cần thiết của giao dịch được xử lý để thực hiện thanh toán.
 
-Trang https://bbookmakeup.com/delete-account/ cung cấp hướng dẫn và liên kết soạn email khi được công bố. Trang không yêu cầu đăng nhập BBook hoặc cài lại app. Yêu cầu chỉ được gửi khi bạn thực sự gửi thư. Bộ phận hỗ trợ tiếp nhận, xác minh chủ tài khoản, thông báo nghĩa vụ cần giải quyết/phạm vi còn giữ và xác nhận kết quả; không có cam kết tự động hoàn tất trong 72 giờ hoặc 30 ngày.
+Dữ liệu được nhà cung cấp xử lý có thể đồng thời chịu các chính sách bảo mật và thời hạn lưu giữ của nhà cung cấp đó.
 
+## 6. Bảo mật và lưu giữ dữ liệu
 
+BBook áp dụng các biện pháp bảo vệ và kiểm soát truy cập phù hợp với tính chất của dữ liệu.
 
-7. Chỉnh sửa thông tin và cập nhật
+Các dữ liệu nhạy cảm như giấy tờ xác minh MUA, ảnh chân dung xác minh, ảnh chat và QR MoMo riêng tư không được thiết kế để hiển thị công khai. Quyền truy cập được kiểm tra dựa trên tài khoản và chức năng tương ứng.
 
-Bạn có thể chỉnh sửa các trường được hỗ trợ trong hồ sơ và quản lý quyền của thiết bị. Để yêu cầu chỉnh sửa dữ liệu khác, nêu câu hỏi về dữ liệu hoặc yêu cầu xóa, liên hệ bbooksupport@gmail.com.
+Những nội dung mà người dùng chủ động đăng công khai như avatar, portfolio, ảnh dịch vụ hoặc một số thông tin hồ sơ MUA có thể được người khác xem theo chức năng của BBook.
 
-Ngày sửa đổi là ngày chuẩn bị nội dung này, không phải bằng chứng trang đã được công bố. Khi chức năng hoặc cách xử lý dữ liệu thay đổi, nội dung cần được cập nhật tương ứng.
+BBook lưu dữ liệu trong thời gian cần thiết để cung cấp dịch vụ, thực hiện giao dịch, giải quyết tranh chấp, bảo vệ hệ thống và đáp ứng các nghĩa vụ áp dụng. Đăng xuất hoặc gỡ ứng dụng khỏi thiết bị không đồng nghĩa với việc xóa tài khoản.
 
-Báo cáo nội dung và chặn người dùng
-Khi bạn gửi báo cáo, BBook lưu tài khoản gửi báo cáo, nội dung/người dùng được báo cáo, lý do và mô tả bạn nhập để quản trị viên xem xét. Quản trị viên có thể xem đúng nội dung bị báo cáo, kể cả tin nhắn hoặc ảnh chat đó; chức năng này không cấp quyền xem toàn bộ cuộc trò chuyện. BBook lưu quan hệ chặn để hạn chế tương tác mới. Khi xử lý xóa tài khoản, quan hệ chặn được xóa và mô tả/ghi chú báo cáo liên quan được làm trống; mã tham chiếu và quyết định xử lý có thể được giữ để bảo đảm nội dung đã gỡ không xuất hiện lại. Liên hệ bbooksupport@gmail.com nếu cần hỗ trợ về dữ liệu này.
+BBook hiện không áp dụng một thời hạn lưu giữ duy nhất cho tất cả các loại dữ liệu. Một số thông tin tối thiểu liên quan đến booking, giao dịch, thanh toán, tranh chấp hoặc bảo mật có thể cần được giữ lại sau khi tài khoản được xóa nếu vẫn cần thiết cho mục đích tương ứng.
+
+Một số tệp được tạo bởi phiên bản cũ của BBook có thể cần được kiểm tra riêng trong quá trình xử lý yêu cầu xóa. Nếu việc xóa tệp gặp lỗi kỹ thuật, BBook có thể tiếp tục xử lý lại cho đến khi hoàn tất hoặc xác định cần hỗ trợ thêm.
+
+Một số nhà cung cấp dịch vụ cũng có thể duy trì nhật ký kỹ thuật, cache hoặc bản sao lưu theo chính sách và cấu hình riêng của họ.
+
+Không có phương thức lưu trữ hoặc truyền dữ liệu nào có thể bảo đảm an toàn tuyệt đối. BBook áp dụng các biện pháp hợp lý nhằm hạn chế việc truy cập, sử dụng hoặc tiết lộ dữ liệu trái phép.
+
+## 7. Xóa tài khoản và dữ liệu
+
+Người dùng có thể yêu cầu xóa tài khoản trực tiếp trong BBook. Đối với tài khoản khách hàng, chức năng này nằm tại Cá nhân → Xóa tài khoản. Đối với MUA, chức năng nằm tại Cài đặt → Xóa tài khoản.
+
+Trước khi hoàn tất việc xóa, BBook có thể kiểm tra các booking đang hoạt động, khoản đặt cọc hoặc thanh toán chưa giải quyết, yêu cầu hoàn tiền, khoản chi trả cho MUA, khiếu nại và các nghĩa vụ tài chính khác liên quan đến tài khoản.
+
+Nếu vẫn còn nghĩa vụ cần giải quyết, BBook ghi nhận yêu cầu nhưng chưa xóa tài khoản hoặc dữ liệu cần thiết để giải quyết nghĩa vụ đó. Bạn được hướng dẫn liên hệ bộ phận hỗ trợ và cần xác nhận xóa lại sau khi các nghĩa vụ đã được giải quyết.
+
+Khi yêu cầu đủ điều kiện được xử lý, tài khoản không còn có thể được sử dụng để đăng nhập. BBook xóa, thay thế hoặc loại bỏ các thông tin nhận dạng trực tiếp không còn cần thiết như tên, email, số điện thoại, avatar, thông tin đăng nhập, hồ sơ cá nhân và những dữ liệu khác thuộc phạm vi yêu cầu xóa.
+
+Đối với MUA, thông tin hồ sơ, dữ liệu xác minh, portfolio, dịch vụ và thông tin nhận tiền không còn cần thiết cũng được xử lý theo quy trình xóa. Các ảnh công khai và riêng tư được xác định thuộc tài khoản và không còn cần lưu giữ được đưa vào quy trình xóa khỏi hệ thống lưu trữ. Việc xử lý tài khoản thành công không đồng nghĩa mọi ảnh đã được xóa ngay; bạn có thể liên hệ hỗ trợ để kiểm tra kết quả, nhất là với ảnh từ phiên bản cũ.
+
+Tin nhắn, đánh giá, phản hồi và những nội dung khác do tài khoản tạo được xử lý trong phạm vi có thể xóa mà không làm mất dữ liệu cần thiết của người dùng khác hoặc phá vỡ các bản ghi cần giữ lại.
+
+Một số dữ liệu tối thiểu liên quan đến booking, giao dịch, thanh toán, tranh chấp, bảo mật hoặc nghĩa vụ pháp lý có thể được giữ lại khi cần thiết. Việc giữ lại này không có nghĩa tài khoản tiếp tục hoạt động.
+
+Sau khi tài khoản đã được xử lý xóa, việc đăng ký tài khoản mới không khôi phục dữ liệu của tài khoản cũ.
+
+### Yêu cầu xóa khi không thể truy cập ứng dụng
+
+Nếu không thể truy cập BBook, bạn có thể gửi yêu cầu xóa tài khoản đến bbooksupport@gmail.com với tiêu đề “Yêu cầu xóa tài khoản BBook”.
+
+Trong email, hãy cung cấp email đăng ký hoặc mã tài khoản và cho biết bạn muốn xóa tài khoản cùng dữ liệu liên quan. Không gửi mật khẩu, mã OTP, thông tin thẻ thanh toán hoặc ảnh giấy tờ tùy thân qua email.
+
+Nếu bạn không còn truy cập email đã đăng ký, hãy liên hệ BBook để được hướng dẫn xác minh quyền sở hữu tài khoản.
+
+Hướng dẫn xóa tài khoản cũng được cung cấp tại bbookmakeup.com/delete-account/. Bạn không cần cài lại ứng dụng hoặc đăng nhập BBook để xem hướng dẫn này.
+
+BBook có thể yêu cầu bước xác minh hợp lý nhằm bảo đảm yêu cầu xóa được gửi bởi chủ tài khoản.
+
+## 8. Quyền của người dùng
+
+Bạn có thể chỉnh sửa những thông tin được BBook hỗ trợ trong hồ sơ của mình và quản lý quyền camera, ảnh, vị trí hoặc thông báo thông qua cài đặt của thiết bị.
+
+Bạn cũng có thể liên hệ BBook để hỏi về dữ liệu cá nhân, yêu cầu chỉnh sửa thông tin không thể tự chỉnh sửa hoặc yêu cầu xóa tài khoản và dữ liệu liên quan.
+
+Khi không thể thực hiện trực tiếp trong ứng dụng, hãy liên hệ bbooksupport@gmail.com.
+
+## 9. Quyền trên thiết bị
+
+BBook có thể yêu cầu quyền camera khi bạn chủ động chụp ảnh, quyền truy cập ảnh khi bạn chọn ảnh để tải lên, quyền vị trí khi bạn yêu cầu sử dụng vị trí hiện tại và quyền thông báo để nhận các cập nhật liên quan đến tài khoản hoặc hoạt động trên BBook.
+
+Bạn có thể từ chối hoặc thu hồi các quyền này trong cài đặt của thiết bị. Khi một quyền cần thiết bị từ chối, chức năng tương ứng có thể không hoạt động đầy đủ.
+
+## 10. Thay đổi chính sách
+
+BBook có thể cập nhật Chính sách quyền riêng tư khi chức năng của ứng dụng, cách xử lý dữ liệu hoặc các yêu cầu áp dụng thay đổi.
+
+Ngày sửa đổi ở đầu trang cho biết thời điểm phiên bản chính sách này được cập nhật. Nếu có thay đổi quan trọng ảnh hưởng đáng kể đến cách BBook xử lý dữ liệu cá nhân, BBook có thể thông báo bằng phương thức phù hợp trong ứng dụng hoặc trên website.
+
+## 11. Liên hệ
+
+Nếu bạn có câu hỏi về Chính sách quyền riêng tư, dữ liệu cá nhân hoặc việc xóa tài khoản, vui lòng liên hệ:
+
+B-Book
+
+Website: bbookmakeup.com
+
+Email: bbooksupport@gmail.com
+
+Vui lòng không gửi mật khẩu, mã OTP, thông tin thẻ thanh toán hoặc ảnh giấy tờ tùy thân qua email hỗ trợ.

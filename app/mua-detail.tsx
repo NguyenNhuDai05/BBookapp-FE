@@ -1,3 +1,4 @@
+import { PostActionSheet } from '../components/feed/PostActionSheet';
 import { useAuthStore } from '../store/useAuthStore';
 import { ReviewNotice } from '../components/ReviewNotice';
 import { getMuaExperienceLabel } from '../utils/muaAreas';
@@ -7,7 +8,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View, Text, TouchableOpacity, Dimensions, Image, RefreshControl } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {ArrowLeft, CheckCircle2, MoreHorizontal} from 'lucide-react-native';
+import {ArrowLeft, CheckCircle2, MoreHorizontal, Users} from 'lucide-react-native';
 import { ErrorView } from '../components/ui/ErrorView';
 import { useFollow } from '../hooks/useFollow';
 import { useMuaDetail } from '../hooks/useMuaDetail';
@@ -38,6 +39,7 @@ export default function MuaDetailScreen() {
   const user=useAuthStore(state=>state.user);
   const sample=user?.isDemoAccount===true && user.demoCounterpartMuaId===id;
   const follow = useFollow(id);
+  const [optionsVisible, setOptionsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState(tab || 'Portfolio');
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [selectedServiceForDetail, setSelectedServiceForDetail] = useState<ServiceDto | null>(null);
@@ -124,7 +126,7 @@ export default function MuaDetailScreen() {
           <ArrowLeft size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{displayName}</Text>
-        <TouchableOpacity hitSlop={{top:10, bottom:10, left:10, right:10}}>
+        <TouchableOpacity onPress={() => setOptionsVisible(true)} accessibilityRole="button" accessibilityLabel="Tùy chọn hồ sơ" hitSlop={{top:10, bottom:10, left:10, right:10}}>
           <MoreHorizontal size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
       </View>
@@ -178,7 +180,11 @@ export default function MuaDetailScreen() {
             <Text style={styles.igBioText}>{displayBio}</Text>
           </View>
 
-          {follow.status ? <Text style={{ color: BrandColors.textMuted, marginHorizontal: 20, marginBottom: 10 }}>{follow.status.followersCount.toLocaleString('vi-VN')} người theo dõi</Text> : null}
+          {follow.status ? <View style={styles.followersBadge}>
+            <View style={styles.followersIcon}><Users size={16} color={BrandColors.accentPink} /></View>
+            <Text style={styles.followersCount}>{follow.status.followersCount.toLocaleString('vi-VN')}</Text>
+            <Text style={styles.followersLabel}>người theo dõi</Text>
+          </View> : null}
           {follow.error ? <TouchableOpacity onPress={() => { void follow.refetch(); }} style={{ padding: 12 }}><Text style={{ color: BrandColors.primaryPink }}>Không tải được trạng thái theo dõi. Nhấn để thử lại.</Text></TouchableOpacity> : null}
           {/* Action Buttons for Customer */}
           <View style={styles.igActionRow}>
@@ -344,6 +350,7 @@ export default function MuaDetailScreen() {
 
       </ScrollView>
 
+      <PostActionSheet visible={optionsVisible} authorId={id} authorName={displayName} onClose={() => setOptionsVisible(false)} />
       {/* Cart Integration */}
       <BookingCartFloatingBar
         onPressCart={() => setBottomSheetVisible(true)}
@@ -368,6 +375,10 @@ export default function MuaDetailScreen() {
 
 
 const styles = StyleSheet.create({
+  followersBadge: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16, paddingVertical: 6, paddingLeft: 6, paddingRight: 14, borderRadius: 22, backgroundColor: '#FFF0F5', borderWidth: 1, borderColor: '#F8DCE6' },
+  followersIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', marginRight: 2 },
+  followersCount: { fontSize: 14, fontWeight: '700', color: BrandColors.textDark },
+  followersLabel: { fontSize: 13, color: BrandColors.textBody },
 safeArea: {
     flex: 1,
     backgroundColor: '#FAFAFA',

@@ -45,3 +45,23 @@ it('selects multiple photos but caps the gallery at five', async () => {
   await fireEvent.press(screen.getByLabelText('Xóa ảnh 1'));
   expect(screen.getByText('4/5 ảnh')).toBeTruthy();
 });
+
+it('clears all images and disables saving until another image is added', async () => {
+  await render(<ServiceFormModal visible onClose={jest.fn()} onSubmit={jest.fn()} initialData={{ name: 'Dịch vụ', description: 'Mô tả', price: 100000, durationMinutes: 60, imageUrls: ['https://example.com/1.jpg', 'https://example.com/2.jpg'] }} />, { wrapper: Wrapper });
+  await fireEvent.press(screen.getByLabelText('Xóa tất cả ảnh'));
+  expect(screen.queryByLabelText('Xóa ảnh 1')).toBeNull();
+  expect(screen.getByText('Tối thiểu 1 ảnh')).toBeTruthy();
+  expect(screen.getByLabelText('Lưu thay đổi').props.accessibilityState.disabled).toBe(true);
+});
+
+it('retains an insertion in the middle of a sentence through another form update and saves it', async () => {
+  const save = jest.fn();
+  await render(<ServiceFormModal visible onClose={jest.fn()} onSubmit={save} initialData={{ name: 'Dịch vụ', description: 'hôm nay đi chơi', price: 100000, durationMinutes: 60, imageUrls: ['https://example.com/1.jpg'] }} />, { wrapper: Wrapper });
+  const input = screen.getByLabelText('Mô tả dịch vụ');
+  expect(input.props.value).toBeUndefined();
+  await fireEvent(input, 'selectionChange', { nativeEvent: { selection: { start: 8, end: 8 } } });
+  await fireEvent.changeText(input, 'hôm nay tôi đi chơi');
+  await fireEvent.press(screen.getByLabelText('Chọn tag'));
+  await fireEvent.press(screen.getByLabelText('Lưu thay đổi'));
+  expect(save).toHaveBeenCalledWith(expect.objectContaining({ description: 'hôm nay tôi đi chơi' }));
+});

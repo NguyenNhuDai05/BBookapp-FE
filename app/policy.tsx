@@ -130,6 +130,9 @@ export default function PolicyScreen() {
                   </Text>
                 );
               }
+              if (/^#{2,3} /.test(line)) {
+                return <Text key={index} style={line.startsWith('### ') ? styles.subheading : styles.sectionHeading}>{line.replace(/^#{2,3} /, '')}</Text>;
+              }
               return (
                 <Text key={index} style={styles.paragraph}>
                   {line}
@@ -144,6 +147,7 @@ export default function PolicyScreen() {
 }
 
 const styles = StyleSheet.create({
+  subheading: { fontSize: 16, fontWeight: '600', color: '#502031', marginTop: 14, marginBottom: 8 },
   safeArea: { flex: 1, backgroundColor: "#FFF8FA" },
   header: {
     flexDirection: "row",
