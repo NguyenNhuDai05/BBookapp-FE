@@ -16,6 +16,7 @@ import { useMuaProfile, useUpdateMuaProfile } from '../../hooks/useMuaProfile';
 import { useMuaStyles } from '../../hooks/useMuaStyles';
 import { getApiError } from '../../services/api';
 import { normalizeSocialUrl } from '../../utils/socialUrl';
+import { validateWorkLocation } from '../../utils/workLocation';
 
 
 function EditProfileScreen() {
@@ -60,6 +61,7 @@ function EditProfileScreen() {
           operatingLocationConfirmed: profile.operatingLocationConfirmed,
           publicMeetingPoint: profile.publicMeetingPoint,
           operatingLocationLabel: profile.operatingLocationLabel,
+          workLocationName: profile.workLocationName, workLocationAddress: profile.workLocationAddress, allowCustomerVisit: !!profile.allowCustomerVisit,
         });
         setExperienceLevel(profile.experienceLevel);
         setExperienceYears(String(profile.experienceYears || ''));
@@ -80,6 +82,8 @@ function EditProfileScreen() {
   const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && JSON.stringify(area.operatingAreaIds || []) === JSON.stringify(profile?.operatingAreaIds || []) && area.latitude === profile?.latitude && area.longitude === profile?.longitude && area.publicMeetingPoint === profile?.publicMeetingPoint && area.operatingLocationLabel === profile?.operatingLocationLabel && area.operatingProvinceCode === profile?.operatingProvinceCode && !area.clearOperatingLocation && experienceLevel === profile?.experienceLevel && experienceYears === String(profile?.experienceYears || '') && JSON.stringify([...styleIds].sort()) === JSON.stringify([...initialStyleIds].sort()) && instagramUrl === (profile?.instagramUrl || '') && facebookUrl === (profile?.facebookUrl || '');
 
   const handleSave = async () => {
+    const locationError = validateWorkLocation(area);
+    if (locationError) { setFormError(locationError); return; }
     if (!name.trim()) {
       setFormError('Vui lòng nhập tên hiển thị.');
       return;
@@ -144,7 +148,7 @@ function EditProfileScreen() {
           <ArrowLeft size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chỉnh sửa trang</Text>
-        <TouchableOpacity style={styles.headerBtn} onPress={handleSave} disabled={isSaving || isUnchanged} accessibilityLabel="Lưu thay đổi">
+        <TouchableOpacity style={styles.headerBtn} onPress={handleSave} disabled={isSaving || (isUnchanged && area.workLocationName === profile?.workLocationName && area.workLocationAddress === profile?.workLocationAddress && !!area.allowCustomerVisit === !!profile?.allowCustomerVisit && !area.clearWorkLocation)} accessibilityLabel="Lưu thay đổi">
           {isSaving ? (
             <ActivityIndicator size="small" color={BrandColors.accentPink} />
           ) : (

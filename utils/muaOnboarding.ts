@@ -1,4 +1,5 @@
 import type { MuaApplicationRequestDto } from '../types/onboarding';
+import { validateWorkLocation } from './workLocation';
 
 export type MuaOnboardingForm = MuaApplicationRequestDto;
 
@@ -9,6 +10,8 @@ export const validateMuaOnboarding = (
   form: MuaOnboardingForm,
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
+  const locationError = validateWorkLocation(form);
+  if (locationError) errors.workLocation = locationError;
   const phone = form.phoneNumber?.trim();
 
   if (!form.avatarUrl.trim()) errors.avatarUrl = 'Vui lòng thêm ảnh đại diện.';

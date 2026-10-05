@@ -12,6 +12,11 @@ export interface PortfolioImageDto {
 }
 
 export interface ArtistDto {
+  workLocationName?: string;
+  workLocationAddress?: string;
+  allowCustomerVisit?: boolean;
+  latitude?: number;
+  longitude?: number;
   id: string;
   name: string;
   avatar: string;

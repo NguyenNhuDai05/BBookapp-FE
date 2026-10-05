@@ -343,6 +343,7 @@ export default function MuaDetailScreen() {
           <View style={styles.section}>
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>Địa chỉ: {muaInfo.city || 'Chưa cập nhật'}</Text>
+              {muaInfo.allowCustomerVisit && !!muaInfo.workLocationAddress && <><Text style={styles.emptyText}>Nơi làm việc: {muaInfo.workLocationName || 'Nơi làm việc của MUA'}</Text><Text style={styles.emptyText}>{muaInfo.workLocationAddress}</Text></>}
               <Text style={styles.emptyText}>Kinh nghiệm: {getMuaExperienceLabel(muaInfo.experienceLevel, muaInfo.yearsExperience)}</Text>
             </View>
           </View>

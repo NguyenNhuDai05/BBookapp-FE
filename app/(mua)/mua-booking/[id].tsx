@@ -7,17 +7,19 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIn
 import { AppAlert as appDialog } from '../../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, MapPin, Clock, Calendar as CalendarIcon, Phone, FileText, CheckCircle, XCircle } from 'lucide-react-native';
+import { ArrowLeft, Clock, Calendar as CalendarIcon, Phone, CheckCircle, XCircle } from 'lucide-react-native';
 import { BrandColors, Spacing, Typography, Radius } from '../../../constants/theme';
 import { useBookingDetail } from '../../../hooks/useBooking';
 import { useUpdateBookingStatus } from '../../../hooks/useMuaBookings';
 import { BookingTimeline } from '../../../components/BookingTimeline';
 import { ComplaintEntry } from '../../../components/booking/ComplaintEntry';
+import { BookingLocationCard } from '../../../components/booking/BookingLocationCard';
 
 export default function MuaBookingDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const review=useAuthStore(state=>state.user?.isDemoAccount===true);
+  const user = useAuthStore(state => state.user);
+  const review = user?.isDemoAccount === true;
 
   const { data: booking, isLoading, isError } = useBookingDetail(id);
   const { mutate: updateStatus, isPending: isUpdating, error: statusError } = useUpdateBookingStatus(booking?.mua.id || 'me');
@@ -146,15 +148,7 @@ export default function MuaBookingDetailScreen() {
               <Text style={styles.infoText}>Giờ hẹn: {booking.time}</Text>
             </View>
             <View style={styles.divider} />
-            <View style={styles.infoRow}>
-              <MapPin size={18} color={BrandColors.accentPink} />
-              <View style={styles.addressBlock}>
-                <Text style={styles.locationType}>
-                  {booking.locationType === 'AT_STUDIO' ? 'Làm tại Studio' : 'Làm tận nơi'}
-                </Text>
-                <Text style={styles.infoText}>{booking.address}</Text>
-              </View>
-            </View>
+            <BookingLocationCard key={booking.id} booking={booking} authorized={!!user?.id && (user.id === booking.customer.id || user.id === booking.mua.id)} />
           </View>
         </View>
 
@@ -181,20 +175,6 @@ export default function MuaBookingDetailScreen() {
             ))}
           </View>
         </View>
-
-        {/* Notes */}
-        {booking.note && (
-          <View style={styles.section}>
-            <View style={styles.card}>
-              <Text style={styles.sectionTitle}>Ghi chú từ khách hàng</Text>
-              <View style={styles.divider} />
-              <View style={styles.infoRow}>
-                <FileText size={18} color={BrandColors.textMuted} />
-                <Text style={styles.noteText}>{booking.note}</Text>
-              </View>
-            </View>
-          </View>
-        )}
 
         {/* Pricing Summary */}
         <View style={styles.section}>

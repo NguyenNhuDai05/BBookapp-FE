@@ -8,6 +8,7 @@ export interface OperatingArea {
   operatingProvinceCode?: number; operatingAreaIds?: string[];
   latitude?: number; longitude?: number; operatingLocationConfirmed?: boolean;
   publicMeetingPoint?: boolean; operatingLocationLabel?: string; clearOperatingLocation?: boolean;
+  workLocationName?: string; workLocationAddress?: string; allowCustomerVisit?: boolean; clearWorkLocation?: boolean;
 }
 export interface NearbyArtist {
   muaId: string; fullName: string; avatarUrl?: string; portfolioCoverUrl?: string;

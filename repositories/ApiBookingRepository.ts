@@ -1,6 +1,6 @@
 import { api } from '../services/api';
 import { IBookingRepository } from './IBookingRepository';
-import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, BookingStatus, ReviewCreateRequest } from '../types/booking';
+import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, SelectedServiceDto, ReviewCreateRequest } from '../types/booking';
 import { mapBookingPaymentStatus, mapBookingStatus, mapPaymentStatus, mapRefundSummary } from '../utils/bookingStatus';
 
 export class ApiBookingRepository implements IBookingRepository {
@@ -27,13 +27,15 @@ export class ApiBookingRepository implements IBookingRepository {
   }
 
   async createBooking(request: CreateBookingRequest): Promise<BookingDto> {
-    try {
       const { data } = await api.post('/Booking/create', {
         idempotencyKey: request.idempotencyKey,
         muaId: request.muaId,
         bookingDate: request.date,
         startTime: `${request.time}:00`,
         address: request.address,
+        serviceLocationType: request.serviceLocationType,
+        serviceLatitude: request.serviceLatitude,
+        serviceLongitude: request.serviceLongitude,
         notes: request.note,
         services: request.services.map(s => ({
           serviceId: s.serviceId,
@@ -41,15 +43,6 @@ export class ApiBookingRepository implements IBookingRepository {
         }))
       });
       return this.mapToBookingDto(data.booking || data.Booking || data);
-    } catch (e: any) {
-      const errorCode = e.response?.data?.code || e.response?.data?.Code;
-      // Insufficient balance is an expected business response handled by the
-      // checkout screen, not an application error that should flood the log.
-      if (errorCode !== 'INSUFFICIENT_BALANCE') {
-        console.error('API Error creating booking:', e.response?.data || e.message);
-      }
-      throw e;
-    }
   }
 
   async createDepositPayment(bookingId: string): Promise<BookingPaymentDto> {
@@ -143,7 +136,11 @@ export class ApiBookingRepository implements IBookingRepository {
       services,
       date: dateStr,
       time: timeStr,
-      address: b.address || '',
+      address: typeof b.serviceAddress === 'string' && b.serviceAddress.trim() ? b.serviceAddress : b.address || '',
+      serviceLatitude: typeof b.serviceLatitude === 'number' ? b.serviceLatitude : null,
+      serviceLongitude: typeof b.serviceLongitude === 'number' ? b.serviceLongitude : null,
+      serviceLocationType: b.serviceLocationType === 'CUSTOMER_ADDRESS' || b.serviceLocationType === 'MUA_WORK_LOCATION' ? b.serviceLocationType : null,
+      serviceLocationName: typeof b.serviceLocationName === 'string' ? b.serviceLocationName : null,
       locationType: 'HOME_SERVICE', // Default fallback
       status: mapBookingStatus(b.status),
       paymentStatus: mapPaymentStatus(b.paymentStatus),

@@ -51,6 +51,15 @@ it('keeps the current account when server refuses account deletion', async () =>
   expect(useAuthStore.getState().user).toEqual(reviewer); expect(useAuthStore.getState().isAuthenticated).toBe(true);
 });
 
+it('clears booking destination on successful account deletion', async () => {
+  useBookingStore.getState().setAddress('Private customer address', { latitude: 10, longitude: 106 });
+  (authService.deleteAccount as jest.Mock).mockResolvedValue(undefined);
+  await useAuthStore.getState().deleteAccount();
+  expect(useBookingStore.getState().draft.address).toBe('');
+  expect(useBookingStore.getState().draft.addressCoordinates).toBeUndefined();
+  expect(useBookingStore.getState().draft.location.mode).toBe('CUSTOMER_ADDRESS');
+});
+
 it('restores an email account after restart, logs out, and logs in again', async () => {
   const normal = { ...reviewer, isDemoAccount: false, role: UserRole.Customer, hasMuaProfile: false };
   (authService.login as jest.Mock).mockResolvedValue({ accessToken: 'email-token', user: normal });
