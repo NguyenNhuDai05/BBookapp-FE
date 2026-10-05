@@ -18,6 +18,7 @@ import { useMuaDetail } from '../../hooks/useMuaDetail';
 import { DatePickerSheet } from '../../components/booking/DatePickerSheet';
 import { TimePickerSheet } from '../../components/booking/TimePickerSheet';
 import { AddressPickerSheet } from '../../components/booking/AddressPickerSheet';
+import { WorkLocationActions } from '../../components/booking/WorkLocationActions';
 import { getApiError } from '../../services/api';
 import { useAuthStore } from '../../store/useAuthStore';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
@@ -208,6 +209,7 @@ export default function CheckoutScreen() {
           {workplaceAvailable && <TouchableOpacity accessibilityRole="radio" accessibilityState={{ checked: !!workplace }} onPress={() => setWorkLocation(draft.mua!.id, muaInfo!.workLocationAddress!, muaInfo!.workLocationName)} style={styles.addressRow}><Text style={styles.addressText}>{workplace ? '●' : '○'} Đến nơi làm việc của MUA</Text></TouchableOpacity>}
           {workplace ? <>
             {workplaceAvailable ? <><Text style={styles.locationNoteLabel}>Bạn sẽ đến: {muaInfo?.workLocationName || 'Nơi làm việc của MUA'}</Text><Text style={styles.addressText}>{muaInfo?.workLocationAddress}</Text></> : <Text style={styles.addressText}>Nơi làm việc này hiện không nhận khách. Hãy chọn MUA đến địa điểm của bạn.</Text>}
+            {workplaceAvailable && workplace.sourceMuaId === draft.mua.id && <WorkLocationActions key={draft.mua.id + muaInfo!.workLocationAddress} destination={{ address: muaInfo!.workLocationAddress, latitude: muaInfo!.latitude, longitude: muaInfo!.longitude, label: muaInfo!.workLocationName }} />}
           </> : <>
           <View style={styles.addressRow}>
             <View style={styles.iconBox}>

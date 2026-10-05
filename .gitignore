@@ -45,3 +45,6 @@ app-example
 
 # Local overlay validation bundles
 .modal-validation/
+
+*.apk
+*.aab
