@@ -35,7 +35,7 @@ Khi bạn đăng ký và sử dụng BBook, chúng tôi xử lý những thông 
 
 Mật khẩu không được lưu dưới dạng văn bản thông thường. Thông tin phục vụ xác thực như mật khẩu và OTP được bảo vệ bằng cơ chế phù hợp. OTP có thời hạn sử dụng và được dùng cho các bước xác thực tương ứng.
 
-Phiên bản này hỗ trợ đăng ký và đăng nhập bằng email, mật khẩu. Email được dùng để gửi OTP xác minh đăng ký và khôi phục mật khẩu.
+Phiên bản hiện tại hỗ trợ đăng ký và đăng nhập bằng email, mật khẩu. Khi đăng ký, bạn cần đồng ý Điều khoản sử dụng và Chính sách quyền riêng tư, sau đó xác minh email bằng OTP. Khi quên mật khẩu, bạn có thể xác minh qua email để đặt lại mật khẩu.
 
 Một số thông tin phiên đăng nhập được lưu trên thiết bị để bạn không phải đăng nhập lại mỗi lần mở ứng dụng.
 
@@ -59,11 +59,15 @@ Việc tải ảnh lên không tự động chứng minh danh tính của ngư�
 
 BBook chỉ truy cập vị trí thiết bị khi bạn chủ động sử dụng chức năng cần vị trí và cấp quyền cho ứng dụng.
 
-Vị trí có thể được sử dụng để gợi ý địa chỉ, thiết lập khu vực hoạt động của MUA, tìm kiếm MUA phù hợp ở gần hoặc xác định địa điểm cung cấp dịch vụ. Tại những chức năng hỗ trợ nhập địa điểm thủ công, bạn vẫn có thể tự nhập hoặc lựa chọn địa điểm thay vì sử dụng vị trí hiện tại.
+Vị trí có thể được sử dụng để tìm MUA ở gần, thêm vị trí studio hoặc nơi làm việc của MUA, hoặc chọn địa điểm thực hiện booking. Bạn có thể chọn khu vực hoặc nhập địa chỉ thủ công thay vì cung cấp vị trí thiết bị. BBook không tự chuyển vị trí GPS thành địa chỉ; bạn cần nhập và kiểm tra địa chỉ trước khi lưu.
 
 Địa chỉ hoặc tọa độ liên quan đến hồ sơ MUA và booking có thể được lưu khi cần thiết để cung cấp chức năng tương ứng.
 
-Đối với điểm gặp của MUA, vị trí chi tiết chỉ được hiển thị công khai khi MUA chủ động cho phép công khai điểm gặp. Nếu MUA không lựa chọn công khai, BBook không hiển thị vị trí chi tiết đó như một phần của hồ sơ công khai. Chức năng tìm MUA gần bạn có thể hiển thị khoảng cách gần đúng từ vị trí này. BBook không có chức năng theo dõi vị trí thiết bị trong nền.
+MUA có thể thêm, sửa hoặc xóa studio hay nơi làm việc; thông tin này không bắt buộc. Tên, địa chỉ và vị trí chi tiết chỉ được công khai khi MUA bật cho phép khách đến nơi làm việc và đã cung cấp địa chỉ. Nếu không bật, thông tin chi tiết không xuất hiện trên hồ sơ công khai; tìm MUA gần bạn có thể sử dụng vị trí đã xác nhận để tính khoảng cách gần đúng. BBook không theo dõi vị trí thiết bị trong nền.
+
+Khi đặt lịch, khách hàng có thể chọn địa chỉ để MUA đến hoặc nơi làm việc mà MUA đã cho phép khách đến. Địa điểm được lưu cùng booking để khách hàng và MUA thực hiện lịch hẹn. Sửa hoặc xóa nơi làm việc sau đó không thay đổi địa điểm đã lưu trong booking trước đó.
+
+Khi bạn nhấn Mở bản đồ trong chi tiết booking, BBook chuyển địa chỉ hoặc tọa độ của booking sang ứng dụng bản đồ bên ngoài để bạn xem địa điểm. Việc sử dụng dữ liệu tại ứng dụng đó tuân theo chính sách của nhà cung cấp bản đồ. BBook không tự mở bản đồ khi bạn xem booking. Nếu chọn Sao chép địa chỉ, địa chỉ được đưa vào bộ nhớ tạm của thiết bị.
 
 ### Booking và giao dịch
 
@@ -97,7 +101,7 @@ BBook không tuyên bố rằng tin nhắn được mã hóa đầu cuối.
 
 ### Thông báo, bảo mật và vận hành
 
-Để gửi thông báo, BBook có thể xử lý mã nhận thông báo của thiết bị, nền tảng, tên thiết bị nếu có và nội dung cần thiết để gửi thông báo. Thông báo tin nhắn có thể bao gồm tên người gửi và phần xem trước nội dung; những thông tin này được chuyển qua dịch vụ gửi thông báo và có thể xuất hiện trên màn hình thiết bị tùy cài đặt của bạn.
+Để gửi thông báo, BBook và dịch vụ thông báo có thể xử lý mã nhận thông báo, mã định danh lần cài đặt ứng dụng, nền tảng, phiên bản ứng dụng, thông tin thiết bị và nội dung cần thiết để gửi thông báo. Dịch vụ thông báo trên Android có thể tự tạo và xử lý mã định danh lần cài đặt ngay cả khi bạn chưa cho phép hiển thị thông báo. Thông báo tin nhắn có thể bao gồm tên người gửi và phần xem trước nội dung; những thông tin này được chuyển qua dịch vụ gửi thông báo và có thể xuất hiện trên màn hình thiết bị tùy cài đặt của bạn.
 
 Máy chủ và nhà cung cấp hạ tầng cũng có thể xử lý địa chỉ IP, nhật ký lỗi và một số thông tin kỹ thuật cần thiết để bảo vệ hệ thống, hạn chế yêu cầu bất thường, ngăn lạm dụng và khắc phục lỗi.
 
@@ -108,6 +112,8 @@ BBook không sử dụng địa chỉ IP trong chức năng này để xây dự
 Dữ liệu được sử dụng để cung cấp và vận hành những chức năng mà người dùng lựa chọn sử dụng trên BBook. Điều này bao gồm việc tạo và quản lý tài khoản, xác thực đăng nhập, xây dựng hồ sơ MUA, tìm kiếm MUA, quản lý booking, hỗ trợ trao đổi giữa khách hàng và MUA, xử lý thanh toán và hoàn tiền, xét duyệt MUA, gửi thông báo và hỗ trợ người dùng.
 
 Một số dữ liệu cũng được sử dụng để bảo vệ tài khoản, phòng chống lạm dụng, xử lý khiếu nại, kiểm tra hoạt động bất thường, sửa lỗi và duy trì độ ổn định của dịch vụ.
+
+BBook có thể ưu tiên bài viết mới của MUA mà bạn đang theo dõi trên bảng tin. Thông tin theo dõi được sử dụng để điều chỉnh nội dung hiển thị theo lựa chọn của bạn.
 
 BBook không bán thông tin cá nhân của người dùng.
 
@@ -127,7 +133,7 @@ Quản trị viên BBook được phân quyền có thể truy cập những th�
 
 Để cung cấp các chức năng của BBook, chúng tôi sử dụng một số dịch vụ bên thứ ba.
 
-Supabase được tích hợp để lưu trữ tệp. Dữ liệu tài khoản, hồ sơ và giao dịch được lưu trong cơ sở dữ liệu của hệ thống BBook. Render cung cấp hạ tầng triển khai máy chủ. Brevo hỗ trợ gửi email như email OTP. Google được sử dụng cho một số chức năng bản đồ hoặc địa điểm. Expo hỗ trợ gửi thông báo đẩy; trên Android, việc chuyển thông báo đến thiết bị sử dụng Firebase Cloud Messaging. PayOS hỗ trợ luồng thanh toán của BBook.
+Supabase được tích hợp để lưu trữ tệp. Dữ liệu tài khoản, hồ sơ và giao dịch được lưu trong cơ sở dữ liệu của hệ thống BBook. Render cung cấp hạ tầng triển khai máy chủ. Brevo hỗ trợ gửi email như email OTP. Expo hỗ trợ gửi thông báo đẩy; trên Android, việc chuyển thông báo đến thiết bị sử dụng Firebase Cloud Messaging của Google. PayOS hỗ trợ luồng thanh toán của BBook. Khi bạn chủ động mở địa điểm booking bằng ứng dụng bản đồ bên ngoài, nhà cung cấp ứng dụng bản đồ cũng nhận thông tin địa điểm cần thiết cho thao tác đó.
 
 Khi bạn sử dụng chức năng liên quan, BBook chỉ cung cấp cho nhà cung cấp những dữ liệu cần thiết để thực hiện chức năng đó. Ví dụ, địa chỉ email có thể được xử lý để gửi OTP, mã nhận thông báo và nội dung thông báo được sử dụng để gửi thông báo và thông tin cần thiết của giao dịch được xử lý để thực hiện thanh toán.
 
@@ -184,6 +190,8 @@ BBook có thể yêu cầu bước xác minh hợp lý nhằm bảo đảm yêu 
 ## 8. Quyền của người dùng
 
 Bạn có thể chỉnh sửa những thông tin được BBook hỗ trợ trong hồ sơ của mình và quản lý quyền camera, ảnh, vị trí hoặc thông báo thông qua cài đặt của thiết bị.
+
+MUA có thể xóa riêng nơi làm việc mà vẫn giữ tài khoản: mở phần chỉnh sửa hồ sơ, chọn Xóa nơi làm việc và lưu thay đổi. Tên, địa chỉ và GPS của nơi làm việc được xóa khỏi hồ sơ; khu vực nhận khách và địa điểm của booking đã tạo trước đó vẫn được giữ để thực hiện lịch hẹn.
 
 Bạn cũng có thể liên hệ BBook để hỏi về dữ liệu cá nhân, yêu cầu chỉnh sửa thông tin không thể tự chỉnh sửa hoặc yêu cầu xóa tài khoản và dữ liệu liên quan.
 
