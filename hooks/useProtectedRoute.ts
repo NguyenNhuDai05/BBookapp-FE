@@ -52,6 +52,9 @@ export function useProtectedRoute() {
         return;
       }
 
+      // Signed-in Customer/MUA can recover their password without leaving the account first.
+      if (inAuthGroup && segments[1] === 'forgot-password') return;
+
       const hasMuaAccess = user?.role === UserRole.MUA || user?.hasMuaProfile === true;
 
       if (activeMode === 'MUA' && hasMuaAccess) {

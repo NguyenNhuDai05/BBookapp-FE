@@ -21,6 +21,8 @@ class AuthService {
 
   requestRegistrationOtp(email: string) { return this.repository.requestRegistrationOtp(email); }
   requestPasswordReset(email: string) { return this.repository.requestPasswordReset(email); }
+  verifyPasswordResetOtp(email: string, otp: string) { return this.repository.verifyPasswordResetOtp(email, otp); }
+  completePasswordReset(email: string, resetToken: string, newPassword: string) { return this.repository.completePasswordReset(email, resetToken, newPassword); }
   resetPassword(email: string, otp: string, newPassword: string) { return this.repository.resetPassword(email, otp, newPassword); }
   changePassword(currentPassword: string, newPassword: string) { return this.repository.changePassword(currentPassword, newPassword); }
 

@@ -11,7 +11,7 @@ const authLogo = require("../../assets/images/B.png");
 
 export default function LoginScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ email?: string; registered?: string }>();
+  const params = useLocalSearchParams<{ email?: string; registered?: string; passwordReset?: string }>();
   const login = useAuthStore((state) => state.login);
 
   const [email, setEmail] = useState(params.email || "");
@@ -90,6 +90,9 @@ export default function LoginScreen() {
                 </Text>
               </View>
 
+              {params.passwordReset === "1" ? (
+                <View style={styles.successBox}><Text accessibilityRole="alert" style={styles.successBoxText}>Đã đặt lại mật khẩu. Hãy đăng nhập bằng mật khẩu mới.</Text></View>
+              ) : null}
               {params.registered === "1" ? (
                 <View style={styles.successBox}>
                   <Text style={styles.successBoxText}>
