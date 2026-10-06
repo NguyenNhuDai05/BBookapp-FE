@@ -20,6 +20,7 @@ import {
   Clock,
   ArrowLeft,
   Trash2,
+  MessageSquare,
   KeyRound,
 } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
@@ -274,6 +275,12 @@ export default function MuaSettingsScreen() {
               <Bell size={20} color="#22152B" />,
               "Thông báo",
               "Cấu hình nhận tin nhắn đặt lịch",
+            )}
+            {renderSettingRow(
+              <MessageSquare size={20} color="#ff7c98" />,
+              "Góp ý & báo lỗi",
+              "Gửi phản hồi đến đội ngũ B-Book",
+              () => router.push('/feedback' as never),
             )}
             {renderSettingRow(
               <ShieldCheck size={20} color="#22152B" />,
