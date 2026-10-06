@@ -14,6 +14,7 @@ import {
   KeyRound,
   User,
   Trash2,
+  MessageSquare,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, Image} from 'react-native';
@@ -339,6 +340,12 @@ export default function ProfileScreen() {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Cài đặt ứng dụng</Text>
           <View style={styles.cardWrapper}>
+            {renderSettingRow(
+              <MessageSquare size={20} color="#ff7c98" />,
+              "Góp ý & báo lỗi",
+              "Gửi phản hồi đến đội ngũ B-Book",
+              () => router.push('/feedback' as never),
+            )}
             {renderSettingRow(
               <ShieldCheck size={20} color="#22152B" />,
               "Chính sách & Điều khoản",
