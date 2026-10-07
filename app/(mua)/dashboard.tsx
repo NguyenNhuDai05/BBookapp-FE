@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { QuickModeSwitcher } from '../../components/QuickModeSwitcher';
 import { ActivityIndicator, View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandColors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
@@ -50,9 +51,10 @@ export default function MuaDashboard() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={BrandColors.accentRose} />}
       >
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>Xin chào,</Text>
             <Text style={styles.name}>{user?.name || 'MUA'}</Text>
+            <QuickModeSwitcher />
           </View>
           <TouchableOpacity style={styles.bellBtn} onPress={() => router.push('/bookings')}>
             <Bell size={24} color={BrandColors.textDark} />

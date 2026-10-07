@@ -1,4 +1,5 @@
 import { Asset } from "expo-asset";
+import { hasMuaAccess } from '../utils/appMode';
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useRouter } from "expo-router";
@@ -60,7 +61,7 @@ export default function SplashScreen() {
             const { user: currentUser, activeMode } = useAuthStore.getState();
             if (currentUser?.role === 'ADMIN') {
               router.replace("/(admin)/dashboard" as any);
-            } else if (activeMode === 'MUA' && (currentUser?.role === 'MUA' || currentUser?.hasMuaProfile)) {
+            } else if (activeMode === 'MUA' && hasMuaAccess(currentUser)) {
               router.replace("/(mua)/dashboard" as any);
             } else {
               router.replace("/(tabs)/home" as any);

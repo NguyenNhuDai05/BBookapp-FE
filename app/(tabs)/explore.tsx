@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { QuickModeSwitcher } from '../../components/QuickModeSwitcher';
 import { ArrowRight, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -48,6 +49,7 @@ export default function ExploreScreen() {
       <ExploreArtistCard item={item as ExploreArtist} onPress={() => openArtist(item.id)} /> : <ExploreServiceCard item={item as ExploreService} onPress={() => openService(item as ExploreService)} />}
   </View>;
   const header = <>
+    <QuickModeSwitcher />
     {reviewUser?.isDemoAccount && reviewUser.demoCounterpartMuaId ? <TouchableOpacity accessibilityRole="button" onPress={() => openArtist(reviewUser.demoCounterpartMuaId!)}><ReviewNotice title="MUA mẫu cho đánh giá" message="Xem hồ sơ, chọn dịch vụ và trải nghiệm đặt lịch với MUA mẫu." /></TouchableOpacity> : null}
     <View style={styles.titleRow}><View><Text style={styles.eyebrow}>B-BOOK / KHÁM PHÁ</Text><Text style={styles.heading}>Đẹp theo cách của bạn</Text></View><Sparkles size={25} color={PINK} /></View>
     <View style={styles.searchRow}><View style={styles.searchBox}><Search size={19} color="#7E6372" />

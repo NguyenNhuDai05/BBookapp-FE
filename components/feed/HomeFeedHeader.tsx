@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { QuickModeSwitcher } from '../QuickModeSwitcher';
 import { Image, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Bell, CircleUserRound } from 'lucide-react-native';
@@ -21,9 +22,12 @@ export function HomeFeedHeader({ avatarUrl, unreadCount, onNotificationsPress, o
     <LinearGradient colors={[BrandColors.gradientHeaderStart, BrandColors.gradientHeaderEnd]}
       start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
       {/* B.png has generous transparent margins. Clip those margins in layout without modifying the asset. */}
+      <View style={styles.identity}>
       <View style={[styles.logoFrame, { width: logoWidth, height: 70 * logoScale }]} accessible accessibilityRole="image" accessibilityLabel="B-Book">
         <Image source={require('../../assets/images/B.png')} resizeMode="contain"
           style={{ position: 'absolute', width: 265 * logoScale, height: 265 * logoScale, left: -46 * logoScale, top: -101.7 * logoScale }} />
+      </View>
+      <QuickModeSwitcher />
       </View>
       <View style={styles.actions}>
         <TouchableOpacity style={styles.button} onPress={onNotificationsPress} accessibilityRole="button"
@@ -43,6 +47,7 @@ export function HomeFeedHeader({ avatarUrl, unreadCount, onNotificationsPress, o
 const styles = StyleSheet.create({
   header: { marginHorizontal: Spacing.base, marginTop: Spacing.sm, marginBottom: Spacing.base, paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md, borderRadius: Radius.xl, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.sm },
+  identity: { flex: 1 },
   logoFrame: { overflow: 'hidden', flexShrink: 0 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flexShrink: 0 },
   button: { width: 44, height: 44, borderRadius: Radius.full, backgroundColor: BrandColors.bgCard, alignItems: 'center', justifyContent: 'center' },

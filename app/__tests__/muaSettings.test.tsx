@@ -12,6 +12,7 @@ jest.mock('@tanstack/react-query', () => ({ useQueryClient: () => mockCache }));
 jest.mock('../../hooks/useMuaEligibility', () => ({ MUA_ELIGIBILITY_QUERY_KEY: ['mua', 'eligibility'] }));
 jest.mock('../../hooks/useMuaProfile', () => ({ useMuaProfile: () => ({ data: mockProfile, isLoading: false, isRefetching: false, refetch: mockRefetch }) }));
 jest.mock('../../store/useAuthStore', () => ({ useAuthStore: () => ({ user: mockUser }) }));
+jest.mock('../../hooks/useAppMode', () => ({ useAppMode: () => ({ selectMode: jest.fn() }) }));
 jest.mock('../../components/ui/dialogStore', () => ({ AppAlert: { alert: jest.fn() } }));
 jest.mock('../../services/api', () => ({ getApiError: () => ({ message: '' }) }));
 

@@ -429,8 +429,9 @@ export default function CheckoutScreen() {
         confirmLabel="Chuyển sang Customer Mode"
         cancelLabel="Hủy"
         onCancel={() => setModeDialogVisible(false)}
-        onConfirm={() => {
-          switchMode('CUSTOMER');
+        onConfirm={async () => {
+          try { await switchMode('CUSTOMER'); }
+          catch { throw new Error('Không thể chuyển chế độ. Vui lòng thử lại.'); }
           setModeDialogVisible(false);
           router.replace('/checkout');
         }}
