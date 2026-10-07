@@ -1,3 +1,4 @@
+import { useAppMode } from '../../hooks/useAppMode';
 import { ReviewNotice } from '../../components/ReviewNotice';
 import { REVIEW_PASSWORD_NOTICE, REVIEW_PROTECTED_NOTICE } from '../../utils/playReview';
 import { getApiError } from '../../services/api';
@@ -31,7 +32,7 @@ import { useMuaProfile } from "../../hooks/useMuaProfile";
 
 export default function MuaSettingsScreen() {
   const router = useRouter();
-  const { user: authUser, logout, deleteAccount, switchMode } = useAuthStore();
+  const { user: authUser, logout, deleteAccount } = useAuthStore();
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const muaId = "me";
 
@@ -77,10 +78,9 @@ export default function MuaSettingsScreen() {
     );
   };
 
+  const { selectMode } = useAppMode();
   const handleSwitchToCustomer = () => {
-    switchMode('CUSTOMER');
-    // Return to the customer tabs layout
-    router.replace("/(tabs)/profile" as any);
+    void selectMode('CUSTOMER');
   };
 
   const performAccountDeletion = async () => {

@@ -1,3 +1,4 @@
+import { useAppMode } from '../../hooks/useAppMode';
 import { ReviewNotice } from '../../components/ReviewNotice';
 import { REVIEW_PASSWORD_NOTICE, REVIEW_PROTECTED_NOTICE } from '../../utils/playReview';
 import { getApiError } from '../../services/api';
@@ -22,14 +23,13 @@ import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { userService, type UserProfile } from "../../services/userService";
 import { useAuthStore } from "../../store/useAuthStore";
-import { UserRole } from "../../types/auth";
 import { bookingService } from "../../services/bookingService";
 import { portfolioService } from "../../services/portfolioService";
 
 // Định nghĩa đúng cấu trúc dữ liệu trả về từ Resource "users" trên MockAPI
 export default function ProfileScreen() {
   const router = useRouter();
-  const { initialize, logout, deleteAccount, user: authUser, switchMode } = useAuthStore();
+  const { initialize, logout, deleteAccount, user: authUser } = useAuthStore();
 
   // Các State lưu trữ trạng thái dữ liệu thực tế từ Server
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -149,7 +149,7 @@ export default function ProfileScreen() {
   };
 
   // Hàm render giao diện các dòng chức năng
-  const isMuaAccount = authUser?.hasMuaProfile === true || authUser?.role === UserRole.MUA;
+  const { hasMuaAccess: isMuaAccount, selectMode } = useAppMode();
 
   const handleBecomeMUA = async () => {
     const openApplication = () => router.push("/mua-onboarding" as any);
@@ -330,8 +330,7 @@ export default function ProfileScreen() {
                 "Chuyển sang giao diện MUA",
                 "Quản lý lịch hẹn, dịch vụ và danh thu",
                 () => {
-                  switchMode('MUA');
-                  router.replace("/(mua)/dashboard" as any);
+                  void selectMode('MUA');
                 },
               )}
           </View>

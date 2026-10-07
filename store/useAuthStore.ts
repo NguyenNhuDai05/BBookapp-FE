@@ -1,4 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { hasMuaAccess } from '../utils/appMode';
+import { muaEligibilityService } from '../services/muaEligibilityService';
+import { getApiError } from '../services/api';
 import { create } from "zustand";
 import { authService } from "../services/authService";
 import type { UserDto } from "../types/auth";
@@ -24,7 +27,8 @@ interface AuthState {
   deleteAccount: () => Promise<void>;
   register: (fullName: string, email: string, password: string, role: UserRole, otp: string) => Promise<boolean>;
   activeMode: 'CUSTOMER' | 'MUA';
-  switchMode: (mode: 'CUSTOMER' | 'MUA') => void;
+  isModeSwitching: boolean;
+  switchMode: (mode: 'CUSTOMER' | 'MUA') => Promise<void>;
   updateUser: (user: Partial<UserDto>) => void;
 }
 
@@ -34,12 +38,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   activeMode: 'CUSTOMER',
 
-  switchMode: (mode) => {
+  isModeSwitching: false,
+  switchMode: async (mode) => {
     const user = get().user;
-    const hasMuaAccess = user?.role === UserRole.MUA || user?.hasMuaProfile === true;
-    const nextMode = mode === 'MUA' && !hasMuaAccess ? 'CUSTOMER' : mode;
+    const previousMode = get().activeMode;
+    const nextMode = mode === 'MUA' && !hasMuaAccess(user) ? 'CUSTOMER' : mode;
     set({ activeMode: nextMode });
-    void AsyncStorage.setItem(ACTIVE_MODE_KEY, nextMode);
+    try { await AsyncStorage.setItem(ACTIVE_MODE_KEY, nextMode); }
+    catch (error) {
+      if (get().user?.id === user?.id) set({ activeMode: previousMode });
+      throw error;
+    }
   },
   updateUser: (updatedUser) => set((state) => ({ user: state.user ? { ...state.user, ...updatedUser } : null })),
 
@@ -65,11 +74,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const user = await authService.getMe();
 
-      const hasMuaAccess = user.role === UserRole.MUA || user.hasMuaProfile === true;
+      let restoreMua = storedMode === 'MUA' && hasMuaAccess(user);
+      if (restoreMua) {
+        try { restoreMua = (await muaEligibilityService.get()).profileStatus !== 'SUSPENDED'; }
+        catch (error) {
+          // Preserve the existing session-expiration behavior for an invalid JWT.
+          if (getApiError(error).status === 401) throw error;
+          restoreMua = false;
+        }
+      }
+      if (storedMode === 'MUA' && !restoreMua) {
+        // Persist the safe fallback without turning a storage error into logout.
+        await AsyncStorage.setItem(ACTIVE_MODE_KEY, 'CUSTOMER').catch(() => undefined);
+      }
       set({
         user,
         isAuthenticated: true,
-        activeMode: storedMode === 'MUA' && hasMuaAccess ? 'MUA' : 'CUSTOMER',
+        activeMode: restoreMua ? 'MUA' : 'CUSTOMER',
       });
 
       return true;

@@ -7,6 +7,7 @@ import { UserRole } from '../../types/auth';
 
 jest.mock('@react-native-async-storage/async-storage', () => jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'));
 jest.mock('../../services/authService', () => ({ authService: { login: jest.fn(), getMe: jest.fn(), logout: jest.fn(), deleteAccount: jest.fn() } }));
+jest.mock('../../services/muaEligibilityService', () => ({ muaEligibilityService: { get: jest.fn().mockResolvedValue({ profileStatus: 'LISTED' }) } }));
 jest.mock('../../services/NotificationService', () => ({ NotificationService: { unregisterDevice: jest.fn() } }));
 jest.mock('../../services/signalRService', () => ({ signalRService: { disconnect: jest.fn() } }));
 jest.mock('../../lib/queryClient', () => ({ queryClient: { clear: jest.fn() } }));

@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
+import { QuickModeSwitcher } from '../../components/QuickModeSwitcher';
 import { ActivityIndicator, View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BrandColors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
+import { AccountMenuTokens, BrandColors, Spacing, Typography, Radius, Shadows } from '../../constants/theme';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useEarningsSnapshot, usePendingBookings, useAllBookings } from '../../hooks/useMuaBookings';
 import { useMuaServices } from '../../hooks/useMuaServices';
@@ -50,11 +51,12 @@ export default function MuaDashboard() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={BrandColors.accentRose} />}
       >
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerIdentity}>
             <Text style={styles.greeting}>Xin chào,</Text>
-            <Text style={styles.name}>{user?.name || 'MUA'}</Text>
+            <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{user?.name || 'MUA'}</Text>
           </View>
-          <TouchableOpacity style={styles.bellBtn} onPress={() => router.push('/bookings')}>
+          <View style={styles.headerActions}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Thông báo" style={styles.bellBtn} onPress={() => router.push('/bookings')}>
             <Bell size={24} color={BrandColors.textDark} />
             {todayBookings.length > 0 && (
               <View style={styles.badge}>
@@ -62,6 +64,8 @@ export default function MuaDashboard() {
               </View>
             )}
           </TouchableOpacity>
+          <QuickModeSwitcher />
+          </View>
         </View>
 
         {user?.isDemoAccount ? <ReviewNotice/> : eligibilityError ? <ErrorView message="Không thể tải trạng thái hồ sơ" onRetry={refetchEligibility} /> : eligibility ? <View style={styles.completionWrap}><MuaCompletionCard eligibility={eligibility} compact onContinue={() => router.push('/mua-onboarding/setup')} /></View> : null}
@@ -131,7 +135,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: Spacing.sm,
   },
+  headerIdentity: { flex: 1, minWidth: 0 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, flexShrink: 0 },
   greeting: {
     fontFamily: Typography.regular,
     fontSize: 16,
@@ -253,7 +260,10 @@ const styles = StyleSheet.create({
   },
   bellBtn: {
     position: 'relative',
-    padding: Spacing.xs,
+    width: AccountMenuTokens.touchSize,
+    height: AccountMenuTokens.touchSize,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   badge: {
     position: 'absolute',
