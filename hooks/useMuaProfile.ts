@@ -16,7 +16,7 @@ export const useUpdateMuaProfile = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Parameters<typeof muaProfileService.updateProfile>[0]) => muaProfileService.updateProfile(data),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.refetchQueries({ queryKey: ['mua-profile'] });
       queryClient.refetchQueries({ queryKey: ['feed'] });
       queryClient.refetchQueries({ queryKey: ['mua'] });

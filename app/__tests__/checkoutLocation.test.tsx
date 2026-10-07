@@ -37,6 +37,11 @@ it('customer destination keeps manually entered address and optional GPS', async
   await render(<Checkout />); await fireEvent.press(screen.getByText('Xác nhận và thanh toán'));
   await waitFor(() => expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ serviceLocationType: 'CUSTOMER_ADDRESS', address: 'Customer address', serviceLatitude: 20, serviceLongitude: 100 })));
 });
+it('composes optional destination details once and keeps the GPS snapshot', async () => {
+  useBookingStore.getState().setAddress('Phường Bến Thành, TP.HCM', { latitude: 20, longitude: 100 }, 'Tầng 12');
+  await render(<Checkout />); await fireEvent.press(screen.getByText('Xác nhận và thanh toán'));
+  await waitFor(() => expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ address: 'Phường Bến Thành, TP.HCM — Tầng 12', serviceLatitude: 20, serviceLongitude: 100 })));
+});
 it('hides studio option when consent is off, and blocks a stale studio draft', async () => {
   useBookingStore.getState().setWorkLocation('mua', 'Stale studio'); mockArtist.allowCustomerVisit = false;
   await render(<Checkout />); expect(screen.queryByText(/Đến nơi làm việc của MUA/)).toBeNull();

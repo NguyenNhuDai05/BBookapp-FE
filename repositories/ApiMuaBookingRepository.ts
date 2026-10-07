@@ -99,7 +99,11 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       services,
       date: dateStr,
       time: timeStr,
-      address: b.address || '',
+      address: typeof b.serviceAddress === 'string' && b.serviceAddress.trim() ? b.serviceAddress : b.address || '',
+      serviceLatitude: typeof b.serviceLatitude === 'number' ? b.serviceLatitude : null,
+      serviceLongitude: typeof b.serviceLongitude === 'number' ? b.serviceLongitude : null,
+      serviceLocationType: b.serviceLocationType === 'CUSTOMER_ADDRESS' || b.serviceLocationType === 'MUA_WORK_LOCATION' ? b.serviceLocationType : null,
+      serviceLocationName: typeof b.serviceLocationName === 'string' ? b.serviceLocationName : null,
       locationType: 'HOME_SERVICE', // Default fallback
       status: mapBookingStatus(b.status),
       paymentStatus: mapPaymentStatus(b.paymentStatus),

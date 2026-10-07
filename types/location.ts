@@ -1,4 +1,13 @@
 export interface Coordinate { latitude: number; longitude: number }
+export type LocationSelectionPhase = 'idle' | 'requestingPermission' | 'locating' | 'resolving' | 'ready' | 'error';
+export interface LocationCandidate extends Coordinate {
+  accuracyMeters?: number;
+  capturedAt?: number;
+  formattedAddress?: string;
+  quality: 'specific' | 'street' | 'area' | 'unknown';
+  accuracyQuality: 'normal' | 'approximate' | 'unreliable';
+  source: 'gps';
+}
 export interface SelectedLocation extends Coordinate { label: string; provinceCode?: number; areaId?: string }
 export interface AreaOption { id: string; name: string; kind: string; legacyProvinceName?: string }
 export interface OperatingProvince { code: number; name: string; legacyProvinceCodes: number[]; areas: AreaOption[] }

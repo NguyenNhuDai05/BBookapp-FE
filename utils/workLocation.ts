@@ -1,7 +1,7 @@
 import type { OperatingArea } from '../types/location';
 import { isValidCoordinate } from './locationCoordinates';
 export function validateWorkLocation(value: Partial<OperatingArea>): string | undefined {
-  if (value.clearWorkLocation) return;
+  if (value.clearWorkLocation && value.latitude == null && value.longitude == null) return;
   const address = value.workLocationAddress?.trim() || '';
   const name = value.workLocationName?.trim() || '';
   const hasLatitude = value.latitude != null; const hasLongitude = value.longitude != null;

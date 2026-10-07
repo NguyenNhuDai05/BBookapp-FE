@@ -59,7 +59,7 @@ Việc tải ảnh lên không tự động chứng minh danh tính của ngư�
 
 BBook chỉ truy cập vị trí thiết bị khi bạn chủ động sử dụng chức năng cần vị trí và cấp quyền cho ứng dụng.
 
-Vị trí có thể được sử dụng để tìm MUA ở gần, thêm vị trí studio hoặc nơi làm việc của MUA, hoặc chọn địa điểm thực hiện booking. Bạn có thể chọn khu vực hoặc nhập địa chỉ thủ công thay vì cung cấp vị trí thiết bị. BBook không tự chuyển vị trí GPS thành địa chỉ; bạn cần nhập và kiểm tra địa chỉ trước khi lưu.
+Vị trí có thể được sử dụng để tìm MUA ở gần, thêm vị trí studio hoặc nơi làm việc của MUA, hoặc chọn địa điểm thực hiện booking. Bạn có thể chọn khu vực hoặc nhập địa chỉ thủ công thay vì cung cấp vị trí thiết bị. Khi bạn chủ động chọn GPS, BBook có thể dùng dịch vụ chuyển tọa độ thành địa chỉ của hệ điều hành thông qua Expo Location để gợi ý địa chỉ. Dịch vụ này có thể cần Internet và gửi tọa độ đến bên cung cấp dịch vụ vị trí của thiết bị. Bạn kiểm tra và xác nhận trước khi lưu; có thể nhập địa chỉ thủ công nếu không muốn dùng GPS hoặc không tìm được địa chỉ.
 
 Địa chỉ hoặc tọa độ liên quan đến hồ sơ MUA và booking có thể được lưu khi cần thiết để cung cấp chức năng tương ứng.
 
@@ -191,7 +191,7 @@ BBook có thể yêu cầu bước xác minh hợp lý nhằm bảo đảm yêu 
 
 Bạn có thể chỉnh sửa những thông tin được BBook hỗ trợ trong hồ sơ của mình và quản lý quyền camera, ảnh, vị trí hoặc thông báo thông qua cài đặt của thiết bị.
 
-MUA có thể xóa riêng nơi làm việc mà vẫn giữ tài khoản: mở phần chỉnh sửa hồ sơ, chọn Xóa nơi làm việc và lưu thay đổi. Tên, địa chỉ và GPS của nơi làm việc được xóa khỏi hồ sơ; khu vực nhận khách và địa điểm của booking đã tạo trước đó vẫn được giữ để thực hiện lịch hẹn.
+MUA có thể xóa riêng nơi làm việc mà vẫn giữ tài khoản: mở phần chỉnh sửa hồ sơ, chọn Xóa vị trí hoạt động và lưu thay đổi. Tên, địa chỉ và GPS của nơi làm việc được xóa khỏi hồ sơ; khu vực nhận khách và địa điểm của booking đã tạo trước đó vẫn được giữ để thực hiện lịch hẹn.
 
 Bạn cũng có thể liên hệ BBook để hỏi về dữ liệu cá nhân, yêu cầu chỉnh sửa thông tin không thể tự chỉnh sửa hoặc yêu cầu xóa tài khoản và dữ liệu liên quan.
 

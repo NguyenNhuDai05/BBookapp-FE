@@ -2,6 +2,7 @@ import { api } from '../services/api';
 import type { IMuaProfileRepository } from './IMuaProfileRepository';
 import type { MuaProfileDto, PayoutSettingsDto, MuaUpdateDto } from '../types/muaProfile';
 import { useAuthStore } from '../store/useAuthStore';
+import { isPrivateOperatingPoint, muaLocationPayload } from '../utils/muaLocationPayload';
 
 export class ApiMuaProfileRepository implements IMuaProfileRepository {
   async getProfile(muaId: string): Promise<MuaProfileDto> {
@@ -45,9 +46,15 @@ export class ApiMuaProfileRepository implements IMuaProfileRepository {
   }
 
   async updateProfile(data: MuaUpdateDto): Promise<void> {
-    const payload = { ...data };
-    // Unchanged legacy private GPS is not silently migrated into a workplace.
-    if (data.workLocationName == null && data.workLocationAddress == null && !data.clearWorkLocation && !data.allowCustomerVisit) delete payload.allowCustomerVisit;
+    const payload = muaLocationPayload(data);
+    if (data.clearWorkLocation && isPrivateOperatingPoint(data)) {
+      // The existing API gives ClearWorkLocation precedence over coordinates.
+      // Complete both writes before reporting success; retrying both is safe.
+      await api.put('/Mua/profile', { clearWorkLocation: true });
+      try { await api.put('/Mua/profile', payload); }
+      catch { throw new Error('Đã xóa địa điểm tiếp khách nhưng chưa lưu vị trí mới. Vui lòng bấm Lưu để thử lại.'); }
+      return;
+    }
     await api.put('/Mua/profile', payload);
   }
 

@@ -10,6 +10,7 @@ interface BookingDraft {
   time: string; // HH:mm
   address: string;
   addressCoordinates?: Coordinate;
+  addressDetails: string;
   note: string;
   paymentMethod: string;
 }
@@ -26,7 +27,7 @@ interface BookingStore {
   removeService: (serviceId: string) => void;
   setDate: (date: string) => void;
   setTime: (time: string) => void;
-  setAddress: (address: string, coordinates?: Coordinate) => void;
+  setAddress: (address: string, coordinates?: Coordinate, details?: string) => void;
   setWorkLocation: (sourceMuaId: string, address: string, name?: string) => void;
   useCustomerAddress: () => void;
   setNote: (note: string) => void;
@@ -46,6 +47,7 @@ const initialDraft: BookingDraft = {
   date: '',
   time: '',
   address: '',
+  addressDetails: '',
   note: '',
   paymentMethod: 'payOS',
 };
@@ -107,7 +109,7 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
 
   setDate: (date) => set((state) => ({ draft: { ...state.draft, date } })),
   setTime: (time) => set((state) => ({ draft: { ...state.draft, time } })),
-  setAddress: (address, addressCoordinates) => set((state) => ({ draft: { ...state.draft, address, addressCoordinates, location: { mode: 'CUSTOMER_ADDRESS' } } })),
+  setAddress: (address, addressCoordinates, addressDetails = '') => set((state) => ({ draft: { ...state.draft, address, addressCoordinates, addressDetails, location: { mode: 'CUSTOMER_ADDRESS' } } })),
   setWorkLocation: (sourceMuaId, address, name) => set((state) => state.draft.mua?.id !== sourceMuaId || !address.trim() ? {} : ({ draft: { ...state.draft, location: { mode: 'MUA_WORK_LOCATION', sourceMuaId, address: address.trim(), name } } })),
   useCustomerAddress: () => set((state) => ({ draft: { ...state.draft, location: { mode: 'CUSTOMER_ADDRESS' } } })),
   setNote: (note) => set((state) => ({ draft: { ...state.draft, note } })),
