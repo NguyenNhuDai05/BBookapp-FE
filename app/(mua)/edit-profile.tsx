@@ -148,7 +148,7 @@ function EditProfileScreen() {
           <ArrowLeft size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chỉnh sửa trang</Text>
-        <TouchableOpacity style={styles.headerBtn} onPress={handleSave} disabled={isSaving || (isUnchanged && area.workLocationName === profile?.workLocationName && area.workLocationAddress === profile?.workLocationAddress && !!area.allowCustomerVisit === !!profile?.allowCustomerVisit && !area.clearWorkLocation)} accessibilityLabel="Lưu thay đổi">
+        <TouchableOpacity style={styles.headerBtn} onPress={handleSave} disabled={isSaving || (isUnchanged && !!area.operatingLocationConfirmed === !!profile?.operatingLocationConfirmed && area.workLocationName === profile?.workLocationName && area.workLocationAddress === profile?.workLocationAddress && !!area.allowCustomerVisit === !!profile?.allowCustomerVisit && !area.clearWorkLocation)} accessibilityLabel="Lưu thay đổi">
           {isSaving ? (
             <ActivityIndicator size="small" color={BrandColors.accentPink} />
           ) : (

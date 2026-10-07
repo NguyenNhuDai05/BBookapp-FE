@@ -1,4 +1,5 @@
 import { ApiBookingRepository } from '../ApiBookingRepository';
+import { ApiMuaBookingRepository } from '../ApiMuaBookingRepository';
 import { api } from '../../services/api';
 jest.mock('../../services/api', () => ({ api: { get: jest.fn(), post: jest.fn() } }));
 const snapshot = { bookingId: 'booking-1', customerId: 'customer-1', muaId: 'mua-1', serviceAddress: 'Địa chỉ booking', address: 'Legacy alias', serviceLatitude: 10.78, serviceLongitude: 106.7, notes: 'Tầng 12', services: [] };
@@ -22,4 +23,17 @@ it('forwards optional customer GPS and notes into the existing backend fields', 
   jest.mocked(api.post).mockResolvedValue({ data: snapshot });
   await new ApiBookingRepository().createBooking({ idempotencyKey: 'test', muaId: snapshot.muaId, services: [{ serviceId: 'service', participantsCount: 1 }], date: '2026-10-10', time: '10:00', address: snapshot.serviceAddress, serviceLatitude: snapshot.serviceLatitude, serviceLongitude: snapshot.serviceLongitude, note: snapshot.notes, paymentMethod: 'payOS' });
   expect(api.post).toHaveBeenCalledWith('/Booking/create', expect.objectContaining({ address: snapshot.serviceAddress, serviceLatitude: snapshot.serviceLatitude, serviceLongitude: snapshot.serviceLongitude, notes: snapshot.notes }));
+});
+
+it('MUA list receives the same canonical destination snapshot as customer detail', async () => {
+  jest.mocked(api.get).mockResolvedValueOnce({ data: snapshot }).mockResolvedValueOnce({ data: [snapshot] });
+  const customer = await new ApiBookingRepository().getBookingDetail(snapshot.bookingId);
+  const [mua] = await new ApiMuaBookingRepository().getAllBookings(snapshot.muaId);
+  for (const key of ['address', 'serviceLatitude', 'serviceLongitude', 'serviceLocationType', 'serviceLocationName', 'note'] as const) expect(mua[key]).toEqual(customer[key]);
+});
+it('MUA legacy and workplace mapping uses snapshots without live-profile fallback', async () => {
+  jest.mocked(api.get).mockResolvedValue({ data: [{ ...snapshot, serviceAddress: null, serviceLatitude: null, serviceLongitude: null }, { ...snapshot, serviceLocationType: 'MUA_WORK_LOCATION', serviceLocationName: 'Snapshot', muaProfile: { workLocationAddress: 'New private address' } }] });
+  const [legacy, workplace] = await new ApiMuaBookingRepository().getAllBookings(snapshot.muaId);
+  expect(legacy).toMatchObject({ address: snapshot.address, serviceLatitude: null, serviceLocationType: null });
+  expect(workplace).toMatchObject({ address: snapshot.serviceAddress, serviceLatitude: snapshot.serviceLatitude, serviceLocationType: 'MUA_WORK_LOCATION', serviceLocationName: 'Snapshot' });
 });

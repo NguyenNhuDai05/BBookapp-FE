@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CheckCircle, ShieldCheck, Clock, Home, FileText } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useBookingStore } from '../../store/useBookingStore';
+import { composeLocationAddress } from '../../utils/locationAddress';
 import { useBookingDetail } from '../../hooks/useBooking';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -132,7 +133,7 @@ export default function CheckoutSuccessScreen() {
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Địa điểm</Text>
-            <Text style={styles.infoValue} numberOfLines={2}>{booking?.serviceLocationType === 'MUA_WORK_LOCATION' ? `Bạn sẽ đến: ${booking.serviceLocationName || ''}\n${booking.address}` : booking?.address || draft.address}</Text>
+            <Text style={styles.infoValue} numberOfLines={2}>{booking?.serviceLocationType === 'MUA_WORK_LOCATION' ? `Bạn sẽ đến: ${booking.serviceLocationName || ''}\n${booking.address}` : booking?.address || composeLocationAddress(draft.address, draft.addressDetails)}</Text>
           </View>
 
           <View style={styles.divider} />

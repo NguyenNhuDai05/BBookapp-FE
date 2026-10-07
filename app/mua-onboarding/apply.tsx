@@ -17,6 +17,7 @@ import { getApiError } from '../../services/api';
 import { useAuthStore } from '../../store/useAuthStore';
 import type { MuaApplicationRequestDto } from '../../types/onboarding';
 import { validateMuaOnboarding } from '../../utils/muaOnboarding';
+import { muaLocationPayload } from '../../utils/muaLocationPayload';
 import { EXPERIENCE_LEVELS, normalizeAreaName } from '../../utils/muaAreas';
 
 export default function MuaApplyScreen() {
@@ -75,7 +76,7 @@ export default function MuaApplyScreen() {
     setErrors(next);
     if (Object.keys(next).length) { scroll.current?.scrollTo({ y: 0, animated: true }); return appDialog.alert('Thông tin chưa hoàn tất', Object.values(next)[0]); }
     saveLock.current = true; setSaving(true);
-    try { await submit.mutateAsync({ ...form, displayName: form.displayName.trim(), bio: form.bio.trim(), avatarUrl: await uploadImage(form.avatarUrl) }); router.replace('/(mua)/dashboard'); }
+    try { await submit.mutateAsync(muaLocationPayload({ ...form, displayName: form.displayName.trim(), bio: form.bio.trim(), avatarUrl: await uploadImage(form.avatarUrl) })); router.replace('/(mua)/dashboard'); }
     catch (error) { setErrors(current => ({ ...current, submit: getApiError(error).message })); }
     finally { saveLock.current = false; setSaving(false); }
   };
