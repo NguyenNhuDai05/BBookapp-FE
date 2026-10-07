@@ -3,7 +3,7 @@ import { bookingService } from '../services/bookingService';
 import { CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
 import { getApiError } from '../services/api';
 import { MUA_ELIGIBILITY_QUERY_KEY } from './useMuaEligibility';
-import { useIsFocused, useFocusEffect } from '@react-navigation/native';
+import { useIsFocused, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 
 const invalidateBookingState = (queryClient: ReturnType<typeof useQueryClient>, bookingId?: string) => {

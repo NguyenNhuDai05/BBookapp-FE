@@ -36,6 +36,7 @@ Chưa thực hiện deploy backend, build AAB hoặc rollout Play trong thay đ�
 ## Kết quả kiểm tra mã nguồn
 
 - TypeScript `tsc --noEmit`: đạt.
+- Với SDK 57, import navigation trong mã ứng dụng phải dùng entry point của `expo-router`; không import trực tiếp `@react-navigation/*`. Kiểm tra thêm Metro Android bundle trước phát hành vì TypeScript/Jest không phát hiện được quy tắc này. Tham khảo [Expo Router migration](https://docs.expo.dev/router/migrate/sdk-55-to-56/).
 - ESLint các màn hình/component/hook đã sửa: không có lỗi hoặc cảnh báo.
 - 14 test frontend mới: ảnh booking, lọc trạng thái lịch, mở chat hai phía, lỗi/thử lại và chọn tháng/năm.
 - 35 test hồi quy: Play review UX/contracts và địa điểm booking.

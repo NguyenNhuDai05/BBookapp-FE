@@ -22,3 +22,14 @@ it('shows retry on denied access without falling back to a public URL', async ()
   expect(screen.queryByTestId('private-image')).toBeNull();
   expect(api.get).toHaveBeenCalledTimes(1);
 });
+it('reports public image errors and retries the existing URL', async () => {
+  const error = jest.fn(); const load = jest.fn();
+  await render(<PrivateMediaImage uri="https://example.test/photo" onError={error} onLoad={load} />);
+  await fireEvent(screen.getByTestId('private-image'), 'error', { error: 'offline' });
+  expect(error).toHaveBeenCalledWith({ error: 'offline' });
+  expect(api.get).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByLabelText('Tải lại ảnh riêng tư'));
+  expect(screen.getByTestId('private-image').props.source.uri).toBe('https://example.test/photo');
+  await fireEvent(screen.getByTestId('private-image'), 'load', { source: { width: 800, height: 400 } });
+  expect(load).toHaveBeenCalled();
+});
