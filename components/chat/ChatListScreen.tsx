@@ -12,13 +12,14 @@ import { ChatRoomDto, chatService } from '../../services/chatService';
 import { signalRService } from '../../services/signalRService';
 import { getChatPeer } from '../../utils/chatPeer';
 import { authService } from '../../services/authService';
+import { parseChatDate } from '../../utils/chatPresentation';
 
 type Props = { viewer: 'customer' | 'mua' };
 
 const relativeTime = (value?: string) => {
   if (!value) return '';
-  const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return '';
+  const date = parseChatDate(value);
+  if (!date) return '';
   const diff = Math.max(0, Date.now() - date.getTime());
   const minutes = Math.floor(diff / 60000);
   if (minutes < 1) return 'Vừa xong';
@@ -46,7 +47,7 @@ export default function ChatListScreen({ viewer }: Props) {
       setError(false);
       const [data, user] = await Promise.all([chatService.getRooms(), authService.getMe()]);
       setCurrentUserId(user.id);
-      setRooms([...data].sort((a,b) => new Date(b.lastMessage?.sentAt || b.createdAt).getTime() - new Date(a.lastMessage?.sentAt || a.createdAt).getTime()));
+      setRooms([...data].sort((a,b) => (parseChatDate(b.lastMessage?.sentAt || b.createdAt)?.getTime() ?? 0) - (parseChatDate(a.lastMessage?.sentAt || a.createdAt)?.getTime() ?? 0)));
     }
     catch (loadError) { console.error('Error fetching chat rooms', loadError); setError(true); }
     finally { setLoading(false); setRefreshing(false); }

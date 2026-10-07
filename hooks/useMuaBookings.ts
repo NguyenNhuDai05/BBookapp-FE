@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { muaBookingService } from '../services/muaBookingService';
 import type { BookingStatus } from '../types/booking';
 import { getApiError } from '../services/api';
-import { useIsFocused, useFocusEffect } from '@react-navigation/native';
+import { useIsFocused, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 
 export const usePendingBookings = (muaId: string) => {
