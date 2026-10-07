@@ -34,6 +34,10 @@ export interface MessageDto {
 }
 
 export const chatService = {
+    getOrCreateRoomForBooking: async (bookingId: string) => {
+        const response = await api.post<ChatRoomDto>(`/chat/booking/${bookingId}`);
+        return response.data;
+    },
     getRooms: async () => {
         const response = await api.get<ChatRoomDto[]>('/chat/rooms');
         return response.data;

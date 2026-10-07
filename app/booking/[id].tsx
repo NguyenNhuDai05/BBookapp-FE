@@ -1,10 +1,11 @@
+import { BookingChatButton } from '../../components/booking/BookingChatButton';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { ArrowLeft, MessageCircle, Calendar, Clock, Copy, RotateCcw } from 'lucide-react-native';
+import { ArrowLeft, Calendar, Clock, Copy, RotateCcw } from 'lucide-react-native';
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useBookingDetail, useConfirmBookingCompletion, usePayBookingDeposit } from '../../hooks/useBooking';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -130,10 +131,7 @@ export default function BookingDetailScreen() {
               <Text style={styles.muaName}>{booking.mua.name}</Text>
               <Text style={styles.muaRole}>Chuyên gia Makeup</Text>
             </View>
-            <TouchableOpacity style={styles.chatBtn}>
-              <MessageCircle size={18} color={BrandColors.accentPink} />
-              <Text style={styles.chatText}>Chat</Text>
-            </TouchableOpacity>
+            <BookingChatButton bookingId={booking.id} muaId={booking.mua.id} viewAs="customer" />
           </View>
         </View>
 

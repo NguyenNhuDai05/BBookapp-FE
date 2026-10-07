@@ -1,0 +1,30 @@
+import React from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { BookingChatButton } from '../BookingChatButton';
+import { chatService } from '../../../services/chatService';
+import { router } from 'expo-router';
+import { AppAlert } from '../../ui/dialogStore';
+jest.mock('expo-router', () => ({ router: { push: jest.fn() } }));
+jest.mock('../../../services/chatService', () => ({ chatService: { getOrCreateRoomWithMua: jest.fn(), getOrCreateRoomForBooking: jest.fn() } }));
+jest.mock('../../../services/api', () => ({ getApiError: () => ({ message: 'Mất kết nối' }) }));
+jest.mock('../../ui/dialogStore', () => ({ AppAlert: { alert: jest.fn() } }));
+beforeEach(() => jest.clearAllMocks());
+it.each(['customer', 'mua'] as const)('opens a room for %s from booking', async viewAs => {
+  jest.mocked(chatService.getOrCreateRoomWithMua).mockResolvedValue({ chatRoomId: 'room' } as any);
+  jest.mocked(chatService.getOrCreateRoomForBooking).mockResolvedValue({ chatRoomId: 'room' } as any);
+  await render(<BookingChatButton bookingId="booking" muaId="artist" viewAs={viewAs} />);
+  await fireEvent.press(screen.getByLabelText('Nhắn tin về booking'));
+  await waitFor(() => expect(router.push).toHaveBeenCalledWith('/chat/room'));
+  if (viewAs === 'customer') expect(chatService.getOrCreateRoomWithMua).toHaveBeenCalledWith('artist');
+  else expect(chatService.getOrCreateRoomForBooking).toHaveBeenCalledWith('booking');
+});
+it('shows failures and allows retry without navigation', async () => {
+  jest.mocked(chatService.getOrCreateRoomForBooking).mockRejectedValue(new Error('offline'));
+  await render(<BookingChatButton bookingId="booking" muaId="artist" viewAs="mua" />);
+  await fireEvent.press(screen.getByLabelText('Nhắn tin về booking'));
+  await waitFor(() => expect(AppAlert.alert).toHaveBeenCalledWith('Không thể mở trò chuyện', 'Mất kết nối'));
+  expect(router.push).not.toHaveBeenCalled();
+  jest.mocked(chatService.getOrCreateRoomForBooking).mockResolvedValue({ chatRoomId: 'room' } as any);
+  await fireEvent.press(screen.getByLabelText('Nhắn tin về booking'));
+  await waitFor(() => expect(router.push).toHaveBeenCalledWith('/chat/room'));
+});
