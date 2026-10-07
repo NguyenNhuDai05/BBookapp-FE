@@ -96,6 +96,8 @@ export const Radius = {
   full: 999,
 } as const;
 
+export const AccountMenuTokens = { avatarSize: 40, touchSize: 44, rowHeight: 56 } as const;
+
 export const CustomerTabBarTokens = { contentHeight: 68, minBottomPadding: 12, topPadding: 8 } as const;
 
 export const getCustomerTabBarMetrics = (bottomInset: number) => {
