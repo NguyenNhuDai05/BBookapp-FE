@@ -1,3 +1,4 @@
+import { BookingChatButton } from '../../../components/booking/BookingChatButton';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ReviewNotice } from '../../../components/ReviewNotice';
 import { REVIEW_FINANCIAL_NOTICE } from '../../../utils/playReview';
@@ -129,6 +130,7 @@ export default function MuaBookingDetailScreen() {
                   <Text style={styles.phoneText}>{booking.customer.phone || 'Chưa cập nhật SĐT'}</Text>
                 </View>
               </View>
+              <BookingChatButton bookingId={booking.id} muaId={booking.mua.id} viewAs="mua" />
             </View>
           </View>
         </View>

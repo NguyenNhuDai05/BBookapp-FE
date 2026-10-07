@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { muaBookingService } from '../services/muaBookingService';
 import type { BookingStatus } from '../types/booking';
 import { getApiError } from '../services/api';
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 export const usePendingBookings = (muaId: string) => {
   return useQuery({
@@ -12,11 +14,16 @@ export const usePendingBookings = (muaId: string) => {
 };
 
 export const useAllBookings = (muaId: string) => {
-  return useQuery({
+  const focused = useIsFocused();
+  const query = useQuery({
     queryKey: ['mua-bookings', muaId, 'ALL'],
     queryFn: () => muaBookingService.getAllBookings(muaId),
     staleTime: 60 * 1000,
+    refetchInterval: focused ? 15000 : false,
   });
+  const { refetch } = query;
+  useFocusEffect(useCallback(() => { void refetch(); }, [refetch]));
+  return query;
 };
 
 export const useUpdateBookingStatus = (muaId: string) => {

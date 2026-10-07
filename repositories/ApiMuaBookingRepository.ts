@@ -74,7 +74,9 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       name: s.serviceName,
       durationMinutes: s.durationMinutes,
       price: s.price,
-      participantsCount: s.participantsCount
+      participantsCount: s.participantsCount,
+      imageUrl: s.imageUrl || s.image || undefined,
+      description: s.description || s.serviceDescription || undefined
     }));
 
     return {
@@ -82,7 +84,7 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       mua: {
         id: b.muaId,
         name: b.muaName || 'MUA',
-        avatarUrl: 'https://via.placeholder.com/150', // Backend BookingDto doesn't include MUA avatar, fallback
+        avatarUrl: b.muaAvatarUrl || '',
         rating: 5.0,
         reviewCount: 0,
         location: '',
@@ -91,8 +93,8 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       customer: {
         id: b.customerId,
         name: b.customerName || 'Khách hàng',
-        phone: '',
-        avatarUrl: 'https://via.placeholder.com/150' // Placeholder for customer
+        phone: b.customerPhone || '',
+        avatarUrl: b.customerAvatarUrl || ''
       },
       services,
       date: dateStr,
