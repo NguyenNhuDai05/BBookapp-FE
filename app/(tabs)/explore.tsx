@@ -1,3 +1,4 @@
+import { AdvisorEntry } from '../../features/makeupAdvisor/AdvisorEntry';
 import { useRouter } from 'expo-router';
 import { QuickModeSwitcher } from '../../components/QuickModeSwitcher';
 import { ArrowRight, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react-native';
@@ -48,7 +49,7 @@ export default function ExploreScreen() {
     {kind === 'portfolio' ? <ExplorePostCard item={item as ExplorePost} onPress={() => openPost(item as ExplorePost)} /> : kind === 'artists' ?
       <ExploreArtistCard item={item as ExploreArtist} onPress={() => openArtist(item.id)} /> : <ExploreServiceCard item={item as ExploreService} onPress={() => openService(item as ExploreService)} />}
   </View>;
-  const header = <>
+  const header = <><AdvisorEntry />
     {reviewUser?.isDemoAccount && reviewUser.demoCounterpartMuaId ? <TouchableOpacity accessibilityRole="button" onPress={() => openArtist(reviewUser.demoCounterpartMuaId!)}><ReviewNotice title="MUA mẫu cho đánh giá" message="Xem hồ sơ, chọn dịch vụ và trải nghiệm đặt lịch với MUA mẫu." /></TouchableOpacity> : null}
     <View style={styles.titleRow}><View style={{ flex: 1, minWidth: 0 }}><Text style={styles.eyebrow}>B-BOOK / KHÁM PHÁ</Text><Text style={styles.heading}>Đẹp theo cách của bạn</Text></View><QuickModeSwitcher /></View>
     <View style={styles.searchRow}><View style={styles.searchBox}><Search size={19} color="#7E6372" />

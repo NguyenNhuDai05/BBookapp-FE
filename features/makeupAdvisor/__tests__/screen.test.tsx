@@ -1,0 +1,16 @@
+import React from 'react';
+import {fireEvent,render,screen} from '@testing-library/react-native';
+import MakeupAdvisor from '../../../app/makeup-advisor';
+const mockPush=jest.fn();const mockPick=jest.fn();const mockScan=jest.fn();let mockAi:Record<string,unknown>;
+const mockService={id:'fixture-service',muaId:'fixture-mua',name:'Fixture service',authorName:'Fixture MUA',price:50,durationMinutes:60,tags:[],imageUrls:[]};
+jest.mock('expo-router',()=>({useRouter:()=>({push:mockPush,back:jest.fn()})}));
+jest.mock('../flags',()=>({advisorEnabled:true}));
+jest.mock('../useAdvisor',()=>({useAdvisor:()=>mockAi}));
+jest.mock('../faceGeometry',()=>({extractGeometry:()=>({status:'measured',ratios:{outlineHeightToWidth:1.3,eyeCenterDistanceToWidth:.49,mouthWidthToWidth:.4},reasons:[]})}));
+jest.mock('../../../services/exploreService',()=>({exploreService:{home:jest.fn(),search:jest.fn()}}));
+jest.mock('@tanstack/react-query',()=>({useQuery:(o:{queryKey:string[];enabled:boolean})=>o.queryKey[1]==='catalog'?{data:{styles:[{id:97,name:'Korean',artistCount:1}],provinces:[]}}:{data:o.enabled?{items:o.queryKey[1]==='services'?[mockService]:[],nextCursor:null}:undefined}}));
+beforeEach(()=>{jest.clearAllMocks();mockAi={photo:undefined,analysis:undefined,busy:false,error:'',reset:jest.fn(),pick:mockPick,scan:mockScan,scanAvailable:true};});
+test('photo first: no questionnaire or recommendation until result or explicit fallback',async()=>{await render(<MakeupAdvisor/>);expect(screen.queryByText('Bạn chuẩn bị cho dịp nào?')).toBeNull();expect(screen.queryByText('Korean · tươi sáng')).toBeNull();expect(mockPick).not.toHaveBeenCalled();expect(mockScan).not.toHaveBeenCalled();});
+test('consent gates acquisition; fallback never invokes inference',async()=>{await render(<MakeupAdvisor/>);await fireEvent.press(screen.getByText('Chọn ảnh'));expect(mockPick).not.toHaveBeenCalled();await fireEvent.press(screen.getByText('Khám phá không dùng ảnh'));expect(screen.getByText('Korean · tươi sáng')).toBeTruthy();expect(mockScan).not.toHaveBeenCalled();});
+test('real API IDs flow to existing MUA detail without creating a booking',async()=>{await render(<MakeupAdvisor/>);await fireEvent.press(screen.getByText('Khám phá không dùng ảnh'));expect(screen.getByText('Fixture service')).toBeTruthy();await fireEvent.press(screen.getByText('Xem dịch vụ'));expect(mockPush).toHaveBeenCalledWith({pathname:'/mua-detail',params:{id:'fixture-mua',tab:'Dịch vụ',serviceId:'fixture-service'}});expect(mockScan).not.toHaveBeenCalled();});
+test('neutral geometry is disclosed as discovery, not claimed personalization',async()=>{mockAi.analysis={};await render(<MakeupAdvisor/>);expect(screen.getByText(/chưa có tín hiệu đủ rõ để xếp hạng theo ảnh/)).toBeTruthy();expect(screen.queryByText(/Một số ý tưởng dưới đây có dùng hình học/)).toBeNull();});

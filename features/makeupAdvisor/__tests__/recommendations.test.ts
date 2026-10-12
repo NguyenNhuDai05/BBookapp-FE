@@ -1,0 +1,14 @@
+import {recommend,resolveStyles,hasServiceStyleTag} from '../recommendations';
+import type {Geometry} from '../faceGeometry';
+import type {ExploreService} from '../../../types/explore';
+const geometry=(height:number,eyes=.48,mouth=.38):Geometry=>({status:'measured',ratios:{outlineHeightToWidth:height,eyeCenterDistanceToWidth:eyes,mouthWidthToWidth:mouth},reasons:[]});
+test('same observations always yield identical recommendations, max three',()=>{expect(recommend({},geometry(1.5))).toEqual(recommend({},geometry(1.5)));expect(recommend()).toHaveLength(3);});
+test('valid image signals really change ranking and reasons',()=>{const tall=recommend({},geometry(1.5));const compact=recommend({},geometry(1.1));expect(tall[0].key).toBe('portrait');expect(compact[0].key).toBe('event');expect(tall[0].geometryRanked).toBe(true);expect(tall[0].reasons.join()).toContain('thử nghiệm');});
+test('eye observations influence rank independently of mouth expression',()=>{expect(recommend({},geometry(1.25,.44))[0].key).toBe('event');expect(recommend({},geometry(1.25,.55))[0].key).toBe('korean');expect(recommend({},geometry(1.25,.44,.25))).toEqual(recommend({},geometry(1.25,.44,.55)));});
+test.each(['blocked','needs_review'] as const)('%s cannot bypass quality gate or personalize geometry',status=>{expect(recommend({}, {status,reasons:['quality']})).toEqual(recommend());});
+test('neutral measurements do not force variation',()=>{expect(recommend({},geometry(1.25)).every(r=>!r.geometryRanked)).toBe(true);expect(recommend({},geometry(1.29))).toEqual(recommend({},geometry(1.25)));});
+test('nonfinite or implausible values fall back to discovery',()=>{expect(recommend({},geometry(NaN))).toEqual(recommend());expect(recommend({},geometry(8))).toEqual(recommend());});
+test('bride is never inferred from a face',()=>{expect(recommend({},geometry(1.5)).some(r=>r.key==='bridal')).toBe(false);expect(recommend({occasion:'wedding'})[0].key).toBe('bridal');});
+test('catalog resolves exact names dynamically, never substring guesses or IDs',()=>{expect(resolveStyles(['Korean'],[{id:42,name:'Korean',artistCount:1},{id:9,name:'Korean Special',artistCount:1}]).map(s=>s.id)).toEqual([42]);expect(resolveStyles(['Unknown'],[])).toEqual([]);});
+test('artist-style result is not mislabelled as service-tag evidence',()=>{const item={tags:['Sự kiện khác']} as ExploreService;const style={id:91,name:'Sự kiện',artistCount:1};expect(hasServiceStyleTag(item,style)).toBe(false);expect(hasServiceStyleTag({...item,tags:['Sự kiện']},style)).toBe(true);});
+test('every recommendation carries version, source and explicit signals, no confidence',()=>{for(const row of recommend({},geometry(1.5))){expect(row.version).toBeTruthy();expect(row.sourceUrl).toMatch(/^https:/);expect(row.signals.length).toBeGreaterThan(0);expect(row).not.toHaveProperty('confidence');}});

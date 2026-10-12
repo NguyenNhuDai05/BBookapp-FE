@@ -25,6 +25,32 @@
       "env": {
         "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api"
       }
+    },
+    "advisor-development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "autoIncrement": false,
+      "android": {
+        "gradleCommand": ":app:assembleDebug",
+        "buildType": "apk"
+      },
+      "env": {
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api"
+      }
+    },
+    "advisor-preview": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "autoIncrement": false,
+      "android": {
+        "gradleCommand": ":app:assembleRelease",
+        "buildType": "apk"
+      },
+      "env": {
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api"
+      }
     }
   },
   "submit": {

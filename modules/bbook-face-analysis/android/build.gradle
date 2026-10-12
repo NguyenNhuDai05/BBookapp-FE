@@ -1,0 +1,20 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+group = 'expo.modules.bbookfaceanalysis'
+version = '0.1.0'
+android {
+  namespace 'expo.modules.bbookfaceanalysis'
+  defaultConfig {
+    versionCode 1
+    versionName '0.1.0'
+    testInstrumentationRunner 'android.test.InstrumentationTestRunner'
+  }
+}
+dependencies {
+  implementation 'com.google.mlkit:face-detection:16.1.7'
+  implementation 'androidx.exifinterface:exifinterface:1.4.2'
+  testImplementation 'junit:junit:4.13.2'
+  androidTestCompileOnly files("${android.sdkDirectory}/platforms/android-36/optional/android.test.runner.jar", "${android.sdkDirectory}/platforms/android-36/optional/android.test.base.jar")
+}
