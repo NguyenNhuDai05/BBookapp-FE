@@ -1,0 +1,11 @@
+{
+  "phase": "A/B only",
+  "protectedFilesChecked": 15,
+  "changedProtectedFiles": [],
+  "productionEngineUnchanged": true,
+  "catalogValid": true,
+  "catalogCount": 20,
+  "catalogIssues": [],
+  "inputMatchesRuntime": true,
+  "inputSHA256": "ab34a96774609a15a0a11a6673cedaf7db59a4075af5bf9ebd9c00ab58559901"
+}

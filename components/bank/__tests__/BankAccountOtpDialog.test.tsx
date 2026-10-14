@@ -1,11 +1,13 @@
 import React from 'react';
-import {fireEvent,render,screen} from '@testing-library/react-native';
+import {act,fireEvent,render,screen} from '@testing-library/react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {OverlayProvider} from '../../ui/OverlayProvider';
 import {BankAccountOtpDialog} from '../BankAccountOtpDialog';
 
 const metrics={frame:{x:0,y:0,width:390,height:844},insets:{top:24,bottom:24,left:0,right:0}};
 const Wrapper=({children}:React.PropsWithChildren)=><SafeAreaProvider initialMetrics={metrics}><OverlayProvider>{children}</OverlayProvider></SafeAreaProvider>;
+beforeEach(()=>jest.useFakeTimers({doNotFake:['setTimeout','clearTimeout']}));
+afterEach(()=>jest.useRealTimers());
 
 it('shows masked email and only enables confirmation for exactly six digits',async()=>{
   const confirm=jest.fn(async()=>{});
@@ -16,4 +18,6 @@ it('shows masked email and only enables confirmation for exactly six digits',asy
   expect(screen.getByRole('button',{name:'Xác nhận'}).props.accessibilityState.disabled).toBe(false);
   await fireEvent.press(screen.getByRole('button',{name:'Xác nhận'}));expect(confirm).toHaveBeenCalledWith('123456');
   expect(screen.getByText('Gửi lại sau 60s')).toBeTruthy();
+  await act(async()=>{jest.advanceTimersByTime(1000);});
+  expect(screen.getByText('Gửi lại sau 59s')).toBeTruthy();
 });

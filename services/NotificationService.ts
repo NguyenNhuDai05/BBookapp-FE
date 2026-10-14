@@ -36,6 +36,9 @@ let notificationHandlerConfigured = false;
  */
 async function getNotifications(): Promise<NotificationsModule | null> {
   if (
+    Constants.expoConfig?.extra?.pushNotificationsEnabled === false
+    || Constants.expoConfig?.extra?.advisorRemotePushEnabled === false
+    ||
     Platform.OS === 'web'
     || (Platform.OS === 'android'
       && Constants.executionEnvironment === ExecutionEnvironment.StoreClient)

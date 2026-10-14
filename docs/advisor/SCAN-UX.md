@@ -1,0 +1,11 @@
+# Scan-first MVP update
+
+> Current implementation: successful scans keep the presentation visible for at least 3600 ms measured from inference start, with a linear 1800 ms downward sweep. Native inference and recommendations start immediately; slow scans add no artificial delay. Completed analysis is labelled as complete while preparing display. Abort/reset/background removes the presentation timer, and stale generations cannot publish results. No fake percentage or fabricated landmarks. See [current build check](./PREVIEW-BUILD-CHECK-20261013.md); remaining paragraphs are historical.
+
+Suggestions, catalog matching and optional occasion/budget filters are gated by a measured quality-gated result. There is no in-advisor bypass to recommendations before scanning. Unsupported devices can return to Explore. A manual quality confirmation is required before Analyze; it never bypasses native/geometry gates.
+
+ScanPhoto uses a native-driver Animated beam while detection is pending. Once ML Kit resolves, real contour points from its bitmap coordinate system are shown in an SVG with matching contain/aspect fit. A 900 ms presentation interval gives users time to see the real overlay before suggestions become visible. This interval is not inference time or simulated progress. Failed or multiple-face results never receive fabricated contour points. Animation is stopped on cleanup; no extra inference is triggered.
+
+The Kotlin two-attempt quota was removed. The counter only tracks whether prior attempts occurred, retaining the subsequent-attempt 64 MiB headroom check. Existing low-memory, 768 MiB and baseline +128 MiB protections remain; one task runs at a time and there is no automatic retry. Memory stability remains unverified. E_ADVISOR_LIMIT now describes memory protection only.
+
+Native code changed: a new advisor-preview APK is required, not a Metro reload. No APK is built by this update. Before release, test a successful scan, overlay rotation/mirror alignment, failed/quality-rejected scans, consent revocation, photo replacement, background navigation and repeated use. Existing 16 KB release acceptance remains outstanding. No backend, database, deployment or Google Play changes.

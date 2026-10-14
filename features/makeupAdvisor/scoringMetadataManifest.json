@@ -1,0 +1,436 @@
+{
+  "version": "scoring-mixed-1.1-1.2",
+  "styles": {
+    "soft-korean": {
+      "version": "1.1",
+      "key": "soft-korean",
+      "name": "Soft Korean Makeup",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "school",
+        "date"
+      ],
+      "tags": [
+        "korean",
+        "soft",
+        "pink",
+        "gradient-lips"
+      ],
+      "colorPalette": [
+        "Hồng phấn",
+        "Đào nhạt",
+        "Nâu sữa"
+      ]
+    },
+    "douyin": {
+      "version": "1.1",
+      "key": "douyin",
+      "name": "Douyin Makeup",
+      "intensity": "medium",
+      "occasions": [
+        "date",
+        "party",
+        "photoshoot"
+      ],
+      "tags": [
+        "douyin",
+        "shimmer",
+        "defined-lashes",
+        "glossy-lips"
+      ],
+      "colorPalette": [
+        "Hồng đào",
+        "Nâu hồng",
+        "Champagne"
+      ]
+    },
+    "clean-girl": {
+      "version": "1.1",
+      "key": "clean-girl",
+      "name": "Clean Girl Makeup",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "work",
+        "date"
+      ],
+      "tags": [
+        "minimal",
+        "dewy",
+        "cream-blush",
+        "tinted-balm"
+      ],
+      "colorPalette": [
+        "Hồng nude",
+        "Đào trong",
+        "Nâu nhạt"
+      ]
+    },
+    "natural": {
+      "version": "1.1",
+      "key": "natural",
+      "name": "Natural Makeup",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "work",
+        "school"
+      ],
+      "tags": [
+        "natural",
+        "satin",
+        "neutral",
+        "everyday"
+      ],
+      "colorPalette": [
+        "Nâu nhạt",
+        "Hồng đất nhẹ",
+        "Be hồng"
+      ]
+    },
+    "peach": {
+      "version": "1.1",
+      "key": "peach",
+      "name": "Peach Makeup",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "date",
+        "photoshoot"
+      ],
+      "tags": [
+        "peach",
+        "monochromatic",
+        "fresh",
+        "soft"
+      ],
+      "colorPalette": [
+        "Đào nhạt",
+        "Cam hồng",
+        "Nâu đào"
+      ]
+    },
+    "strawberry": {
+      "version": "1.1",
+      "key": "strawberry",
+      "name": "Strawberry Makeup",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "date",
+        "photoshoot"
+      ],
+      "tags": [
+        "strawberry",
+        "rosy-blush",
+        "gloss",
+        "fresh"
+      ],
+      "colorPalette": [
+        "Hồng dâu",
+        "Đỏ hồng",
+        "Nâu mềm"
+      ]
+    },
+    "latte": {
+      "version": "1.1",
+      "key": "latte",
+      "name": "Latte Makeup",
+      "intensity": "medium",
+      "occasions": [
+        "work",
+        "date",
+        "party",
+        "photoshoot"
+      ],
+      "tags": [
+        "latte",
+        "brown",
+        "bronze",
+        "monochromatic"
+      ],
+      "colorPalette": [
+        "Nâu sữa",
+        "Caramel",
+        "Đồng nhạt"
+      ]
+    },
+    "soft-glam": {
+      "version": "1.1",
+      "key": "soft-glam",
+      "name": "Soft Glam Makeup",
+      "intensity": "medium",
+      "occasions": [
+        "date",
+        "party",
+        "photoshoot",
+        "wedding"
+      ],
+      "tags": [
+        "soft-glam",
+        "blended",
+        "satin",
+        "neutral"
+      ],
+      "colorPalette": [
+        "Nâu trung tính",
+        "Hồng đất",
+        "Champagne dịu"
+      ]
+    },
+    "thai-glam": {
+      "version": "1.1",
+      "key": "thai-glam",
+      "name": "Thai Glam Makeup",
+      "intensity": "bold",
+      "occasions": [
+        "party",
+        "photoshoot",
+        "wedding"
+      ],
+      "tags": [
+        "thai-glam",
+        "bronze",
+        "defined-eyes",
+        "nude-lips"
+      ],
+      "colorPalette": [
+        "Nâu đồng",
+        "Be nâu",
+        "Hồng nâu"
+      ]
+    },
+    "smokey-eyes": {
+      "version": "1.1",
+      "key": "smokey-eyes",
+      "name": "Smokey Eyes Makeup",
+      "intensity": "bold",
+      "occasions": [
+        "party",
+        "photoshoot"
+      ],
+      "tags": [
+        "smokey",
+        "dark-eyes",
+        "blended",
+        "evening"
+      ],
+      "colorPalette": [
+        "Nâu khói",
+        "Xám than",
+        "Hồng nude"
+      ]
+    },
+    "bridal-soft-glam": {
+      "version": "1.1",
+      "key": "bridal-soft-glam",
+      "name": "Bridal Soft Glam Makeup",
+      "intensity": "medium",
+      "occasions": [
+        "wedding",
+        "photoshoot"
+      ],
+      "tags": [
+        "bridal",
+        "soft-glam",
+        "rose",
+        "longwear"
+      ],
+      "colorPalette": [
+        "Hồng nâu",
+        "Hồng đất",
+        "Champagne mịn"
+      ]
+    },
+    "classic-glam": {
+      "version": "1.1",
+      "key": "classic-glam",
+      "name": "Classic Glam Makeup",
+      "intensity": "bold",
+      "occasions": [
+        "party",
+        "photoshoot",
+        "wedding"
+      ],
+      "tags": [
+        "classic",
+        "red-lips",
+        "winged-liner",
+        "glam"
+      ],
+      "colorPalette": [
+        "Đỏ cổ điển",
+        "Be sáng",
+        "Nâu trung tính"
+      ]
+    },
+    "j-beauty": {
+      "version": "1.2",
+      "key": "j-beauty",
+      "name": "J-Beauty Makeup",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "school",
+        "date"
+      ],
+      "tags": [
+        "japanese",
+        "natural",
+        "soft"
+      ],
+      "colorPalette": [
+        "soft pink",
+        "beige",
+        "coral"
+      ]
+    },
+    "igari": {
+      "version": "1.2",
+      "key": "igari",
+      "name": "Igari Makeup",
+      "intensity": "medium",
+      "occasions": [
+        "date",
+        "photoshoot",
+        "daily"
+      ],
+      "tags": [
+        "japanese",
+        "blush",
+        "playful"
+      ],
+      "colorPalette": [
+        "rose pink",
+        "coral",
+        "peach"
+      ]
+    },
+    "ulzzang": {
+      "version": "1.2",
+      "key": "ulzzang",
+      "name": "Ulzzang Makeup",
+      "intensity": "medium",
+      "occasions": [
+        "date",
+        "photoshoot",
+        "daily"
+      ],
+      "tags": [
+        "korean",
+        "youthful",
+        "glossy"
+      ],
+      "colorPalette": [
+        "pink",
+        "brown",
+        "coral"
+      ]
+    },
+    "western-glam": {
+      "version": "1.2",
+      "key": "western-glam",
+      "name": "Western Glam Makeup",
+      "intensity": "bold",
+      "occasions": [
+        "party",
+        "photoshoot"
+      ],
+      "tags": [
+        "glamorous",
+        "contour",
+        "bold"
+      ],
+      "colorPalette": [
+        "bronze",
+        "warm brown",
+        "nude"
+      ]
+    },
+    "nude-makeup": {
+      "version": "1.2",
+      "key": "nude-makeup",
+      "name": "Nude Makeup",
+      "intensity": "medium",
+      "occasions": [
+        "work",
+        "date",
+        "daily"
+      ],
+      "tags": [
+        "minimalist",
+        "nude",
+        "elegant"
+      ],
+      "colorPalette": [
+        "nude",
+        "taupe",
+        "mauve"
+      ]
+    },
+    "fox-eye": {
+      "version": "1.2",
+      "key": "fox-eye",
+      "name": "Fox Eye Makeup",
+      "intensity": "bold",
+      "occasions": [
+        "party",
+        "photoshoot",
+        "date"
+      ],
+      "tags": [
+        "sharp",
+        "eyeliner",
+        "bold"
+      ],
+      "colorPalette": [
+        "dark brown",
+        "taupe",
+        "rose pink"
+      ]
+    },
+    "sunkissed": {
+      "version": "1.2",
+      "key": "sunkissed",
+      "name": "Sun-Kissed Makeup",
+      "intensity": "medium",
+      "occasions": [
+        "daily",
+        "date",
+        "photoshoot"
+      ],
+      "tags": [
+        "bronzed",
+        "fresh",
+        "warm"
+      ],
+      "colorPalette": [
+        "bronze",
+        "coral",
+        "caramel"
+      ]
+    },
+    "glass-skin": {
+      "version": "1.2",
+      "key": "glass-skin",
+      "name": "Glass Skin Makeup",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "date",
+        "work"
+      ],
+      "tags": [
+        "dewy",
+        "glowy",
+        "minimalist"
+      ],
+      "colorPalette": [
+        "soft pink",
+        "champagne",
+        "peach"
+      ]
+    }
+  }
+}

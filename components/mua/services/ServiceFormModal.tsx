@@ -1,3 +1,6 @@
+import * as Crypto from 'expo-crypto';
+import { MakeupStylePicker } from '../MakeupStylePicker';
+import { type MakeupStyle, styleErrorMessage } from '../../../utils/makeupStyles';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useRef, useState } from 'react';
@@ -13,7 +16,10 @@ interface ServiceFormModalProps {
   onClose: () => void;
   onSubmit: (data: CreateServiceRequest) => void | Promise<void>;
   initialData?: Partial<ServiceDto> | null;
-  availableTags?: string[];
+  availableStyles?: MakeupStyle[];
+  stylesLoading?: boolean;
+  stylesError?: boolean;
+  onReloadStyles?: () => void;
 }
 const unique = (items: string[]) => [...new Set(items.map(item => item.trim()).filter(Boolean))];
 const digits = (value: string) => value.replace(/\D/g, '');
@@ -21,27 +27,27 @@ const digits = (value: string) => value.replace(/\D/g, '');
 export function ServiceFormModal(props: ServiceFormModalProps) {
   return props.visible ? <ServiceFormContent {...props} /> : null;
 }
-function ServiceFormContent({ onClose, onSubmit, initialData, availableTags = [] }: ServiceFormModalProps) {
+function ServiceFormContent({ onClose, onSubmit, initialData, availableStyles = [], stylesLoading, stylesError, onReloadStyles }: ServiceFormModalProps) {
   // Keep free-text inputs native while composing Vietnamese or inserting at the caret.
   const [name, setName] = useState(initialData?.name || initialData?.serviceName || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [price, setPrice] = useState(initialData?.price ? String(initialData.price) : '');
   const [duration, setDuration] = useState(initialData?.durationMinutes ? String(initialData.durationMinutes) : '');
   const [images, setImages] = useState<string[]>(initialData?.imageUrls?.length ? initialData.imageUrls : initialData?.imageUrl ? [initialData.imageUrl] : []);
-  const [tags, setTags] = useState<string[]>(unique(initialData?.tags || []));
-  const [tagQuery, setTagQuery] = useState('');
-  const [tagsOpen, setTagsOpen] = useState(false);
+  const [selection, setSelection] = useState({ styleIds: initialData?.styleIds || [], newStyleNames: [] as string[] });
+  const [stylesDirty, setStylesDirty] = useState(false);
+  const retryPayload = useRef<CreateServiceRequest | null>(null);
+  const [retryPending, setRetryPending] = useState(false);
   const [isActive, setIsActive] = useState(initialData?.visibility !== false && initialData?.status !== 'INACTIVE' && initialData?.status !== 'DRAFT' && initialData?.status !== 'ARCHIVED');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [picking, setPicking] = useState(false);
   const lock = useRef(false);
   const pickLock = useRef(false);
-  const suggestions = unique([...availableTags, ...tags]);
+  const disabled = submitting || retryPending;
   const valid = name.trim().length > 0 && name.length <= 100 && description.trim().length > 0 && description.length <= 500 && Number(price) > 0 && Number(price) <= 100000000 && Number.isInteger(Number(duration)) && Number(duration) > 0 && Number(duration) <= 1440 && images.length > 0 && images.length <= 5;
   const clear = (key: string) => setErrors(current => ({ ...current, [key]: '', submit: '' }));
   const close = () => { if (!lock.current && !pickLock.current) onClose(); };
-  const toggleTag = (tag: string) => setTags(current => current.includes(tag) ? current.filter(item => item !== tag) : current.length < 10 ? [...current, tag] : current);
   const pickImages = async () => {
     if (pickLock.current || lock.current || images.length >= 5) return;
     pickLock.current = true; setPicking(true);
@@ -66,45 +72,53 @@ function ServiceFormContent({ onClose, onSubmit, initialData, availableTags = []
     }
     lock.current = true; setSubmitting(true); clear('submit');
     try {
-      const imageUrls = await Promise.all(images.map(uri => uploadImage(uri, 'service')));
+      const imageUrls = retryPayload.current?.imageUrls || await Promise.all(images.map(uri => uploadImage(uri, 'service')));
       // Retain successful uploads if saving fails so retrying does not upload them again.
       setImages(imageUrls);
-      await onSubmit({ serviceName: name.trim(), description: description.trim(), price: Number(price), durationMinutes: Number(duration), imageUrls, imageUrl: imageUrls[0], tags, isActive });
+      const payload = retryPayload.current || {
+        serviceName: name.trim(), description: description.trim(), price: Number(price), durationMinutes: Number(duration), imageUrls, imageUrl: imageUrls[0], isActive,
+        ...(!initialData || stylesDirty ? selection : {}),
+        ...(!initialData ? { requestId: Crypto.randomUUID() } : {}),
+      };
+      retryPayload.current = payload;
+      await onSubmit(payload);
       onClose();
-    } catch (error) { setErrors(current => ({ ...current, submit: getApiError(error).message || 'Không thể lưu dịch vụ. Vui lòng thử lại.' })); }
+    } catch (error) {
+      const parsed = getApiError(error);
+      const uncertain = parsed.isNetworkError === true || (parsed.status !== undefined && parsed.status >= 500);
+      if (!uncertain) retryPayload.current = null;
+      setRetryPending(uncertain);
+      setErrors(current => ({ ...current, submit: styleErrorMessage(error) }));
+    }
     finally { lock.current = false; setSubmitting(false); }
   };
   const error = (key: string) => <Text style={s.error}>{errors[key] || ' '}</Text>;
-  const tagChip = (tag: string, selected: boolean) => <TouchableOpacity key={tag} disabled={submitting} onPress={() => toggleTag(tag)} accessibilityRole="button" accessibilityLabel={selected ? `Bỏ tag ${tag}` : `Chọn tag ${tag}`} style={[s.chip, selected && s.chipSelected]}><Text style={s.chipText}>{tag}{selected ? ' ×' : ''}</Text></TouchableOpacity>;
   return <AppOverlay visible animationType="slide" onRequestClose={close}>
     <SafeAreaView style={s.screen} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={s.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={s.header}><TouchableOpacity onPress={close} disabled={submitting || picking} style={s.back} accessibilityLabel="Quay lại"><Text style={s.backText}>‹</Text></TouchableOpacity><View style={s.headerCopy}><Text style={s.title}>{initialData ? 'Chỉnh sửa dịch vụ' : 'Thêm dịch vụ mới'}</Text><Text style={s.subtitle}>Tạo dịch vụ để khách hàng có thể đặt lịch với bạn</Text></View><View style={s.back} /></View>
         <ScrollView style={s.flex} contentContainerStyle={s.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false}>
           <View style={s.card}><Text style={s.section}>1. Thông tin cơ bản</Text>
-            <Label text="Tên dịch vụ" required /><TextInput accessibilityLabel="Tên dịch vụ" editable={!submitting} defaultValue={initialData?.name || initialData?.serviceName || ''} maxLength={100} onChangeText={value => { setName(value); clear('name'); }} placeholder="Nhập tên dịch vụ" style={s.input} /><Text style={s.counter}>{name.length}/100</Text>{error('name')}
-            <Label text="Mô tả dịch vụ" required /><TextInput accessibilityLabel="Mô tả dịch vụ" editable={!submitting} defaultValue={initialData?.description || ''} maxLength={500} onChangeText={value => { setDescription(value); clear('description'); }} placeholder="Mô tả chi tiết dịch vụ, phù hợp trong trường hợp nào, bao gồm những gì..." multiline textAlignVertical="top" style={[s.input, s.textarea]} /><Text style={s.counter}>{description.length}/500</Text>{error('description')}
+            <Label text="Tên dịch vụ" required /><TextInput accessibilityLabel="Tên dịch vụ" editable={!disabled} defaultValue={initialData?.name || initialData?.serviceName || ''} maxLength={100} onChangeText={value => { setName(value); clear('name'); }} placeholder="Nhập tên dịch vụ" style={s.input} /><Text style={s.counter}>{name.length}/100</Text>{error('name')}
+            <Label text="Mô tả dịch vụ" required /><TextInput accessibilityLabel="Mô tả dịch vụ" editable={!disabled} defaultValue={initialData?.description || ''} maxLength={500} onChangeText={value => { setDescription(value); clear('description'); }} placeholder="Mô tả chi tiết dịch vụ, phù hợp trong trường hợp nào, bao gồm những gì..." multiline textAlignVertical="top" style={[s.input, s.textarea]} /><Text style={s.counter}>{description.length}/500</Text>{error('description')}
           </View>
           <View style={s.card}><Text style={s.section}>2. Giá và thời gian</Text><View style={s.columns}>
-            <View style={s.column}><Label text="Giá (VND)" required /><TextInput accessibilityLabel="Giá dịch vụ" editable={!submitting} value={price ? Number(price).toLocaleString('vi-VN') : ''} maxLength={11} onChangeText={value => { setPrice(digits(value)); clear('price'); }} keyboardType="number-pad" placeholder="Nhập giá" style={s.input} />{error('price')}</View>
-            <View style={s.column}><Label text="Thời gian thực hiện" required /><View style={s.duration}><TextInput accessibilityLabel="Thời gian dịch vụ" editable={!submitting} value={duration} maxLength={4} onChangeText={value => { setDuration(digits(value)); clear('duration'); }} keyboardType="number-pad" placeholder="Số phút" style={s.durationInput} /><Text style={s.unit}>phút</Text></View>{error('duration')}</View>
+            <View style={s.column}><Label text="Giá (VND)" required /><TextInput accessibilityLabel="Giá dịch vụ" editable={!disabled} value={price ? Number(price).toLocaleString('vi-VN') : ''} maxLength={11} onChangeText={value => { setPrice(digits(value)); clear('price'); }} keyboardType="number-pad" placeholder="Nhập giá" style={s.input} />{error('price')}</View>
+            <View style={s.column}><Label text="Thời gian thực hiện" required /><View style={s.duration}><TextInput accessibilityLabel="Thời gian dịch vụ" editable={!disabled} value={duration} maxLength={4} onChangeText={value => { setDuration(digits(value)); clear('duration'); }} keyboardType="number-pad" placeholder="Số phút" style={s.durationInput} /><Text style={s.unit}>phút</Text></View>{error('duration')}</View>
           </View></View>
           <View style={s.card}><View style={s.sectionRow}><Text style={s.section}>3. Ảnh minh họa</Text><Text style={s.badge}>{images.length ? `${images.length}/5 ảnh` : 'Tối thiểu 1 ảnh'}</Text></View>
-            {!images.length && <TouchableOpacity style={s.upload} onPress={pickImages} disabled={picking || submitting}><Text style={s.uploadTitle}>Thêm ảnh dịch vụ</Text><Text style={s.subtitle}>Tải lên ảnh minh họa rõ nét về dịch vụ này (tối đa 5 ảnh)</Text><Text style={s.choose}>{picking ? 'Đang mở thư viện...' : 'Chọn ảnh'}</Text></TouchableOpacity>}
-            {images.length > 0 && <TouchableOpacity accessibilityRole="button" accessibilityLabel="Xóa tất cả ảnh" disabled={submitting || picking} onPress={() => { setImages([]); clear('images'); }} style={s.clearImages}><Text style={s.choose}>Xóa tất cả</Text></TouchableOpacity>}
-            <View style={s.images}>{images.map((uri, index) => <View key={`${index}-${uri}`} style={s.imageWrap}><Image source={{ uri }} style={s.image} contentFit="cover" /><TouchableOpacity accessibilityRole="button" accessibilityLabel={`Xóa ảnh ${index + 1}`} disabled={submitting || picking} style={s.remove} onPress={() => setImages(current => current.filter((_, position) => position !== index))}><Text style={s.removeText}>×</Text></TouchableOpacity></View>)}
-              {images.length > 0 && images.length < 5 && <TouchableOpacity accessibilityLabel="Thêm ảnh minh họa" style={[s.imageWrap, s.add]} disabled={submitting || picking} onPress={pickImages}><Text style={s.addText}>{picking ? '...' : '+'}</Text></TouchableOpacity>}
+            {!images.length && <TouchableOpacity style={s.upload} onPress={pickImages} disabled={picking || disabled}><Text style={s.uploadTitle}>Thêm ảnh dịch vụ</Text><Text style={s.subtitle}>Tải lên ảnh minh họa rõ nét về dịch vụ này (tối đa 5 ảnh)</Text><Text style={s.choose}>{picking ? 'Đang mở thư viện...' : 'Chọn ảnh'}</Text></TouchableOpacity>}
+            {images.length > 0 && <TouchableOpacity accessibilityRole="button" accessibilityLabel="Xóa tất cả ảnh" disabled={disabled || picking} onPress={() => { setImages([]); clear('images'); }} style={s.clearImages}><Text style={s.choose}>Xóa tất cả</Text></TouchableOpacity>}
+            <View style={s.images}>{images.map((uri, index) => <View key={`${index}-${uri}`} style={s.imageWrap}><Image source={{ uri }} style={s.image} contentFit="cover" /><TouchableOpacity accessibilityRole="button" accessibilityLabel={`Xóa ảnh ${index + 1}`} disabled={disabled || picking} style={s.remove} onPress={() => setImages(current => current.filter((_, position) => position !== index))}><Text style={s.removeText}>×</Text></TouchableOpacity></View>)}
+              {images.length > 0 && images.length < 5 && <TouchableOpacity accessibilityLabel="Thêm ảnh minh họa" style={[s.imageWrap, s.add]} disabled={disabled || picking} onPress={pickImages}><Text style={s.addText}>{picking ? '...' : '+'}</Text></TouchableOpacity>}
             </View>{error('images')}
           </View>
-          <View style={s.card}><Text style={s.section}>4. Tag / Từ khóa</Text><Text style={s.subtitle}>Chọn các tag phù hợp để khách hàng dễ tìm thấy dịch vụ</Text>
-            <TouchableOpacity accessibilityLabel="Chọn tag" disabled={submitting} onPress={() => setTagsOpen(current => !current)} style={s.tagSelector}><Text style={s.subtitle}>{tags.length ? `${tags.length} tag đã chọn · Bấm để chỉnh sửa` : 'Chọn tag'}</Text></TouchableOpacity>
-            <View style={s.chips}>{tags.map(tag => tagChip(tag, true))}</View>
-            {tagsOpen && <View style={s.tagPanel}><TextInput accessibilityLabel="Tìm hoặc thêm tag" value={tagQuery} maxLength={50} onChangeText={setTagQuery} placeholder="Tìm hoặc thêm tag..." style={s.input} /><View style={s.chips}>{suggestions.filter(tag => !tags.includes(tag) && tag.toLowerCase().includes(tagQuery.trim().toLowerCase())).map(tag => tagChip(tag, false))}</View>
-              {tagQuery.trim() && !suggestions.some(tag => tag.toLowerCase() === tagQuery.trim().toLowerCase()) && <TouchableOpacity disabled={tags.length >= 10} onPress={() => { toggleTag(tagQuery.trim()); setTagQuery(''); }}><Text style={s.choose}>Thêm “{tagQuery.trim()}”</Text></TouchableOpacity>}
-              <TouchableOpacity onPress={() => setTagsOpen(false)}><Text style={s.choose}>Xong</Text></TouchableOpacity></View>}
-            <Text style={s.smallLabel}>Tag thường dùng:</Text><View style={s.chips}>{suggestions.filter(tag => !tags.includes(tag)).slice(0, 5).map(tag => tagChip(tag, false))}</View>
+          <View style={s.card}><Text style={s.section}>4. Phong cách makeup</Text><Text style={s.subtitle}>Chọn tối đa 5 phong cách. Phong cách mới sẽ được thêm vào chuyên môn của bạn khi lưu.</Text>
+            <MakeupStylePicker styles={[...availableStyles, ...(initialData?.styleTags || [])]} value={selection} onChange={value => { setSelection(value); setStylesDirty(true); clear('submit'); }} limit={5} disabled={disabled} loading={stylesLoading} loadError={stylesError} onReload={onReloadStyles} />
+            {!!initialData?.tags?.length && <Text style={s.subtitle}>Từ khóa đã lưu: {initialData.tags.join(', ')}. Từ khóa lịch sử chưa ánh xạ vẫn được giữ.</Text>}
           </View>
-          <View style={s.card}><Text style={s.section}>5. Trạng thái hiển thị</Text><Text style={s.subtitle}>Bạn có thể lưu ở chế độ ẩn nếu chưa muốn hiển thị dịch vụ này</Text><View style={s.visibility}><Text style={s.visibilityLabel}>Hiển thị dịch vụ trên hồ sơ</Text><Switch accessibilityLabel="Hiển thị dịch vụ trên hồ sơ" value={isActive} disabled={submitting} onValueChange={setIsActive} trackColor={{ false: '#DED7DD', true: '#FF5C9A' }} thumbColor="#FFF" /></View></View>
+          {retryPending && <Text style={s.subtitle}>Chưa xác nhận được lần lưu trước. Bấm Lưu để thử lại cùng nội dung; kiểm tra danh sách dịch vụ trước khi đóng và tạo mới.</Text>}
+          <View style={s.card}><Text style={s.section}>5. Trạng thái hiển thị</Text><Text style={s.subtitle}>Bạn có thể lưu ở chế độ ẩn nếu chưa muốn hiển thị dịch vụ này</Text><View style={s.visibility}><Text style={s.visibilityLabel}>Hiển thị dịch vụ trên hồ sơ</Text><Switch accessibilityLabel="Hiển thị dịch vụ trên hồ sơ" value={isActive} disabled={disabled} onValueChange={setIsActive} trackColor={{ false: '#DED7DD', true: '#FF5C9A' }} thumbColor="#FFF" /></View></View>
           {!!errors.submit && <Text accessibilityRole="alert" style={s.submitError}>{errors.submit}</Text>}
         </ScrollView>
         <View style={s.footer}><TouchableOpacity disabled={submitting || picking} onPress={close} style={s.cancel}><Text style={s.cancelText}>Hủy</Text></TouchableOpacity><TouchableOpacity accessibilityLabel={initialData ? 'Lưu thay đổi' : 'Lưu dịch vụ'} disabled={!valid || submitting || picking} onPress={save} style={[s.save, (!valid || submitting || picking) && s.disabled]}>{submitting ? <ActivityIndicator color="#FFF" /> : <Text style={s.saveText}>{initialData ? 'Lưu thay đổi' : 'Lưu dịch vụ'}</Text>}</TouchableOpacity></View>

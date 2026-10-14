@@ -1,3 +1,4 @@
+import { AdvisorEntry } from '../../features/makeupAdvisor/AdvisorEntry';
 import { useRouter } from 'expo-router';
 import { QuickModeSwitcher } from '../../components/QuickModeSwitcher';
 import { ArrowRight, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react-native';
@@ -13,6 +14,7 @@ import { exploreErrorMessage, isExploreSessionError } from '../../services/explo
 import type { ExploreArtist, ExploreItem, ExploreKind, ExplorePost, ExploreService } from '../../types/explore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { ReviewNotice } from '../../components/ReviewNotice';
+import { AiMakeupEntry } from '../../components/aiMakeup/AiMakeupEntry';
 
 const KINDS: { key: ExploreKind; label: string }[] = [
   { key: 'portfolio', label: 'Tác phẩm' }, { key: 'artists', label: 'Chuyên gia' }, { key: 'services', label: 'Dịch vụ' },
@@ -49,6 +51,8 @@ export default function ExploreScreen() {
       <ExploreArtistCard item={item as ExploreArtist} onPress={() => openArtist(item.id)} /> : <ExploreServiceCard item={item as ExploreService} onPress={() => openService(item as ExploreService)} />}
   </View>;
   const header = <>
+    <AiMakeupEntry />
+    <AdvisorEntry />
     {reviewUser?.isDemoAccount && reviewUser.demoCounterpartMuaId ? <TouchableOpacity accessibilityRole="button" onPress={() => openArtist(reviewUser.demoCounterpartMuaId!)}><ReviewNotice title="MUA mẫu cho đánh giá" message="Xem hồ sơ, chọn dịch vụ và trải nghiệm đặt lịch với MUA mẫu." /></TouchableOpacity> : null}
     <View style={styles.titleRow}><View style={{ flex: 1, minWidth: 0 }}><Text style={styles.eyebrow}>B-BOOK / KHÁM PHÁ</Text><Text style={styles.heading}>Đẹp theo cách của bạn</Text></View><QuickModeSwitcher /></View>
     <View style={styles.searchRow}><View style={styles.searchBox}><Search size={19} color="#7E6372" />

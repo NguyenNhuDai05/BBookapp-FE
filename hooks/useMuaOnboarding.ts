@@ -13,6 +13,9 @@ export const useSubmitApplication = () => {
       return request;
     },
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['advisor'] });
+      queryClient.invalidateQueries({ queryKey: ['mua-styles'] });
+      await queryClient.invalidateQueries({ queryKey: ['mua-services'] });
       await queryClient.invalidateQueries({ queryKey: ['mua-profile', 'me'] });
       await queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
     },

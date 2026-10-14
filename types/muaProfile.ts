@@ -56,4 +56,5 @@ export interface MuaUpdateDto extends Partial<OperatingArea> {
   instagramUrl?: string;
   facebookUrl?: string;
   styleIds?: number[];
+  newStyleNames?: string[];
 }

@@ -1,0 +1,8 @@
+{
+  "protectedCount": 13,
+  "changedProtectedFiles": [],
+  "authorizedLifecycleFileChange": "useAdvisor only wires effects state/re-ranking; normalization/native/cancellation/timing branches unchanged",
+  "authorizedConfigChange": "app.config/flags add local-development gate and isolated package; no release/EAS profile changed",
+  "engine12Unchanged": true,
+  "buildPerformed": false
+}

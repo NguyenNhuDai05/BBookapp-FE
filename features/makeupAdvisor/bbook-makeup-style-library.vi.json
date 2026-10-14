@@ -1,0 +1,756 @@
+{
+  "schemaVersion": "1.1",
+  "language": "vi-VN",
+  "catalogType": "makeup-style-library",
+  "styles": [
+    {
+      "key": "soft-korean",
+      "name": "Soft Korean Makeup",
+      "displayName": "Hàn Quốc nhẹ nhàng",
+      "shortDescription": "Nền mỏng sáng nhẹ, mắt nâu hồng dịu và môi tán mềm tạo tổng thể thanh thoát. Điểm nhấn nằm ở sự chuyển màu nhẹ, không ở đường nét sắc đậm.",
+      "signatureLook": "Màu hồng dịu, chân mày mềm và môi đậm nhẹ ở giữa.",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "school",
+        "date"
+      ],
+      "tags": [
+        "korean",
+        "soft",
+        "pink",
+        "gradient-lips"
+      ],
+      "colorPalette": [
+        "Hồng phấn",
+        "Đào nhạt",
+        "Nâu sữa"
+      ],
+      "techniques": {
+        "base": "Tán một lớp nền mỏng bằng mút ẩm; chấm che phủ ở nơi cần rồi phủ ít phấn quanh mũi.",
+        "eyes": "Tán nâu sữa sát chân mi, thêm hồng nhạt trên bầu mắt; kẻ eyeliner nâu mảnh và chải mi tơi.",
+        "brows": "Đi nét ngắn theo chân mày sẵn có, làm nhạt đầu mày bằng cọ xoắn.",
+        "cheeks": "Dặm hồng phấn nhẹ trên má rồi tán mép màu bằng mút sạch.",
+        "lips": "Thoa màu hồng vào giữa môi, tán dần ra ngoài; thêm một lớp dưỡng mỏng.",
+        "contourHighlight": "Không cần tạo khối rõ; chấm ánh ngọc trai nhỏ ở phần má muốn bắt sáng."
+      },
+      "quickSteps": [
+        "Dưỡng nhẹ, đợi ráo rồi tán nền mỏng.",
+        "Đi nét chân mày và chải mềm đầu mày.",
+        "Tán mắt nâu hồng, kẻ viền mảnh và chải mi.",
+        "Dặm má hồng với lượng nhỏ.",
+        "Tán son từ giữa môi và kiểm tra tổng thể."
+      ],
+      "whyTry": "Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm.",
+      "conditionalTips": [],
+      "imageKey": "soft-korean.webp",
+      "imageBrief": "Adult portrait, soft pink Korean-inspired makeup, sheer luminous foundation, delicate brown liner and gradient pink lips, clear studio light, no text or watermark.",
+      "visualFocus": "Soft pink cheeks, fine brown eyeliner, diffused gradient lips.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "soft-eyeliner",
+          "eye-shimmer",
+          "soft-brow-shaping",
+          "gradient-lips",
+          "soft-blurred-lips",
+          "glossy-lips",
+          "soft-blush-placement"
+        ],
+        "ruleIds": [
+          "spacing-high-soft",
+          "opening-low-soft",
+          "arch-low-soft",
+          "lip-high-soft"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "douyin",
+      "name": "Douyin Makeup",
+      "displayName": "Douyin mắt lấp lánh",
+      "shortDescription": "Mắt nhũ sáng, hàng mi tách chùm và má hồng rõ tạo vẻ nổi bật khi chụp ảnh. Môi bóng mềm cân bằng nét sắc của eyeliner và các điểm sáng nhỏ.",
+      "signatureLook": "Nhũ điểm ở mắt, mi tách chùm và môi bóng.",
+      "intensity": "medium",
+      "occasions": [
+        "date",
+        "party",
+        "photoshoot"
+      ],
+      "tags": [
+        "douyin",
+        "shimmer",
+        "defined-lashes",
+        "glossy-lips"
+      ],
+      "colorPalette": [
+        "Hồng đào",
+        "Nâu hồng",
+        "Champagne"
+      ],
+      "techniques": {
+        "base": "Tán nền mỏng từng lớp, che phủ cục bộ và phủ phấn nhẹ để nhũ mắt nổi rõ.",
+        "eyes": "Tán nâu hồng ở đuôi mắt; đặt nhũ champagne ở giữa bầu mắt, kẻ viền gọn và dùng mascara tạo các chùm mi nhỏ. Chỉ dùng nhũ dành cho vùng mắt.",
+        "brows": "Tô các khoảng thưa bằng nét mảnh, giữ thân mày nhẹ để mắt là điểm chính.",
+        "cheeks": "Dặm hồng đào lên má, tán đều mép màu; tăng từng lớp để màu lên rõ khi chụp.",
+        "lips": "Tán son hồng đào, làm mềm viền rồi thêm bóng ở giữa môi.",
+        "contourHighlight": "Dùng cọ nhỏ chấm bắt sáng trên má, tránh phủ nhũ toàn mặt."
+      },
+      "quickSteps": [
+        "Làm nền gọn và phủ phấn nhẹ.",
+        "Đi chân mày mảnh.",
+        "Tán nâu hồng, kẻ mắt rồi đặt nhũ điểm.",
+        "Chải mi thành chùm nhỏ và dặm má.",
+        "Tán son, thêm bóng rồi kiểm tra dưới ánh sáng chụp."
+      ],
+      "whyTry": "Một hướng thử khi bạn thích đôi mắt có nhiều chi tiết. Nhũ và mi tách chùm tạo điểm nhấn khác với lối trang điểm nhẹ hằng ngày.",
+      "conditionalTips": [],
+      "imageKey": "douyin.webp",
+      "imageBrief": "Adult portrait with Douyin-inspired eye shimmer, small separated lash clusters, peach pink blush and softly glossy lips; neutral studio background, crisp light, no text or watermark.",
+      "visualFocus": "Targeted eye sparkle, separated lashes, glossy blurred lips.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "defined-eyeliner",
+          "outer-eye-emphasis",
+          "gradient-eyeshadow",
+          "eye-shimmer",
+          "soft-brow-shaping",
+          "soft-blurred-lips",
+          "glossy-lips",
+          "soft-blush-placement"
+        ],
+        "ruleIds": [
+          "spacing-low-outer",
+          "opening-high-gradient",
+          "arch-low-soft",
+          "lip-high-soft"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "clean-girl",
+      "name": "Clean Girl Makeup",
+      "displayName": "Tối giản sáng nhẹ",
+      "shortDescription": "Lớp nền trong, chân mày chải dựng nhẹ và má kem tạo diện mạo gọn gàng. Mắt ít màu, môi dưỡng có sắc giữ tổng thể sáng nhẹ mà không nhiều lớp phấn.",
+      "signatureLook": "Nền trong, chân mày chải gọn và môi dưỡng bóng nhẹ.",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "work",
+        "date"
+      ],
+      "tags": [
+        "minimal",
+        "dewy",
+        "cream-blush",
+        "tinted-balm"
+      ],
+      "colorPalette": [
+        "Hồng nude",
+        "Đào trong",
+        "Nâu nhạt"
+      ],
+      "techniques": {
+        "base": "Dùng nền mỏng hoặc skin tint, chỉ che phủ từng điểm; giữ độ bóng nhẹ và phủ phấn ở nơi dễ bóng quá mức.",
+        "eyes": "Tán một lớp nâu nhạt sát mi nếu muốn, chải mascara mỏng để mi không vón.",
+        "brows": "Chải mày hướng lên nhẹ rồi theo chiều mọc; dùng gel giữ nếp vừa đủ.",
+        "cheeks": "Dặm má kem hồng nude bằng đầu ngón tay sạch, tán mỏng để màu hòa vào nền.",
+        "lips": "Thoa dưỡng có màu, thêm một lớp mỏng ở giữa nếu muốn sắc rõ hơn.",
+        "contourHighlight": "Có thể bỏ tạo khối; dặm chút highlight dạng kem trên má, tránh lớp nhũ dày."
+      },
+      "quickSteps": [
+        "Dưỡng và đợi sản phẩm ráo.",
+        "Tán skin tint, che phủ từng điểm.",
+        "Chải gel chân mày và mascara mỏng.",
+        "Dặm má kem, phủ phấn cục bộ nếu cần.",
+        "Thoa dưỡng môi có màu."
+      ],
+      "whyTry": "Lựa chọn gọn cho những ngày muốn trang điểm ít bước. Điểm riêng của phong cách là hiệu ứng sản phẩm kem và chân mày chải gọn.",
+      "conditionalTips": [],
+      "imageKey": "clean-girl.webp",
+      "imageBrief": "Adult portrait, minimal clean makeup, translucent glowing base, softly brushed brows, cream blush and tinted lip balm, natural window light, no text or watermark.",
+      "visualFocus": "Translucent base, brushed brows, subtle cream blush.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "soft-eyeliner",
+          "natural-brow-styling",
+          "glossy-lips",
+          "soft-blush-placement"
+        ],
+        "ruleIds": [
+          "spacing-high-soft",
+          "opening-low-soft",
+          "arch-high-natural"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "natural",
+      "name": "Natural Makeup",
+      "displayName": "Tự nhiên hằng ngày",
+      "shortDescription": "Nền mỏng vừa đủ, mắt nâu dịu và son gần màu môi tạo diện mạo chỉn chu. Hiệu ứng satin nhẹ dễ dùng hằng ngày, không đặt trọng tâm vào độ bóng hay nhũ.",
+      "signatureLook": "Nền satin, mắt nâu trung tính và son mềm.",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "work",
+        "school"
+      ],
+      "tags": [
+        "natural",
+        "satin",
+        "neutral",
+        "everyday"
+      ],
+      "colorPalette": [
+        "Nâu nhạt",
+        "Hồng đất nhẹ",
+        "Be hồng"
+      ],
+      "techniques": {
+        "base": "Tán nền satin một lớp mỏng, che phủ chỗ cần rồi dùng cọ lớn phủ lượng phấn nhỏ.",
+        "eyes": "Tán nâu nhạt sát mi, làm mềm viền bằng cọ nhỏ và chải mascara một lượt.",
+        "brows": "Tô riêng khoảng thưa, chải theo chiều mọc để vẫn thấy sợi mày.",
+        "cheeks": "Tán hồng đất nhẹ bằng cọ mềm, phủ màu ít rồi tăng dần.",
+        "lips": "Chọn son gần màu môi bạn thích, thoa một lớp rồi bặm giấy để viền mềm.",
+        "contourHighlight": "Không bắt buộc tạo khối hoặc highlight; ưu tiên lớp màu mỏng và đều."
+      },
+      "quickSteps": [
+        "Tán nền satin và che phủ cục bộ.",
+        "Phủ phấn nhẹ, tô các khoảng mày thưa.",
+        "Tán viền mắt nâu và chải mi.",
+        "Tán má hồng đất nhẹ.",
+        "Thoa son mềm, kiểm tra dưới ánh sáng ban ngày."
+      ],
+      "whyTry": "Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ.",
+      "conditionalTips": [],
+      "imageKey": "natural.webp",
+      "imageBrief": "Adult portrait with natural satin makeup, subtle neutral brown eyes and softly blotted rosy lips, clear daylight, no text or watermark.",
+      "visualFocus": "Satin base, understated brown eye line, soft rosy lips.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "soft-eyeliner",
+          "natural-brow-styling",
+          "soft-blurred-lips",
+          "soft-blush-placement"
+        ],
+        "ruleIds": [
+          "spacing-high-soft",
+          "opening-low-soft",
+          "arch-high-natural",
+          "lip-high-soft"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "peach",
+      "name": "Peach Makeup",
+      "displayName": "Sắc đào mềm mại",
+      "shortDescription": "Mắt, má và môi cùng sắc đào tạo tổng thể liền mạch, tươi nhẹ. Một chút nhũ mịn ở mắt giúp màu đào có chiều sâu mà không cần eyeliner đen sắc nét.",
+      "signatureLook": "Sắc đào đồng điệu trên mắt, má và môi.",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "date",
+        "photoshoot"
+      ],
+      "tags": [
+        "peach",
+        "monochromatic",
+        "fresh",
+        "soft"
+      ],
+      "colorPalette": [
+        "Đào nhạt",
+        "Cam hồng",
+        "Nâu đào"
+      ],
+      "techniques": {
+        "base": "Tán nền sáng nhẹ, che phủ mỏng để màu đào trên má không bị lớp nền dày làm chìm.",
+        "eyes": "Tán đào nhạt trên bầu mắt, nhấn nâu đào ở đuôi; kẻ nâu sát mi và chấm nhũ mịn ở giữa.",
+        "brows": "Đi nét nâu nhẹ rồi chải tơi, không tô thành khối đậm.",
+        "cheeks": "Dặm má đào gần vùng mắt để nối màu, tán mép bằng cọ sạch.",
+        "lips": "Tán son cam hồng thành lớp mỏng, có thể thêm bóng nhẹ để nối với hiệu ứng mắt.",
+        "contourHighlight": "Chấm highlight champagne rất ít trên má; không cần khối đậm."
+      },
+      "quickSteps": [
+        "Làm nền mỏng sáng nhẹ.",
+        "Đi chân mày và tán mắt đào.",
+        "Nhấn đuôi mắt nâu đào, chải mi.",
+        "Tán má đào và làm mềm mép.",
+        "Thoa son cam hồng cùng bảng màu."
+      ],
+      "whyTry": "Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm.",
+      "conditionalTips": [],
+      "imageKey": "peach.webp",
+      "imageBrief": "Adult portrait, monochromatic soft peach eyes cheeks and lips, subtle champagne shimmer, soft daylight, no text or watermark.",
+      "visualFocus": "Coordinated peach palette and blended blush edges.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "soft-eyeliner",
+          "outer-eye-emphasis",
+          "gradient-eyeshadow",
+          "eye-shimmer",
+          "soft-brow-shaping",
+          "soft-blurred-lips",
+          "glossy-lips",
+          "soft-blush-placement"
+        ],
+        "ruleIds": [
+          "spacing-low-outer",
+          "spacing-high-soft",
+          "opening-low-soft",
+          "opening-high-gradient",
+          "arch-low-soft",
+          "lip-high-soft"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "strawberry",
+      "name": "Strawberry Makeup",
+      "displayName": "Má hồng dâu tươi tắn",
+      "shortDescription": "Má hồng dâu là điểm chính, kết hợp nền trong và môi đỏ hồng bóng nhẹ. Mắt tối giản giúp sắc má nổi bật; tàn nhang trang điểm là tùy chọn, không bắt buộc.",
+      "signatureLook": "Má đỏ hồng nổi bật trên nền nhẹ, môi mọng.",
+      "intensity": "light",
+      "occasions": [
+        "daily",
+        "date",
+        "photoshoot"
+      ],
+      "tags": [
+        "strawberry",
+        "rosy-blush",
+        "gloss",
+        "fresh"
+      ],
+      "colorPalette": [
+        "Hồng dâu",
+        "Đỏ hồng",
+        "Nâu mềm"
+      ],
+      "techniques": {
+        "base": "Tán nền trong và che phủ riêng từng điểm; hạn chế phủ phấn dày trên vùng má.",
+        "eyes": "Kẻ nâu rất mảnh và chải mi, không cần nhiều màu mắt để giữ trọng tâm ở má.",
+        "brows": "Chải mày tơi, chỉ bổ sung các khoảng thưa bằng nét nhỏ.",
+        "cheeks": "Dặm má kem hồng dâu thành nhiều lớp mỏng, trải nhẹ qua vùng má; có thể chấm lượng nhỏ qua sống mũi nếu thích.",
+        "lips": "Thoa đỏ hồng nhẹ, tán mềm viền và phủ bóng mỏng ở giữa.",
+        "contourHighlight": "Bỏ khối đậm; giữ ánh sáng tự nhiên của lớp nền và thêm chút bắt sáng nếu muốn."
+      },
+      "quickSteps": [
+        "Làm nền trong, che phủ từng điểm.",
+        "Chải mày, kẻ mắt nâu mảnh.",
+        "Dặm má hồng dâu và tán rộng mép màu.",
+        "Chải mascara nhẹ.",
+        "Tán son đỏ hồng rồi thêm bóng."
+      ],
+      "whyTry": "Một cách đổi điểm nhấn từ mắt sang má. Sắc hồng dâu rõ hơn sắc đào, còn mắt được giữ nhẹ để tổng thể không quá nhiều chi tiết.",
+      "conditionalTips": [],
+      "imageKey": "strawberry.webp",
+      "imageBrief": "Adult portrait with strawberry pink-red blush, sheer base, minimal brown eye line and juicy rose gloss, natural light, no text or watermark.",
+      "visualFocus": "Strawberry blush as the central accent and glossy rosy lips.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "soft-eyeliner",
+          "natural-brow-styling",
+          "soft-blurred-lips",
+          "glossy-lips",
+          "soft-blush-placement"
+        ],
+        "ruleIds": [
+          "spacing-high-soft",
+          "opening-low-soft",
+          "arch-high-natural",
+          "lip-high-soft"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "latte",
+      "name": "Latte Makeup",
+      "displayName": "Nâu latte đồng điệu",
+      "shortDescription": "Các sắc nâu sữa, caramel và đồng nhạt nối liền mắt, má và môi. Màu được tán mềm để tổng thể có chiều sâu nhẹ, không dùng viền đen làm điểm chính.",
+      "signatureLook": "Bảng màu nâu đồng điệu với mắt tán mềm.",
+      "intensity": "medium",
+      "occasions": [
+        "work",
+        "date",
+        "party",
+        "photoshoot"
+      ],
+      "tags": [
+        "latte",
+        "brown",
+        "bronze",
+        "monochromatic"
+      ],
+      "colorPalette": [
+        "Nâu sữa",
+        "Caramel",
+        "Đồng nhạt"
+      ],
+      "techniques": {
+        "base": "Tán nền satin, phủ phấn nhẹ vùng trung tâm; không đổi màu nền sang đậm hơn chỉ để tạo cảm giác nâu.",
+        "eyes": "Tán nâu sữa làm nền, nhấn caramel ở đuôi và đồng nhạt ở giữa; làm mềm viền nâu sát mi.",
+        "brows": "Tô nét ngắn theo màu mày đã chọn, giữ thân mày rõ vừa phải.",
+        "cheeks": "Tán má nâu đào nhẹ, nối mép màu với bronzer mỏng nếu muốn.",
+        "lips": "Dùng viền nâu mềm, tán vào trong rồi phủ son be nâu hoặc hồng nâu.",
+        "contourHighlight": "Dùng bronzer ít một ở rìa mặt muốn làm ấm màu; highlight đồng nhạt đặt gọn trên má."
+      },
+      "quickSteps": [
+        "Tán nền satin và phủ phấn cục bộ.",
+        "Đi mày gọn, tán mắt nâu sữa.",
+        "Nhấn caramel và đồng, làm mềm viền mắt.",
+        "Tán má nâu đào, thêm bronzer lượng nhỏ.",
+        "Tán viền môi rồi thoa son nâu mềm."
+      ],
+      "whyTry": "Bảng màu nâu liền mạch tạo cảm giác ấm và gọn. Bạn có thể giảm nhũ cho ban ngày hoặc tăng độ rõ của mắt khi đi tiệc.",
+      "conditionalTips": [],
+      "imageKey": "latte.webp",
+      "imageBrief": "Adult portrait with latte makeup, milk brown and caramel eyes, subtle bronze accents and brown nude lips, neutral studio light, no text or watermark.",
+      "visualFocus": "Blended brown palette, bronze lid accent, soft brown lip edge.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "soft-eyeliner",
+          "outer-eye-emphasis",
+          "gradient-eyeshadow",
+          "eye-shimmer",
+          "defined-brow-shaping",
+          "defined-lip-outline",
+          "directional-blush-placement",
+          "subtle-contour"
+        ],
+        "ruleIds": [
+          "spacing-low-outer",
+          "spacing-high-soft",
+          "opening-low-soft",
+          "opening-high-gradient",
+          "lip-low-outline"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "soft-glam",
+      "name": "Soft Glam Makeup",
+      "displayName": "Glam mềm vừa đủ",
+      "shortDescription": "Nền satin gọn, mắt nâu tán chuyển sắc và mi rõ vừa tạo vẻ chỉn chu. Má hồng đất cùng môi mềm cân bằng nét nổi bật, tránh các đường viền quá cứng.",
+      "signatureLook": "Mắt chuyển sắc mềm, nền satin và mi rõ.",
+      "intensity": "medium",
+      "occasions": [
+        "date",
+        "party",
+        "photoshoot",
+        "wedding"
+      ],
+      "tags": [
+        "soft-glam",
+        "blended",
+        "satin",
+        "neutral"
+      ],
+      "colorPalette": [
+        "Nâu trung tính",
+        "Hồng đất",
+        "Champagne dịu"
+      ],
+      "techniques": {
+        "base": "Tán nền từng lớp mỏng, che phủ cục bộ rồi ép phấn nhẹ để nền gọn mà không dày.",
+        "eyes": "Tán nâu trung tính ở đuôi, kéo màu nhạt vào giữa; chấm champagne ít và làm mờ eyeliner trước khi chải mi.",
+        "brows": "Đi thân mày rõ vừa, làm mềm đầu bằng cọ xoắn.",
+        "cheeks": "Tán hồng đất từ má ra ngoài bằng cọ mềm, giữ mép màu chuyển nhẹ.",
+        "lips": "Viền môi cùng tông son, tán viền vào trong rồi phủ hồng nude satin.",
+        "contourHighlight": "Tán khối mỏng và làm sạch mép bằng mút; highlight mịn ở một vài điểm nhỏ."
+      },
+      "quickSteps": [
+        "Làm nền satin và ép phấn nhẹ.",
+        "Đi mày, tán mắt nâu chuyển sắc.",
+        "Làm mềm viền mắt, chải mi rõ vừa.",
+        "Tán má hồng đất và khối mỏng nếu muốn.",
+        "Tán viền môi, thoa son satin."
+      ],
+      "whyTry": "Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc.",
+      "conditionalTips": [],
+      "imageKey": "soft-glam.webp",
+      "imageBrief": "Adult portrait with soft glam satin base, blended neutral brown eyes, defined yet airy lashes and rose nude lips, clear studio lighting, no text or watermark.",
+      "visualFocus": "Smooth eye gradients, airy defined lashes, satin nude lips.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "soft-eyeliner",
+          "outer-eye-emphasis",
+          "gradient-eyeshadow",
+          "eye-shimmer",
+          "defined-brow-shaping",
+          "defined-lip-outline",
+          "directional-blush-placement",
+          "subtle-contour"
+        ],
+        "ruleIds": [
+          "spacing-low-outer",
+          "spacing-high-soft",
+          "opening-low-soft",
+          "opening-high-gradient",
+          "lip-low-outline"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "thai-glam",
+      "name": "Thai Glam Makeup",
+      "displayName": "Glam Thái sắc nét",
+      "shortDescription": "Mắt nâu đồng rõ, mi dày tơi và chân mày có nét tạo diện mạo nổi bật. Nền satin cùng môi nude nâu giữ tổng thể cân bằng khi tăng độ sắc của mắt.",
+      "signatureLook": "Mắt nâu đồng, mi rõ và môi nude nâu.",
+      "intensity": "bold",
+      "occasions": [
+        "party",
+        "photoshoot",
+        "wedding"
+      ],
+      "tags": [
+        "thai-glam",
+        "bronze",
+        "defined-eyes",
+        "nude-lips"
+      ],
+      "colorPalette": [
+        "Nâu đồng",
+        "Be nâu",
+        "Hồng nâu"
+      ],
+      "techniques": {
+        "base": "Tán nền satin thành lớp mỏng, tăng che phủ cục bộ và ép phấn ở vùng cần giữ nền.",
+        "eyes": "Nhấn nâu đậm ở đuôi, tán đồng ở giữa bầu mắt; kẻ viền gọn và tăng mascara từng lớp. Mi giả là tùy chọn.",
+        "brows": "Đi đuôi mày rõ bằng nét nhỏ, giữ đầu mày nhạt hơn thân.",
+        "cheeks": "Tán hồng nâu hướng ra ngoài, dùng lượng ít để không cạnh tranh với mắt.",
+        "lips": "Viền nâu mềm, thoa nude nâu satin và tán mép viền vào màu son.",
+        "contourHighlight": "Tán khối nhẹ từng lớp ở rìa mặt muốn nhấn; dùng highlight mịn, tránh dải nhũ rộng."
+      },
+      "quickSteps": [
+        "Làm nền satin và ép phấn.",
+        "Đi chân mày rõ, đầu mày mềm.",
+        "Tán mắt nâu đồng rồi kẻ viền.",
+        "Chải mi nhiều lớp mỏng, tán má hồng nâu.",
+        "Thoa nude nâu và kiểm tra độ cân bằng với mắt."
+      ],
+      "whyTry": "Phiên bản glam nhấn vào độ rõ của mắt và hàng mi. Đây là một hướng phối nâu đồng để thử, không phải quy chuẩn cho mọi lối trang điểm Thái.",
+      "conditionalTips": [],
+      "imageKey": "thai-glam.webp",
+      "imageBrief": "Adult portrait with Thai-glam-inspired bronze brown eyes, defined airy lashes, precise brows and satin brown nude lips, clear studio light, no text or watermark.",
+      "visualFocus": "Defined bronze eyes, layered lashes and soft brown nude lips.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "defined-eyeliner",
+          "outer-eye-emphasis",
+          "gradient-eyeshadow",
+          "eye-shimmer",
+          "defined-brow-shaping",
+          "defined-lip-outline",
+          "directional-blush-placement",
+          "subtle-contour"
+        ],
+        "ruleIds": [
+          "spacing-low-outer",
+          "opening-high-gradient",
+          "lip-low-outline"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "smokey-eyes",
+      "name": "Smokey Eyes Makeup",
+      "displayName": "Mắt khói nổi bật",
+      "shortDescription": "Màu tối sát mi được tán nhạt dần tạo đôi mắt khói có chiều sâu. Má và môi giữ nhẹ để mắt là tâm điểm, với lựa chọn nâu khói hoặc xám đen.",
+      "signatureLook": "Viền mi đậm và màu mắt chuyển tối sang nhạt.",
+      "intensity": "bold",
+      "occasions": [
+        "party",
+        "photoshoot"
+      ],
+      "tags": [
+        "smokey",
+        "dark-eyes",
+        "blended",
+        "evening"
+      ],
+      "colorPalette": [
+        "Nâu khói",
+        "Xám than",
+        "Hồng nude"
+      ],
+      "techniques": {
+        "base": "Làm mắt trước nếu phấn dễ rơi; sau đó tán nền satin và dọn phần màu rơi dưới mắt.",
+        "eyes": "Kẻ chì sát mi rồi tán mờ, phủ nâu khói lên trên; dùng cọ sạch làm nhạt mép màu và tán rất ít ở viền mi dưới.",
+        "brows": "Đi mày gọn, giữ đầu mềm để không thêm một khối tối lớn cạnh mắt.",
+        "cheeks": "Tán hồng nude mỏng, tránh má quá đậm khi mắt đã là điểm chính.",
+        "lips": "Thoa hồng nude hoặc be hồng satin, giữ viền môi mềm.",
+        "contourHighlight": "Có thể tán khối mỏng; highlight nhỏ ở má để tổng thể không bị nhiều vùng sáng mạnh."
+      },
+      "quickSteps": [
+        "Lót mắt và kẻ chì sát mi.",
+        "Tán phấn khói, làm mềm mép và chải mi.",
+        "Dọn phấn rơi rồi tán nền.",
+        "Đi mày, tán má nhẹ.",
+        "Thoa son nude và kiểm tra hai bên mắt."
+      ],
+      "whyTry": "Dành cho lúc bạn muốn thử một điểm nhấn mắt rõ rệt. Chuyển sắc khói khác với đường eyeliner sắc của glam cổ điển.",
+      "conditionalTips": [],
+      "imageKey": "smokey-eyes.webp",
+      "imageBrief": "Adult portrait with blended brown charcoal smokey eyes, soft nude cheeks and satin pink nude lips, clear neutral studio lighting, no text or watermark.",
+      "visualFocus": "Dark lash line fading into soft smoke, understated lips.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "defined-eyeliner",
+          "gradient-eyeshadow",
+          "soft-brow-shaping",
+          "soft-blush-placement",
+          "subtle-contour"
+        ],
+        "ruleIds": [
+          "opening-high-gradient",
+          "arch-low-soft"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "bridal-soft-glam",
+      "name": "Bridal Soft Glam Makeup",
+      "displayName": "Glam cô dâu mềm mại",
+      "shortDescription": "Nền satin bền màu, mắt hồng nâu và mi nhẹ tạo diện mạo trang trọng. Môi hồng đất cùng điểm sáng mịn giúp tổng thể rõ trong ảnh mà vẫn giữ nét mềm mại.",
+      "signatureLook": "Nền gọn bền màu, mắt hồng nâu và son hồng đất.",
+      "intensity": "medium",
+      "occasions": [
+        "wedding",
+        "photoshoot"
+      ],
+      "tags": [
+        "bridal",
+        "soft-glam",
+        "rose",
+        "longwear"
+      ],
+      "colorPalette": [
+        "Hồng nâu",
+        "Hồng đất",
+        "Champagne mịn"
+      ],
+      "techniques": {
+        "base": "Tán nền nhiều lớp mỏng, ép phấn nhẹ và thử độ bền trước ngày dùng; tránh đổi toàn bộ sản phẩm sát ngày cưới.",
+        "eyes": "Tán hồng nâu mềm, đặt champagne mịn ở giữa mắt; kẻ viền mảnh và dùng mascara bền màu đã thử trước.",
+        "brows": "Tạo nét gọn bằng từng sợi nhỏ, làm mềm đầu mày để tổng thể dịu.",
+        "cheeks": "Dặm má kem hồng đất rồi phủ chút phấn cùng tông để tăng độ bền.",
+        "lips": "Viền cùng màu, thoa hồng đất bền màu thành lớp mỏng; chuẩn bị màu son để dặm lại.",
+        "contourHighlight": "Khối mỏng và highlight mịn, thử chụp với ánh sáng thực tế trước khi quyết định lượng nhũ."
+      },
+      "quickSteps": [
+        "Dưỡng vừa đủ, làm nền mỏng và ép phấn.",
+        "Đi mày và tán mắt hồng nâu.",
+        "Chải mascara bền màu, thêm mi nhẹ nếu thích.",
+        "Dặm má hai lớp mỏng và bắt sáng mịn.",
+        "Viền môi, thoa son và kiểm tra bằng ảnh thử."
+      ],
+      "whyTry": "Một hướng trang trọng cho dịp cưới khi bạn chủ động chọn nhu cầu này. Nên thử trước để chốt màu và độ bền bạn thấy thoải mái.",
+      "conditionalTips": [],
+      "imageKey": "bridal-soft-glam.webp",
+      "imageBrief": "Adult bridal makeup portrait, satin longwear finish, soft rose brown eyes, airy lashes and rosewood lips, clear studio light, no veil required, no text or watermark.",
+      "visualFocus": "Fine champagne eye highlight, satin base, rosewood lip finish.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "soft-eyeliner",
+          "gradient-eyeshadow",
+          "eye-shimmer",
+          "soft-brow-shaping",
+          "defined-lip-outline",
+          "soft-blush-placement",
+          "subtle-contour"
+        ],
+        "ruleIds": [
+          "spacing-high-soft",
+          "opening-low-soft",
+          "opening-high-gradient",
+          "arch-low-soft",
+          "lip-low-outline"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    },
+    {
+      "key": "classic-glam",
+      "name": "Classic Glam Makeup",
+      "displayName": "Glam cổ điển môi đỏ",
+      "shortDescription": "Eyeliner có đuôi gọn và môi đỏ rõ tạo diện mạo cổ điển, nổi bật. Nền satin cùng má nhẹ giữ tổng thể tinh giản, để hai điểm nhấn mắt và môi dẫn dắt.",
+      "signatureLook": "Eyeliner đuôi gọn, môi đỏ và nền satin.",
+      "intensity": "bold",
+      "occasions": [
+        "party",
+        "photoshoot",
+        "wedding"
+      ],
+      "tags": [
+        "classic",
+        "red-lips",
+        "winged-liner",
+        "glam"
+      ],
+      "colorPalette": [
+        "Đỏ cổ điển",
+        "Be sáng",
+        "Nâu trung tính"
+      ],
+      "techniques": {
+        "base": "Tán nền satin đều, che phủ cục bộ rồi phủ phấn mỏng để môi đỏ có nền tổng thể gọn.",
+        "eyes": "Tán be nhẹ, nhấn nâu sát mi rồi kẻ đuôi eyeliner gọn; kiểm tra khi mở mắt trước khi tăng độ dày.",
+        "brows": "Đi mày rõ vừa bằng nét nhỏ, chải mềm đầu mày.",
+        "cheeks": "Tán má hồng be nhẹ để không cạnh tranh với son đỏ.",
+        "lips": "Viền môi bằng màu đỏ gần son, tô từ giữa ra ngoài rồi bặm giấy; dùng cọ nhỏ dọn mép nếu cần.",
+        "contourHighlight": "Tán khối mỏng tùy thích, chấm highlight mịn trên má thay vì phủ nhũ rộng."
+      },
+      "quickSteps": [
+        "Làm nền satin và phủ phấn nhẹ.",
+        "Đi mày, tán mắt be nâu.",
+        "Kẻ eyeliner đuôi gọn và chải mi.",
+        "Tán má nhẹ.",
+        "Viền môi đỏ, thoa son và dọn mép."
+      ],
+      "whyTry": "Thử nếu bạn muốn môi đỏ là điểm nhấn rõ ràng. Bố cục ít màu giúp vẻ cổ điển nổi bật mà không cần mắt khói đậm.",
+      "conditionalTips": [],
+      "imageKey": "classic-glam.webp",
+      "imageBrief": "Adult portrait, classic glam with precise winged eyeliner, satin complexion and crisp classic red lips, clear studio light, no text or watermark.",
+      "visualFocus": "Precise eyeliner wing and defined red lips.",
+      "faceCompatibility": {
+        "techniqueKeys": [
+          "defined-eyeliner",
+          "outer-eye-emphasis",
+          "defined-brow-shaping",
+          "defined-lip-outline",
+          "soft-blush-placement",
+          "subtle-contour"
+        ],
+        "ruleIds": [
+          "spacing-low-outer",
+          "lip-low-outline"
+        ],
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending"
+      }
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "version": "reviewed-20-v1",
+  "ruleIds": {
+    "soft-korean": [
+      "spacing-high-soft",
+      "opening-low-soft",
+      "arch-low-soft",
+      "lip-high-soft"
+    ],
+    "douyin": [
+      "spacing-low-outer",
+      "opening-high-gradient",
+      "arch-low-soft",
+      "lip-high-soft"
+    ],
+    "clean-girl": [
+      "spacing-high-soft",
+      "opening-low-soft",
+      "arch-high-natural"
+    ],
+    "natural": [
+      "spacing-high-soft",
+      "opening-low-soft",
+      "arch-high-natural",
+      "lip-high-soft"
+    ],
+    "peach": [
+      "spacing-low-outer",
+      "spacing-high-soft",
+      "opening-low-soft",
+      "opening-high-gradient",
+      "arch-low-soft",
+      "lip-high-soft"
+    ],
+    "strawberry": [
+      "spacing-high-soft",
+      "opening-low-soft",
+      "arch-high-natural",
+      "lip-high-soft"
+    ],
+    "latte": [
+      "spacing-low-outer",
+      "spacing-high-soft",
+      "opening-low-soft",
+      "opening-high-gradient",
+      "lip-low-outline"
+    ],
+    "soft-glam": [
+      "spacing-low-outer",
+      "spacing-high-soft",
+      "opening-low-soft",
+      "opening-high-gradient",
+      "lip-low-outline"
+    ],
+    "thai-glam": [
+      "spacing-low-outer",
+      "opening-high-gradient",
+      "lip-low-outline"
+    ],
+    "smokey-eyes": [
+      "opening-high-gradient",
+      "arch-low-soft"
+    ],
+    "bridal-soft-glam": [
+      "spacing-high-soft",
+      "opening-low-soft",
+      "opening-high-gradient",
+      "arch-low-soft",
+      "lip-low-outline"
+    ],
+    "classic-glam": [
+      "spacing-low-outer",
+      "lip-low-outline"
+    ],
+    "j-beauty": [
+      "opening-low-soft",
+      "arch-high-natural"
+    ],
+    "igari": [],
+    "ulzzang": [
+      "opening-low-soft",
+      "arch-low-soft"
+    ],
+    "western-glam": [
+      "lip-low-outline",
+      "opening-high-gradient"
+    ],
+    "nude-makeup": [
+      "opening-low-soft",
+      "arch-high-natural"
+    ],
+    "fox-eye": [
+      "spacing-low-outer"
+    ],
+    "sunkissed": [],
+    "glass-skin": [
+      "opening-low-soft",
+      "arch-high-natural"
+    ]
+  }
+}

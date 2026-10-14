@@ -12,6 +12,8 @@ interface BackendServiceDto {
   imageUrl?: string;
   imageUrls?: string[];
   tags?: string[];
+  styleIds?: number[];
+  styleTags?: ServiceDto['styleTags'];
   isActive?: boolean;
 }
 
@@ -26,6 +28,8 @@ const mapService = (service: BackendServiceDto): ServiceDto => ({
   imageUrl: service.imageUrl,
   imageUrls: service.imageUrls?.length ? service.imageUrls : service.imageUrl ? [service.imageUrl] : [],
   tags: service.tags || [],
+  styleIds: service.styleIds || [],
+  styleTags: service.styleTags || [],
   status: service.isActive === false ? 'INACTIVE' : 'ACTIVE',
   visibility: service.isActive !== false,
 });

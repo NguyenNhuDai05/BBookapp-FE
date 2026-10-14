@@ -1,0 +1,4905 @@
+{
+  "simulationOnly": true,
+  "productionChanged": false,
+  "syntheticOnly": true,
+  "countsAreNotProbabilities": true,
+  "cases": 6912,
+  "profiles": 108,
+  "preferences": 32,
+  "modes": 2,
+  "weights": {
+    "faceBudget": 1,
+    "occasionBonus": 0.12,
+    "intensityBonus": 0.08
+  },
+  "tieBreakOrder": [
+    "natural",
+    "peach",
+    "soft-glam",
+    "soft-korean",
+    "clean-girl",
+    "strawberry",
+    "latte",
+    "douyin",
+    "classic-glam",
+    "thai-glam",
+    "smokey-eyes",
+    "bridal-soft-glam",
+    "j-beauty",
+    "igari",
+    "ulzzang",
+    "western-glam",
+    "nude-makeup",
+    "fox-eye",
+    "sunkissed",
+    "glass-skin"
+  ],
+  "legacyMetadataPreserved": true,
+  "legacyOnlyParityCases": 6912,
+  "legacyScoreChanges": 0,
+  "explanationsChecked": 132192,
+  "sunkissedDominance": {
+    "minimumEarlierSameIntensityDominators": 3,
+    "interpretation": "At least this many eligible medium candidates score higher or tie ahead; equal-intensity diversity cannot rescue sunkissed"
+  },
+  "regression": {
+    "on": {
+      "cases": 3456,
+      "orderedChanged": 574,
+      "setChanged": 574,
+      "overlap": [
+        2,
+        16,
+        556,
+        2882
+      ],
+      "noPreferences": {
+        "cases": 108,
+        "orderedChanged": 8,
+        "setChanged": 8
+      }
+    },
+    "off": {
+      "cases": 3456,
+      "orderedChanged": 1188,
+      "setChanged": 1188,
+      "overlap": [
+        108,
+        0,
+        1080,
+        2268
+      ],
+      "noPreferences": {
+        "cases": 108,
+        "orderedChanged": 0,
+        "setChanged": 0
+      }
+    }
+  },
+  "defaults": {
+    "on": {
+      "natural,soft-glam,classic-glam": 5,
+      "soft-glam,classic-glam,latte": 4,
+      "natural,douyin,peach": 5,
+      "peach,douyin,smokey-eyes": 6,
+      "peach,soft-glam,classic-glam": 4,
+      "peach,douyin,soft-korean": 5,
+      "natural,nude-makeup,clean-girl": 4,
+      "natural,strawberry,douyin": 2,
+      "natural,soft-glam,peach": 6,
+      "soft-glam,latte,natural": 6,
+      "natural,peach,soft-korean": 4,
+      "peach,ulzzang,soft-korean": 2,
+      "peach,soft-glam,soft-korean": 5,
+      "peach,soft-korean,douyin": 3,
+      "natural,soft-glam,clean-girl": 4,
+      "natural,strawberry,nude-makeup": 2,
+      "peach,soft-glam,thai-glam": 7,
+      "soft-glam,thai-glam,latte": 6,
+      "peach,douyin,thai-glam": 6,
+      "natural,soft-glam,thai-glam": 2,
+      "peach,douyin,classic-glam": 2,
+      "peach,soft-glam,latte": 4,
+      "soft-glam,latte,peach": 2,
+      "peach,soft-glam,natural": 2,
+      "natural,peach,strawberry": 2,
+      "peach,soft-korean,soft-glam": 2,
+      "natural,clean-girl,strawberry": 2,
+      "natural,strawberry,peach": 2,
+      "peach,soft-korean,natural": 1,
+      "peach,soft-glam,smokey-eyes": 1
+    },
+    "off": {
+      "natural,soft-glam,classic-glam": 108
+    }
+  },
+  "rows": [
+    {
+      "key": "soft-korean",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "arch-low-soft",
+        "lip-high-soft"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "eye-shimmer",
+        "soft-brow-shaping",
+        "gradient-lips",
+        "soft-blurred-lips",
+        "glossy-lips",
+        "soft-blush-placement"
+      ],
+      "selectedOn": 846,
+      "selectedOff": 756,
+      "noPreferencesOn": 22,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 872,
+      "baselineSelectedOff": 1296,
+      "positionChangeCount": 628,
+      "positions12": [
+        72,
+        931,
+        1165
+      ],
+      "positions20": [
+        72,
+        869,
+        661
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 2145.279999999924,
+      "scoreHistogram": {
+        "0.000000": 1980,
+        "0.080000": 660,
+        "0.120000": 1188,
+        "0.200000": 396,
+        "1.000000": 330,
+        "1.080000": 110,
+        "1.120000": 198,
+        "1.200000": 66,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 216,
+        "0.700000": 72,
+        "0.666667": 225,
+        "0.746667": 75,
+        "0.786667": 135,
+        "0.866667": 45,
+        "0.333333": 225,
+        "0.413333": 75,
+        "0.453333": 135,
+        "0.533333": 45,
+        "0.750000": 60,
+        "0.830000": 20,
+        "0.870000": 36,
+        "0.950000": 12,
+        "0.250000": 60,
+        "0.330000": 20,
+        "0.370000": 36,
+        "0.450000": 12
+      },
+      "faceHistogram": {
+        "0.000000": 4224,
+        "1.000000": 704,
+        "0.500000": 768,
+        "0.666667": 480,
+        "0.333333": 480,
+        "0.750000": 128,
+        "0.250000": 128
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "light"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "peach",
+          "soft-korean"
+        ],
+        "simulationTop3": [
+          "natural",
+          "peach",
+          "soft-korean"
+        ],
+        "selectedRow": {
+          "styleKey": "soft-korean",
+          "displayName": "Trang điểm Hàn Quốc nhẹ nhàng",
+          "faceScore": 0,
+          "preferenceScore": 0.08,
+          "finalScore": 0.08,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích độ đậm light: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.31037037037035936,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "douyin",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-low-outer",
+        "opening-high-gradient",
+        "arch-low-soft",
+        "lip-high-soft"
+      ],
+      "techniqueKeys": [
+        "defined-eyeliner",
+        "outer-eye-emphasis",
+        "gradient-eyeshadow",
+        "eye-shimmer",
+        "soft-brow-shaping",
+        "soft-blurred-lips",
+        "glossy-lips",
+        "soft-blush-placement"
+      ],
+      "selectedOn": 852,
+      "selectedOff": 432,
+      "noPreferencesOn": 29,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 864,
+      "baselineSelectedOff": 432,
+      "positionChangeCount": 14,
+      "positions12": [
+        198,
+        423,
+        675
+      ],
+      "positions20": [
+        198,
+        417,
+        669
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 2145.2799999998783,
+      "scoreHistogram": {
+        "0.000000": 1980,
+        "0.080000": 660,
+        "0.120000": 1188,
+        "0.200000": 396,
+        "1.000000": 330,
+        "1.080000": 110,
+        "1.120000": 198,
+        "1.200000": 66,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 216,
+        "0.700000": 72,
+        "0.333333": 225,
+        "0.413333": 75,
+        "0.453333": 135,
+        "0.533333": 45,
+        "0.666667": 225,
+        "0.746667": 75,
+        "0.786667": 135,
+        "0.866667": 45,
+        "0.750000": 60,
+        "0.830000": 20,
+        "0.870000": 36,
+        "0.950000": 12,
+        "0.250000": 60,
+        "0.330000": 20,
+        "0.370000": 36,
+        "0.450000": 12
+      },
+      "faceHistogram": {
+        "0.000000": 4224,
+        "1.000000": 704,
+        "0.500000": 768,
+        "0.333333": 480,
+        "0.666667": 480,
+        "0.750000": 128,
+        "0.250000": 128
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "medium"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "soft-glam",
+          "latte",
+          "douyin"
+        ],
+        "simulationTop3": [
+          "soft-glam",
+          "latte",
+          "douyin"
+        ],
+        "selectedRow": {
+          "styleKey": "douyin",
+          "displayName": "Trang điểm phong cách Douyin",
+          "faceScore": 0,
+          "preferenceScore": 0.08,
+          "finalScore": 0.08,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.31037037037035275,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "clean-girl",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "arch-high-natural"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "natural-brow-styling",
+        "glossy-lips",
+        "soft-blush-placement"
+      ],
+      "selectedOn": 339,
+      "selectedOff": 432,
+      "noPreferencesOn": 10,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 415,
+      "baselineSelectedOff": 540,
+      "positionChangeCount": 268,
+      "positions12": [
+        30,
+        322,
+        603
+      ],
+      "positions20": [
+        26,
+        234,
+        511
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1686.6133333333025,
+      "scoreHistogram": {
+        "0.000000": 2160,
+        "0.080000": 720,
+        "0.120000": 1296,
+        "0.200000": 432,
+        "1.000000": 150,
+        "1.080000": 50,
+        "1.120000": 90,
+        "1.200000": 30,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 216,
+        "0.700000": 72,
+        "0.333333": 285,
+        "0.413333": 95,
+        "0.453333": 171,
+        "0.533333": 57,
+        "0.666667": 165,
+        "0.746667": 55,
+        "0.786667": 99,
+        "0.866667": 33,
+        "0.250000": 90,
+        "0.330000": 30,
+        "0.370000": 54,
+        "0.450000": 18,
+        "0.750000": 30,
+        "0.830000": 10,
+        "0.870000": 18,
+        "0.950000": 6
+      },
+      "faceHistogram": {
+        "0.000000": 4608,
+        "1.000000": 320,
+        "0.500000": 768,
+        "0.333333": 608,
+        "0.666667": 352,
+        "0.250000": 192,
+        "0.750000": 64
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "work",
+          "intensity": null
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "latte",
+          "clean-girl"
+        ],
+        "simulationTop3": [
+          "natural",
+          "latte",
+          "clean-girl"
+        ],
+        "selectedRow": {
+          "styleKey": "clean-girl",
+          "displayName": "Trang điểm Clean Girl tối giản",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "work",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp work: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp work: +0.12"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.2440123456790079,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "natural",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "arch-high-natural",
+        "lip-high-soft"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "natural-brow-styling",
+        "soft-blurred-lips",
+        "soft-blush-placement"
+      ],
+      "selectedOn": 1212,
+      "selectedOff": 1404,
+      "noPreferencesOn": 49,
+      "noPreferencesOff": 108,
+      "baselineSelectedOn": 1291,
+      "baselineSelectedOff": 1512,
+      "positionChangeCount": 349,
+      "positions12": [
+        2157,
+        250,
+        396
+      ],
+      "positions20": [
+        2017,
+        144,
+        455
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 2145.2799999999233,
+      "scoreHistogram": {
+        "0.000000": 1980,
+        "0.080000": 660,
+        "0.120000": 1188,
+        "0.200000": 396,
+        "1.000000": 330,
+        "1.080000": 110,
+        "1.120000": 198,
+        "1.200000": 66,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 216,
+        "0.700000": 72,
+        "0.333333": 225,
+        "0.413333": 75,
+        "0.453333": 135,
+        "0.533333": 45,
+        "0.666667": 225,
+        "0.746667": 75,
+        "0.786667": 135,
+        "0.866667": 45,
+        "0.250000": 60,
+        "0.330000": 20,
+        "0.370000": 36,
+        "0.450000": 12,
+        "0.750000": 60,
+        "0.830000": 20,
+        "0.870000": 36,
+        "0.950000": 12
+      },
+      "faceHistogram": {
+        "0.000000": 4224,
+        "1.000000": 704,
+        "0.500000": 768,
+        "0.333333": 480,
+        "0.666667": 480,
+        "0.250000": 128,
+        "0.750000": 128
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": null
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "soft-glam",
+          "classic-glam"
+        ],
+        "simulationTop3": [
+          "natural",
+          "soft-glam",
+          "classic-glam"
+        ],
+        "selectedRow": {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0,
+          "finalScore": 0,
+          "selected": true,
+          "selectionReason": "diverse-discovery",
+          "evidenceStatus": "fallback",
+          "ruleContributions": [],
+          "preferenceContributions": [],
+          "explanations": []
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.3103703703703593,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "peach",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-low-outer",
+        "spacing-high-soft",
+        "opening-low-soft",
+        "opening-high-gradient",
+        "arch-low-soft",
+        "lip-high-soft"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "outer-eye-emphasis",
+        "gradient-eyeshadow",
+        "eye-shimmer",
+        "soft-brow-shaping",
+        "soft-blurred-lips",
+        "glossy-lips",
+        "soft-blush-placement"
+      ],
+      "selectedOn": 2038,
+      "selectedOff": 972,
+      "noPreferencesOn": 71,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 2132,
+      "baselineSelectedOff": 1188,
+      "positionChangeCount": 710,
+      "positions12": [
+        1666,
+        1064,
+        590
+      ],
+      "positions20": [
+        1530,
+        822,
+        658
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 2923.946666666493,
+      "scoreHistogram": {
+        "0.000000": 1740,
+        "0.080000": 580,
+        "0.120000": 1044,
+        "0.200000": 348,
+        "1.000000": 690,
+        "1.080000": 230,
+        "1.120000": 414,
+        "1.200000": 138,
+        "0.500000": 300,
+        "0.580000": 100,
+        "0.620000": 180,
+        "0.700000": 60,
+        "0.666667": 300,
+        "0.746667": 100,
+        "0.786667": 180,
+        "0.866667": 60,
+        "0.333333": 90,
+        "0.413333": 30,
+        "0.453333": 54,
+        "0.533333": 18,
+        "0.750000": 120,
+        "0.830000": 40,
+        "0.870000": 72,
+        "0.950000": 24
+      },
+      "faceHistogram": {
+        "0.000000": 3712,
+        "1.000000": 1472,
+        "0.500000": 640,
+        "0.666667": 640,
+        "0.333333": 192,
+        "0.750000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "light"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "peach",
+          "soft-korean"
+        ],
+        "simulationTop3": [
+          "natural",
+          "peach",
+          "soft-korean"
+        ],
+        "selectedRow": {
+          "styleKey": "peach",
+          "displayName": "Trang điểm tông đào ngọt ngào",
+          "faceScore": 0,
+          "preferenceScore": 0.08,
+          "finalScore": 0.08,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích độ đậm light: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.4230246913579996,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "strawberry",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "arch-high-natural",
+        "lip-high-soft"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "natural-brow-styling",
+        "soft-blurred-lips",
+        "glossy-lips",
+        "soft-blush-placement"
+      ],
+      "selectedOn": 575,
+      "selectedOff": 108,
+      "noPreferencesOn": 10,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 673,
+      "baselineSelectedOff": 108,
+      "positionChangeCount": 110,
+      "positions12": [
+        78,
+        345,
+        358
+      ],
+      "positions20": [
+        78,
+        333,
+        272
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 2145.2799999999233,
+      "scoreHistogram": {
+        "0.000000": 1980,
+        "0.080000": 660,
+        "0.120000": 1188,
+        "0.200000": 396,
+        "1.000000": 330,
+        "1.080000": 110,
+        "1.120000": 198,
+        "1.200000": 66,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 216,
+        "0.700000": 72,
+        "0.333333": 225,
+        "0.413333": 75,
+        "0.453333": 135,
+        "0.533333": 45,
+        "0.666667": 225,
+        "0.746667": 75,
+        "0.786667": 135,
+        "0.866667": 45,
+        "0.250000": 60,
+        "0.330000": 20,
+        "0.370000": 36,
+        "0.450000": 12,
+        "0.750000": 60,
+        "0.830000": 20,
+        "0.870000": 36,
+        "0.950000": 12
+      },
+      "faceHistogram": {
+        "0.000000": 4224,
+        "1.000000": 704,
+        "0.500000": 768,
+        "0.333333": 480,
+        "0.666667": 480,
+        "0.250000": 128,
+        "0.750000": 128
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "photoshoot",
+          "intensity": "light"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "peach",
+          "strawberry",
+          "soft-glam"
+        ],
+        "simulationTop3": [
+          "peach",
+          "strawberry",
+          "soft-glam"
+        ],
+        "selectedRow": {
+          "styleKey": "strawberry",
+          "displayName": "Trang điểm tông dâu ngọt ngào",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "photoshoot",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp photoshoot: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp photoshoot: +0.12",
+            "Sở thích độ đậm light: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.3103703703703593,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "latte",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-low-outer",
+        "spacing-high-soft",
+        "opening-low-soft",
+        "opening-high-gradient",
+        "lip-low-outline"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "outer-eye-emphasis",
+        "gradient-eyeshadow",
+        "eye-shimmer",
+        "defined-brow-shaping",
+        "defined-lip-outline",
+        "directional-blush-placement",
+        "subtle-contour"
+      ],
+      "selectedOn": 1106,
+      "selectedOff": 972,
+      "noPreferencesOn": 22,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 1159,
+      "baselineSelectedOff": 1080,
+      "positionChangeCount": 161,
+      "positions12": [
+        273,
+        1199,
+        767
+      ],
+      "positions20": [
+        273,
+        1199,
+        606
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 2568.959999999833,
+      "scoreHistogram": {
+        "0.000000": 1440,
+        "0.080000": 480,
+        "0.120000": 1440,
+        "0.200000": 480,
+        "1.000000": 264,
+        "1.080000": 88,
+        "1.120000": 264,
+        "1.200000": 88,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 360,
+        "0.700000": 120,
+        "0.666667": 288,
+        "0.746667": 96,
+        "0.786667": 288,
+        "0.866667": 96,
+        "0.333333": 144,
+        "0.413333": 48,
+        "0.453333": 144,
+        "0.533333": 48,
+        "0.750000": 96,
+        "0.830000": 32,
+        "0.870000": 96,
+        "0.950000": 32
+      },
+      "faceHistogram": {
+        "0.000000": 3840,
+        "1.000000": 704,
+        "0.500000": 960,
+        "0.666667": 768,
+        "0.333333": 384,
+        "0.750000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 2592,
+        "0.080000": 864,
+        "0.120000": 2592,
+        "0.200000": 864
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "medium"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "soft-glam",
+          "latte",
+          "douyin"
+        ],
+        "simulationTop3": [
+          "soft-glam",
+          "latte",
+          "douyin"
+        ],
+        "selectedRow": {
+          "styleKey": "latte",
+          "displayName": "Trang điểm tông Latte ấm áp",
+          "faceScore": 0,
+          "preferenceScore": 0.08,
+          "finalScore": 0.08,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.37166666666664255,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "soft-glam",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-low-outer",
+        "spacing-high-soft",
+        "opening-low-soft",
+        "opening-high-gradient",
+        "lip-low-outline"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "outer-eye-emphasis",
+        "gradient-eyeshadow",
+        "eye-shimmer",
+        "defined-brow-shaping",
+        "defined-lip-outline",
+        "directional-blush-placement",
+        "subtle-contour"
+      ],
+      "selectedOn": 1554,
+      "selectedOff": 1620,
+      "noPreferencesOn": 60,
+      "noPreferencesOff": 108,
+      "baselineSelectedOn": 1648,
+      "baselineSelectedOff": 1836,
+      "positionChangeCount": 465,
+      "positions12": [
+        1779,
+        952,
+        753
+      ],
+      "positions20": [
+        1779,
+        789,
+        606
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 2568.9599999998327,
+      "scoreHistogram": {
+        "0.000000": 1440,
+        "0.080000": 480,
+        "0.120000": 1440,
+        "0.200000": 480,
+        "1.000000": 264,
+        "1.080000": 88,
+        "1.120000": 264,
+        "1.200000": 88,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 360,
+        "0.700000": 120,
+        "0.666667": 288,
+        "0.746667": 96,
+        "0.786667": 288,
+        "0.866667": 96,
+        "0.333333": 144,
+        "0.413333": 48,
+        "0.453333": 144,
+        "0.533333": 48,
+        "0.750000": 96,
+        "0.830000": 32,
+        "0.870000": 96,
+        "0.950000": 32
+      },
+      "faceHistogram": {
+        "0.000000": 3840,
+        "1.000000": 704,
+        "0.500000": 960,
+        "0.666667": 768,
+        "0.333333": 384,
+        "0.750000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 2592,
+        "0.080000": 864,
+        "0.120000": 2592,
+        "0.200000": 864
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": null
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "soft-glam",
+          "classic-glam"
+        ],
+        "simulationTop3": [
+          "natural",
+          "soft-glam",
+          "classic-glam"
+        ],
+        "selectedRow": {
+          "styleKey": "soft-glam",
+          "displayName": "Trang điểm Soft Glam quyến rũ",
+          "faceScore": 0,
+          "preferenceScore": 0,
+          "finalScore": 0,
+          "selected": true,
+          "selectionReason": "diverse-discovery",
+          "evidenceStatus": "fallback",
+          "ruleContributions": [],
+          "preferenceContributions": [],
+          "explanations": []
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.37166666666664244,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "thai-glam",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-low-outer",
+        "opening-high-gradient",
+        "lip-low-outline"
+      ],
+      "techniqueKeys": [
+        "defined-eyeliner",
+        "outer-eye-emphasis",
+        "gradient-eyeshadow",
+        "eye-shimmer",
+        "defined-brow-shaping",
+        "defined-lip-outline",
+        "directional-blush-placement",
+        "subtle-contour"
+      ],
+      "selectedOn": 558,
+      "selectedOff": 648,
+      "noPreferencesOn": 21,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 566,
+      "baselineSelectedOff": 648,
+      "positionChangeCount": 14,
+      "positions12": [
+        77,
+        640,
+        497
+      ],
+      "positions20": [
+        77,
+        634,
+        495
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1686.613333333233,
+      "scoreHistogram": {
+        "0.000000": 2160,
+        "0.080000": 720,
+        "0.120000": 1296,
+        "0.200000": 432,
+        "1.000000": 150,
+        "1.080000": 50,
+        "1.120000": 90,
+        "1.200000": 30,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 216,
+        "0.700000": 72,
+        "0.333333": 285,
+        "0.413333": 95,
+        "0.453333": 171,
+        "0.533333": 57,
+        "0.666667": 165,
+        "0.746667": 55,
+        "0.786667": 99,
+        "0.866667": 33,
+        "0.250000": 90,
+        "0.330000": 30,
+        "0.370000": 54,
+        "0.450000": 18,
+        "0.750000": 30,
+        "0.830000": 10,
+        "0.870000": 18,
+        "0.950000": 6
+      },
+      "faceHistogram": {
+        "0.000000": 4608,
+        "1.000000": 320,
+        "0.500000": 768,
+        "0.333333": 608,
+        "0.666667": 352,
+        "0.250000": 192,
+        "0.750000": 64
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "bold"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "classic-glam",
+          "thai-glam",
+          "smokey-eyes"
+        ],
+        "simulationTop3": [
+          "classic-glam",
+          "thai-glam",
+          "smokey-eyes"
+        ],
+        "selectedRow": {
+          "styleKey": "thai-glam",
+          "displayName": "Trang điểm phong cách Thái Lan",
+          "faceScore": 0,
+          "preferenceScore": 0.08,
+          "finalScore": 0.08,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.24401234567899782,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "smokey-eyes",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "opening-high-gradient",
+        "arch-low-soft"
+      ],
+      "techniqueKeys": [
+        "defined-eyeliner",
+        "gradient-eyeshadow",
+        "soft-brow-shaping",
+        "soft-blush-placement",
+        "subtle-contour"
+      ],
+      "selectedOn": 148,
+      "selectedOff": 324,
+      "noPreferencesOn": 7,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 195,
+      "baselineSelectedOff": 324,
+      "positionChangeCount": 49,
+      "positions12": [
+        18,
+        45,
+        456
+      ],
+      "positions20": [
+        18,
+        43,
+        411
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1262.9333333333147,
+      "scoreHistogram": {
+        "0.000000": 2808,
+        "0.080000": 936,
+        "0.120000": 936,
+        "0.200000": 312,
+        "1.000000": 108,
+        "1.080000": 36,
+        "1.120000": 36,
+        "1.200000": 12,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 120,
+        "0.700000": 40,
+        "0.333333": 360,
+        "0.413333": 120,
+        "0.453333": 120,
+        "0.533333": 40,
+        "0.666667": 108,
+        "0.746667": 36,
+        "0.786667": 36,
+        "0.866667": 12,
+        "0.250000": 144,
+        "0.330000": 48,
+        "0.370000": 48,
+        "0.450000": 16
+      },
+      "faceHistogram": {
+        "0.000000": 4992,
+        "1.000000": 192,
+        "0.500000": 640,
+        "0.333333": 640,
+        "0.666667": 192,
+        "0.250000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3888,
+        "0.080000": 1296,
+        "0.120000": 1296,
+        "0.200000": 432
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "bold"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "classic-glam",
+          "thai-glam",
+          "smokey-eyes"
+        ],
+        "simulationTop3": [
+          "classic-glam",
+          "thai-glam",
+          "smokey-eyes"
+        ],
+        "selectedRow": {
+          "styleKey": "smokey-eyes",
+          "displayName": "Trang điểm mắt khói cá tính",
+          "faceScore": 0,
+          "preferenceScore": 0.08,
+          "finalScore": 0.08,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.18271604938271335,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "bridal-soft-glam",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "opening-high-gradient",
+        "arch-low-soft",
+        "lip-low-outline"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "gradient-eyeshadow",
+        "eye-shimmer",
+        "soft-brow-shaping",
+        "defined-lip-outline",
+        "soft-blush-placement",
+        "subtle-contour"
+      ],
+      "selectedOn": 221,
+      "selectedOff": 108,
+      "noPreferencesOn": 0,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 221,
+      "baselineSelectedOff": 108,
+      "positionChangeCount": 0,
+      "positions12": [
+        72,
+        196,
+        61
+      ],
+      "positions20": [
+        72,
+        196,
+        61
+      ],
+      "candidateCount": 864,
+      "scoreMin": 0.12,
+      "scoreMax": 1.2,
+      "scoreTotal": 390.2933333333347,
+      "scoreHistogram": {
+        "0.120000": 360,
+        "0.200000": 120,
+        "1.120000": 102,
+        "1.200000": 34,
+        "0.620000": 72,
+        "0.700000": 24,
+        "0.786667": 57,
+        "0.866667": 19,
+        "0.453333": 33,
+        "0.533333": 11,
+        "0.870000": 18,
+        "0.950000": 6,
+        "0.370000": 6,
+        "0.450000": 2
+      },
+      "faceHistogram": {
+        "0.000000": 480,
+        "1.000000": 136,
+        "0.500000": 96,
+        "0.666667": 76,
+        "0.333333": 44,
+        "0.750000": 24,
+        "0.250000": 8
+      },
+      "preferenceHistogram": {
+        "0.120000": 648,
+        "0.200000": 216
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "wedding",
+          "intensity": "medium"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "soft-glam",
+          "bridal-soft-glam",
+          "classic-glam"
+        ],
+        "simulationTop3": [
+          "soft-glam",
+          "bridal-soft-glam",
+          "classic-glam"
+        ],
+        "selectedRow": {
+          "styleKey": "bridal-soft-glam",
+          "displayName": "Trang điểm cô dâu Soft Glam",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "wedding",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp wedding: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp wedding: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.45172839506173,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "classic-glam",
+      "metadataSource": "legacy-12",
+      "mappingReview": "inherited-experimental",
+      "ruleIds": [
+        "spacing-low-outer",
+        "lip-low-outline"
+      ],
+      "techniqueKeys": [
+        "defined-eyeliner",
+        "outer-eye-emphasis",
+        "defined-brow-shaping",
+        "defined-lip-outline",
+        "soft-blush-placement",
+        "subtle-contour"
+      ],
+      "selectedOn": 325,
+      "selectedOff": 1188,
+      "noPreferencesOn": 15,
+      "noPreferencesOff": 108,
+      "baselineSelectedOn": 332,
+      "baselineSelectedOff": 1296,
+      "positionChangeCount": 118,
+      "positions12": [
+        492,
+        545,
+        591
+      ],
+      "positions20": [
+        492,
+        542,
+        479
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1227.9466666666415,
+      "scoreHistogram": {
+        "0.000000": 2430,
+        "0.080000": 810,
+        "0.120000": 1458,
+        "0.200000": 486,
+        "1.000000": 60,
+        "1.080000": 20,
+        "1.120000": 36,
+        "1.200000": 12,
+        "0.500000": 270,
+        "0.580000": 90,
+        "0.620000": 162,
+        "0.700000": 54,
+        "0.333333": 300,
+        "0.413333": 100,
+        "0.453333": 180,
+        "0.533333": 60,
+        "0.666667": 60,
+        "0.746667": 20,
+        "0.786667": 36,
+        "0.866667": 12,
+        "0.250000": 120,
+        "0.330000": 40,
+        "0.370000": 72,
+        "0.450000": 24
+      },
+      "faceHistogram": {
+        "0.000000": 5184,
+        "1.000000": 128,
+        "0.500000": 576,
+        "0.333333": 640,
+        "0.666667": 128,
+        "0.250000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": null
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "soft-glam",
+          "classic-glam"
+        ],
+        "simulationTop3": [
+          "natural",
+          "soft-glam",
+          "classic-glam"
+        ],
+        "selectedRow": {
+          "styleKey": "classic-glam",
+          "displayName": "Trang điểm cổ điển Classic Glam",
+          "faceScore": 0,
+          "preferenceScore": 0,
+          "finalScore": 0,
+          "selected": true,
+          "selectionReason": "diverse-discovery",
+          "evidenceStatus": "fallback",
+          "ruleContributions": [],
+          "preferenceContributions": [],
+          "explanations": []
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.1776543209876507,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "j-beauty",
+      "metadataSource": "catalog-20",
+      "mappingReview": "proposed-experimental",
+      "ruleIds": [
+        "opening-low-soft",
+        "arch-high-natural"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "natural-brow-styling"
+      ],
+      "selectedOn": 72,
+      "selectedOff": 432,
+      "noPreferencesOn": 0,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 0,
+      "baselineSelectedOff": 0,
+      "positionChangeCount": 0,
+      "positions12": [
+        0,
+        0,
+        0
+      ],
+      "positions20": [
+        0,
+        48,
+        456
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1366.6133333332946,
+      "scoreHistogram": {
+        "0.000000": 2340,
+        "0.080000": 780,
+        "0.120000": 1404,
+        "0.200000": 468,
+        "1.000000": 90,
+        "1.080000": 30,
+        "1.120000": 54,
+        "1.200000": 18,
+        "0.500000": 300,
+        "0.580000": 100,
+        "0.620000": 180,
+        "0.700000": 60,
+        "0.333333": 300,
+        "0.413333": 100,
+        "0.453333": 180,
+        "0.533333": 60,
+        "0.666667": 90,
+        "0.746667": 30,
+        "0.786667": 54,
+        "0.866667": 18,
+        "0.250000": 120,
+        "0.330000": 40,
+        "0.370000": 72,
+        "0.450000": 24
+      },
+      "faceHistogram": {
+        "0.000000": 4992,
+        "1.000000": 192,
+        "0.500000": 640,
+        "0.333333": 640,
+        "0.666667": 192,
+        "0.250000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "school",
+          "intensity": null
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "soft-korean",
+          "soft-glam"
+        ],
+        "simulationTop3": [
+          "natural",
+          "soft-korean",
+          "j-beauty"
+        ],
+        "selectedRow": {
+          "styleKey": "j-beauty",
+          "displayName": "Trang điểm Nhật Bản tự nhiên",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.19771604938271045,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "igari",
+      "metadataSource": "catalog-20",
+      "mappingReview": "preference-only",
+      "ruleIds": [],
+      "techniqueKeys": [],
+      "selectedOn": 6,
+      "selectedOff": 324,
+      "noPreferencesOn": 0,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 0,
+      "baselineSelectedOff": 0,
+      "positionChangeCount": 0,
+      "positions12": [
+        0,
+        0,
+        0
+      ],
+      "positions20": [
+        110,
+        220,
+        0
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 0.2,
+      "scoreTotal": 449.2799999999984,
+      "scoreHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "faceHistogram": {
+        "0.000000": 6912
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "daily",
+          "intensity": null
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "peach",
+          "soft-korean"
+        ],
+        "simulationTop3": [
+          "natural",
+          "igari",
+          "peach"
+        ],
+        "selectedRow": {
+          "styleKey": "igari",
+          "displayName": "Trang điểm Igari má hồng say",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.06499999999999977,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "ulzzang",
+      "metadataSource": "catalog-20",
+      "mappingReview": "proposed-experimental",
+      "ruleIds": [
+        "opening-low-soft",
+        "opening-high-gradient",
+        "arch-low-soft"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "gradient-eyeshadow",
+        "soft-brow-shaping"
+      ],
+      "selectedOn": 218,
+      "selectedOff": 108,
+      "noPreferencesOn": 2,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 0,
+      "baselineSelectedOff": 0,
+      "positionChangeCount": 0,
+      "positions12": [
+        0,
+        0,
+        0
+      ],
+      "positions20": [
+        28,
+        206,
+        92
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1825.2799999999402,
+      "scoreHistogram": {
+        "0.000000": 1980,
+        "0.080000": 660,
+        "0.120000": 1188,
+        "0.200000": 396,
+        "1.000000": 150,
+        "1.080000": 50,
+        "1.120000": 90,
+        "1.200000": 30,
+        "0.500000": 450,
+        "0.580000": 150,
+        "0.620000": 270,
+        "0.700000": 90,
+        "0.666667": 180,
+        "0.746667": 60,
+        "0.786667": 108,
+        "0.866667": 36,
+        "0.333333": 360,
+        "0.413333": 120,
+        "0.453333": 216,
+        "0.533333": 72,
+        "0.250000": 120,
+        "0.330000": 40,
+        "0.370000": 72,
+        "0.450000": 24
+      },
+      "faceHistogram": {
+        "0.000000": 4224,
+        "1.000000": 320,
+        "0.500000": 960,
+        "0.666667": 384,
+        "0.333333": 768,
+        "0.250000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "daily",
+          "intensity": "medium"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "peach",
+          "soft-korean"
+        ],
+        "simulationTop3": [
+          "igari",
+          "ulzzang",
+          "nude-makeup"
+        ],
+        "selectedRow": {
+          "styleKey": "ulzzang",
+          "displayName": "Trang điểm Ulzzang Hàn Quốc",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.2640740740740654,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "western-glam",
+      "metadataSource": "catalog-20",
+      "mappingReview": "proposed-experimental",
+      "ruleIds": [
+        "lip-low-outline",
+        "opening-high-gradient"
+      ],
+      "techniqueKeys": [
+        "defined-lip-outline",
+        "gradient-eyeshadow"
+      ],
+      "selectedOn": 62,
+      "selectedOff": 0,
+      "noPreferencesOn": 0,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 0,
+      "baselineSelectedOff": 0,
+      "positionChangeCount": 0,
+      "positions12": [
+        0,
+        0,
+        0
+      ],
+      "positions20": [
+        0,
+        20,
+        42
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1262.9333333333159,
+      "scoreHistogram": {
+        "0.000000": 2808,
+        "0.080000": 936,
+        "0.120000": 936,
+        "0.200000": 312,
+        "1.000000": 108,
+        "1.080000": 36,
+        "1.120000": 36,
+        "1.200000": 12,
+        "0.500000": 360,
+        "0.580000": 120,
+        "0.620000": 120,
+        "0.700000": 40,
+        "0.333333": 360,
+        "0.413333": 120,
+        "0.453333": 120,
+        "0.533333": 40,
+        "0.666667": 108,
+        "0.746667": 36,
+        "0.786667": 36,
+        "0.866667": 12,
+        "0.250000": 144,
+        "0.330000": 48,
+        "0.370000": 48,
+        "0.450000": 16
+      },
+      "faceHistogram": {
+        "0.000000": 4992,
+        "1.000000": 192,
+        "0.500000": 640,
+        "0.333333": 640,
+        "0.666667": 192,
+        "0.250000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3888,
+        "0.080000": 1296,
+        "0.120000": 1296,
+        "0.200000": 432
+      },
+      "example": {
+        "profileId": 1,
+        "features": {
+          "mouthAspect": 0.2
+        },
+        "preferences": {
+          "occasion": null,
+          "intensity": "bold"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "classic-glam",
+          "thai-glam",
+          "soft-glam"
+        ],
+        "simulationTop3": [
+          "classic-glam",
+          "thai-glam",
+          "western-glam"
+        ],
+        "selectedRow": {
+          "styleKey": "western-glam",
+          "displayName": "Trang điểm Tây sắc sảo",
+          "faceScore": 1,
+          "preferenceScore": 0.08,
+          "finalScore": 1.08,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 1,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ.",
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.18271604938271352,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "nude-makeup",
+      "metadataSource": "catalog-20",
+      "mappingReview": "proposed-experimental",
+      "ruleIds": [
+        "opening-low-soft",
+        "arch-high-natural"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "natural-brow-styling"
+      ],
+      "selectedOn": 200,
+      "selectedOff": 216,
+      "noPreferencesOn": 6,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 0,
+      "baselineSelectedOff": 0,
+      "positionChangeCount": 0,
+      "positions12": [
+        0,
+        0,
+        0
+      ],
+      "positions20": [
+        30,
+        196,
+        190
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1366.6133333332943,
+      "scoreHistogram": {
+        "0.000000": 2340,
+        "0.080000": 780,
+        "0.120000": 1404,
+        "0.200000": 468,
+        "1.000000": 90,
+        "1.080000": 30,
+        "1.120000": 54,
+        "1.200000": 18,
+        "0.500000": 300,
+        "0.580000": 100,
+        "0.620000": 180,
+        "0.700000": 60,
+        "0.333333": 300,
+        "0.413333": 100,
+        "0.453333": 180,
+        "0.533333": 60,
+        "0.666667": 90,
+        "0.746667": 30,
+        "0.786667": 54,
+        "0.866667": 18,
+        "0.250000": 120,
+        "0.330000": 40,
+        "0.370000": 72,
+        "0.450000": 24
+      },
+      "faceHistogram": {
+        "0.000000": 4992,
+        "1.000000": 192,
+        "0.500000": 640,
+        "0.333333": 640,
+        "0.666667": 192,
+        "0.250000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "daily",
+          "intensity": "medium"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "peach",
+          "soft-korean"
+        ],
+        "simulationTop3": [
+          "igari",
+          "ulzzang",
+          "nude-makeup"
+        ],
+        "selectedRow": {
+          "styleKey": "nude-makeup",
+          "displayName": "Trang điểm tông nude thanh lịch",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.1977160493827104,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "fox-eye",
+      "metadataSource": "catalog-20",
+      "mappingReview": "proposed-experimental",
+      "ruleIds": [
+        "spacing-low-outer"
+      ],
+      "techniqueKeys": [
+        "outer-eye-emphasis"
+      ],
+      "selectedOn": 20,
+      "selectedOff": 216,
+      "noPreferencesOn": 0,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 0,
+      "baselineSelectedOff": 0,
+      "positionChangeCount": 0,
+      "positions12": [
+        0,
+        0,
+        0
+      ],
+      "positions20": [
+        112,
+        0,
+        124
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 769.280000000041,
+      "scoreHistogram": {
+        "0.000000": 2835,
+        "0.080000": 945,
+        "0.120000": 1701,
+        "0.200000": 567,
+        "1.000000": 15,
+        "1.080000": 5,
+        "1.120000": 9,
+        "1.200000": 3,
+        "0.500000": 90,
+        "0.580000": 30,
+        "0.620000": 54,
+        "0.700000": 18,
+        "0.333333": 180,
+        "0.413333": 60,
+        "0.453333": 108,
+        "0.533333": 36,
+        "0.250000": 120,
+        "0.330000": 40,
+        "0.370000": 72,
+        "0.450000": 24
+      },
+      "faceHistogram": {
+        "0.000000": 6048,
+        "1.000000": 32,
+        "0.500000": 192,
+        "0.333333": 384,
+        "0.250000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "date",
+          "intensity": null
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "peach",
+          "soft-glam",
+          "soft-korean"
+        ],
+        "simulationTop3": [
+          "peach",
+          "soft-glam",
+          "fox-eye"
+        ],
+        "selectedRow": {
+          "styleKey": "fox-eye",
+          "displayName": "Trang điểm mắt cáo cá tính",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "date",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp date: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp date: +0.12"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.11129629629630224,
+      "canAppear": true,
+      "neverSelectedReason": null
+    },
+    {
+      "key": "sunkissed",
+      "metadataSource": "catalog-20",
+      "mappingReview": "preference-only",
+      "ruleIds": [],
+      "techniqueKeys": [],
+      "selectedOn": 0,
+      "selectedOff": 0,
+      "noPreferencesOn": 0,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 0,
+      "baselineSelectedOff": 0,
+      "positionChangeCount": 0,
+      "positions12": [
+        0,
+        0,
+        0
+      ],
+      "positions20": [
+        0,
+        0,
+        0
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 0.2,
+      "scoreTotal": 449.2799999999984,
+      "scoreHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "faceHistogram": {
+        "0.000000": 6912
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.06499999999999977,
+      "canAppear": false,
+      "neverSelectedReason": "Preference-only; existing candidates win equal scores; no unsupported face bonus"
+    },
+    {
+      "key": "glass-skin",
+      "metadataSource": "catalog-20",
+      "mappingReview": "proposed-experimental",
+      "ruleIds": [
+        "opening-low-soft",
+        "arch-high-natural"
+      ],
+      "techniqueKeys": [
+        "soft-eyeliner",
+        "natural-brow-styling"
+      ],
+      "selectedOn": 16,
+      "selectedOff": 108,
+      "noPreferencesOn": 0,
+      "noPreferencesOff": 0,
+      "baselineSelectedOn": 0,
+      "baselineSelectedOff": 0,
+      "positionChangeCount": 0,
+      "positions12": [
+        0,
+        0,
+        0
+      ],
+      "positions20": [
+        0,
+        0,
+        124
+      ],
+      "candidateCount": 6912,
+      "scoreMin": 0,
+      "scoreMax": 1.2,
+      "scoreTotal": 1366.6133333332946,
+      "scoreHistogram": {
+        "0.000000": 2340,
+        "0.080000": 780,
+        "0.120000": 1404,
+        "0.200000": 468,
+        "1.000000": 90,
+        "1.080000": 30,
+        "1.120000": 54,
+        "1.200000": 18,
+        "0.500000": 300,
+        "0.580000": 100,
+        "0.620000": 180,
+        "0.700000": 60,
+        "0.333333": 300,
+        "0.413333": 100,
+        "0.453333": 180,
+        "0.533333": 60,
+        "0.666667": 90,
+        "0.746667": 30,
+        "0.786667": 54,
+        "0.866667": 18,
+        "0.250000": 120,
+        "0.330000": 40,
+        "0.370000": 72,
+        "0.450000": 24
+      },
+      "faceHistogram": {
+        "0.000000": 4992,
+        "1.000000": 192,
+        "0.500000": 640,
+        "0.333333": 640,
+        "0.666667": 192,
+        "0.250000": 256
+      },
+      "preferenceHistogram": {
+        "0.000000": 3240,
+        "0.080000": 1080,
+        "0.120000": 1944,
+        "0.200000": 648
+      },
+      "example": {
+        "profileId": 0,
+        "features": {},
+        "preferences": {
+          "occasion": "work",
+          "intensity": "light"
+        },
+        "experimental": true,
+        "baselineTop3": [
+          "natural",
+          "clean-girl",
+          "latte"
+        ],
+        "simulationTop3": [
+          "natural",
+          "clean-girl",
+          "glass-skin"
+        ],
+        "selectedRow": {
+          "styleKey": "glass-skin",
+          "displayName": "Trang điểm da căng bóng",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "work",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp work: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp work: +0.12",
+            "Sở thích độ đậm light: +0.08"
+          ]
+        }
+      },
+      "scoreRegressionCount": 0,
+      "scoreMean": 0.19771604938271045,
+      "canAppear": true,
+      "neverSelectedReason": null
+    }
+  ],
+  "examples": [
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "daily",
+        "intensity": null
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "peach",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        },
+        {
+          "styleKey": "igari",
+          "displayName": "Trang điểm Igari má hồng say",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        },
+        {
+          "styleKey": "peach",
+          "displayName": "Trang điểm tông đào ngọt ngào",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "daily",
+        "intensity": "medium"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "peach",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "igari",
+          "displayName": "Trang điểm Igari má hồng say",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        },
+        {
+          "styleKey": "ulzzang",
+          "displayName": "Trang điểm Ulzzang Hàn Quốc",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        },
+        {
+          "styleKey": "nude-makeup",
+          "displayName": "Trang điểm tông nude thanh lịch",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "daily",
+        "intensity": "bold"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "peach",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        },
+        {
+          "styleKey": "igari",
+          "displayName": "Trang điểm Igari má hồng say",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        },
+        {
+          "styleKey": "peach",
+          "displayName": "Trang điểm tông đào ngọt ngào",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "work",
+        "intensity": "light"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.2,
+          "explanation": "Một lựa chọn để thử cho dịp đi làm. Độ đậm nhẹ theo lựa chọn của bạn. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "clean-girl",
+          "score": 0.2,
+          "explanation": "Một lựa chọn để thử cho dịp đi làm. Độ đậm nhẹ theo lựa chọn của bạn. Lựa chọn gọn cho những ngày muốn trang điểm ít bước. Điểm riêng của phong cách là hiệu ứng sản phẩm kem và chân mày chải gọn."
+        },
+        {
+          "key": "latte",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi làm. Bảng màu nâu liền mạch tạo cảm giác ấm và gọn. Bạn có thể giảm nhũ cho ban ngày hoặc tăng độ rõ của mắt khi đi tiệc."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "work",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp work: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp work: +0.12",
+            "Sở thích độ đậm light: +0.08"
+          ]
+        },
+        {
+          "styleKey": "clean-girl",
+          "displayName": "Trang điểm Clean Girl tối giản",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "work",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp work: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp work: +0.12",
+            "Sở thích độ đậm light: +0.08"
+          ]
+        },
+        {
+          "styleKey": "glass-skin",
+          "displayName": "Trang điểm da căng bóng",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "work",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp work: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp work: +0.12",
+            "Sở thích độ đậm light: +0.08"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "work",
+        "intensity": "medium"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "latte",
+          "score": 0.2,
+          "explanation": "Một lựa chọn để thử cho dịp đi làm. Độ đậm vừa theo lựa chọn của bạn. Bảng màu nâu liền mạch tạo cảm giác ấm và gọn. Bạn có thể giảm nhũ cho ban ngày hoặc tăng độ rõ của mắt khi đi tiệc."
+        },
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi làm. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "clean-girl",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi làm. Lựa chọn gọn cho những ngày muốn trang điểm ít bước. Điểm riêng của phong cách là hiệu ứng sản phẩm kem và chân mày chải gọn."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "latte",
+          "displayName": "Trang điểm tông Latte ấm áp",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "work",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp work: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp work: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        },
+        {
+          "styleKey": "nude-makeup",
+          "displayName": "Trang điểm tông nude thanh lịch",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "work",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp work: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp work: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        },
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "work",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp work: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp work: +0.12"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "school",
+        "intensity": null
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi học. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi học. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        },
+        {
+          "key": "soft-glam",
+          "score": 0,
+          "explanation": "Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        },
+        {
+          "styleKey": "soft-korean",
+          "displayName": "Trang điểm Hàn Quốc nhẹ nhàng",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        },
+        {
+          "styleKey": "j-beauty",
+          "displayName": "Trang điểm Nhật Bản tự nhiên",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "school",
+        "intensity": "light"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.2,
+          "explanation": "Một lựa chọn để thử cho dịp đi học. Độ đậm nhẹ theo lựa chọn của bạn. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.2,
+          "explanation": "Một lựa chọn để thử cho dịp đi học. Độ đậm nhẹ theo lựa chọn của bạn. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        },
+        {
+          "key": "peach",
+          "score": 0.08,
+          "explanation": "Độ đậm nhẹ theo lựa chọn của bạn. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12",
+            "Sở thích độ đậm light: +0.08"
+          ]
+        },
+        {
+          "styleKey": "soft-korean",
+          "displayName": "Trang điểm Hàn Quốc nhẹ nhàng",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12",
+            "Sở thích độ đậm light: +0.08"
+          ]
+        },
+        {
+          "styleKey": "j-beauty",
+          "displayName": "Trang điểm Nhật Bản tự nhiên",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "light",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm light: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12",
+            "Sở thích độ đậm light: +0.08"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "school",
+        "intensity": "medium"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi học. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi học. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        },
+        {
+          "key": "soft-glam",
+          "score": 0.08,
+          "explanation": "Độ đậm vừa theo lựa chọn của bạn. Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        },
+        {
+          "styleKey": "soft-korean",
+          "displayName": "Trang điểm Hàn Quốc nhẹ nhàng",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        },
+        {
+          "styleKey": "j-beauty",
+          "displayName": "Trang điểm Nhật Bản tự nhiên",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "school",
+        "intensity": "bold"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi học. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp đi học. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        },
+        {
+          "key": "classic-glam",
+          "score": 0.08,
+          "explanation": "Độ đậm nổi bật theo lựa chọn của bạn. Thử nếu bạn muốn môi đỏ là điểm nhấn rõ ràng. Bố cục ít màu giúp vẻ cổ điển nổi bật mà không cần mắt khói đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        },
+        {
+          "styleKey": "soft-korean",
+          "displayName": "Trang điểm Hàn Quốc nhẹ nhàng",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        },
+        {
+          "styleKey": "j-beauty",
+          "displayName": "Trang điểm Nhật Bản tự nhiên",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "school",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp school: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp school: +0.12"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "date",
+        "intensity": null
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "peach",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hẹn hò. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        },
+        {
+          "key": "soft-glam",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hẹn hò. Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hẹn hò. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "peach",
+          "displayName": "Trang điểm tông đào ngọt ngào",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "date",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp date: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp date: +0.12"
+          ]
+        },
+        {
+          "styleKey": "soft-glam",
+          "displayName": "Trang điểm Soft Glam quyến rũ",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "date",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp date: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp date: +0.12"
+          ]
+        },
+        {
+          "styleKey": "fox-eye",
+          "displayName": "Trang điểm mắt cáo cá tính",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "date",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp date: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp date: +0.12"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "date",
+        "intensity": "bold"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "peach",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hẹn hò. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        },
+        {
+          "key": "soft-glam",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hẹn hò. Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hẹn hò. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "fox-eye",
+          "displayName": "Trang điểm mắt cáo cá tính",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "date",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp date: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp date: +0.12",
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        },
+        {
+          "styleKey": "peach",
+          "displayName": "Trang điểm tông đào ngọt ngào",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "date",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp date: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp date: +0.12"
+          ]
+        },
+        {
+          "styleKey": "soft-glam",
+          "displayName": "Trang điểm Soft Glam quyến rũ",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "date",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp date: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp date: +0.12"
+          ]
+        }
+      ]
+    },
+    {
+      "profileId": 1,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {
+          "mouthAspect": 0.2
+        },
+        "featureSources": {
+          "mouthAspect": "face_detection"
+        },
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": null,
+        "intensity": "bold"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "classic-glam",
+          "score": 1.08,
+          "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ. Độ đậm nổi bật theo lựa chọn của bạn. Thử nếu bạn muốn môi đỏ là điểm nhấn rõ ràng. Bố cục ít màu giúp vẻ cổ điển nổi bật mà không cần mắt khói đậm."
+        },
+        {
+          "key": "thai-glam",
+          "score": 1.08,
+          "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ. Độ đậm nổi bật theo lựa chọn của bạn. Phiên bản glam nhấn vào độ rõ của mắt và hàng mi. Đây là một hướng phối nâu đồng để thử, không phải quy chuẩn cho mọi lối trang điểm Thái."
+        },
+        {
+          "key": "soft-glam",
+          "score": 1,
+          "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ. Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "classic-glam",
+          "displayName": "Trang điểm cổ điển Classic Glam",
+          "faceScore": 1,
+          "preferenceScore": 0.08,
+          "finalScore": 1.08,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 1,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ.",
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        },
+        {
+          "styleKey": "thai-glam",
+          "displayName": "Trang điểm phong cách Thái Lan",
+          "faceScore": 1,
+          "preferenceScore": 0.08,
+          "finalScore": 1.08,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 1,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ.",
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        },
+        {
+          "styleKey": "western-glam",
+          "displayName": "Trang điểm Tây sắc sảo",
+          "faceScore": 1,
+          "preferenceScore": 0.08,
+          "finalScore": 1.08,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 1,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ.",
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        }
+      ]
+    }
+  ],
+  "curatedExamples": {
+    "fallback-no-features-no-preferences": {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": null,
+        "intensity": null
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0,
+          "explanation": "Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "soft-glam",
+          "score": 0,
+          "explanation": "Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc."
+        },
+        {
+          "key": "classic-glam",
+          "score": 0,
+          "explanation": "Thử nếu bạn muốn môi đỏ là điểm nhấn rõ ràng. Bố cục ít màu giúp vẻ cổ điển nổi bật mà không cần mắt khói đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0,
+          "finalScore": 0,
+          "selected": true,
+          "selectionReason": "diverse-discovery",
+          "evidenceStatus": "fallback",
+          "ruleContributions": [],
+          "preferenceContributions": [],
+          "explanations": []
+        },
+        {
+          "styleKey": "soft-glam",
+          "displayName": "Trang điểm Soft Glam quyến rũ",
+          "faceScore": 0,
+          "preferenceScore": 0,
+          "finalScore": 0,
+          "selected": true,
+          "selectionReason": "diverse-discovery",
+          "evidenceStatus": "fallback",
+          "ruleContributions": [],
+          "preferenceContributions": [],
+          "explanations": []
+        },
+        {
+          "styleKey": "classic-glam",
+          "displayName": "Trang điểm cổ điển Classic Glam",
+          "faceScore": 0,
+          "preferenceScore": 0,
+          "finalScore": 0,
+          "selected": true,
+          "selectionReason": "diverse-discovery",
+          "evidenceStatus": "fallback",
+          "ruleContributions": [],
+          "preferenceContributions": [],
+          "explanations": []
+        }
+      ]
+    },
+    "preference-only-igari": {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "daily",
+        "intensity": null
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "peach",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        },
+        {
+          "styleKey": "igari",
+          "displayName": "Trang điểm Igari má hồng say",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        },
+        {
+          "styleKey": "peach",
+          "displayName": "Trang điểm tông đào ngọt ngào",
+          "faceScore": 0,
+          "preferenceScore": 0.12,
+          "finalScore": 0.12,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12"
+          ]
+        }
+      ]
+    },
+    "zero-overlap-regression": {
+      "profileId": 0,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {},
+        "featureSources": {},
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": "daily",
+        "intensity": "medium"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "peach",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        },
+        {
+          "key": "soft-korean",
+          "score": 0.12,
+          "explanation": "Một lựa chọn để thử cho dịp hằng ngày. Thử khi bạn muốn màu sắc nhẹ và diện mạo mềm mại. Môi chuyển màu giúp tổng thể có điểm nhấn mà không cần trang điểm đậm."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "igari",
+          "displayName": "Trang điểm Igari má hồng say",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        },
+        {
+          "styleKey": "ulzzang",
+          "displayName": "Trang điểm Ulzzang Hàn Quốc",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        },
+        {
+          "styleKey": "nude-makeup",
+          "displayName": "Trang điểm tông nude thanh lịch",
+          "faceScore": 0,
+          "preferenceScore": 0.2,
+          "finalScore": 0.2,
+          "selected": true,
+          "selectionReason": "explicit-preference",
+          "evidenceStatus": "preference-only",
+          "ruleContributions": [],
+          "preferenceContributions": [
+            {
+              "kind": "occasion",
+              "value": "daily",
+              "contribution": 0.12,
+              "explanation": "Sở thích dịp daily: +0.12"
+            },
+            {
+              "kind": "intensity",
+              "value": "medium",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm medium: +0.08"
+            }
+          ],
+          "explanations": [
+            "Sở thích dịp daily: +0.12",
+            "Sở thích độ đậm medium: +0.08"
+          ]
+        }
+      ]
+    },
+    "experimental-western-glam": {
+      "profileId": 1,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {
+          "mouthAspect": 0.2
+        },
+        "featureSources": {
+          "mouthAspect": "face_detection"
+        },
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": null,
+        "intensity": "bold"
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "classic-glam",
+          "score": 1.08,
+          "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ. Độ đậm nổi bật theo lựa chọn của bạn. Thử nếu bạn muốn môi đỏ là điểm nhấn rõ ràng. Bố cục ít màu giúp vẻ cổ điển nổi bật mà không cần mắt khói đậm."
+        },
+        {
+          "key": "thai-glam",
+          "score": 1.08,
+          "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ. Độ đậm nổi bật theo lựa chọn của bạn. Phiên bản glam nhấn vào độ rõ của mắt và hàng mi. Đây là một hướng phối nâu đồng để thử, không phải quy chuẩn cho mọi lối trang điểm Thái."
+        },
+        {
+          "key": "soft-glam",
+          "score": 1,
+          "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ. Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "classic-glam",
+          "displayName": "Trang điểm cổ điển Classic Glam",
+          "faceScore": 1,
+          "preferenceScore": 0.08,
+          "finalScore": 1.08,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 1,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ.",
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        },
+        {
+          "styleKey": "thai-glam",
+          "displayName": "Trang điểm phong cách Thái Lan",
+          "faceScore": 1,
+          "preferenceScore": 0.08,
+          "finalScore": 1.08,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 1,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ.",
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        },
+        {
+          "styleKey": "western-glam",
+          "displayName": "Trang điểm Tây sắc sảo",
+          "faceScore": 1,
+          "preferenceScore": 0.08,
+          "finalScore": 1.08,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 1,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [
+            {
+              "kind": "intensity",
+              "value": "bold",
+              "contribution": 0.08,
+              "explanation": "Sở thích độ đậm bold: +0.08"
+            }
+          ],
+          "explanations": [
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ.",
+            "Sở thích độ đậm bold: +0.08"
+          ]
+        }
+      ]
+    },
+    "no-preferences-ranking-change": {
+      "profileId": 6,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {
+          "leftBrowArch": 0.12,
+          "rightBrowArch": 0.12
+        },
+        "featureSources": {
+          "leftBrowArch": "face_detection",
+          "rightBrowArch": "face_detection"
+        },
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": null,
+        "intensity": null
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "natural",
+          "score": 1,
+          "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên. Dễ bắt đầu nếu bạn muốn một diện mạo chỉn chu mà không đổi nhiều thói quen. Hiệu ứng satin khác với độ bóng rõ của lối tối giản sáng nhẹ."
+        },
+        {
+          "key": "clean-girl",
+          "score": 1,
+          "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên. Lựa chọn gọn cho những ngày muốn trang điểm ít bước. Điểm riêng của phong cách là hiệu ứng sản phẩm kem và chân mày chải gọn."
+        },
+        {
+          "key": "strawberry",
+          "score": 1,
+          "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên. Một cách đổi điểm nhấn từ mắt sang má. Sắc hồng dâu rõ hơn sắc đào, còn mắt được giữ nhẹ để tổng thể không quá nhiều chi tiết."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "natural",
+          "displayName": "Trang điểm tự nhiên hằng ngày",
+          "faceScore": 1,
+          "preferenceScore": 0,
+          "finalScore": 1,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "arch-high-natural",
+              "feature": "browArch",
+              "techniqueKey": "natural-brow-styling",
+              "contribution": 1,
+              "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+            }
+          ],
+          "preferenceContributions": [],
+          "explanations": [
+            "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+          ]
+        },
+        {
+          "styleKey": "nude-makeup",
+          "displayName": "Trang điểm tông nude thanh lịch",
+          "faceScore": 1,
+          "preferenceScore": 0,
+          "finalScore": 1,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "arch-high-natural",
+              "feature": "browArch",
+              "techniqueKey": "natural-brow-styling",
+              "contribution": 1,
+              "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+            }
+          ],
+          "preferenceContributions": [],
+          "explanations": [
+            "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+          ]
+        },
+        {
+          "styleKey": "clean-girl",
+          "displayName": "Trang điểm Clean Girl tối giản",
+          "faceScore": 1,
+          "preferenceScore": 0,
+          "finalScore": 1,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "arch-high-natural",
+              "feature": "browArch",
+              "techniqueKey": "natural-brow-styling",
+              "contribution": 1,
+              "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+            }
+          ],
+          "preferenceContributions": [],
+          "explanations": [
+            "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+          ]
+        }
+      ]
+    },
+    "full-measurements-no-preferences": {
+      "profileId": 40,
+      "input": {
+        "schemaVersion": 3,
+        "analysisMethod": "face_detection",
+        "quality": {
+          "frontal": true,
+          "singleFace": true,
+          "expressionLimited": false
+        },
+        "detection": {
+          "faceCount": 1,
+          "boundingBox": {
+            "x": 0.1,
+            "y": 0.1,
+            "width": 0.8,
+            "height": 0.8
+          },
+          "pose": {
+            "yaw": 0,
+            "pitch": 0,
+            "roll": 0
+          }
+        },
+        "features": {
+          "eyeSpacing": 0.35,
+          "leftEyeAspect": 0.15,
+          "rightEyeAspect": 0.15,
+          "leftBrowArch": 0.02,
+          "rightBrowArch": 0.02,
+          "mouthAspect": 0.2
+        },
+        "featureSources": {
+          "eyeSpacing": "face_detection",
+          "leftEyeAspect": "face_detection",
+          "rightEyeAspect": "face_detection",
+          "leftBrowArch": "face_detection",
+          "rightBrowArch": "face_detection",
+          "mouthAspect": "face_detection"
+        },
+        "missing": [],
+        "limitations": []
+      },
+      "preferences": {
+        "occasion": null,
+        "intensity": null
+      },
+      "experimental": true,
+      "baselineTop3": [
+        {
+          "key": "peach",
+          "score": 0.75,
+          "explanation": "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác. Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ. Thử đi nét chân mày mềm theo đường sẵn có, không cần vẽ đỉnh mày cao hơn. Thử một bảng màu đồng điệu thay vì phối nhiều sắc khác nhau. Sắc đào tạo hướng vui tươi, nhẹ hơn kiểu mắt nâu đậm."
+        },
+        {
+          "key": "soft-glam",
+          "score": 0.75,
+          "explanation": "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác. Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ. Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ. Giữ được độ nổi bật của makeup đi tiệc mà vẫn mềm mại. Các mép màu được tán kỹ thay vì nhấn bằng đường viền sắc."
+        },
+        {
+          "key": "latte",
+          "score": 0.75,
+          "explanation": "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác. Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ. Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ. Bảng màu nâu liền mạch tạo cảm giác ấm và gọn. Bạn có thể giảm nhũ cho ban ngày hoặc tăng độ rõ của mắt khi đi tiệc."
+        }
+      ],
+      "simulationTop3": [
+        {
+          "styleKey": "peach",
+          "displayName": "Trang điểm tông đào ngọt ngào",
+          "faceScore": 0.75,
+          "preferenceScore": 0,
+          "finalScore": 0.75,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "spacing-low-outer",
+              "feature": "eyeSpacing",
+              "techniqueKey": "outer-eye-emphasis",
+              "contribution": 0.25,
+              "explanation": "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác."
+            },
+            {
+              "ruleId": "opening-low-soft",
+              "feature": "eyeAspect",
+              "techniqueKey": "soft-eyeliner",
+              "contribution": 0.25,
+              "explanation": "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ."
+            },
+            {
+              "ruleId": "arch-low-soft",
+              "feature": "browArch",
+              "techniqueKey": "soft-brow-shaping",
+              "contribution": 0.25,
+              "explanation": "Thử đi nét chân mày mềm theo đường sẵn có, không cần vẽ đỉnh mày cao hơn."
+            }
+          ],
+          "preferenceContributions": [],
+          "explanations": [
+            "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác.",
+            "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ.",
+            "Thử đi nét chân mày mềm theo đường sẵn có, không cần vẽ đỉnh mày cao hơn."
+          ]
+        },
+        {
+          "styleKey": "soft-glam",
+          "displayName": "Trang điểm Soft Glam quyến rũ",
+          "faceScore": 0.75,
+          "preferenceScore": 0,
+          "finalScore": 0.75,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "spacing-low-outer",
+              "feature": "eyeSpacing",
+              "techniqueKey": "outer-eye-emphasis",
+              "contribution": 0.25,
+              "explanation": "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác."
+            },
+            {
+              "ruleId": "opening-low-soft",
+              "feature": "eyeAspect",
+              "techniqueKey": "soft-eyeliner",
+              "contribution": 0.25,
+              "explanation": "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ."
+            },
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 0.25,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [],
+          "explanations": [
+            "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác.",
+            "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ.",
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+          ]
+        },
+        {
+          "styleKey": "latte",
+          "displayName": "Trang điểm tông Latte ấm áp",
+          "faceScore": 0.75,
+          "preferenceScore": 0,
+          "finalScore": 0.75,
+          "selected": true,
+          "selectionReason": "face-technique-match",
+          "evidenceStatus": "experimental",
+          "ruleContributions": [
+            {
+              "ruleId": "spacing-low-outer",
+              "feature": "eyeSpacing",
+              "techniqueKey": "outer-eye-emphasis",
+              "contribution": 0.25,
+              "explanation": "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác."
+            },
+            {
+              "ruleId": "opening-low-soft",
+              "feature": "eyeAspect",
+              "techniqueKey": "soft-eyeliner",
+              "contribution": 0.25,
+              "explanation": "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ."
+            },
+            {
+              "ruleId": "lip-low-outline",
+              "feature": "mouthAspect",
+              "techniqueKey": "defined-lip-outline",
+              "contribution": 0.25,
+              "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+            }
+          ],
+          "preferenceContributions": [],
+          "explanations": [
+            "Bạn có thể thử nhấn màu ở đuôi mắt và kéo viền nhẹ ra ngoài để khám phá bố cục mắt khác.",
+            "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ.",
+            "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+          ]
+        }
+      ]
+    }
+  },
+  "catalogKeys": [
+    "soft-korean",
+    "douyin",
+    "clean-girl",
+    "natural",
+    "peach",
+    "strawberry",
+    "latte",
+    "soft-glam",
+    "thai-glam",
+    "smokey-eyes",
+    "bridal-soft-glam",
+    "classic-glam",
+    "j-beauty",
+    "igari",
+    "ulzzang",
+    "western-glam",
+    "nude-makeup",
+    "fox-eye",
+    "sunkissed",
+    "glass-skin"
+  ]
+}

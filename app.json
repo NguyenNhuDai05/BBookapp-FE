@@ -60,11 +60,12 @@
       ],
       "expo-font",
       "expo-image",
+      ["expo-camera", { "cameraPermission": "Cho phép BBook dùng camera khi bạn chủ động chụp selfie để tư vấn makeup.", "recordAudioAndroid": false, "barcodeScannerEnabled": false }],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Cho phép BeautyBook truy cập ảnh để tải hồ sơ, giấy tờ xác minh và portfolio do bạn chọn.",
-          "cameraPermission": "Cho phép B-Book sử dụng camera để chụp CCCD và ảnh khuôn mặt khi bạn xác minh danh tính.",
+          "photosPermission": "Cho phép BBook chọn ảnh để tải hồ sơ, xác minh, portfolio hoặc tư vấn makeup AI khi bạn chủ động sử dụng.",
+          "cameraPermission": "Cho phép BBook dùng camera khi bạn chủ động chụp ảnh xác minh hoặc selfie để tư vấn makeup AI.",
           "microphonePermission": false
         }
       ],

@@ -1,5 +1,6 @@
 export type ExploreKind = 'portfolio' | 'artists' | 'services';
-export type ExploreFilters = { provinceCode?: number; styleId?: number; minPrice?: number; maxPrice?: number };
+export type AdvisorStyleMapping = { styleKey: string; styleIds: number[] };
+export type ExploreFilters = { advisorStyleKey?: string; provinceCode?: number; styleId?: number; minPrice?: number; maxPrice?: number };
 export type ExploreStyle = { id: number; name: string; artistCount: number };
 export type ExploreProvince = { code: number; name: string };
 export type ExplorePost = {
@@ -13,6 +14,7 @@ export type ExploreArtist = {
 export type ExploreService = {
   id: string; muaId: string; name: string; authorName: string; city?: string; price: number;
   durationMinutes: number; imageUrl?: string; imageUrls: string[]; tags: string[];
+  styleIds?: number[]; styleTags?: { styleId: number; name: string; isActive: boolean }[]; matchBasis?: 'service-style' | 'mua-specialty';
 };
 export type ExploreItem = ExplorePost | ExploreArtist | ExploreService;
 export type ExplorePage = { items: ExploreItem[]; nextCursor: string | null };

@@ -1,0 +1,1259 @@
+{
+  "syntheticOnly": true,
+  "notProbabilities": true,
+  "cases": 6912,
+  "profiles": 108,
+  "preferences": 32,
+  "experimentalModes": 2,
+  "candidateSource": "bbook-makeup-style-library.vi.json (12)",
+  "displayCatalog": "bbook-makeup-catalog-20-vi-v1.2.json (20)",
+  "fallbackWithoutPreferences": {
+    "natural,soft-glam,classic-glam": 108
+  },
+  "rows": [
+    {
+      "key": "soft-korean",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "arch-low-soft",
+        "lip-high-soft"
+      ],
+      "enabledCount": 872,
+      "disabledCount": 1296,
+      "noPreferencesCount": 22,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "light"
+        },
+        "score": 0.08
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_high -> soft-eyeliner",
+        "eyeAspect:relatively_low -> soft-eyeliner",
+        "browArch:relatively_low -> soft-brow-shaping",
+        "mouthAspect:relatively_high -> soft-blurred-lips"
+      ]
+    },
+    {
+      "key": "douyin",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-low-outer",
+        "opening-high-gradient",
+        "arch-low-soft",
+        "lip-high-soft"
+      ],
+      "enabledCount": 864,
+      "disabledCount": 432,
+      "noPreferencesCount": 29,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "medium"
+        },
+        "score": 0.08
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_low -> outer-eye-emphasis",
+        "eyeAspect:relatively_high -> gradient-eyeshadow",
+        "browArch:relatively_low -> soft-brow-shaping",
+        "mouthAspect:relatively_high -> soft-blurred-lips"
+      ]
+    },
+    {
+      "key": "clean-girl",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "arch-high-natural"
+      ],
+      "enabledCount": 415,
+      "disabledCount": 540,
+      "noPreferencesCount": 10,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": "work",
+          "intensity": null
+        },
+        "score": 0.12
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_high -> soft-eyeliner",
+        "eyeAspect:relatively_low -> soft-eyeliner",
+        "browArch:relatively_high -> natural-brow-styling"
+      ]
+    },
+    {
+      "key": "natural",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "arch-high-natural",
+        "lip-high-soft"
+      ],
+      "enabledCount": 1291,
+      "disabledCount": 1512,
+      "noPreferencesCount": 49,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": null
+        },
+        "score": 0
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_high -> soft-eyeliner",
+        "eyeAspect:relatively_low -> soft-eyeliner",
+        "browArch:relatively_high -> natural-brow-styling",
+        "mouthAspect:relatively_high -> soft-blurred-lips"
+      ]
+    },
+    {
+      "key": "peach",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-low-outer",
+        "spacing-high-soft",
+        "opening-low-soft",
+        "opening-high-gradient",
+        "arch-low-soft",
+        "lip-high-soft"
+      ],
+      "enabledCount": 2132,
+      "disabledCount": 1188,
+      "noPreferencesCount": 73,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "light"
+        },
+        "score": 0.08
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_low -> outer-eye-emphasis",
+        "eyeSpacing:relatively_high -> soft-eyeliner",
+        "eyeAspect:relatively_low -> soft-eyeliner",
+        "eyeAspect:relatively_high -> gradient-eyeshadow",
+        "browArch:relatively_low -> soft-brow-shaping",
+        "mouthAspect:relatively_high -> soft-blurred-lips"
+      ]
+    },
+    {
+      "key": "strawberry",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "arch-high-natural",
+        "lip-high-soft"
+      ],
+      "enabledCount": 673,
+      "disabledCount": 108,
+      "noPreferencesCount": 14,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": "photoshoot",
+          "intensity": "light"
+        },
+        "score": 0.2
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_high -> soft-eyeliner",
+        "eyeAspect:relatively_low -> soft-eyeliner",
+        "browArch:relatively_high -> natural-brow-styling",
+        "mouthAspect:relatively_high -> soft-blurred-lips"
+      ]
+    },
+    {
+      "key": "latte",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-low-outer",
+        "spacing-high-soft",
+        "opening-low-soft",
+        "opening-high-gradient",
+        "lip-low-outline"
+      ],
+      "enabledCount": 1159,
+      "disabledCount": 1080,
+      "noPreferencesCount": 22,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "medium"
+        },
+        "score": 0.08
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_low -> outer-eye-emphasis",
+        "eyeSpacing:relatively_high -> soft-eyeliner",
+        "eyeAspect:relatively_low -> soft-eyeliner",
+        "eyeAspect:relatively_high -> gradient-eyeshadow",
+        "mouthAspect:relatively_low -> defined-lip-outline"
+      ]
+    },
+    {
+      "key": "soft-glam",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-low-outer",
+        "spacing-high-soft",
+        "opening-low-soft",
+        "opening-high-gradient",
+        "lip-low-outline"
+      ],
+      "enabledCount": 1648,
+      "disabledCount": 1836,
+      "noPreferencesCount": 62,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": null
+        },
+        "score": 0
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_low -> outer-eye-emphasis",
+        "eyeSpacing:relatively_high -> soft-eyeliner",
+        "eyeAspect:relatively_low -> soft-eyeliner",
+        "eyeAspect:relatively_high -> gradient-eyeshadow",
+        "mouthAspect:relatively_low -> defined-lip-outline"
+      ]
+    },
+    {
+      "key": "thai-glam",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-low-outer",
+        "opening-high-gradient",
+        "lip-low-outline"
+      ],
+      "enabledCount": 566,
+      "disabledCount": 648,
+      "noPreferencesCount": 21,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "bold"
+        },
+        "score": 0.08
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_low -> outer-eye-emphasis",
+        "eyeAspect:relatively_high -> gradient-eyeshadow",
+        "mouthAspect:relatively_low -> defined-lip-outline"
+      ]
+    },
+    {
+      "key": "smokey-eyes",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "opening-high-gradient",
+        "arch-low-soft"
+      ],
+      "enabledCount": 195,
+      "disabledCount": 324,
+      "noPreferencesCount": 7,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": "bold"
+        },
+        "score": 0.08
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeAspect:relatively_high -> gradient-eyeshadow",
+        "browArch:relatively_low -> soft-brow-shaping"
+      ]
+    },
+    {
+      "key": "bridal-soft-glam",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-high-soft",
+        "opening-low-soft",
+        "opening-high-gradient",
+        "arch-low-soft",
+        "lip-low-outline"
+      ],
+      "enabledCount": 221,
+      "disabledCount": 108,
+      "noPreferencesCount": 0,
+      "minScore": 0.12,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": "wedding",
+          "intensity": "medium"
+        },
+        "score": 0.2
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_high -> soft-eyeliner",
+        "eyeAspect:relatively_low -> soft-eyeliner",
+        "eyeAspect:relatively_high -> gradient-eyeshadow",
+        "browArch:relatively_low -> soft-brow-shaping",
+        "mouthAspect:relatively_low -> defined-lip-outline"
+      ]
+    },
+    {
+      "key": "classic-glam",
+      "inCatalog": true,
+      "inCandidates": true,
+      "ruleIds": [
+        "spacing-low-outer",
+        "lip-low-outline"
+      ],
+      "enabledCount": 332,
+      "disabledCount": 1296,
+      "noPreferencesCount": 15,
+      "minScore": 0,
+      "maxScore": 1.2,
+      "example": {
+        "features": {},
+        "preferences": {
+          "occasion": null,
+          "intensity": null
+        },
+        "score": 0
+      },
+      "canAppear": true,
+      "conditions": [
+        "eyeSpacing:relatively_low -> outer-eye-emphasis",
+        "mouthAspect:relatively_low -> defined-lip-outline"
+      ]
+    },
+    {
+      "key": "j-beauty",
+      "inCatalog": true,
+      "inCandidates": false,
+      "ruleIds": [],
+      "enabledCount": 0,
+      "disabledCount": 0,
+      "noPreferencesCount": 0,
+      "minScore": null,
+      "maxScore": 0,
+      "canAppear": false,
+      "conditions": []
+    },
+    {
+      "key": "igari",
+      "inCatalog": true,
+      "inCandidates": false,
+      "ruleIds": [],
+      "enabledCount": 0,
+      "disabledCount": 0,
+      "noPreferencesCount": 0,
+      "minScore": null,
+      "maxScore": 0,
+      "canAppear": false,
+      "conditions": []
+    },
+    {
+      "key": "ulzzang",
+      "inCatalog": true,
+      "inCandidates": false,
+      "ruleIds": [],
+      "enabledCount": 0,
+      "disabledCount": 0,
+      "noPreferencesCount": 0,
+      "minScore": null,
+      "maxScore": 0,
+      "canAppear": false,
+      "conditions": []
+    },
+    {
+      "key": "western-glam",
+      "inCatalog": true,
+      "inCandidates": false,
+      "ruleIds": [],
+      "enabledCount": 0,
+      "disabledCount": 0,
+      "noPreferencesCount": 0,
+      "minScore": null,
+      "maxScore": 0,
+      "canAppear": false,
+      "conditions": []
+    },
+    {
+      "key": "nude-makeup",
+      "inCatalog": true,
+      "inCandidates": false,
+      "ruleIds": [],
+      "enabledCount": 0,
+      "disabledCount": 0,
+      "noPreferencesCount": 0,
+      "minScore": null,
+      "maxScore": 0,
+      "canAppear": false,
+      "conditions": []
+    },
+    {
+      "key": "fox-eye",
+      "inCatalog": true,
+      "inCandidates": false,
+      "ruleIds": [],
+      "enabledCount": 0,
+      "disabledCount": 0,
+      "noPreferencesCount": 0,
+      "minScore": null,
+      "maxScore": 0,
+      "canAppear": false,
+      "conditions": []
+    },
+    {
+      "key": "sunkissed",
+      "inCatalog": true,
+      "inCandidates": false,
+      "ruleIds": [],
+      "enabledCount": 0,
+      "disabledCount": 0,
+      "noPreferencesCount": 0,
+      "minScore": null,
+      "maxScore": 0,
+      "canAppear": false,
+      "conditions": []
+    },
+    {
+      "key": "glass-skin",
+      "inCatalog": true,
+      "inCandidates": false,
+      "ruleIds": [],
+      "enabledCount": 0,
+      "disabledCount": 0,
+      "noPreferencesCount": 0,
+      "minScore": null,
+      "maxScore": 0,
+      "canAppear": false,
+      "conditions": []
+    }
+  ],
+  "probes": [
+    {
+      "name": "missing",
+      "trace": {
+        "experimentalEnabled": true,
+        "acceptedFeatures": [],
+        "rejectedFeatures": [
+          {
+            "key": "outlineAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeSpacing",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyeWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyeAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyeTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeWidthDifference",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyePosition",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyePosition",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowLength",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowLength",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowArch",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowArch",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowEyeGap",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowEyeGap",
+            "reason": "missing"
+          },
+          {
+            "key": "noseBridgeLength",
+            "reason": "missing"
+          },
+          {
+            "key": "noseBaseWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "upperLipThickness",
+            "reason": "missing"
+          },
+          {
+            "key": "lowerLipThickness",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthPosition",
+            "reason": "missing"
+          },
+          {
+            "key": "lowerFaceHeight",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineUpperWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineMiddleWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineLowerWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "chinWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineCompactness",
+            "reason": "missing"
+          },
+          {
+            "key": "meshProjectedArea",
+            "reason": "missing"
+          },
+          {
+            "key": "meshRelativeZSpan",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeAspect",
+            "reason": "incomplete_pair"
+          },
+          {
+            "key": "browArch",
+            "reason": "incomplete_pair"
+          }
+        ],
+        "activatedRules": [],
+        "source": "fallback",
+        "styles": [
+          {
+            "styleKey": "natural",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "soft-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "classic-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "peach",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "soft-korean",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "clean-girl",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "strawberry",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "latte",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "douyin",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "thai-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "smokey-eyes",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pose-rejected",
+      "trace": {
+        "experimentalEnabled": true,
+        "acceptedFeatures": [],
+        "rejectedFeatures": [
+          {
+            "key": "outlineAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeSpacing",
+            "reason": "quality_or_pose"
+          },
+          {
+            "key": "leftEyeWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyeAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyeTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeWidthDifference",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyePosition",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyePosition",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowLength",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowLength",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowArch",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowArch",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowEyeGap",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowEyeGap",
+            "reason": "missing"
+          },
+          {
+            "key": "noseBridgeLength",
+            "reason": "missing"
+          },
+          {
+            "key": "noseBaseWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "upperLipThickness",
+            "reason": "missing"
+          },
+          {
+            "key": "lowerLipThickness",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthPosition",
+            "reason": "missing"
+          },
+          {
+            "key": "lowerFaceHeight",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineUpperWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineMiddleWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineLowerWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "chinWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineCompactness",
+            "reason": "missing"
+          },
+          {
+            "key": "meshProjectedArea",
+            "reason": "missing"
+          },
+          {
+            "key": "meshRelativeZSpan",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeAspect",
+            "reason": "incomplete_pair"
+          },
+          {
+            "key": "browArch",
+            "reason": "incomplete_pair"
+          }
+        ],
+        "activatedRules": [],
+        "source": "fallback",
+        "styles": [
+          {
+            "styleKey": "natural",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "soft-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "classic-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "peach",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "soft-korean",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "clean-girl",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "strawberry",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "latte",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "douyin",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "thai-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "smokey-eyes",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          }
+        ]
+      }
+    },
+    {
+      "name": "unknown-source",
+      "trace": {
+        "experimentalEnabled": true,
+        "acceptedFeatures": [],
+        "rejectedFeatures": [
+          {
+            "key": "outlineAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeSpacing",
+            "reason": "missing_source"
+          },
+          {
+            "key": "leftEyeWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyeAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyeTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyeTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeWidthDifference",
+            "reason": "missing"
+          },
+          {
+            "key": "leftEyePosition",
+            "reason": "missing"
+          },
+          {
+            "key": "rightEyePosition",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowLength",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowLength",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowArch",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowArch",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowTilt",
+            "reason": "missing"
+          },
+          {
+            "key": "leftBrowEyeGap",
+            "reason": "missing"
+          },
+          {
+            "key": "rightBrowEyeGap",
+            "reason": "missing"
+          },
+          {
+            "key": "noseBridgeLength",
+            "reason": "missing"
+          },
+          {
+            "key": "noseBaseWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthAspect",
+            "reason": "missing"
+          },
+          {
+            "key": "upperLipThickness",
+            "reason": "missing"
+          },
+          {
+            "key": "lowerLipThickness",
+            "reason": "missing"
+          },
+          {
+            "key": "mouthPosition",
+            "reason": "missing"
+          },
+          {
+            "key": "lowerFaceHeight",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineUpperWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineMiddleWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineLowerWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "chinWidth",
+            "reason": "missing"
+          },
+          {
+            "key": "outlineCompactness",
+            "reason": "missing"
+          },
+          {
+            "key": "meshProjectedArea",
+            "reason": "missing"
+          },
+          {
+            "key": "meshRelativeZSpan",
+            "reason": "missing"
+          },
+          {
+            "key": "eyeAspect",
+            "reason": "incomplete_pair"
+          },
+          {
+            "key": "browArch",
+            "reason": "incomplete_pair"
+          }
+        ],
+        "activatedRules": [],
+        "source": "fallback",
+        "styles": [
+          {
+            "styleKey": "natural",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "soft-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "classic-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": true,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "peach",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "soft-korean",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "clean-girl",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "strawberry",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "latte",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "douyin",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "thai-glam",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          },
+          {
+            "styleKey": "smokey-eyes",
+            "ruleContributions": [],
+            "faceScore": 0,
+            "preferenceScore": 0,
+            "finalScore": 0,
+            "selected": false,
+            "selectionReason": "diverse-discovery"
+          }
+        ]
+      }
+    }
+  ]
+}

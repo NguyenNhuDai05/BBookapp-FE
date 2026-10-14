@@ -1,0 +1,95 @@
+{
+  "flushed-blush": {
+    "label": "Má hồng ửng nổi bật",
+    "keys": [
+      "igari",
+      "strawberry"
+    ],
+    "field": "techniques.cheeks",
+    "fieldsByKey": {}
+  },
+  "bronzed-glow": {
+    "label": "Hiệu ứng bronzer/ánh đồng",
+    "keys": [
+      "sunkissed",
+      "thai-glam",
+      "latte",
+      "clean-girl"
+    ],
+    "field": "techniques.cheeks",
+    "fieldsByKey": {
+      "clean-girl": "techniques.contourHighlight"
+    }
+  },
+  "dewy-base": {
+    "label": "Nền căng bóng",
+    "keys": [
+      "soft-korean",
+      "clean-girl",
+      "glass-skin",
+      "bridal-soft-glam"
+    ],
+    "field": "techniques.base",
+    "fieldsByKey": {
+      "clean-girl": "signatureLook"
+    }
+  },
+  "matte-base": {
+    "label": "Nền lì hoặc bán lì",
+    "keys": [
+      "douyin",
+      "latte",
+      "soft-glam",
+      "thai-glam",
+      "smokey-eyes",
+      "classic-glam",
+      "western-glam"
+    ],
+    "field": "techniques.base",
+    "fieldsByKey": {}
+  },
+  "gradient-lips": {
+    "label": "Môi chuyển sắc",
+    "keys": [
+      "soft-korean",
+      "ulzzang"
+    ],
+    "field": "techniques.lips",
+    "fieldsByKey": {}
+  },
+  "soft-natural": {
+    "label": "Tự nhiên, nhẹ",
+    "keys": [
+      "natural",
+      "j-beauty",
+      "clean-girl"
+    ],
+    "field": "signatureLook",
+    "fieldsByKey": {}
+  },
+  "smokey-eyes": {
+    "label": "Mắt khói",
+    "keys": [
+      "soft-glam",
+      "smokey-eyes"
+    ],
+    "field": "techniques.eyes",
+    "fieldsByKey": {}
+  },
+  "classic-red-lips": {
+    "label": "Môi đỏ cổ điển",
+    "keys": [
+      "classic-glam"
+    ],
+    "field": "techniques.lips",
+    "fieldsByKey": {}
+  },
+  "peach-tone": {
+    "label": "Phối sắc đào",
+    "keys": [
+      "peach"
+    ],
+    "field": "signatureLook",
+    "fieldsByKey": {}
+  }
+}

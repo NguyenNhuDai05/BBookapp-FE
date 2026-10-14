@@ -454,7 +454,8 @@ export default function MuaProfilePremiumScreen() {
           }
         }}
         initialData={editingService}
-        availableTags={[...new Set((services || []).flatMap(service => service.tags || []))]}
+        availableStyles={profile?.specialties || []}
+        onReloadStyles={() => refetchProfile()}
       />
 
       <PortfolioFormModal

@@ -1,0 +1,5 @@
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import config from '../../../app.config';
+test('ordinary development keeps the existing Firebase plugin configuration; local-only removal plugin is gone',()=>{const before={...process.env};try{process.env.EAS_BUILD_PROFILE='advisor-development';process.env.BBOOK_ADVISOR_ENABLED='1';const c=config({config:{name:'BBook',slug:'BBook-app',android:{package:'com.bbook.app',googleServicesFile:'./google-services.json'}}} as any);expect(c.android?.googleServicesFile).toBe('./google-services.json');expect(c.android?.package).toBe('com.bbook.app');expect(JSON.stringify(c.plugins)).not.toContain('withAdvisorLocalDevelopment');}finally{process.env={...before};}});
+test('test APK script embeds release JS and performs no installation, upload or publishing',()=>{const text=readFileSync(resolve('docs/advisor/Build-Development-Test.ps1'),'utf8');expect(text).toContain(':app:assembleRelease');expect(text).toContain("EAS_BUILD_PROFILE = 'advisor-local-test'");expect(text).not.toMatch(/expo start|installRelease|eas build|submit|com\.bbook\.advisor\.local/);});
