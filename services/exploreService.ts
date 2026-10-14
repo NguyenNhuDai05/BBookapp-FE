@@ -1,8 +1,12 @@
 import { isAxiosError } from 'axios';
 import { api } from './api';
-import type { ExploreFilters, ExploreHome, ExploreKind, ExplorePage } from '../types/explore';
+import type { AdvisorStyleMapping, ExploreFilters, ExploreHome, ExploreKind, ExplorePage } from '../types/explore';
 
 export const exploreService = {
+  async advisorMappings(signal?: AbortSignal): Promise<AdvisorStyleMapping[]> {
+    const { data } = await api.get<AdvisorStyleMapping[]>('/Explore/advisor-mappings', { signal });
+    return data;
+  },
   async home(signal?: AbortSignal): Promise<ExploreHome> {
     const { data } = await api.get<ExploreHome>('/Explore', { signal });
     return data;

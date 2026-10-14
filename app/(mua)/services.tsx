@@ -1,3 +1,4 @@
+import { useMuaProfile } from '../../hooks/useMuaProfile';
 import { useAuthStore } from '../../store/useAuthStore';
 import { ReviewNotice } from '../../components/ReviewNotice';
 import React, { useState } from 'react';
@@ -26,6 +27,7 @@ export default function MuaManagementScreen() {
   const [editingService, setEditingService] = useState<any>(null);
   const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
 
+  const profileQuery = useMuaProfile(muaId);
   const { data: services = [], isLoading: isLoadingServices } = useMuaServices(muaId);
   const { data: portfolio = [], isLoading: isLoadingPortfolio, deleteItem, createItem: createPortfolioItem, setVisibility } = useMuaPortfolio(muaId);
   const { data: eligibility } = useMuaEligibility();
@@ -131,7 +133,10 @@ export default function MuaManagementScreen() {
         onClose={() => setIsServiceModalVisible(false)}
         onSubmit={handleSaveService}
         initialData={editingService}
-        availableTags={[...new Set(services.flatMap(service => service.tags || []))]}
+        availableStyles={profileQuery.data?.specialties || []}
+        stylesLoading={profileQuery.isLoading}
+        stylesError={profileQuery.isError}
+        onReloadStyles={() => profileQuery.refetch()}
       />
       <PortfolioFormModal
         visible={!review && isPortfolioModalVisible}

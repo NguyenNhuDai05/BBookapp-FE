@@ -1,0 +1,2 @@
+// Matches the backend's narrow defensive rules, not a semantic guarantee.
+export const unsupportedClaims=(text:string)=>/\d\s*%|\b\d+[.,]\d+\b|\bconfidence\b\s*[:=]?\s*\d|\b(you (are|have)|your (face|skin) is)\b.{0,45}\b(male|female|oval|round|square|warm|cool|fair|dark|acne)\b|(?:bạn (?:là|có)|da bạn|khuôn mặt bạn|mặt của bạn).{0,45}(?:nam|nữ|tròn|vuông|oval|trái xoan|undertone|trắng|ngăm|mụn)/iu.test(text);

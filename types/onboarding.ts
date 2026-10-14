@@ -42,6 +42,7 @@ export interface MuaApplicationRequestDto extends OperatingArea {
   socialLinks?: string;
   avatarUrl: string;
   styleIds: number[];
+  newStyleNames?: string[];
   address?: string;
   district?: string;
   provinceCode?: number;

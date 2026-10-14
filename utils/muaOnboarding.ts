@@ -19,7 +19,8 @@ export const validateMuaOnboarding = (
   if (phone && !/^\+?[0-9][0-9 .-]{7,19}$/.test(phone)) errors.phoneNumber = 'Số điện thoại không hợp lệ.';
   if (form.city.trim().length < 2) errors.city = 'Vui lòng nhập khu vực làm việc.';
   if (form.bio.length > 500) errors.bio = 'Giới thiệu tối đa 500 ký tự.';
-  if (!form.styleIds.length) errors.styleIds = 'Hãy chọn ít nhất một chuyên môn.';
-  if (form.styleIds.length > 5) errors.styleIds = 'Chỉ được chọn tối đa 5 phong cách.';
+  const count = new Set(form.styleIds).size + new Set((form.newStyleNames || []).map(name => name.normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase())).size;
+  if (!count) errors.styleIds = 'Hãy chọn ít nhất một chuyên môn.';
+  if (count > 20) errors.styleIds = 'Chỉ được chọn tối đa 20 phong cách.';
   return errors;
 };

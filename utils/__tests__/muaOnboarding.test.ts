@@ -24,7 +24,7 @@ describe('MUA onboarding validation', () => {
     ['bio', { bio: 'x'.repeat(501) }],
     ['avatarUrl', { avatarUrl: '' }],
     ['styleIds', { styleIds: [] }],
-    ['styleIds', { styleIds: [1, 2, 3, 4, 5, 6] }],
+    ['styleIds', { styleIds: Array.from({ length: 21 }, (_, index) => index + 1) }],
   ])('rejects invalid %s', (field, override) => {
     expect(validateMuaOnboarding({ ...validForm, ...override })).toHaveProperty(field);
   });

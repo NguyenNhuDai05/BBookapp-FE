@@ -15,7 +15,7 @@ Không gửi mật khẩu, OTP hoặc giấy tờ tùy thân trong nội dung c�
 
 CHÍNH SÁCH QUYỀN RIÊNG TƯ BBOOK
 
-Bản sửa đổi: 05/10/2026 · Dành cho người từ đủ 18 tuổi
+Bản sửa đổi: 10/10/2026 · Dành cho người từ đủ 18 tuổi
 
 ## 1. Phạm vi và thông tin liên hệ
 
@@ -28,6 +28,18 @@ Chính sách này giải thích những dữ liệu BBook xử lý khi bạn s�
 BBook hướng đến người dùng từ đủ 18 tuổi. Chính sách này áp dụng cho các chức năng hiện có của BBook. Trong phiên bản hiện tại, BBook không sử dụng AI để nhận diện khuôn mặt hoặc tạo dữ liệu sinh trắc học trong quy trình xác minh MUA.
 
 ## 2. Dữ liệu BBook xử lý
+
+### Tư vấn makeup AI (khi tính năng được bật)
+
+Khi bạn chủ động chọn/chụp ảnh và đồng ý phân tích, BBook gửi ảnh đã nén, sở thích makeup và dịp sử dụng nếu được cung cấp đến dịch vụ Gemini Paid Tier của Google để quan sát những đặc điểm có thể nhìn thấy và đề xuất phong cách từ danh mục BBook. Bạn cần đủ 18 tuổi và có quyền sử dụng ảnh. Bạn có thể hủy trước khi phân tích; ảnh không được gửi đến Google trước khi bạn đồng ý.
+
+BBook xử lý ảnh trong bộ nhớ máy chủ, không lưu selfie vào database, bucket lưu trữ, nhật ký hoặc gửi cho MUA. Bản ảnh tạm do tính năng tạo trên thiết bị được xóa khi phân tích hoàn tất, chọn lại ảnh hoặc rời màn hình; ảnh gốc trong thư viện không bị xóa. Nếu ứng dụng bị đóng đột ngột, hệ điều hành có thể giữ ảnh tạm trong cache đến khi dọn dẹp. Kết quả gợi ý chỉ giữ trong phiên màn hình, không lưu lịch sử phân tích trên máy chủ.
+
+Google Paid Tier không dùng prompt, ảnh và response để cải thiện sản phẩm. Google có thể ghi và giữ dữ liệu trong thời gian giới hạn nhằm phát hiện/ngăn chặn lạm dụng và đáp ứng yêu cầu pháp lý; dữ liệu có thể được xử lý ở các quốc gia nơi Google hoặc đơn vị của Google có cơ sở. BBook không cam kết Google xóa ảnh ngay lập tức. Xem điều khoản xử lý tại https://ai.google.dev/gemini-api/terms.
+
+BBook lưu bộ đếm lượt theo ngày và một khóa băm theo tài khoản/ngày để giới hạn chi phí và chống spam; khóa này không chứa ảnh, tên hoặc email. Bản ghi trước ngày hôm qua được dọn khi có lượt phân tích được chấp nhận tiếp theo; nếu tính năng ngừng hoạt động, quản trị viên cần dọn bộ đếm cũ. Nhật ký vận hành chỉ chứa model, trạng thái, thời gian xử lý, số token và chi phí ước tính, không chứa ảnh hoặc toàn bộ kết quả. Chi phí ước tính không phải hóa đơn Google.
+
+Tính năng không xác định danh tính, tạo facial embeddings/templates, chấm điểm nhan sắc, suy đoán thuộc tính nhạy cảm hoặc chẩn đoán sức khỏe. Kết quả mang tính tham khảo, có thể bị ảnh hưởng bởi ánh sáng và góc chụp. MUA và dịch vụ được tìm từ dữ liệu BBook; lịch trống được kiểm tra trong quy trình đặt lịch. Việc đổi phong cách/khu vực/ngân sách không gửi lại ảnh cho Google. Bạn có thể liên hệ bbooksupport@gmail.com về dữ liệu hoặc yêu cầu xóa dữ liệu; việc xóa dữ liệu tại Google chịu điều khoản và nghĩa vụ lưu giữ của nhà cung cấp.
 
 ### Tài khoản và đăng nhập
 

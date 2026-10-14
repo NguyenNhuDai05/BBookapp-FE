@@ -1,0 +1,1641 @@
+[
+  {
+    "name": "missing",
+    "baselineTop3": [
+      "natural",
+      "soft-glam",
+      "classic-glam"
+    ],
+    "simulationTop3": [
+      {
+        "styleKey": "natural",
+        "displayName": "Trang điểm tự nhiên hằng ngày",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "soft-glam",
+        "displayName": "Trang điểm Soft Glam quyến rũ",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "classic-glam",
+        "displayName": "Trang điểm cổ điển Classic Glam",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      }
+    ],
+    "activatedRules": [],
+    "rejectedFeatures": [
+      {
+        "key": "outlineAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeSpacing",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeWidthDifference",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowArch",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowArch",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBridgeLength",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBaseWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "upperLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthPosition",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerFaceHeight",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineUpperWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineMiddleWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineLowerWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "chinWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineCompactness",
+        "reason": "missing"
+      },
+      {
+        "key": "meshProjectedArea",
+        "reason": "missing"
+      },
+      {
+        "key": "meshRelativeZSpan",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeAspect",
+        "reason": "incomplete_pair"
+      },
+      {
+        "key": "browArch",
+        "reason": "incomplete_pair"
+      }
+    ]
+  },
+  {
+    "name": "pose",
+    "baselineTop3": [
+      "natural",
+      "soft-glam",
+      "classic-glam"
+    ],
+    "simulationTop3": [
+      {
+        "styleKey": "natural",
+        "displayName": "Trang điểm tự nhiên hằng ngày",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "soft-glam",
+        "displayName": "Trang điểm Soft Glam quyến rũ",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "classic-glam",
+        "displayName": "Trang điểm cổ điển Classic Glam",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      }
+    ],
+    "activatedRules": [],
+    "rejectedFeatures": [
+      {
+        "key": "outlineAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeSpacing",
+        "reason": "quality_or_pose"
+      },
+      {
+        "key": "leftEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeAspect",
+        "reason": "quality_or_pose"
+      },
+      {
+        "key": "rightEyeAspect",
+        "reason": "quality_or_pose"
+      },
+      {
+        "key": "leftEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeWidthDifference",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowArch",
+        "reason": "quality_or_pose"
+      },
+      {
+        "key": "rightBrowArch",
+        "reason": "quality_or_pose"
+      },
+      {
+        "key": "leftBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBridgeLength",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBaseWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthAspect",
+        "reason": "quality_or_pose"
+      },
+      {
+        "key": "upperLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthPosition",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerFaceHeight",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineUpperWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineMiddleWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineLowerWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "chinWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineCompactness",
+        "reason": "missing"
+      },
+      {
+        "key": "meshProjectedArea",
+        "reason": "missing"
+      },
+      {
+        "key": "meshRelativeZSpan",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeAspect",
+        "reason": "incomplete_pair"
+      },
+      {
+        "key": "browArch",
+        "reason": "incomplete_pair"
+      }
+    ]
+  },
+  {
+    "name": "unknown-source",
+    "baselineTop3": [
+      "natural",
+      "soft-glam",
+      "classic-glam"
+    ],
+    "simulationTop3": [
+      {
+        "styleKey": "natural",
+        "displayName": "Trang điểm tự nhiên hằng ngày",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "soft-glam",
+        "displayName": "Trang điểm Soft Glam quyến rũ",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "classic-glam",
+        "displayName": "Trang điểm cổ điển Classic Glam",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      }
+    ],
+    "activatedRules": [],
+    "rejectedFeatures": [
+      {
+        "key": "outlineAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeSpacing",
+        "reason": "missing_source"
+      },
+      {
+        "key": "leftEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeAspect",
+        "reason": "missing_source"
+      },
+      {
+        "key": "rightEyeAspect",
+        "reason": "missing_source"
+      },
+      {
+        "key": "leftEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeWidthDifference",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowArch",
+        "reason": "missing_source"
+      },
+      {
+        "key": "rightBrowArch",
+        "reason": "missing_source"
+      },
+      {
+        "key": "leftBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBridgeLength",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBaseWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthAspect",
+        "reason": "missing_source"
+      },
+      {
+        "key": "upperLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthPosition",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerFaceHeight",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineUpperWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineMiddleWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineLowerWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "chinWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineCompactness",
+        "reason": "missing"
+      },
+      {
+        "key": "meshProjectedArea",
+        "reason": "missing"
+      },
+      {
+        "key": "meshRelativeZSpan",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeAspect",
+        "reason": "incomplete_pair"
+      },
+      {
+        "key": "browArch",
+        "reason": "incomplete_pair"
+      }
+    ]
+  },
+  {
+    "name": "nonfinite",
+    "baselineTop3": [
+      "natural",
+      "soft-glam",
+      "classic-glam"
+    ],
+    "simulationTop3": [
+      {
+        "styleKey": "natural",
+        "displayName": "Trang điểm tự nhiên hằng ngày",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "soft-glam",
+        "displayName": "Trang điểm Soft Glam quyến rũ",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "classic-glam",
+        "displayName": "Trang điểm cổ điển Classic Glam",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      }
+    ],
+    "activatedRules": [],
+    "rejectedFeatures": [
+      {
+        "key": "outlineAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeSpacing",
+        "reason": "nonfinite"
+      },
+      {
+        "key": "leftEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeWidthDifference",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowArch",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowArch",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBridgeLength",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBaseWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "upperLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthPosition",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerFaceHeight",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineUpperWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineMiddleWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineLowerWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "chinWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineCompactness",
+        "reason": "missing"
+      },
+      {
+        "key": "meshProjectedArea",
+        "reason": "missing"
+      },
+      {
+        "key": "meshRelativeZSpan",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeAspect",
+        "reason": "incomplete_pair"
+      },
+      {
+        "key": "browArch",
+        "reason": "incomplete_pair"
+      }
+    ]
+  },
+  {
+    "name": "out-of-range",
+    "baselineTop3": [
+      "natural",
+      "soft-glam",
+      "classic-glam"
+    ],
+    "simulationTop3": [
+      {
+        "styleKey": "natural",
+        "displayName": "Trang điểm tự nhiên hằng ngày",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "soft-glam",
+        "displayName": "Trang điểm Soft Glam quyến rũ",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "classic-glam",
+        "displayName": "Trang điểm cổ điển Classic Glam",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      }
+    ],
+    "activatedRules": [],
+    "rejectedFeatures": [
+      {
+        "key": "outlineAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeSpacing",
+        "reason": "out_of_range"
+      },
+      {
+        "key": "leftEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeWidthDifference",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowArch",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowArch",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBridgeLength",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBaseWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "upperLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthPosition",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerFaceHeight",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineUpperWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineMiddleWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineLowerWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "chinWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineCompactness",
+        "reason": "missing"
+      },
+      {
+        "key": "meshProjectedArea",
+        "reason": "missing"
+      },
+      {
+        "key": "meshRelativeZSpan",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeAspect",
+        "reason": "incomplete_pair"
+      },
+      {
+        "key": "browArch",
+        "reason": "incomplete_pair"
+      }
+    ]
+  },
+  {
+    "name": "declared-missing",
+    "baselineTop3": [
+      "natural",
+      "soft-glam",
+      "classic-glam"
+    ],
+    "simulationTop3": [
+      {
+        "styleKey": "natural",
+        "displayName": "Trang điểm tự nhiên hằng ngày",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "soft-glam",
+        "displayName": "Trang điểm Soft Glam quyến rũ",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      },
+      {
+        "styleKey": "classic-glam",
+        "displayName": "Trang điểm cổ điển Classic Glam",
+        "faceScore": 0,
+        "preferenceScore": 0,
+        "finalScore": 0,
+        "selected": true,
+        "selectionReason": "diverse-discovery",
+        "evidenceStatus": "fallback",
+        "ruleContributions": [],
+        "preferenceContributions": [],
+        "explanations": []
+      }
+    ],
+    "activatedRules": [],
+    "rejectedFeatures": [
+      {
+        "key": "outlineAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeSpacing",
+        "reason": "declared_missing"
+      },
+      {
+        "key": "leftEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeAspect",
+        "reason": "declared_missing"
+      },
+      {
+        "key": "rightEyeAspect",
+        "reason": "declared_missing"
+      },
+      {
+        "key": "leftEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeWidthDifference",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowArch",
+        "reason": "declared_missing"
+      },
+      {
+        "key": "rightBrowArch",
+        "reason": "declared_missing"
+      },
+      {
+        "key": "leftBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBridgeLength",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBaseWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthAspect",
+        "reason": "declared_missing"
+      },
+      {
+        "key": "upperLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthPosition",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerFaceHeight",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineUpperWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineMiddleWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineLowerWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "chinWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineCompactness",
+        "reason": "missing"
+      },
+      {
+        "key": "meshProjectedArea",
+        "reason": "missing"
+      },
+      {
+        "key": "meshRelativeZSpan",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeAspect",
+        "reason": "incomplete_pair"
+      },
+      {
+        "key": "browArch",
+        "reason": "incomplete_pair"
+      }
+    ]
+  },
+  {
+    "name": "eyes-closed",
+    "baselineTop3": [
+      "natural",
+      "soft-glam",
+      "classic-glam"
+    ],
+    "simulationTop3": [
+      {
+        "styleKey": "natural",
+        "displayName": "Trang điểm tự nhiên hằng ngày",
+        "faceScore": 0.5,
+        "preferenceScore": 0,
+        "finalScore": 0.5,
+        "selected": true,
+        "selectionReason": "face-technique-match",
+        "evidenceStatus": "experimental",
+        "ruleContributions": [
+          {
+            "ruleId": "arch-high-natural",
+            "feature": "browArch",
+            "techniqueKey": "natural-brow-styling",
+            "contribution": 0.5,
+            "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+          }
+        ],
+        "preferenceContributions": [],
+        "explanations": [
+          "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+        ]
+      },
+      {
+        "styleKey": "soft-glam",
+        "displayName": "Trang điểm Soft Glam quyến rũ",
+        "faceScore": 0.5,
+        "preferenceScore": 0,
+        "finalScore": 0.5,
+        "selected": true,
+        "selectionReason": "face-technique-match",
+        "evidenceStatus": "experimental",
+        "ruleContributions": [
+          {
+            "ruleId": "lip-low-outline",
+            "feature": "mouthAspect",
+            "techniqueKey": "defined-lip-outline",
+            "contribution": 0.5,
+            "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+          }
+        ],
+        "preferenceContributions": [],
+        "explanations": [
+          "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+        ]
+      },
+      {
+        "styleKey": "classic-glam",
+        "displayName": "Trang điểm cổ điển Classic Glam",
+        "faceScore": 0.5,
+        "preferenceScore": 0,
+        "finalScore": 0.5,
+        "selected": true,
+        "selectionReason": "face-technique-match",
+        "evidenceStatus": "experimental",
+        "ruleContributions": [
+          {
+            "ruleId": "lip-low-outline",
+            "feature": "mouthAspect",
+            "techniqueKey": "defined-lip-outline",
+            "contribution": 0.5,
+            "explanation": "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+          }
+        ],
+        "preferenceContributions": [],
+        "explanations": [
+          "Với vùng môi được phân tích, thử viền cùng màu son, tán mép vào trong rồi kiểm tra trước khi tăng độ rõ."
+        ]
+      }
+    ],
+    "activatedRules": [
+      "arch-high-natural",
+      "lip-low-outline"
+    ],
+    "rejectedFeatures": [
+      {
+        "key": "outlineAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeSpacing",
+        "reason": "eyes_closed"
+      },
+      {
+        "key": "leftEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeAspect",
+        "reason": "eyes_closed"
+      },
+      {
+        "key": "rightEyeAspect",
+        "reason": "eyes_closed"
+      },
+      {
+        "key": "leftEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeWidthDifference",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBridgeLength",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBaseWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "upperLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthPosition",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerFaceHeight",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineUpperWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineMiddleWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineLowerWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "chinWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineCompactness",
+        "reason": "missing"
+      },
+      {
+        "key": "meshProjectedArea",
+        "reason": "missing"
+      },
+      {
+        "key": "meshRelativeZSpan",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeAspect",
+        "reason": "incomplete_pair"
+      }
+    ]
+  },
+  {
+    "name": "expression",
+    "baselineTop3": [
+      "natural",
+      "clean-girl",
+      "strawberry"
+    ],
+    "simulationTop3": [
+      {
+        "styleKey": "natural",
+        "displayName": "Trang điểm tự nhiên hằng ngày",
+        "faceScore": 1,
+        "preferenceScore": 0,
+        "finalScore": 1,
+        "selected": true,
+        "selectionReason": "face-technique-match",
+        "evidenceStatus": "experimental",
+        "ruleContributions": [
+          {
+            "ruleId": "spacing-high-soft",
+            "feature": "eyeSpacing",
+            "techniqueKey": "soft-eyeliner",
+            "contribution": 0.3333333333333333,
+            "explanation": "Thử giữ đường viền mắt mảnh, gọn thay vì kéo đuôi dài; tăng màu từng chút để chọn bố cục bạn thích."
+          },
+          {
+            "ruleId": "opening-low-soft",
+            "feature": "eyeAspect",
+            "techniqueKey": "soft-eyeliner",
+            "contribution": 0.3333333333333333,
+            "explanation": "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ."
+          },
+          {
+            "ruleId": "arch-high-natural",
+            "feature": "browArch",
+            "techniqueKey": "natural-brow-styling",
+            "contribution": 0.3333333333333333,
+            "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+          }
+        ],
+        "preferenceContributions": [],
+        "explanations": [
+          "Thử giữ đường viền mắt mảnh, gọn thay vì kéo đuôi dài; tăng màu từng chút để chọn bố cục bạn thích.",
+          "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ.",
+          "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+        ]
+      },
+      {
+        "styleKey": "clean-girl",
+        "displayName": "Trang điểm Clean Girl tối giản",
+        "faceScore": 1,
+        "preferenceScore": 0,
+        "finalScore": 1,
+        "selected": true,
+        "selectionReason": "face-technique-match",
+        "evidenceStatus": "experimental",
+        "ruleContributions": [
+          {
+            "ruleId": "spacing-high-soft",
+            "feature": "eyeSpacing",
+            "techniqueKey": "soft-eyeliner",
+            "contribution": 0.3333333333333333,
+            "explanation": "Thử giữ đường viền mắt mảnh, gọn thay vì kéo đuôi dài; tăng màu từng chút để chọn bố cục bạn thích."
+          },
+          {
+            "ruleId": "opening-low-soft",
+            "feature": "eyeAspect",
+            "techniqueKey": "soft-eyeliner",
+            "contribution": 0.3333333333333333,
+            "explanation": "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ."
+          },
+          {
+            "ruleId": "arch-high-natural",
+            "feature": "browArch",
+            "techniqueKey": "natural-brow-styling",
+            "contribution": 0.3333333333333333,
+            "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+          }
+        ],
+        "preferenceContributions": [],
+        "explanations": [
+          "Thử giữ đường viền mắt mảnh, gọn thay vì kéo đuôi dài; tăng màu từng chút để chọn bố cục bạn thích.",
+          "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ.",
+          "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+        ]
+      },
+      {
+        "styleKey": "strawberry",
+        "displayName": "Trang điểm tông dâu ngọt ngào",
+        "faceScore": 1,
+        "preferenceScore": 0,
+        "finalScore": 1,
+        "selected": true,
+        "selectionReason": "face-technique-match",
+        "evidenceStatus": "experimental",
+        "ruleContributions": [
+          {
+            "ruleId": "spacing-high-soft",
+            "feature": "eyeSpacing",
+            "techniqueKey": "soft-eyeliner",
+            "contribution": 0.3333333333333333,
+            "explanation": "Thử giữ đường viền mắt mảnh, gọn thay vì kéo đuôi dài; tăng màu từng chút để chọn bố cục bạn thích."
+          },
+          {
+            "ruleId": "opening-low-soft",
+            "feature": "eyeAspect",
+            "techniqueKey": "soft-eyeliner",
+            "contribution": 0.3333333333333333,
+            "explanation": "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ."
+          },
+          {
+            "ruleId": "arch-high-natural",
+            "feature": "browArch",
+            "techniqueKey": "natural-brow-styling",
+            "contribution": 0.3333333333333333,
+            "explanation": "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+          }
+        ],
+        "preferenceContributions": [],
+        "explanations": [
+          "Thử giữ đường viền mắt mảnh, gọn thay vì kéo đuôi dài; tăng màu từng chút để chọn bố cục bạn thích.",
+          "Theo vùng mắt được phân tích, thử viền mảnh sát mi và kiểm tra khi mở mắt để giữ khoảng màu nhẹ.",
+          "Thử chải mày và bổ sung các khoảng thưa theo đường cong sẵn có để giữ nét tự nhiên."
+        ]
+      }
+    ],
+    "activatedRules": [
+      "spacing-high-soft",
+      "opening-low-soft",
+      "arch-high-natural"
+    ],
+    "rejectedFeatures": [
+      {
+        "key": "outlineAspect",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyeTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "eyeWidthDifference",
+        "reason": "missing"
+      },
+      {
+        "key": "leftEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "rightEyePosition",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowLength",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowTilt",
+        "reason": "missing"
+      },
+      {
+        "key": "leftBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "rightBrowEyeGap",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBridgeLength",
+        "reason": "missing"
+      },
+      {
+        "key": "noseBaseWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthAspect",
+        "reason": "expression"
+      },
+      {
+        "key": "upperLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerLipThickness",
+        "reason": "missing"
+      },
+      {
+        "key": "mouthPosition",
+        "reason": "missing"
+      },
+      {
+        "key": "lowerFaceHeight",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineUpperWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineMiddleWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineLowerWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "chinWidth",
+        "reason": "missing"
+      },
+      {
+        "key": "outlineCompactness",
+        "reason": "missing"
+      },
+      {
+        "key": "meshProjectedArea",
+        "reason": "missing"
+      },
+      {
+        "key": "meshRelativeZSpan",
+        "reason": "missing"
+      }
+    ]
+  }
+]

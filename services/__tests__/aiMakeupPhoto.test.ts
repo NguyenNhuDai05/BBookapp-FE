@@ -1,0 +1,32 @@
+import * as Picker from 'expo-image-picker';
+import * as Manipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system/legacy';
+import { Platform } from 'react-native';
+import { deleteAiPhoto, pickAiPhoto, prepareAiPhoto } from '../aiMakeupPhoto';
+jest.mock('expo-image-picker', () => ({ requestCameraPermissionsAsync: jest.fn(), requestMediaLibraryPermissionsAsync: jest.fn(), launchCameraAsync: jest.fn(), launchImageLibraryAsync: jest.fn(), CameraType: { front: 'front' } }));
+jest.mock('expo-image-manipulator', () => ({ manipulateAsync: jest.fn(), SaveFormat: { JPEG: 'jpeg' } }));
+jest.mock('expo-file-system/legacy', () => ({ cacheDirectory: 'file:///cache/', deleteAsync: jest.fn(), getInfoAsync: jest.fn() }));
+const raw = { uri: 'file:///cache/picked.jpg', width: 4000, height: 3000 };
+beforeEach(() => {
+  jest.clearAllMocks(); jest.mocked(Picker.requestCameraPermissionsAsync).mockResolvedValue({ granted: true } as never);
+  Object.defineProperty(Platform, 'OS', { configurable: true, value: 'android' });
+  jest.mocked(Picker.requestMediaLibraryPermissionsAsync).mockResolvedValue({ granted: true } as never);
+  jest.mocked(FileSystem.deleteAsync).mockResolvedValue(undefined);
+  jest.mocked(Picker.launchImageLibraryAsync).mockResolvedValue({ canceled: false, assets: [raw] } as never);
+  jest.mocked(Picker.launchCameraAsync).mockResolvedValue({ canceled: false, assets: [raw] } as never);
+  jest.mocked(Manipulator.manipulateAsync).mockResolvedValue({ uri: 'file:///cache/normalized.jpg', width: 1280, height: 960 });
+  jest.mocked(FileSystem.getInfoAsync).mockResolvedValue({ exists: true, size: 1200 } as never);
+});
+it('selects one image without broad Android library access and resizes to JPEG', async () => {
+  expect(await pickAiPhoto(false, 5000)).toEqual({ uri: 'file:///cache/normalized.jpg', width: 1280, height: 960 });
+  expect(Picker.launchImageLibraryAsync).toHaveBeenCalledWith(expect.objectContaining({ mediaTypes: ['images'], allowsMultipleSelection: false, exif: false, base64: false }));
+  expect(Manipulator.manipulateAsync).toHaveBeenCalledWith(raw.uri, [{ resize: { width: 1280, height: 960 } }], expect.objectContaining({ format: 'jpeg' }));
+  expect(FileSystem.deleteAsync).toHaveBeenCalledWith(raw.uri, { idempotent: true });
+});
+it('does not launch a denied camera', async () => { jest.mocked(Picker.requestCameraPermissionsAsync).mockResolvedValue({ granted: false } as never); await expect(pickAiPhoto(true, 5000)).rejects.toThrow('chưa cho phép'); expect(Picker.launchCameraAsync).not.toHaveBeenCalled(); });
+it('cancel leaves existing preview alone', async () => { jest.mocked(Picker.launchImageLibraryAsync).mockResolvedValue({ canceled: true, assets: null }); expect(await pickAiPhoto(false, 5000)).toBeNull(); expect(Manipulator.manipulateAsync).not.toHaveBeenCalled(); });
+it('rejects oversized compressed image and deletes both temporary copies', async () => { jest.mocked(FileSystem.getInfoAsync).mockResolvedValue({ exists: true, size: 6000 } as never); await expect(pickAiPhoto(false, 5000)).rejects.toThrow('quá lớn'); expect(FileSystem.deleteAsync).toHaveBeenCalledWith('file:///cache/normalized.jpg', { idempotent: true }); expect(FileSystem.deleteAsync).toHaveBeenCalledWith(raw.uri, { idempotent: true }); });
+it('never deletes an original outside cache', async () => { await deleteAiPhoto('content://library/asset'); await deleteAiPhoto('file:///documents/original.jpg'); expect(FileSystem.deleteAsync).not.toHaveBeenCalled(); });
+it('prepares front camera capture using the same normalization', async () => { expect((await prepareAiPhoto(raw, 5000)).width).toBe(1280); });
+it('rejects tiny image before processing', async () => { await expect(prepareAiPhoto({ ...raw, width: 20 }, 5000)).rejects.toThrow('quá nhỏ'); expect(Manipulator.manipulateAsync).not.toHaveBeenCalled(); });
+it('handles denied library permission on iOS', async () => { Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' }); jest.mocked(Picker.requestMediaLibraryPermissionsAsync).mockResolvedValue({ granted: false } as never); await expect(pickAiPhoto(false, 5000)).rejects.toThrow('chưa cho phép'); expect(Picker.launchImageLibraryAsync).not.toHaveBeenCalled(); });

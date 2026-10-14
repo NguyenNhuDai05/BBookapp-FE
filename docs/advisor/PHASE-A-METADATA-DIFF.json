@@ -1,0 +1,638 @@
+{
+  "runtimeRankingMetadataChanged": false,
+  "simulationPreservesLegacyMetadata": true,
+  "styles": [
+    {
+      "key": "soft-korean",
+      "changes": [
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "daily",
+            "school",
+            "date"
+          ],
+          "catalog20Value": [
+            "daily",
+            "date",
+            "school"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ thứ tự; includes() không đổi điểm"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "korean",
+            "soft",
+            "pink",
+            "gradient-lips"
+          ],
+          "catalog20Value": [
+            "natural",
+            "soft",
+            "korean",
+            "dewy",
+            "fresh"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Hồng phấn",
+            "Đào nhạt",
+            "Nâu sữa"
+          ],
+          "catalog20Value": [
+            "soft pink",
+            "peach",
+            "light brown",
+            "coral"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "douyin",
+      "changes": [
+        {
+          "field": "intensity",
+          "engine12Value": "medium",
+          "catalog20Value": "bold",
+          "affectsRanking": true,
+          "note": "Đổi bonus 0.08 nếu thay metadata engine"
+        },
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "date",
+            "party",
+            "photoshoot"
+          ],
+          "catalog20Value": [
+            "party",
+            "photoshoot",
+            "date"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ thứ tự; includes() không đổi điểm"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "douyin",
+            "shimmer",
+            "defined-lashes",
+            "glossy-lips"
+          ],
+          "catalog20Value": [
+            "douyin",
+            "glamorous",
+            "sparkling",
+            "sharp",
+            "trendy"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Hồng đào",
+            "Nâu hồng",
+            "Champagne"
+          ],
+          "catalog20Value": [
+            "rose pink",
+            "champagne",
+            "brown",
+            "red"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "clean-girl",
+      "changes": [
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "daily",
+            "work",
+            "date"
+          ],
+          "catalog20Value": [
+            "daily",
+            "work",
+            "school"
+          ],
+          "affectsRanking": true,
+          "note": "Membership đổi bonus 0.12"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "minimal",
+            "dewy",
+            "cream-blush",
+            "tinted-balm"
+          ],
+          "catalog20Value": [
+            "clean-girl",
+            "minimalist",
+            "natural",
+            "chic",
+            "polished"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Hồng nude",
+            "Đào trong",
+            "Nâu nhạt"
+          ],
+          "catalog20Value": [
+            "nude",
+            "warm beige",
+            "bronze",
+            "soft pink"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "natural",
+      "changes": [
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "daily",
+            "work",
+            "school"
+          ],
+          "catalog20Value": [
+            "daily",
+            "school",
+            "work"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ thứ tự; includes() không đổi điểm"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "natural",
+            "satin",
+            "neutral",
+            "everyday"
+          ],
+          "catalog20Value": [
+            "natural",
+            "everyday",
+            "fresh",
+            "simple",
+            "lightweight"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Nâu nhạt",
+            "Hồng đất nhẹ",
+            "Be hồng"
+          ],
+          "catalog20Value": [
+            "light pink",
+            "nude peach",
+            "soft beige"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "peach",
+      "changes": [
+        {
+          "field": "intensity",
+          "engine12Value": "light",
+          "catalog20Value": "medium",
+          "affectsRanking": true,
+          "note": "Đổi bonus 0.08 nếu thay metadata engine"
+        },
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "daily",
+            "date",
+            "photoshoot"
+          ],
+          "catalog20Value": [
+            "date",
+            "daily",
+            "photoshoot"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ thứ tự; includes() không đổi điểm"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "peach",
+            "monochromatic",
+            "fresh",
+            "soft"
+          ],
+          "catalog20Value": [
+            "peach",
+            "sweet",
+            "vibrant",
+            "youthful",
+            "fruity"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Đào nhạt",
+            "Cam hồng",
+            "Nâu đào"
+          ],
+          "catalog20Value": [
+            "peach",
+            "coral",
+            "warm pink",
+            "apricot"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "strawberry",
+      "changes": [
+        {
+          "field": "intensity",
+          "engine12Value": "light",
+          "catalog20Value": "medium",
+          "affectsRanking": true,
+          "note": "Đổi bonus 0.08 nếu thay metadata engine"
+        },
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "daily",
+            "date",
+            "photoshoot"
+          ],
+          "catalog20Value": [
+            "date",
+            "photoshoot",
+            "daily"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ thứ tự; includes() không đổi điểm"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "strawberry",
+            "rosy-blush",
+            "gloss",
+            "fresh"
+          ],
+          "catalog20Value": [
+            "strawberry",
+            "pink-red",
+            "cute",
+            "fresh",
+            "playful"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Hồng dâu",
+            "Đỏ hồng",
+            "Nâu mềm"
+          ],
+          "catalog20Value": [
+            "strawberry red",
+            "pink",
+            "berry",
+            "soft brown"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "latte",
+      "changes": [
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "work",
+            "date",
+            "party",
+            "photoshoot"
+          ],
+          "catalog20Value": [
+            "work",
+            "date",
+            "party"
+          ],
+          "affectsRanking": true,
+          "note": "Membership đổi bonus 0.12"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "latte",
+            "brown",
+            "bronze",
+            "monochromatic"
+          ],
+          "catalog20Value": [
+            "latte",
+            "warm brown",
+            "chic",
+            "autumnal",
+            "sophisticated"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Nâu sữa",
+            "Caramel",
+            "Đồng nhạt"
+          ],
+          "catalog20Value": [
+            "caramel",
+            "latte brown",
+            "warm beige",
+            "bronze"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "soft-glam",
+      "changes": [
+        {
+          "field": "intensity",
+          "engine12Value": "medium",
+          "catalog20Value": "bold",
+          "affectsRanking": true,
+          "note": "Đổi bonus 0.08 nếu thay metadata engine"
+        },
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "date",
+            "party",
+            "photoshoot",
+            "wedding"
+          ],
+          "catalog20Value": [
+            "party",
+            "date",
+            "photoshoot"
+          ],
+          "affectsRanking": true,
+          "note": "Membership đổi bonus 0.12"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "soft-glam",
+            "blended",
+            "satin",
+            "neutral"
+          ],
+          "catalog20Value": [
+            "soft-glam",
+            "glamorous",
+            "romantic",
+            "polished",
+            "evening"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Nâu trung tính",
+            "Hồng đất",
+            "Champagne dịu"
+          ],
+          "catalog20Value": [
+            "rose gold",
+            "warm brown",
+            "taupe",
+            "mauve"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "thai-glam",
+      "changes": [
+        {
+          "field": "occasions",
+          "engine12Value": [
+            "party",
+            "photoshoot",
+            "wedding"
+          ],
+          "catalog20Value": [
+            "party",
+            "photoshoot",
+            "date"
+          ],
+          "affectsRanking": true,
+          "note": "Membership đổi bonus 0.12"
+        },
+        {
+          "field": "tags",
+          "engine12Value": [
+            "thai-glam",
+            "bronze",
+            "defined-eyes",
+            "nude-lips"
+          ],
+          "catalog20Value": [
+            "thai-look",
+            "sharp",
+            "bold",
+            "bronzed",
+            "striking"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Nâu đồng",
+            "Be nâu",
+            "Hồng nâu"
+          ],
+          "catalog20Value": [
+            "bronze",
+            "terracotta",
+            "warm nude",
+            "burnt orange"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "smokey-eyes",
+      "changes": [
+        {
+          "field": "tags",
+          "engine12Value": [
+            "smokey",
+            "dark-eyes",
+            "blended",
+            "evening"
+          ],
+          "catalog20Value": [
+            "smokey",
+            "dramatic",
+            "bold",
+            "mysterious",
+            "edgy"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Nâu khói",
+            "Xám than",
+            "Hồng nude"
+          ],
+          "catalog20Value": [
+            "charcoal black",
+            "dark brown",
+            "silver",
+            "nude"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "bridal-soft-glam",
+      "changes": [
+        {
+          "field": "tags",
+          "engine12Value": [
+            "bridal",
+            "soft-glam",
+            "rose",
+            "longwear"
+          ],
+          "catalog20Value": [
+            "bridal",
+            "romantic",
+            "elegant",
+            "glowy",
+            "timeless"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Hồng nâu",
+            "Hồng đất",
+            "Champagne mịn"
+          ],
+          "catalog20Value": [
+            "champagne",
+            "rose pink",
+            "soft peach",
+            "pearl white"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    },
+    {
+      "key": "classic-glam",
+      "changes": [
+        {
+          "field": "tags",
+          "engine12Value": [
+            "classic",
+            "red-lips",
+            "winged-liner",
+            "glam"
+          ],
+          "catalog20Value": [
+            "classic",
+            "hollywood",
+            "red-lips",
+            "vintage",
+            "timeless"
+          ],
+          "affectsRanking": false,
+          "note": "Không score; ảnh hưởng search metadata"
+        },
+        {
+          "field": "colorPalette",
+          "engine12Value": [
+            "Đỏ cổ điển",
+            "Be sáng",
+            "Nâu trung tính"
+          ],
+          "catalog20Value": [
+            "classic red",
+            "black",
+            "ivory",
+            "gold"
+          ],
+          "affectsRanking": false,
+          "note": "Chỉ hiển thị"
+        }
+      ]
+    }
+  ]
+}

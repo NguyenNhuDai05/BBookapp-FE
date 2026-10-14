@@ -1,0 +1,21 @@
+// Local verification only: serial C++ compilation, short object names, NDK r27 flexible pages.
+gradle.beforeProject { project ->
+  ['com.android.application', 'com.android.library'].each { pluginId ->
+    project.plugins.withId(pluginId) {
+      project.extensions.getByName('androidComponents').finalizeDsl { android ->
+        android.defaultConfig.externalNativeBuild.cmake.arguments.addAll([
+          '-DCMAKE_JOB_POOLS=advisor_compile=1',
+          '-DCMAKE_JOB_POOL_COMPILE=advisor_compile',
+          '-DCMAKE_OBJECT_PATH_MAX=128',
+          '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
+          ,'-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384'
+        ])
+        // The app's autolinked object directories already exceed 128 chars.
+        // CMake needs room for a hashed source path plus basename below MAX_PATH.
+        if (project.path == ':app') {
+          android.defaultConfig.externalNativeBuild.cmake.arguments.add('-DCMAKE_OBJECT_PATH_MAX=240')
+        }
+      }
+    }
+  }
+}

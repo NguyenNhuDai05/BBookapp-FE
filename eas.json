@@ -4,6 +4,18 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "ai-test": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "autoIncrement": false,
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "BBOOK_BUILD_VARIANT": "ai-test",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api"
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal"
@@ -24,6 +36,131 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api"
+      }
+    },
+    "advisor-qa": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "autoIncrement": false,
+      "environment": "preview",
+      "credentialsSource": "remote",
+      "android": {
+        "image": "latest",
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "env": {
+        "EAS_BUILD_PROFILE": "advisor-qa",
+        "BBOOK_ADVISOR_QA_ONLY": "1",
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "BBOOK_ADVISOR_FACE_AWARE_EXPERIMENTAL": "1",
+        "BBOOK_ADVISOR_DIAGNOSTICS": "1",
+        "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
+        "BBOOK_ADVISOR_GEMINI_APPROVED": "0",
+        "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-13zj.onrender.com/api"
+      }
+    },
+    "advisor-development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "autoIncrement": false,
+      "android": {
+        "gradleCommand": ":app:assembleDebug",
+        "buildType": "apk"
+      },
+      "env": {
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
+        "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending",
+        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-13zj.onrender.com/api"
+      }
+    },
+    "advisor-preview": {
+      "developmentClient": false,
+      "distribution": "internal",
+      "autoIncrement": false,
+      "android": {
+        "gradleCommand": ":app:assembleRelease",
+        "buildType": "apk"
+      },
+      "env": {
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "BBOOK_ADVISOR_DIAGNOSTICS": "1",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
+        "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending",
+        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-13zj.onrender.com/api"
+      },
+      "environment": "preview",
+      "credentialsSource": "remote"
+    },
+    "advisor-closed-test": {
+      "env": {
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-13zj.onrender.com/api",
+        "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending"
+      },
+      "developmentClient": false,
+      "autoIncrement": true,
+      "environment": "preview",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "credentialsSource": "remote",
+      "distribution": "store"
+    },
+    "unified-qa": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "autoIncrement": false,
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "BBOOK_BUILD_VARIANT": "unified-qa",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "BBOOK_ADVISOR_QA_ONLY": "1",
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
+        "BBOOK_ADVISOR_DIAGNOSTICS": "1",
+        "BBOOK_ADVISOR_FACE_AWARE_EXPERIMENTAL": "1"
+      }
+    },
+    "tester-apk": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "credentialsSource": "remote",
+      "autoIncrement": true,
+      "environment": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
+        "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending"
+      }
+    },
+    "tester-aab": {
+      "distribution": "store",
+      "developmentClient": false,
+      "credentialsSource": "remote",
+      "autoIncrement": true,
+      "environment": "preview",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "BBOOK_ADVISOR_ENABLED": "1",
+        "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
+        "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending"
       }
     }
   },

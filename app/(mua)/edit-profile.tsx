@@ -1,3 +1,5 @@
+import { MakeupStylePicker } from '../../components/mua/MakeupStylePicker';
+import { styleErrorMessage } from '../../utils/makeupStyles';
 import { ReviewReadOnlyScreen } from '../../components/ReviewReadOnlyScreen';
 import { OperatingAreaFields, type OperatingArea } from '../../components/mua/OperatingAreaFields';
 import { EXPERIENCE_LEVELS } from '../../utils/muaAreas';
@@ -14,7 +16,6 @@ import { uploadImage } from '../../services/supabase';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile, useUpdateMuaProfile } from '../../hooks/useMuaProfile';
 import { useMuaStyles } from '../../hooks/useMuaStyles';
-import { getApiError } from '../../services/api';
 import { normalizeSocialUrl } from '../../utils/socialUrl';
 import { validateWorkLocation } from '../../utils/workLocation';
 
@@ -35,6 +36,9 @@ function EditProfileScreen() {
   const [experienceLevel, setExperienceLevel] = useState<string | undefined>();
   const [experienceYears, setExperienceYears] = useState('');
   const [styleIds, setStyleIds] = useState<number[]>([]);
+  const [newStyleNames, setNewStyleNames] = useState<string[]>([]);
+  const saveLock = useRef(false);
+  const [initialStyleIds, setInitialStyleIds] = useState<number[]>([]);
   const [instagramUrl, setInstagramUrl] = useState('');
   const [facebookUrl, setFacebookUrl] = useState('');
   const [formError, setFormError] = useState('');
@@ -66,6 +70,7 @@ function EditProfileScreen() {
         setExperienceLevel(profile.experienceLevel);
         setExperienceYears(String(profile.experienceYears || ''));
         setStyleIds(profile.specialties?.map(item => item.styleId) || []);
+        setInitialStyleIds(profile.specialties?.map(item => item.styleId) || []);
         setInstagramUrl(profile.instagramUrl || '');
         setFacebookUrl(profile.facebookUrl || '');
       } else if (user) {
@@ -78,10 +83,11 @@ function EditProfileScreen() {
 
   const { mutateAsync: updateProfile, isPending } = useUpdateMuaProfile();
   const isSaving = isPending || isUploading;
-  const initialStyleIds = profile?.specialties?.map(item => item.styleId) || [];
-  const isUnchanged = Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && JSON.stringify(area.operatingAreaIds || []) === JSON.stringify(profile?.operatingAreaIds || []) && area.latitude === profile?.latitude && area.longitude === profile?.longitude && area.publicMeetingPoint === profile?.publicMeetingPoint && area.operatingLocationLabel === profile?.operatingLocationLabel && area.operatingProvinceCode === profile?.operatingProvinceCode && !area.clearOperatingLocation && experienceLevel === profile?.experienceLevel && experienceYears === String(profile?.experienceYears || '') && JSON.stringify([...styleIds].sort()) === JSON.stringify([...initialStyleIds].sort()) && instagramUrl === (profile?.instagramUrl || '') && facebookUrl === (profile?.facebookUrl || '');
+  const isUnchanged = !newStyleNames.length && Boolean(profile) && avatar === (profile?.avatarUrl || '') && name === (profile?.name || profile?.brandName || user?.name || '') && bio === (profile?.bio || '') && phoneNumber === (profile?.phoneNumber || '') && city === (profile?.city || '') && JSON.stringify(area.operatingAreaIds || []) === JSON.stringify(profile?.operatingAreaIds || []) && area.latitude === profile?.latitude && area.longitude === profile?.longitude && area.publicMeetingPoint === profile?.publicMeetingPoint && area.operatingLocationLabel === profile?.operatingLocationLabel && area.operatingProvinceCode === profile?.operatingProvinceCode && !area.clearOperatingLocation && experienceLevel === profile?.experienceLevel && experienceYears === String(profile?.experienceYears || '') && JSON.stringify([...styleIds].sort()) === JSON.stringify([...initialStyleIds].sort()) && instagramUrl === (profile?.instagramUrl || '') && facebookUrl === (profile?.facebookUrl || '');
 
   const handleSave = async () => {
+    if (saveLock.current) return;
+    if ((initialStyleIds.length || newStyleNames.length) && !styleIds.length && !newStyleNames.length) { setFormError('Hãy chọn ít nhất một chuyên môn.'); return; }
     const locationError = validateWorkLocation(area);
     if (locationError) { setFormError(locationError); return; }
     if (!name.trim()) {
@@ -97,16 +103,18 @@ function EditProfileScreen() {
       return;
     }
 
+    saveLock.current = true;
     setIsUploading(true);
     try {
       const finalAvatarUrl = await uploadImage(avatar);
-      await updateProfile({ ...area, displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceLevel, experienceYears: Number(experienceYears) || 0, styleIds, instagramUrl: normalizedInstagram, facebookUrl: normalizedFacebook });
+      await updateProfile({ ...area, displayName: name.trim(), bio, avatarUrl: finalAvatarUrl, phoneNumber, city, experienceLevel, experienceYears: Number(experienceYears) || 0, ...(newStyleNames.length || JSON.stringify([...styleIds].sort()) !== JSON.stringify([...initialStyleIds].sort()) ? { styleIds, newStyleNames } : {}), instagramUrl: normalizedInstagram, facebookUrl: normalizedFacebook });
       updateUser({ name: name.trim(), avatarUrl: finalAvatarUrl });
       appDialog.alert('Thành công', 'Đã lưu thông tin hồ sơ.');
       router.replace('/(mua)/profile');
     } catch (error) {
-      setFormError(getApiError(error).message || 'Không thể lưu hồ sơ. Vui lòng kiểm tra kết nối và thử lại.');
+      setFormError(styleErrorMessage(error) || 'Không thể lưu hồ sơ. Vui lòng kiểm tra kết nối và thử lại.');
     } finally {
+      saveLock.current = false;
       setIsUploading(false);
     }
   };
@@ -222,8 +230,7 @@ function EditProfileScreen() {
             <View style={styles.inputGroup}><Text style={styles.label}>Kinh nghiệm</Text><View style={styles.styleChips}>{EXPERIENCE_LEVELS.map(item => <TouchableOpacity key={item.value} onPress={() => setExperienceLevel(item.value)} style={[styles.styleChip, experienceLevel === item.value && styles.styleChipSelected]}><Text style={[styles.styleChipText, experienceLevel === item.value && styles.styleChipTextSelected]}>{item.label}</Text></TouchableOpacity>)}</View></View>
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}><Sparkles size={16} color={BrandColors.textMuted}/><Text style={styles.label}>Chuyên môn</Text></View>
-              <Text style={styles.helpText}>Chọn tối đa 5 phong cách</Text>
-              {stylesQuery.isLoading ? <ActivityIndicator color={BrandColors.accentPink}/> : stylesQuery.isError ? <TouchableOpacity onPress={() => stylesQuery.refetch()}><Text style={styles.formError}>Không thể tải chuyên môn. Chạm để thử lại.</Text></TouchableOpacity> : <View style={styles.styleChips}>{stylesQuery.data?.map(item => { const selected = styleIds.includes(item.styleId); return <TouchableOpacity key={item.styleId} onPress={() => setStyleIds(current => selected ? current.filter(id => id !== item.styleId) : current.length < 5 ? [...current,item.styleId] : current)} style={[styles.styleChip,selected&&styles.styleChipSelected]}><Text style={[styles.styleChipText,selected&&styles.styleChipTextSelected]}>{selected?'✓ ':''}{item.name}</Text></TouchableOpacity>; })}</View>}
+              <MakeupStylePicker styles={[...(profile?.specialties || []), ...(stylesQuery.data || [])]} value={{ styleIds, newStyleNames }} onChange={value => { setStyleIds(value.styleIds); setNewStyleNames(value.newStyleNames); setFormError(''); }} limit={20} disabled={isSaving} loading={stylesQuery.isLoading} loadError={stylesQuery.isError} onReload={() => stylesQuery.refetch()} />
             </View>
             <View style={styles.inputGroup}><Text style={styles.sectionLabel}>Liên kết mạng xã hội</Text><Text style={styles.helpText}>Không bắt buộc</Text></View>
             <ProfileInput icon={<FileText size={16} color={BrandColors.textMuted}/>} label="Instagram" value={instagramUrl} onChangeText={setInstagramUrl} placeholder="instagram.com/username" autoCapitalize="none" keyboardType="url" />

@@ -1,0 +1,99 @@
+[
+  {
+    "key": "soft-korean",
+    "changes": [
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "douyin",
+    "changes": [
+      "intensity",
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "clean-girl",
+    "changes": [
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "natural",
+    "changes": [
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "peach",
+    "changes": [
+      "intensity",
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "strawberry",
+    "changes": [
+      "intensity",
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "latte",
+    "changes": [
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "soft-glam",
+    "changes": [
+      "intensity",
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "thai-glam",
+    "changes": [
+      "occasions",
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "smokey-eyes",
+    "changes": [
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "bridal-soft-glam",
+    "changes": [
+      "tags",
+      "colorPalette"
+    ]
+  },
+  {
+    "key": "classic-glam",
+    "changes": [
+      "tags",
+      "colorPalette"
+    ]
+  }
+]

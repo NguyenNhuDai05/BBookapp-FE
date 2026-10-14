@@ -16,6 +16,8 @@ export interface ServiceDto {
   imageUrl?: string;
   imageUrls?: string[];
   tags?: string[];
+  styleIds?: number[];
+  styleTags?: { styleId: number; name: string | null; isActive: boolean }[];
 }
 
 export interface CreateServiceRequest {
@@ -26,7 +28,10 @@ export interface CreateServiceRequest {
   durationMinutes: number;
   price: number;
   imageUrl?: string;
-  tags: string[];
+  tags?: string[];
+  styleIds?: number[];
+  newStyleNames?: string[];
+  requestId?: string;
 }
 
-export type UpdateServiceRequest = CreateServiceRequest;
+export type UpdateServiceRequest = Omit<CreateServiceRequest, 'requestId'>;

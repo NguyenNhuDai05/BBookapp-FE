@@ -23,6 +23,9 @@ export const useUpdateMuaProfile = () => {
       queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
       queryClient.invalidateQueries({ queryKey: ['nearby-muas'] });
+      queryClient.invalidateQueries({ queryKey: ['advisor'] });
+      queryClient.invalidateQueries({ queryKey: ['mua-styles'] });
+      queryClient.invalidateQueries({ queryKey: ['mua-services'] });
     },
   });
 };

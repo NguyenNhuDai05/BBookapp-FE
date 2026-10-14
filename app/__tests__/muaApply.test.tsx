@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 import MuaApplyScreen from '../mua-onboarding/apply';
+import { muaStyleService } from '../../services/muaStyleService';
 const mockSubmit = jest.fn().mockResolvedValue({});
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn(), replace: jest.fn() }) }));
@@ -45,15 +46,14 @@ it('changes the operating district options when a province is selected', async (
   expect(screen.getByText('Chọn thêm khu vực (2)')).toBeTruthy();
 });
 
-it('shows only a few suggestions initially and prevents choosing a sixth style', async () => {
+it('allows more than five styles and keeps new names local until final save', async () => {
   await render(<MuaApplyScreen />, { wrapper: Wrapper });
-  expect(screen.queryByText('Style 6')).toBeNull();
-  await fireEvent.press(screen.getByText('Thêm phong cách'));
-  for (let id = 1; id <= 5; id++) {
-    await fireEvent.press(screen.getAllByRole('button', { name: `Style ${id}` }).at(-1)!);
-  }
-  expect(screen.getAllByText('Đã chọn 5/5')).toHaveLength(2);
-  expect(screen.getAllByRole('button', { name: 'Style 6' }).every(button => button.props.accessibilityState.disabled)).toBe(true);
+  for (let id = 1; id <= 6; id++) await fireEvent.press(screen.getByLabelText(`Chọn Style ${id}`));
+  expect(screen.getByText('Đã chọn 6/20 phong cách')).toBeTruthy();
+  await fireEvent.changeText(screen.getByLabelText('Tìm hoặc thêm phong cách'), '  Makeup   mới  ');
+  await fireEvent.press(screen.getByText('Thêm “Makeup mới”'));
+  expect(screen.getByText('Đã chọn 7/20 phong cách')).toBeTruthy();
+  expect(muaStyleService.selectOrCreate).not.toHaveBeenCalled();
 });
 
 it('creates a new MUA with a confirmed private GPS point and no workplace fields', async () => {
@@ -63,7 +63,7 @@ it('creates a new MUA with a confirmed private GPS point and no workplace fields
   await fireEvent.press(screen.getByText('Thành phố Hồ Chí Minh'));
   await fireEvent.press(screen.getByText('Chọn quận / huyện'));
   await fireEvent.press(screen.getByRole('checkbox', { name: /Quận Bình Thạnh/ })); await fireEvent.press(screen.getByText('Xong'));
-  await fireEvent.press(screen.getByRole('button', { name: 'Style 1' }));
+  await fireEvent.press(screen.getByRole('button', { name: 'Chọn Style 1' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Chọn vị trí hoạt động' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Sử dụng vị trí hiện tại' }));
   await screen.findByText('Phường Bến Thành, TP.HCM');

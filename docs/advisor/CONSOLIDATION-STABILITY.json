@@ -1,0 +1,16 @@
+{
+  "buildPerformedAfterConsolidationRequest": false,
+  "protectedFilesChecked": 32,
+  "previousBuildCancelled": true,
+  "releaseRolloutApproved": false,
+  "singleRuntimeEngine": "features/makeupAdvisor/localEngine.ts",
+  "legacyOracle": "scripts/advisorRegression/legacyEngine12.ts",
+  "catalogStyles": 20,
+  "publicGateway": "features/makeupAdvisor/faceScanRecommendations.ts",
+  "changedProtectedFiles": [],
+  "weights": {
+    "faceBudget": 1,
+    "occasionBonus": 0.12,
+    "intensityBonus": 0.08
+  }
+}
