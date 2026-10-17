@@ -6,7 +6,11 @@ module.exports = ({config}) => {
  const preview=profile==='advisor-preview';
  const qa=profile==='advisor-qa'||profile==='unified-qa';
  const tester=['tester-apk','tester-aab'].includes(profile);
- if(tester && (process.env.BBOOK_ADVISOR_TESTER_APPROVED!=='1'||process.env.BBOOK_ADVISOR_DEVICE_ACCEPTANCE!=='approved'))throw new Error('Tester Advisor requires device acceptance and explicit tester release approval');
+ // Build authorization only: never exposed in runtime config or treated as release approval.
+ const releaseCandidate=process.env.BBOOK_APK_RELEASE_CANDIDATE==='1';
+ if(releaseCandidate&&profile!=='tester-apk')throw new Error('Release Candidate authorization is only valid for tester-apk');
+ if(releaseCandidate&&(process.env.BBOOK_ADVISOR_TESTER_APPROVED==='1'||process.env.BBOOK_ADVISOR_DEVICE_ACCEPTANCE==='approved'))throw new Error('Release Candidate must not claim tester approval or device acceptance');
+ if(tester && !releaseCandidate && (process.env.BBOOK_ADVISOR_TESTER_APPROVED!=='1'||process.env.BBOOK_ADVISOR_DEVICE_ACCEPTANCE!=='approved'))throw new Error('Tester Advisor requires device acceptance and explicit tester release approval');
  const isolated=preview||qa;
  const firebaseFile=preview?process.env.BBOOK_ADVISOR_GOOGLE_SERVICES_FILE:undefined;
  if(firebaseFile){

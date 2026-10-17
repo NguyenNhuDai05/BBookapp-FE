@@ -1,0 +1,193 @@
+name: Android APK (manual only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      installation_acknowledged:
+        description: 'Same package as Google Play: read docs/github-actions-apk.md before installing'
+        type: boolean
+        required: true
+        default: false
+      architectures:
+        description: 'arm64 is faster; universal also supports older phones and emulators'
+        type: choice
+        options:
+          - arm64-v8a
+          - universal
+        default: universal
+      version_code:
+        description: 'APK test versionCode (does not update EAS or Play version counters)'
+        type: string
+        required: true
+        default: '1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    if: ${{ inputs.installation_acknowledged }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    # Repository secrets work with private repositories on GitHub Free.
+    defaults:
+      run:
+        shell: bash
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+      EXPO_NO_DOTENV: '1'
+      # Business environment comes only from eas.json tester-apk, loaded below.
+      NODE_ENV: production
+      APK_VERSION_CODE: ${{ inputs.version_code }}
+      APK_ARCHITECTURES: ${{ inputs.architectures }}
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-ci
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs=-Xmx3g
+      CMAKE_BUILD_PARALLEL_LEVEL: '2'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Validate inputs and required signing secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          CERT_SHA256: ${{ secrets.ANDROID_SIGNING_CERT_SHA256 }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          for name in ['KEYSTORE_BASE64', 'STORE_PASSWORD', 'KEY_ALIAS', 'KEY_PASSWORD', 'CERT_SHA256']:
+              if not os.environ.get(name):
+                  raise SystemExit('Missing required signing secret: ' + name)
+          if not re.fullmatch(r'[1-9][0-9]{0,9}', os.environ['APK_VERSION_CODE']) or int(os.environ['APK_VERSION_CODE']) > 2100000000:
+              raise SystemExit('version_code must be an integer between 1 and 2100000000')
+          if os.environ['APK_ARCHITECTURES'] not in ['arm64-v8a', 'universal']:
+              raise SystemExit('Unsupported architecture')
+          if not re.fullmatch(r'[0-9a-fA-F]{64}', os.environ['CERT_SHA256'].replace(':', '').strip()):
+              raise SystemExit('Expected signing certificate SHA-256 is invalid')
+          PY
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.3'
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install locked dependencies
+        run: npm ci --include=dev --no-audit --no-fund
+
+      - name: Check Release Candidate policy and runtime equivalence
+        run: node --test scripts/ci/release-policy.test.cjs
+
+      - name: Load Release Candidate build permission (not release approval)
+        run: node scripts/ci/release-apk-config.cjs environment
+
+      - name: Restore Gradle dependencies (no signing files or build outputs)
+        uses: actions/cache@v4
+        with:
+          path: |
+            .gradle-ci/caches/modules-2
+            .gradle-ci/wrapper
+          key: apk-gradle-${{ runner.os }}-${{ hashFiles('package-lock.json', 'modules/**/build.gradle', 'plugins/**') }}
+          restore-keys: apk-gradle-${{ runner.os }}-
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install matching SDK and NDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.1.12297006' 'cmake;3.22.1'
+
+      - name: Generate Android project on runner only
+        run: |
+          npx --no-install expo config --type public --json > "$RUNNER_TEMP/apk-expo-config.json"
+          node scripts/ci/prepare-apk.cjs config "$RUNNER_TEMP/apk-expo-config.json"
+          node scripts/ci/release-apk-config.cjs snapshot "$RUNNER_TEMP/apk-expo-config.json"
+          npx --no-install expo prebuild --platform android --clean --no-install
+          npx --no-install expo-modules-autolinking resolve --platform android --json > "$RUNNER_TEMP/apk-autolinking.json"
+          node scripts/ci/prepare-apk.cjs native "$RUNNER_TEMP/apk-autolinking.json"
+
+      - name: Compile standalone release APK
+        working-directory: android
+        env:
+          NODE_ENV: production
+        run: |
+          chmod +x gradlew
+          abi="$APK_ARCHITECTURES"
+          if [[ "$abi" == universal ]]; then abi='armeabi-v7a,arm64-v8a,x86,x86_64'; fi
+          ./gradlew :app:assembleRelease --no-daemon --max-workers=2 --build-cache \
+            -PreactNativeArchitectures="$abi" -Porg.gradle.parallel=false \
+            -I ../scripts/ci/apk-memory.init.gradle
+
+      - name: Sign with supplied existing key and verify APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          CERT_SHA256: ${{ secrets.ANDROID_SIGNING_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          keyfile="$RUNNER_TEMP/bbook-apk-signing.jks"
+          trap 'rm -f "$keyfile"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keyfile"
+          mkdir -p apk-artifact
+          tools="$ANDROID_HOME/build-tools/36.0.0"
+          unsigned=android/app/build/outputs/apk/release/app-release-unsigned.apk
+          test -f "$unsigned"
+          "$tools/zipalign" -P 16 -f 4 "$unsigned" "$RUNNER_TEMP/bbook-aligned.apk"
+          "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:STORE_PASSWORD --key-pass env:KEY_PASSWORD \
+            --out apk-artifact/BBook-test.apk "$RUNNER_TEMP/bbook-aligned.apk"
+          "$tools/apksigner" verify --verbose --print-certs apk-artifact/BBook-test.apk > "$RUNNER_TEMP/apk-certificate.txt"
+          python3 - <<'PY'
+          import os, pathlib, re, zipfile
+          cert = (pathlib.Path(os.environ['RUNNER_TEMP']) / 'apk-certificate.txt').read_text()
+          fingerprints = re.findall(r'Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]+)', cert)
+          expected = os.environ['CERT_SHA256'].replace(':', '').strip().lower()
+          if len(fingerprints) != 1 or fingerprints[0].lower() != expected:
+              raise SystemExit('APK signer does not match the expected existing certificate')
+          with zipfile.ZipFile('apk-artifact/BBook-test.apk') as apk:
+              if 'assets/index.android.bundle' not in apk.namelist():
+                  raise SystemExit('Embedded JS bundle missing: refusing to upload APK')
+          PY
+          "$tools/aapt" dump badging apk-artifact/BBook-test.apk > "$RUNNER_TEMP/apk-badging.txt"
+          python3 - <<'PY'
+          import os, pathlib, re
+          text = (pathlib.Path(os.environ['RUNNER_TEMP']) / 'apk-badging.txt').read_text()
+          if not re.search(r"package: name='com.bbook.app' versionCode='" + os.environ['APK_VERSION_CODE'] + "'", text):
+              raise SystemExit('Unexpected APK package or versionCode')
+          PY
+          (cd apk-artifact && sha256sum BBook-test.apk > SHA256SUMS.txt)
+          printf 'Commit: %s\nPackage: com.bbook.app\nVersion code: %s\nArchitectures: %s\n' \
+            "$GITHUB_SHA" "$APK_VERSION_CODE" "$APK_ARCHITECTURES" > apk-artifact/build-info.txt
+          node scripts/ci/release-apk-config.cjs verify
+          cp "$RUNNER_TEMP/apk-release-provenance.json" apk-artifact/release-provenance.json
+          cp "$RUNNER_TEMP/apk-expo-config.json" apk-artifact/expo-public-config.json
+          cp "$RUNNER_TEMP/apk-certificate.txt" apk-artifact/signing-certificate.txt
+          (cd apk-artifact && sha256sum *.json *.txt BBook-test.apk > manifest.sha256)
+
+      - name: Downloadable APK only
+        uses: actions/upload-artifact@v4
+        with:
+          name: BBook-APK-${{ github.run_number }}
+          path: apk-artifact/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/bbook-apk-signing.jks"
