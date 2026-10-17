@@ -1,6 +1,6 @@
 # 20 phong cách — asset manifest
 
-Chưa có chân dung local có quyền sử dụng. Mỗi imageKey cần một WebP riêng. Khuyến nghị 720×960, sRGB, dưới 150KB, khuôn mặt ở giữa với khoảng an toàn cho crop 4:5. Không chữ/logo/UI và không dùng selfie. Thêm literal require vào styleImages.ts sau khi bổ sung ảnh.
+Đã bổ sung đủ 20 ảnh WebP và gắn literal require trong styleImages.ts theo imageKey. Ảnh “Bảng phong cách trang điểm.webp” dùng tại màn hình giới thiệu trước bước chụp ảnh quét mặt, hiển thị trọn ảnh theo tỉ lệ gốc. Khi thay ảnh, giữ tên file và kiểm tra lại nội dung, kích thước, quyền sử dụng.
 
 ## soft-korean
 
