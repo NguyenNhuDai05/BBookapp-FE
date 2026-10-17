@@ -5,7 +5,7 @@
       "key": "soft-korean",
       "imageKey": "soft-korean.webp",
       "path": "assets/images/advisor/styles/soft-korean.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Close-up portrait of a young Asian woman with glowing dewy skin, peach blush, soft natural brows, and glossy lips, studio lighting, natural aesthetic.",
       "visualFocus": "Dewy skin texture, subtle eye makeup, glossy gradient lips."
     },
@@ -13,7 +13,7 @@
       "key": "douyin",
       "imageKey": "douyin.webp",
       "path": "assets/images/advisor/styles/douyin.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Portrait of an Asian woman with flawless matte skin, dramatic glittery eyes, sharp winged eyeliner, clear aegyo-sal, and bold gradient lips, studio setting.",
       "visualFocus": "Sparkling glitter eyeshadow, defined aegyo-sal, sharp eyeliner."
     },
@@ -21,7 +21,7 @@
       "key": "clean-girl",
       "imageKey": "clean-girl.webp",
       "path": "assets/images/advisor/styles/clean-girl.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Close-up of a model with sleek slicked-back hair, glowing healthy skin, brushed-up fluffy eyebrows, subtle bronze glow, and nude glossy lips.",
       "visualFocus": "Fluffy brows, healthy skin glow, polished minimalist look."
     },
@@ -29,7 +29,7 @@
       "key": "natural",
       "imageKey": "natural.webp",
       "path": "assets/images/advisor/styles/natural.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Portrait of a natural-looking woman with minimal makeup, fresh skin, light pink lips, soft natural lighting.",
       "visualFocus": "Fresh natural skin texture, understated everyday look."
     },
@@ -37,7 +37,7 @@
       "key": "peach",
       "imageKey": "peach.webp",
       "path": "assets/images/advisor/styles/peach.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Close-up portrait of a woman wearing warm peach eyeshadow, matching coral blush, and juicy glossy peach lips, bright natural light.",
       "visualFocus": "Peach color harmony across eyes, cheeks, and lips."
     },
@@ -45,7 +45,7 @@
       "key": "strawberry",
       "imageKey": "strawberry.webp",
       "path": "assets/images/advisor/styles/strawberry.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Portrait of a woman with vibrant strawberry red blush across her nose bridge, subtle faux freckles, glossy berry lips, and fresh glowing skin.",
       "visualFocus": "Strawberry pink-red blush, glossy lips, playful freckles."
     },
@@ -53,7 +53,7 @@
       "key": "latte",
       "imageKey": "latte.webp",
       "path": "assets/images/advisor/styles/latte.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Portrait of a stylish woman with warm latte brown eyeshadow, caramel-toned lips, soft bronze contours, and chic autumn aesthetic.",
       "visualFocus": "Warm caramel and latte brown tones, sophisticated matte finish."
     },
@@ -61,7 +61,7 @@
       "key": "soft-glam",
       "imageKey": "soft-glam.webp",
       "path": "assets/images/advisor/styles/soft-glam.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Professional studio portrait of a woman with soft smokey eyeshadow, rose gold shimmer, defined contours, and dusty rose lipstick.",
       "visualFocus": "Soft smokey eyes with shimmer, polished contour, elegant lips."
     },
@@ -69,7 +69,7 @@
       "key": "thai-glam",
       "imageKey": "thai-glam.webp",
       "path": "assets/images/advisor/styles/thai-glam.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Close-up of a stunning woman with bold feathered eyebrows, bronzed skin, striking smokey bronze eyeshadow, and nude matte lips.",
       "visualFocus": "Feathered bold eyebrows, bronzed complexion, sharp contour."
     },
@@ -77,7 +77,7 @@
       "key": "smokey-eyes",
       "imageKey": "smokey-eyes.webp",
       "path": "assets/images/advisor/styles/smokey-eyes.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Dramatic portrait of a woman with intense charcoal smokey eyes, sleek hair, sharp contours, and neutral nude lips.",
       "visualFocus": "Intense smokey eye makeup, dramatic depth."
     },
@@ -85,7 +85,7 @@
       "key": "bridal-soft-glam",
       "imageKey": "bridal-soft-glam.webp",
       "path": "assets/images/advisor/styles/bridal-soft-glam.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Bridal portrait of a radiant woman with glowing skin, soft champagne shimmer eyeshadow, natural pink cheeks, and elegant rose lips.",
       "visualFocus": "Radiant bridal glow, soft pearl shimmer, elegant pink lips."
     },
@@ -93,7 +93,7 @@
       "key": "classic-glam",
       "imageKey": "classic-glam.webp",
       "path": "assets/images/advisor/styles/classic-glam.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Vintage Hollywood portrait of a woman with winged cat eyeliner, flawless porcelain skin, and iconic classic red lipstick.",
       "visualFocus": "Sharp cat-eye eyeliner, iconic classic red lips."
     },
@@ -101,7 +101,7 @@
       "key": "j-beauty",
       "imageKey": "j-beauty.webp",
       "path": "assets/images/advisor/styles/j-beauty.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Photorealistic editorial beauty portrait showing J-Beauty Makeup, makeup details clearly visible, soft studio light, clean background.",
       "visualFocus": "Da tự nhiên, má hồng nhẹ, môi màu trong."
     },
@@ -109,7 +109,7 @@
       "key": "igari",
       "imageKey": "igari.webp",
       "path": "assets/images/advisor/styles/igari.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Photorealistic editorial beauty portrait showing Igari Makeup, makeup details clearly visible, soft studio light, clean background.",
       "visualFocus": "Má hồng lan nhẹ qua sống mũi, môi trong trẻo."
     },
@@ -117,7 +117,7 @@
       "key": "ulzzang",
       "imageKey": "ulzzang.webp",
       "path": "assets/images/advisor/styles/ulzzang.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Photorealistic editorial beauty portrait showing Ulzzang Makeup, makeup details clearly visible, soft studio light, clean background.",
       "visualFocus": "Mắt long lanh, chân mày mềm, môi tint chuyển sắc."
     },
@@ -125,7 +125,7 @@
       "key": "western-glam",
       "imageKey": "western-glam.webp",
       "path": "assets/images/advisor/styles/western-glam.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Photorealistic editorial beauty portrait showing Western Glam Makeup, makeup details clearly visible, soft studio light, clean background.",
       "visualFocus": "Tạo khối sắc nét, mi dày, môi có viền rõ."
     },
@@ -133,7 +133,7 @@
       "key": "nude-makeup",
       "imageKey": "nude-makeup.webp",
       "path": "assets/images/advisor/styles/nude-makeup.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Photorealistic editorial beauty portrait showing Nude Makeup, makeup details clearly visible, soft studio light, clean background.",
       "visualFocus": "Mắt nâu nhạt, má nude, môi hồng đất."
     },
@@ -141,7 +141,7 @@
       "key": "fox-eye",
       "imageKey": "fox-eye.webp",
       "path": "assets/images/advisor/styles/fox-eye.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Photorealistic editorial beauty portrait showing Fox Eye Makeup, makeup details clearly visible, soft studio light, clean background.",
       "visualFocus": "Đuôi mắt kéo dài, eyeliner mảnh, môi cân bằng."
     },
@@ -149,7 +149,7 @@
       "key": "sunkissed",
       "imageKey": "sunkissed.webp",
       "path": "assets/images/advisor/styles/sunkissed.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Photorealistic editorial beauty portrait showing Sun-Kissed Makeup, makeup details clearly visible, soft studio light, clean background.",
       "visualFocus": "Da ánh đồng nhẹ, má cam ấm, môi bóng tự nhiên."
     },
@@ -157,7 +157,7 @@
       "key": "glass-skin",
       "imageKey": "glass-skin.webp",
       "path": "assets/images/advisor/styles/glass-skin.webp",
-      "available": false,
+      "available": true,
       "imageBrief": "Photorealistic editorial beauty portrait showing Glass Skin Makeup, makeup details clearly visible, soft studio light, clean background.",
       "visualFocus": "Nền bóng khỏe, mắt nhẹ, môi bóng trong."
     }

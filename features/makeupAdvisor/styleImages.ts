@@ -3,26 +3,26 @@ import {presentationStyle} from './presentationCatalog';
 // Each slot accepts one unique licensed local WebP via a literal require().
 // Missing assets deliberately use the themed placeholder; never use the selfie.
 export const styleImages:Readonly<Record<string,ImageSourcePropType|undefined>>={
- 'soft-korean.webp':undefined, // ../../assets/images/advisor/styles/soft-korean.webp
- 'douyin.webp':undefined, // ../../assets/images/advisor/styles/douyin.webp
- 'clean-girl.webp':undefined, // ../../assets/images/advisor/styles/clean-girl.webp
- 'natural.webp':undefined, // ../../assets/images/advisor/styles/natural.webp
- 'peach.webp':undefined, // ../../assets/images/advisor/styles/peach.webp
- 'strawberry.webp':undefined, // ../../assets/images/advisor/styles/strawberry.webp
- 'latte.webp':undefined, // ../../assets/images/advisor/styles/latte.webp
- 'soft-glam.webp':undefined, // ../../assets/images/advisor/styles/soft-glam.webp
- 'thai-glam.webp':undefined, // ../../assets/images/advisor/styles/thai-glam.webp
- 'smokey-eyes.webp':undefined, // ../../assets/images/advisor/styles/smokey-eyes.webp
- 'bridal-soft-glam.webp':undefined, // ../../assets/images/advisor/styles/bridal-soft-glam.webp
- 'classic-glam.webp':undefined, // ../../assets/images/advisor/styles/classic-glam.webp
- 'j-beauty.webp':undefined, // ../../assets/images/advisor/styles/j-beauty.webp
- 'igari.webp':undefined, // ../../assets/images/advisor/styles/igari.webp
- 'ulzzang.webp':undefined, // ../../assets/images/advisor/styles/ulzzang.webp
- 'western-glam.webp':undefined, // ../../assets/images/advisor/styles/western-glam.webp
- 'nude-makeup.webp':undefined, // ../../assets/images/advisor/styles/nude-makeup.webp
- 'fox-eye.webp':undefined, // ../../assets/images/advisor/styles/fox-eye.webp
- 'sunkissed.webp':undefined, // ../../assets/images/advisor/styles/sunkissed.webp
- 'glass-skin.webp':undefined, // ../../assets/images/advisor/styles/glass-skin.webp
+ 'soft-korean.webp':require('../../assets/images/advisor/styles/soft-korean.webp'),
+ 'douyin.webp':require('../../assets/images/advisor/styles/douyin.webp'),
+ 'clean-girl.webp':require('../../assets/images/advisor/styles/clean-girl.webp'),
+ 'natural.webp':require('../../assets/images/advisor/styles/natural.webp'),
+ 'peach.webp':require('../../assets/images/advisor/styles/peach.webp'),
+ 'strawberry.webp':require('../../assets/images/advisor/styles/strawberry.webp'),
+ 'latte.webp':require('../../assets/images/advisor/styles/latte.webp'),
+ 'soft-glam.webp':require('../../assets/images/advisor/styles/soft-glam.webp'),
+ 'thai-glam.webp':require('../../assets/images/advisor/styles/thai-glam.webp'),
+ 'smokey-eyes.webp':require('../../assets/images/advisor/styles/smokey-eyes.webp'),
+ 'bridal-soft-glam.webp':require('../../assets/images/advisor/styles/bridal-soft-glam.webp'),
+ 'classic-glam.webp':require('../../assets/images/advisor/styles/classic-glam.webp'),
+ 'j-beauty.webp':require('../../assets/images/advisor/styles/j-beauty.webp'),
+ 'igari.webp':require('../../assets/images/advisor/styles/igari.webp'),
+ 'ulzzang.webp':require('../../assets/images/advisor/styles/ulzzang.webp'),
+ 'western-glam.webp':require('../../assets/images/advisor/styles/western-glam.webp'),
+ 'nude-makeup.webp':require('../../assets/images/advisor/styles/nude-makeup.webp'),
+ 'fox-eye.webp':require('../../assets/images/advisor/styles/fox-eye.webp'),
+ 'sunkissed.webp':require('../../assets/images/advisor/styles/sunkissed.webp'),
+ 'glass-skin.webp':require('../../assets/images/advisor/styles/glass-skin.webp'),
 };
 export const styleFor=presentationStyle;
 export const paletteColors:Readonly<Record<string,string>>={
