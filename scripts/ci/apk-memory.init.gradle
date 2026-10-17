@@ -1,0 +1,13 @@
+// Bound C++ compiler concurrency on GitHub-hosted runners.
+gradle.beforeProject { project ->
+    ['com.android.application', 'com.android.library'].each { pluginId ->
+        project.plugins.withId(pluginId) {
+            project.extensions.getByName('androidComponents').finalizeDsl { android ->
+                android.defaultConfig.externalNativeBuild.cmake.arguments.addAll([
+                    '-DCMAKE_JOB_POOLS=apk_compile=2',
+                    '-DCMAKE_JOB_POOL_COMPILE=apk_compile'
+                ])
+            }
+        }
+    }
+}

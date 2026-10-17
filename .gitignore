@@ -48,3 +48,7 @@ app-example
 
 *.apk
 *.aab
+
+# EAS Android signing credentials
+/credentials.json
+/credentials/
