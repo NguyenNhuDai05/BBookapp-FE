@@ -48,3 +48,43 @@ it('retains a nullable legacy display name by ID without crashing search or offe
   await fireEvent.press(screen.getByLabelText('Bỏ Phong cách #31'));
   expect(change).toHaveBeenCalledWith({styleIds:[],newStyleNames:[]});
 });
+
+it('shows specialties before discovery and deduplicates by ID across groups', async () => {
+  const rows = [ { styleId: 2, name: 'Khám phá', isActive: true }, { styleId: 1, name: 'Chuyên môn', isActive: true }, { styleId: 1, name: 'Chuyên môn', isActive: true } ];
+  await render(<MakeupStylePicker styles={rows} historicalStyles={[rows[1]]} preferredStyleIds={[1]} value={{ styleIds: [], newStyleNames: [] }} onChange={jest.fn()} limit={5} />);
+  const choices = screen.getAllByRole('button').filter(item => item.props.accessibilityLabel?.startsWith('Chọn '));
+  expect(choices.map(item => item.props.accessibilityLabel)).toEqual(['Chọn Chuyên môn', 'Chọn Khám phá']);
+});
+it('does not guess identity for two distinct IDs with equal display names', async () => {
+  const change = jest.fn();
+  await render(<MakeupStylePicker styles={[{ styleId: 1, name: 'Glam', isActive: true }, { styleId: 2, name: 'Glam', isActive: true }]} value={{ styleIds: [], newStyleNames: [] }} onChange={change} limit={5} />);
+  expect(screen.getAllByLabelText('Chọn Glam')).toHaveLength(2);
+  await fireEvent.changeText(screen.getByLabelText('Tìm hoặc thêm phong cách'), 'Glam'); await fireEvent.press(screen.getByText('Thêm “Glam”'));
+  expect(change).not.toHaveBeenCalled(); expect(screen.getByText(/Tên này trùng nhiều phong cách/)).toBeTruthy();
+});
+it('retains inactive history missing from active catalog without offering it for selection', async () => {
+  await render(<MakeupStylePicker styles={[]} historicalStyles={[{ styleId: 99, name: 'Cũ', isActive: true }]} value={{ styleIds: [99], newStyleNames: [] }} onChange={jest.fn()} limit={5} />);
+  expect(screen.getByText('Cũ · Ngừng sử dụng ×')).toBeTruthy(); expect(screen.queryByLabelText('Chọn Cũ')).toBeNull();
+});
+it('keeps legacy overflow visible and permits removal while blocking additions', async () => {
+  await render(<Picker initial={{ styleIds: Array.from({ length: 21 }, (_, i) => i + 1), newStyleNames: [] }} limit={20} />);
+  expect(screen.getByText('Đã chọn 21/20 phong cách')).toBeTruthy();
+  await fireEvent.press(screen.getByLabelText('Bỏ Style 21')); expect(screen.getByLabelText('Chọn Style 21').props.accessibilityState.disabled).toBe(true);
+});
+it('shows loading/error/retry and permits retaining selections without new choices', async () => {
+  const reload = jest.fn();
+  await render(<MakeupStylePicker styles={[]} historicalStyles={[{ styleId: 1, name: 'Giữ', isActive: true }]} catalogLoaded={false} value={{ styleIds: [1], newStyleNames: [] }} onChange={jest.fn()} limit={5} loadError onReload={reload} />);
+  expect(screen.getByText('Giữ · Chưa xác minh trạng thái ×')).toBeTruthy();
+  await fireEvent.press(screen.getByText('Thử lại phong cách')); expect(reload).toHaveBeenCalledTimes(1);
+});
+
+it('offers an explicit new-style action while keeping the draft local until confirmation', async () => {
+  const change = jest.fn();
+  await render(<MakeupStylePicker styles={[]} value={{ styleIds: [], newStyleNames: [] }} onChange={change} limit={5} />);
+  await fireEvent.press(screen.getByLabelText('Thêm phong cách mới'));
+  expect(screen.getByPlaceholderText('Nhập tên phong cách mới...')).toBeTruthy();
+  expect(change).not.toHaveBeenCalled();
+  await fireEvent.changeText(screen.getByLabelText('Tìm hoặc thêm phong cách'), 'Glam mới');
+  await fireEvent.press(screen.getByText('Thêm “Glam mới”'));
+  expect(change).toHaveBeenCalledWith({ styleIds: [], newStyleNames: ['Glam mới'] });
+});

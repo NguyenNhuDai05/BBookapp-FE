@@ -1,9 +1,9 @@
-import { PortfolioItemDto, CreatePortfolioItemRequest, PortfolioCommentDto } from '../types/portfolio';
+import { PortfolioItemDto, CreatePortfolioItemRequest, PortfolioCommentDto, PortfolioWriteAck } from '../types/portfolio';
 
 export interface IPortfolioRepository {
   getPortfolio(muaId: string): Promise<PortfolioItemDto[]>;
-  createItem(muaId: string, item: CreatePortfolioItemRequest): Promise<PortfolioItemDto>;
-  updateItem(itemId: string, updates: Partial<CreatePortfolioItemRequest>): Promise<PortfolioItemDto>;
+  createItem(muaId: string, item: CreatePortfolioItemRequest): Promise<PortfolioWriteAck>;
+  updateItem(itemId: string, updates: Partial<CreatePortfolioItemRequest>): Promise<PortfolioWriteAck>;
   deleteItem(itemId: string): Promise<void>;
   setVisibility(itemId: string, isHidden: boolean): Promise<void>;
   toggleLike(itemId: string): Promise<void>;

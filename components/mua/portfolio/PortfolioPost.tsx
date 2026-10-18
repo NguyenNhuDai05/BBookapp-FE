@@ -46,9 +46,14 @@ function PortfolioPostComponent({ compact = true, item, onLike, onSave, onOption
   const authorName = item.authorName || 'Chuyên gia';
   const authorAvatar = item.authorAvatarUrl || item.authorAvatar;
   const time = formatPostTime(item.createdAt);
-  const caption = [item.title, item.description].filter(value => value?.trim()).join('\n');
+  const caption = item.description || '';
   const followLock = useRef(false);
   const [followingBusy, setFollowingBusy] = useState(false);
+  const [expandedTags, setExpandedTags] = useState(false);
+  const structuredLabels = useMemo(() => item.tagging ? [item.tagging.primaryStyle?.name,
+    ...item.tagging.occasions.map(t => t.label), item.tagging.intensity?.label,
+    ...item.tagging.secondaryStyles.map(s => s.name), ...item.tagging.colorTones.map(t => t.label),
+    ...item.tagging.effects.map(t => t.label)].filter((s): s is string => Boolean(s)) : [], [item.tagging]);
   // TODO: wire follow only when a real backend contract exists; never toggle local fake follow state.
   const follow = async () => {
     if (!onFollow || followLock.current) return;
@@ -67,6 +72,7 @@ function PortfolioPostComponent({ compact = true, item, onLike, onSave, onOption
     () => normalizeHashtags(item.hashtags?.length ? item.hashtags : item.tags || []),
     [item.hashtags, item.tags],
   );
+  const allLabels = [...new Set([...structuredLabels, ...hashtags])];
 
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
     const nextWidth = Math.round(event.nativeEvent.layout.width);
@@ -103,7 +109,7 @@ function PortfolioPostComponent({ compact = true, item, onLike, onSave, onOption
         </View>
       </View>
 
-      <View style={styles.captionContainer}><PostCaption key={`${item.id || item.portfolioId}-${caption}`} text={compact ? item.description || '' : caption} title={compact ? item.title : undefined} compact={compact} /></View>
+      <View style={styles.captionContainer}><PostCaption key={`${item.id || item.portfolioId}-${caption}`} text={caption} compact={compact} /></View>
 
       <View testID="post-gallery" style={[styles.carouselFrame, compact && compactStyles.carouselFrame]} onLayout={handleLayout}>
         {carouselWidth > 0 && images.length > 0 ? (
@@ -171,7 +177,7 @@ function PortfolioPostComponent({ compact = true, item, onLike, onSave, onOption
         </TouchableOpacity>
       </View>
 
-      {hashtags.length ? <View style={[styles.hashtags, compact && compactStyles.hashtags]} testID="post-hashtags">{hashtags.map(tag => <View key={tag} style={[styles.tag, compact && compactStyles.tag]}><Text style={styles.tagsText}>{tag}</Text></View>)}</View> : null}
+      {allLabels.length ? <View style={[styles.hashtags, compact && compactStyles.hashtags]} testID="post-hashtags">{(expandedTags ? allLabels : allLabels.slice(0, 3)).map(tag => <View key={tag} style={[styles.tag, compact && compactStyles.tag]}><Text style={styles.tagsText}>{tag}</Text></View>)}{allLabels.length > 3 && <TouchableOpacity accessibilityRole="button" accessibilityState={{ expanded: expandedTags }} style={{ minHeight: 44, justifyContent: 'center' }} onPress={() => setExpandedTags(!expandedTags)}><Text style={styles.tagsText}>{expandedTags ? 'Thu gọn tag' : `Xem thêm ${allLabels.length - 3} tag`}</Text></TouchableOpacity>}</View> : null}
     </View>
   );
 }

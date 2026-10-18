@@ -6,14 +6,17 @@ import { ServiceFormModal } from '../ServiceFormModal';
 import { uploadImage } from '../../../../services/supabase';
 import * as ImagePicker from 'expo-image-picker';
 const mockNetworkError = jest.fn(() => false);
+let mockApiCode: string | undefined;
+let mockCatalogStyles = [{ styleId: 2, name: 'Tự nhiên', isActive: true }];
+jest.mock('../../../../hooks/useMuaStyles', () => ({ useMuaStyles: () => ({ data: mockCatalogStyles, isLoading: false, isError: false, refetch: jest.fn() }) }));
 
 jest.mock('expo-crypto', () => ({ randomUUID: jest.fn(() => '11111111-1111-4111-8111-111111111111') }));
 jest.mock('expo-image-picker', () => ({ requestMediaLibraryPermissionsAsync: jest.fn(), launchImageLibraryAsync: jest.fn() }));
 jest.mock('../../../../services/supabase', () => ({ uploadImage: jest.fn(async (uri: string) => uri) }));
-jest.mock('../../../../services/api', () => ({ getApiError: () => ({ message: 'Không thể lưu', isNetworkError: mockNetworkError() }) }));
+jest.mock('../../../../services/api', () => ({ getApiError: () => ({ message: 'Không thể lưu', code: mockApiCode, isNetworkError: mockNetworkError() }) }));
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 24, bottom: 24, left: 0, right: 0 } };
 const Wrapper = ({ children }: React.PropsWithChildren) => <SafeAreaProvider initialMetrics={metrics}><OverlayProvider>{children}</OverlayProvider></SafeAreaProvider>;
-beforeEach(() => { jest.clearAllMocks(); mockNetworkError.mockReturnValue(false); });
+beforeEach(() => { jest.clearAllMocks(); mockNetworkError.mockReturnValue(false); mockApiCode = undefined; mockCatalogStyles = [{ styleId: 2, name: 'Tự nhiên', isActive: true }]; });
 
 it('keeps input contents and focus through updates without showing validation errors on blur', async () => {
   await render(<ServiceFormModal visible onClose={jest.fn()} onSubmit={jest.fn()} />, { wrapper: Wrapper });
@@ -108,4 +111,31 @@ it('retries an uncertain create with the same requestId and immutable payload', 
   expect(save.mock.calls[1][0]).toEqual(save.mock.calls[0][0]);
   expect(save.mock.calls[0][0].requestId).toBe('11111111-1111-4111-8111-111111111111');
   expect(uploadImage).toHaveBeenCalledTimes(1);
+});
+
+
+it('selects an additional catalog style beyond specialties without saving the profile first', async () => {
+  mockCatalogStyles = [{ styleId: 1, name: 'Chuyên môn hiện tại', isActive: true }, { styleId: 2, name: 'Ngoài chuyên môn', isActive: true }];
+  const save = jest.fn(); const reload = jest.fn();
+  await render(<ServiceFormModal visible onClose={jest.fn()} onSubmit={save} availableStyles={[mockCatalogStyles[0]]} onReloadStyles={reload} initialData={{ id: 's', name: 'Dịch vụ', description: 'Mô tả', price: 100000, durationMinutes: 60, imageUrls: ['https://example.com/1.jpg'] }} />, { wrapper: Wrapper });
+  expect(screen.getByText('Chuyên môn của bạn')).toBeTruthy();
+  expect(screen.getAllByLabelText('Chọn Chuyên môn hiện tại')).toHaveLength(1);
+  await fireEvent.press(screen.getByLabelText('Chọn Ngoài chuyên môn'));
+  expect(save).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByLabelText('Lưu thay đổi'));
+  expect(save).toHaveBeenCalledWith(expect.objectContaining({ styleIds: [2], newStyleNames: [] }));
+});
+it('removing a service style sends only service replacement, never profile deletion', async () => {
+  mockCatalogStyles = [{ styleId: 2, name: 'Tự nhiên', isActive: true }];
+  const save = jest.fn();
+  await render(<ServiceFormModal visible onClose={jest.fn()} onSubmit={save} availableStyles={mockCatalogStyles} initialData={{ id: 's', name: 'Dịch vụ', description: 'Mô tả', price: 100000, durationMinutes: 60, imageUrls: ['https://example.com/1.jpg'], styleIds: [2], styleTags: mockCatalogStyles }} />, { wrapper: Wrapper });
+  await fireEvent.press(screen.getByLabelText('Bỏ Tự nhiên')); await fireEvent.press(screen.getByLabelText('Lưu thay đổi'));
+  expect(save).toHaveBeenCalledWith(expect.objectContaining({ styleIds: [], newStyleNames: [] }));
+  expect(save.mock.calls[0][0]).not.toHaveProperty('tags');
+});
+it('does not close or report success when the backend rejects the specialty union', async () => {
+  mockApiCode = 'MUA_STYLE_LIMIT_EXCEEDED';
+  const close = jest.fn(); const save = jest.fn().mockRejectedValue(new Error('Tổng chuyên môn vượt 20; chưa lưu'));
+  await render(<ServiceFormModal visible onClose={close} onSubmit={save} initialData={{ id: 's', name: 'Dịch vụ', description: 'Mô tả', price: 100000, durationMinutes: 60, imageUrls: ['https://example.com/1.jpg'] }} />, { wrapper: Wrapper });
+  await fireEvent.press(screen.getByLabelText('Lưu thay đổi')); expect(close).not.toHaveBeenCalled(); expect(screen.getByRole('alert')).toBeTruthy(); expect(screen.getByText(/Tổng chuyên môn sẽ vượt 20/)).toBeTruthy();
 });

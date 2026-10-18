@@ -369,6 +369,7 @@ export default function MuaProfilePremiumScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Thông tin giới thiệu</Text>
             <Text style={styles.bioText}>{profile?.bio || 'Chưa có thông tin.'}</Text>
+            {!!profile?.specialties?.length && <View style={{ marginTop: 16 }}><Text style={styles.sectionTitle}>Chuyên môn ({profile.specialties.length})</Text><Text style={styles.bioText}>{profile.specialties.map(item => `${item.name || 'Phong cách #' + item.styleId}${item.isActive ? '' : ' (ngừng sử dụng)'}`).join(' · ')}</Text></View>}
           </View>
         )}
 
@@ -734,5 +735,3 @@ modalTitle: {
     color: '#22152B',
   }
 });
-
-

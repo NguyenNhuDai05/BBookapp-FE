@@ -10,10 +10,9 @@ export default function PrivateMediaMaintenance() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const refresh = useCallback(async () => {
-    try { const response = await api.get<Job[]>('/admin/private-media/jobs'); setJobs(response.data); setError(''); }
-    catch { setError('Không tải được trạng thái. Render có thể đang khởi động; hãy thử lại.'); }
-  }, []);
+  const refresh = useCallback(() => api.get<Job[]>('/admin/private-media/jobs')
+    .then(response => { setJobs(response.data); setError(''); })
+    .catch(() => { setError('Không tải được trạng thái. Render có thể đang khởi động; hãy thử lại.'); }), []);
   useEffect(() => { void refresh(); const timer = setInterval(() => { void refresh(); }, 15000); return () => clearInterval(timer); }, [refresh]);
   const start = async (action: string) => {
     setBusy(true);

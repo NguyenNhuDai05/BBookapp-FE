@@ -26,15 +26,18 @@ export default function AdminPayoutDetailScreen(){
   const [notice,setNotice]=useState<{tone:'success'|'error'|'warning';text:string}|null>(null);
   const [uncertain,setUncertain]=useState(false);
   const payout=query.data;
-  const [transferQr,setTransferQr]=useState<{payoutId:string;amount:number;imageDataUrl:string;kind?:string;containsPayoutAmount?:boolean}|null>(null);
-  const [qrError,setQrError]=useState('');
+  const payoutStatus=payout?.status;
+  const qrKey=JSON.stringify([id,payoutStatus,payout?.amount]);
+  const [qrState,setQrState]=useState<{key:string;value:{payoutId:string;amount:number;imageDataUrl:string;kind?:string;containsPayoutAmount?:boolean}|null;error:string}|null>(null);
+  const transferQr=qrState?.key===qrKey?qrState.value:null;
+  const qrError=qrState?.key===qrKey?qrState.error:'';
   useEffect(()=>{
-    let active=true; setTransferQr(null); setQrError('');
-    if(payout&&['PENDING','MANUAL_ACTION_REQUIRED','PROCESSING'].includes(payout.status)) {
-      adminPayoutService.getTransferQr(id).then(value=>{if(active)setTransferQr(value);}).catch(error=>{if(active)setQrError(getApiError(error).message);});
+    let active=true;
+    if(payoutStatus&&['PENDING','MANUAL_ACTION_REQUIRED','PROCESSING'].includes(payoutStatus)) {
+      adminPayoutService.getTransferQr(id).then(value=>{if(active)setQrState({key:qrKey,value,error:''});}).catch(error=>{if(active)setQrState({key:qrKey,value:null,error:getApiError(error).message});});
     }
     return()=>{active=false;};
-  },[id,payout?.status,payout?.amount]);
+  },[id,payoutStatus,qrKey]);
   const submitting=start.isPending||complete.isPending||fail.isPending;
 
   const reconcile=async(expected?:string)=>{
