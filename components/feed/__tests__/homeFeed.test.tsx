@@ -25,6 +25,8 @@ it('expands by measured line count and collapses without changing the caption', 
 it('places description before gallery, hashtags last and preserves action callbacks', async () => {
   const like = jest.fn(), save = jest.fn(), comment = jest.fn(), profile = jest.fn();
   await render(<PortfolioPost item={item} onLike={like} onSave={save} onComment={comment} onAuthorPress={profile} />);
+  expect(screen.queryByText(item.title!)).toBeNull();
+  expect(screen.getByTestId('caption-visible').props.children).toBe(item.description);
   const json = JSON.stringify(screen.toJSON());
   expect(json.indexOf('post-caption')).toBeLessThan(json.indexOf('post-gallery'));
   expect(json.indexOf('post-gallery')).toBeLessThan(json.indexOf('post-hashtags'));

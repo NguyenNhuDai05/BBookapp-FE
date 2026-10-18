@@ -141,7 +141,7 @@ export default function MuaManagementScreen() {
       <PortfolioFormModal
         visible={!review && isPortfolioModalVisible}
         onClose={() => setIsPortfolioModalVisible(false)}
-        onSubmit={async data => { await createPortfolioItem(data); setIsPortfolioModalVisible(false); }}
+        onSubmit={async data => { await createPortfolioItem(data); }}
       />
     </SafeAreaView>
   );

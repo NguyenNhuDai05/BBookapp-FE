@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { act, render, screen, waitFor } from '@testing-library/react-native';
 import Detail from '../(admin)/payouts/[id]';
 const mockQr = jest.fn(); let mockId = 'payout-a';
 let mockPayout: any;
@@ -25,4 +25,19 @@ it('shows original private MoMo QR with amount warning and preserves manual fall
  mockId='payout-momo';mockPayout={id:mockId,status:'PROCESSING',provider:'MANUAL',amount:23456,bankCode:'MOMO',accountNumber:'0000000000',accountHolderName:'TEST ONLY',receivableIds:[]};mockQr.mockResolvedValue({payoutId:mockId,amount:23456,imageDataUrl:'data:image/jpeg;base64,TEST',kind:'MOMO_ORIGINAL',containsPayoutAmount:false});
  const result=await render(<Detail/>);await waitFor(()=>expect(screen.getByLabelText('QR chuyển khoản payout').props.source.uri).toBe('data:image/jpeg;base64,TEST'));expect(screen.getByText(/BBook không nhúng số tiền payout/)).toBeTruthy();expect(screen.getByText('23.456đ')).toBeTruthy();expect(screen.getByText('0000000000')).toBeTruthy();
  mockId='payout-no-qr';mockPayout={...mockPayout,id:mockId};mockQr.mockRejectedValue(new Error('Chuyển thủ công'));await result.rerender(<Detail/>);await screen.findByText('Chuyển thủ công');expect(screen.queryByLabelText('QR chuyển khoản payout')).toBeNull();expect(screen.getByText('TEST ONLY')).toBeTruthy();
+});
+
+it('ignores a late QR response after switching payout and hides stale data while loading',async()=>{
+ let resolveOld!: (value: unknown) => void;
+ mockId='payout-slow';mockPayout={id:mockId,status:'PROCESSING',provider:'MANUAL',amount:100,bankCode:'VCB',receivableIds:[]};
+ mockQr.mockImplementationOnce(()=>new Promise(resolve=>{resolveOld=resolve;}));
+ const view=await render(<Detail/>);
+ mockId='payout-current';mockPayout={...mockPayout,id:mockId,amount:200};
+ mockQr.mockResolvedValueOnce({payoutId:mockId,amount:200,imageDataUrl:'data:image/png;base64,CURRENT'});
+ await view.rerender(<Detail/>);
+ await waitFor(()=>expect(screen.getByLabelText('QR chuyển khoản payout').props.source.uri).toBe('data:image/png;base64,CURRENT'));
+ await act(async()=>{resolveOld({payoutId:'payout-slow',amount:100,imageDataUrl:'data:image/png;base64,STALE'});});
+ expect(screen.getByLabelText('QR chuyển khoản payout').props.source.uri).toBe('data:image/png;base64,CURRENT');
+ mockPayout={...mockPayout,status:'PAID'};await view.rerender(<Detail/>);
+ expect(screen.queryByLabelText('QR chuyển khoản payout')).toBeNull();
 });

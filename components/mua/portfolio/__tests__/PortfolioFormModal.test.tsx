@@ -4,13 +4,16 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { OverlayProvider } from '../../../ui/OverlayProvider';
 import { PortfolioFormModal } from '../PortfolioFormModal';
 import { uploadImage } from '../../../../services/supabase';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('expo-image-picker', () => ({ requestMediaLibraryPermissionsAsync: async () => ({ granted: true }), launchImageLibraryAsync: async () => ({ canceled: false, assets: [{ uri: 'file:///new.jpg' }] }) }));
 jest.mock('../../../../services/supabase', () => ({ uploadImage: jest.fn(async (uri: string) => uri) }));
 jest.mock('../../../../services/api', () => ({ getApiError: () => ({ message: 'Không thể lưu' }) }));
 jest.mock('../../../../hooks/useMuaServices', () => ({ useMuaServices: () => ({ data: [] }) }));
+jest.mock('../../../../hooks/useMuaStyles', () => ({ useMuaStyles: () => ({ data: [], refetch: jest.fn() }) }));
+jest.mock('../../../../hooks/useMuaPortfolio', () => ({ reloadOwnerPortfolio: jest.fn() }));
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 24, bottom: 24, left: 0, right: 0 } };
-const Wrapper = ({ children }: React.PropsWithChildren) => <SafeAreaProvider initialMetrics={metrics}><OverlayProvider>{children}</OverlayProvider></SafeAreaProvider>;
+const Wrapper = ({ children }: React.PropsWithChildren) => <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { gcTime: Infinity, retry: false } } })}><SafeAreaProvider initialMetrics={metrics}><OverlayProvider>{children}</OverlayProvider></SafeAreaProvider></QueryClientProvider>;
 beforeEach(() => jest.clearAllMocks());
 
 it('removes a single image, clears the remaining images and allows choosing again', async () => {
@@ -42,8 +45,10 @@ it('saves text inserted in the middle and uploads only the retained image', asyn
 
 it('starts a fresh form when reopened', async () => {
   const view = await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={jest.fn()} />, { wrapper: Wrapper });
-  await fireEvent.changeText(screen.getByLabelText('Tên tác phẩm'), 'Bản nháp');
+  expect(screen.queryByLabelText('Tên tác phẩm')).toBeNull();
+  await fireEvent.changeText(screen.getByLabelText('Mô tả tác phẩm'), 'Bản nháp');
   await view.rerender(<PortfolioFormModal visible={false} onClose={jest.fn()} onSubmit={jest.fn()} />);
-  await view.rerender(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={jest.fn()} initialData={{ title: 'Tác phẩm khác' }} />);
-  expect(screen.getByLabelText('Tên tác phẩm').props.defaultValue).toBe('Tác phẩm khác');
+  await view.rerender(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={jest.fn()} initialData={{ title: 'Tác phẩm khác', description: 'Mô tả khác' }} />);
+  expect(screen.queryByLabelText('Tên tác phẩm')).toBeNull();
+  expect(screen.getByLabelText('Mô tả tác phẩm').props.defaultValue).toBe('Mô tả khác');
 });

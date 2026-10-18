@@ -1,9 +1,10 @@
 import * as Crypto from 'expo-crypto';
+import { useMuaStyles } from '../../../hooks/useMuaStyles';
 import { MakeupStylePicker } from '../MakeupStylePicker';
-import { type MakeupStyle, styleErrorMessage } from '../../../utils/makeupStyles';
+import { type MakeupStyle, styleErrorMessage, exceedsStyleLimit } from '../../../utils/makeupStyles';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppOverlay } from '../../ui/OverlayProvider';
@@ -28,6 +29,9 @@ export function ServiceFormModal(props: ServiceFormModalProps) {
   return props.visible ? <ServiceFormContent {...props} /> : null;
 }
 function ServiceFormContent({ onClose, onSubmit, initialData, availableStyles = [], stylesLoading, stylesError, onReloadStyles }: ServiceFormModalProps) {
+  const catalog = useMuaStyles();
+  const reloadProfile = useRef(onReloadStyles);
+  useEffect(() => { reloadProfile.current?.(); }, []);
   // Keep free-text inputs native while composing Vietnamese or inserting at the caret.
   const [name, setName] = useState(initialData?.name || initialData?.serviceName || '');
   const [description, setDescription] = useState(initialData?.description || '');
@@ -64,6 +68,7 @@ function ServiceFormContent({ onClose, onSubmit, initialData, availableStyles = 
   };
   const save = async () => {
     if (lock.current || pickLock.current) return;
+    if (!retryPayload.current && stylesDirty && exceedsStyleLimit(selection, initialData?.styleIds || [], 5)) { setErrors(current => ({ ...current, submit: 'Mỗi dịch vụ có tối đa 5 phong cách. Phong cách lịch sử chỉ có thể giữ nguyên hoặc giảm bớt.' })); return; }
     if (!valid) {
       setErrors({ name: !name.trim() ? 'Vui lòng nhập tên dịch vụ.' : '', description: !description.trim() ? 'Vui lòng nhập mô tả dịch vụ.' : '',
         price: Number(price) <= 0 || Number(price) > 100000000 ? 'Giá phải lớn hơn 0 và không quá 100.000.000đ.' : '',
@@ -114,7 +119,8 @@ function ServiceFormContent({ onClose, onSubmit, initialData, availableStyles = 
             </View>{error('images')}
           </View>
           <View style={s.card}><Text style={s.section}>4. Phong cách makeup</Text><Text style={s.subtitle}>Chọn tối đa 5 phong cách. Phong cách mới sẽ được thêm vào chuyên môn của bạn khi lưu.</Text>
-            <MakeupStylePicker styles={[...availableStyles, ...(initialData?.styleTags || [])]} value={selection} onChange={value => { setSelection(value); setStylesDirty(true); clear('submit'); }} limit={5} disabled={disabled} loading={stylesLoading} loadError={stylesError} onReload={onReloadStyles} />
+            <MakeupStylePicker styles={catalog.data || []} catalogLoaded={!!catalog.data} historicalStyles={[...availableStyles, ...(initialData?.styleTags || [])]} preferredStyleIds={availableStyles.map(item => item.styleId)} value={selection} onChange={value => { setSelection(value); setStylesDirty(true); clear('submit'); }} limit={5} disabled={disabled} loading={catalog.isFetching || catalog.isLoading || stylesLoading} loadError={catalog.isError} fallbackReason={catalog.fallbackReason} onReload={() => { void catalog.refetch(); onReloadStyles?.(); }} />
+            {!!stylesError && <Text style={s.subtitle}>Chưa tải được chuyên môn hiện tại. Bạn vẫn có thể tìm trong catalog; hệ thống sẽ kiểm tra tổng chuyên môn khi lưu.</Text>}
             {!!initialData?.tags?.length && <Text style={s.subtitle}>Từ khóa đã lưu: {initialData.tags.join(', ')}. Từ khóa lịch sử chưa ánh xạ vẫn được giữ.</Text>}
           </View>
           {retryPending && <Text style={s.subtitle}>Chưa xác nhận được lần lưu trước. Bấm Lưu để thử lại cùng nội dung; kiểm tra danh sách dịch vụ trước khi đóng và tạo mới.</Text>}

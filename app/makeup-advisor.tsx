@@ -1,5 +1,6 @@
 import React,{useCallback,useEffect,useRef,useState} from 'react';
-import {ActivityIndicator,AppState,BackHandler,Image,Modal,ScrollView,StyleSheet,Switch,Text,TouchableOpacity,View} from 'react-native';
+import {ActivityIndicator,AppState,BackHandler,KeyboardAvoidingView,Modal,Platform,ScrollView,StyleSheet,Switch,Text,TouchableOpacity,View} from 'react-native';
+import {StatusBar} from 'expo-status-bar';
 import {SafeAreaView,useSafeAreaInsets} from 'react-native-safe-area-context';
 import {ArrowLeft,ShieldCheck} from 'lucide-react-native';
 import {useFocusEffect,useRouter} from 'expo-router';
@@ -14,7 +15,8 @@ import {AdvisorMatching} from '../features/makeupAdvisor/AdvisorMatching';
 import {AdvisorLanding} from '../features/makeupAdvisor/AdvisorLanding';
 import {exploreService} from '../services/exploreService';
 import type {ExploreStyle} from '../types/explore';
-import {AdvisorPreferences} from '../features/makeupAdvisor/AdvisorPreferences';
+import {advisorTheme as theme} from '../features/makeupAdvisor/advisorTheme';
+import {AdvisorImage} from '../features/makeupAdvisor/ResultVisuals';
 import {AdvisorCamera} from '../features/makeupAdvisor/AdvisorCamera';
 import {discardCameraPhoto} from '../features/makeupAdvisor/cameraPhoto';
 import type {Photo} from '../features/makeupAdvisor/faceAnalysis';
@@ -43,9 +45,11 @@ export default function MakeupAdvisor(){
  const isResults=ai.stage==='results'&&!!ai.result;
  if(!advisorEnabled)return <SafeAreaView style={s.page}><Text>Makeup Advisor chưa được bật trong bản này.</Text><AdvisorButton title="Quay về" onPress={()=>router.back()}/></SafeAreaView>;
  return <SafeAreaView edges={capture?[]:['top','bottom']} style={s.page}>
+  {!capture&&<StatusBar style="dark"/>}
   {capture?<AdvisorCamera onBack={()=>setCapture(false)} onGallery={()=>acquire(false)} onPhoto={photo=>void receivedPhoto(photo)}/>:<>
   <View style={ui.header}><TouchableOpacity accessibilityRole="button" accessibilityLabel={matching?'Quay về Top 3':'Quay về Khám phá'} style={ui.icon} onPress={()=>matching?setMatching(false):ai.stage==='error'?reset():router.back()}><ArrowLeft size={21} color="#2B1B2A"/></TouchableOpacity><Text style={[s.label,{flex:1,fontSize:9,letterSpacing:1}]}>BBOOK · AI MAKEUP ADVISOR</Text><TouchableOpacity accessibilityRole="button" accessibilityLabel="Quyền xử lý ảnh" style={ui.icon} onPress={()=>setPrivacy(true)}><ShieldCheck size={20} color="#a45879"/></TouchableOpacity></View>
-  <ScrollView key={`${ai.stage}-${matching?'matching':'advisor'}`} removeClippedSubviews={false} contentContainerStyle={[s.content,{paddingTop:8,paddingBottom:24},isResults&&{width:'100%',maxWidth:760,alignSelf:'center',paddingHorizontal:20}]}>
+  <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS==='ios'?'padding':'height'}>
+  <ScrollView key={`${ai.stage}-${matching?'matching':'advisor'}`} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" removeClippedSubviews={false} contentContainerStyle={[s.content,{paddingTop:8,paddingBottom:24,width:'100%',maxWidth:600,alignSelf:'center'}]}>
    {!isResults&&ai.stage!=='scanning'&&ai.stage!=='error'&&<>
     <AdvisorLanding/>
     {!ai.scanAvailable&&<Text style={s.note}>Hãy dùng bản Android có hỗ trợ quét khuôn mặt để trải nghiệm.</Text>}
@@ -53,19 +57,19 @@ export default function MakeupAdvisor(){
    </>}
    {(ai.stage==='scanning'||ai.stage==='error')&&<>
     <Text style={ui.title}>{ai.stage==='error'?'Chưa hoàn tất lần quét':'Đang khám phá đường nét của bạn'}</Text>
-    {ai.photo&&(ai.stage==='error'?<Image source={{uri:ai.photo.uri}} style={ui.selfie} accessibilityLabel="Selfie của lần quét này"/>:<ScanPhoto photo={ai.photo} analysis={ai.analysis} scanning showStatus={false}/>)}
+    {ai.photo&&(ai.stage==='error'?<AdvisorImage source={{uri:ai.photo.uri}} style={ui.selfie} label="Selfie của lần quét này"/>:<ScanPhoto photo={ai.photo} analysis={ai.analysis} scanning showStatus={false}/>)}
     <DynamicScanStatus phase={ai.phase} failure={ai.failure}/>
     {ai.stage==='error'&&<MemoryDiagnostics snapshot={ai.diagnosticSnapshot} code={ai.failure?.code}/>}
     {ai.stage==='error'?<><AdvisorButton title="Chụp lại" disabled={ai.busy} primary onPress={()=>acquire(true)}/><AdvisorButton title="Chọn ảnh khác" disabled={ai.busy} onPress={()=>acquire(false)}/></>:<AdvisorButton title="Hủy quét / chụp lại" onPress={reset}/>}
    </>}
    {isResults&&ai.result&&(matching?<AdvisorMatching chosen={chosen} recommendations={ai.result.recommendations} catalog={home.data} onStyle={setChosen}/>:<>
-    <AdvisorResults result={ai.result} catalog={home.data} onStyle={style=>{setChosen(style);setMatching(true);}} onReset={reset} onNewPhoto={()=>acquire(true)} busy={ai.busy} photoUri={ai.photo?.uri} catalogLoading={home.isLoading} extraction={ai.extraction} effects={ai.effectsEnabled?ai.effects:undefined} onEffects={ai.effectsEnabled?e=>{setChosen(undefined);ai.setEffects(e);}:undefined}/>
+    <AdvisorResults result={ai.result} catalog={home.data} onStyle={style=>{setChosen(style);setMatching(true);}} onReset={reset} onNewPhoto={()=>acquire(true)} busy={ai.busy} photoUri={ai.photo?.uri} catalogLoading={home.isLoading} extraction={ai.extraction} effects={ai.effectsEnabled?ai.effects:undefined} onEffects={ai.effectsEnabled?e=>{setChosen(undefined);ai.setEffects(e);}:undefined} preferences={ai.preferences} onPreferences={ai.preferences?p=>{setChosen(undefined);ai.setPreferences(p);}:undefined}/>
     {home.isError&&<AdvisorButton title="Thử tải catalog lại" onPress={()=>void home.refetch()}/>}
-    {ai.preferences&&<AdvisorPreferences value={ai.preferences} disabled={ai.busy} onChange={p=>{setChosen(undefined);ai.setPreferences(p);}}/>}
     <RecommendationDebug trace={ai.result.rankingTrace}/>
    </>)}
    {ai.busy&&ai.phase==='initializing'&&ai.stage!=='scanning'&&ai.stage!=='error'&&<View style={s.row}><ActivityIndicator color="#FF5C9A"/><Text accessibilityLiveRegion="polite" style={s.note}>Đang chuẩn bị ảnh...</Text></View>}
   </ScrollView>
+  </KeyboardAvoidingView>
   {!isResults&&ai.stage!=='scanning'&&ai.stage!=='error'&&<View style={ui.footer}><AdvisorButton title="Bắt đầu khám phá" primary disabled={ai.busy||!ai.scanAvailable} onPress={()=>acquire(true)}/></View>}
   </>}
   <Modal visible={pendingAcquisition!==undefined||privacy} transparent animationType="slide" onRequestClose={()=>{setPendingAcquisition(undefined);setPrivacy(false);}}>
@@ -81,4 +85,4 @@ export default function MakeupAdvisor(){
   {isResults&&ai.phase==='success'&&ai.photo&&<ScanSuccessTransition photo={ai.photo} analysis={ai.analysis}/>}
  </SafeAreaView>;
 }
-const ui=StyleSheet.create({header:{flexDirection:'row',alignItems:'center',gap:10,paddingHorizontal:14,paddingVertical:6},icon:{minWidth:44,minHeight:44,alignItems:'center',justifyContent:'center'},title:{fontSize:28,lineHeight:35,fontWeight:'700',letterSpacing:-.6,color:'#2B1B2A'},selfie:{width:62,height:76,borderRadius:18},footer:{paddingHorizontal:24,paddingTop:12,paddingBottom:12,backgroundColor:'#FFF7FA'}});
+const ui=StyleSheet.create({header:{flexDirection:'row',alignItems:'center',gap:10,paddingHorizontal:14,paddingVertical:4,width:'100%',maxWidth:600,alignSelf:'center'},icon:{minWidth:44,minHeight:44,alignItems:'center',justifyContent:'center'},title:{fontSize:25,lineHeight:32,fontWeight:'700',letterSpacing:-.5,color:theme.text},selfie:{width:80,height:104,borderRadius:12},footer:{width:'100%',maxWidth:600,alignSelf:'center',paddingHorizontal:20,paddingTop:10,paddingBottom:12,backgroundColor:theme.background}});

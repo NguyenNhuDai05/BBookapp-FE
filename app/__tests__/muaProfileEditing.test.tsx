@@ -9,12 +9,13 @@ const mockSave = jest.fn();
 const mockUpdateUser = jest.fn();
 const mockUpload = jest.fn();
 let mockProfile: MuaProfileDto = { id: 'mua-id', name: 'MUA', avatarUrl: 'https://example.com/old.jpg', bio: 'Tiểu sử cũ', phoneNumber: '0123456789', city: 'Hà Nội', operatingAreaIds: ['area'], experienceYears: 2, verificationStatus: 'DRAFT' };
+let mockProfileFetching = false;
 let mockAreaChange: Partial<OperatingArea> = {};
 const mockState = { user: { id: 'mua-id', name: 'MUA' }, updateUser: mockUpdateUser };
 jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace }) }));
 jest.mock('expo-image-picker', () => ({ MediaTypeOptions: { Images: 'Images' }, requestMediaLibraryPermissionsAsync: async () => ({ granted: true }), launchImageLibraryAsync: async () => ({ canceled: false, assets: [{ uri: 'file:///new.jpg' }] }) }));
 jest.mock('../../store/useAuthStore', () => ({ useAuthStore: (selector?: (state: typeof mockState) => unknown) => selector ? selector(mockState) : mockState }));
-jest.mock('../../hooks/useMuaProfile', () => ({ useMuaProfile: () => ({ data: mockProfile, isLoading: false }), useUpdateMuaProfile: () => ({ mutateAsync: mockSave, isPending: false }) }));
+jest.mock('../../hooks/useMuaProfile', () => ({ useMuaProfile: () => ({ data: mockProfile, isLoading: false, isFetching: mockProfileFetching }), useUpdateMuaProfile: () => ({ mutateAsync: mockSave, isPending: false }) }));
 jest.mock('../../hooks/useMuaStyles', () => ({ useMuaStyles: () => ({ data: [] }) }));
 jest.mock('../../components/mua/OperatingAreaFields', () => ({ OperatingAreaFields: ({ value, onChange }: any) => {
   const React = jest.requireActual('react'); const { TouchableOpacity, Text } = jest.requireActual('react-native');
@@ -27,6 +28,7 @@ jest.mock('../../components/ui/dialogStore', () => ({ AppAlert: { alert: jest.fn
 beforeEach(() => {
   jest.clearAllMocks();
   mockAreaChange = {};
+  mockProfileFetching = false;
   mockProfile = { id: 'mua-id', name: 'MUA', avatarUrl: 'https://example.com/old.jpg', bio: 'Tiểu sử cũ', phoneNumber: '0123456789', city: 'Hà Nội', operatingAreaIds: ['area'], experienceYears: 2, verificationStatus: 'DRAFT' };
   mockSave.mockResolvedValue(undefined);
   mockUpload.mockResolvedValue('https://example.com/new.jpg');
@@ -106,4 +108,17 @@ it('shows the services blocking removal and preserves the unsaved selection on 4
   expect(mockReplace).not.toHaveBeenCalled();
   expect(screen.getByLabelText('Bỏ Style 2')).toBeTruthy();
   expect(mockSave).toHaveBeenCalledWith(expect.objectContaining({ styleIds: [2] }));
+});
+
+
+it('waits for the first fresh profile before initializing specialties from a stale cache', async () => {
+  mockProfileFetching = true;
+  mockProfile = { ...mockProfile, specialties: [{ styleId: 1, name: 'Cache cũ', isActive: true }] };
+  const view = await render(<EditProfile />);
+  expect(screen.queryByLabelText('Bỏ Cache cũ')).toBeNull();
+  mockProfile = { ...mockProfile, specialties: [{ styleId: 2, name: 'Chuyên môn mới', isActive: true }] };
+  mockProfileFetching = false;
+  await view.rerender(<EditProfile />);
+  await screen.findByLabelText('Bỏ Chuyên môn mới');
+  expect(screen.queryByLabelText('Bỏ Cache cũ')).toBeNull();
 });

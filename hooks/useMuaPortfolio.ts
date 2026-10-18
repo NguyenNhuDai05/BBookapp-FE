@@ -1,13 +1,32 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { portfolioService } from '../services/portfolioService';
 import { CreatePortfolioItemRequest } from '../types/portfolio';
 import { AppAlert as appDialog } from '../components/ui/dialogStore';
 import { MUA_ELIGIBILITY_QUERY_KEY } from './useMuaEligibility';
+import { PortfolioSavedRefreshError } from '../utils/portfolioWrite';
 
-const PORTFOLIO_QUERY_KEY = 'mua-portfolio';
+export const PORTFOLIO_QUERY_KEY = 'mua-portfolio';
+export async function reloadOwnerPortfolio(client: QueryClient) {
+  const queryKey = [PORTFOLIO_QUERY_KEY, 'me'];
+  await client.cancelQueries({ queryKey, exact: true });
+  await client.invalidateQueries({ queryKey, exact: true, refetchType: 'none' });
+  return client.fetchQuery({ queryKey, queryFn: () => portfolioService.getPortfolio('me'), staleTime: 0, retry: false });
+}
 
 export function useMuaPortfolio(muaId: string) {
   const queryClient = useQueryClient();
+  const afterWrite = async () => {
+    const keys = [[PORTFOLIO_QUERY_KEY], MUA_ELIGIBILITY_QUERY_KEY, ['feed'], ['customer-explore'], ['portfolio-favorites']];
+    await Promise.all(keys.map(queryKey => queryClient.invalidateQueries({ queryKey, refetchType: 'none' })));
+    await reloadOwnerPortfolio(queryClient);
+    void Promise.allSettled(keys.map(queryKey => queryClient.refetchQueries({ queryKey, type: 'active', predicate: q => !(q.queryKey[0] === PORTFOLIO_QUERY_KEY && q.queryKey[1] === 'me') })));
+  };
+  const acknowledgeAndRefresh = async (write: () => ReturnType<typeof portfolioService.createItem>) => {
+    const ack = await write();
+    try { await afterWrite(); }
+    catch { throw new PortfolioSavedRefreshError(afterWrite); }
+    return ack;
+  };
 
   const query = useQuery({
     queryKey: [PORTFOLIO_QUERY_KEY, muaId],
@@ -17,27 +36,14 @@ export function useMuaPortfolio(muaId: string) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (item: CreatePortfolioItemRequest) => portfolioService.createItem(muaId, item),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
-      queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ['feed'] });
-      queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
-    },
-    onError: () => {
-      appDialog.alert('Lỗi', 'Không thể thêm ảnh vào portfolio.');
-    }
+    mutationFn: (item: CreatePortfolioItemRequest) => acknowledgeAndRefresh(() => portfolioService.createItem(muaId, item)),
+    retry: false,
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<CreatePortfolioItemRequest> }) =>
-      portfolioService.updateItem(id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [PORTFOLIO_QUERY_KEY, muaId] });
-      queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ['feed'] });
-      queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
-    },
+      acknowledgeAndRefresh(() => portfolioService.updateItem(id, updates)),
+    retry: false,
   });
 
   const deleteMutation = useMutation({

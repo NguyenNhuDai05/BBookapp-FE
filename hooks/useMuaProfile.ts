@@ -16,16 +16,16 @@ export const useUpdateMuaProfile = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Parameters<typeof muaProfileService.updateProfile>[0]) => muaProfileService.updateProfile(data),
-    onSettled: () => {
-      queryClient.refetchQueries({ queryKey: ['mua-profile'] });
-      queryClient.refetchQueries({ queryKey: ['feed'] });
-      queryClient.refetchQueries({ queryKey: ['mua'] });
-      queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
-      queryClient.invalidateQueries({ queryKey: ['nearby-muas'] });
-      queryClient.invalidateQueries({ queryKey: ['advisor'] });
-      queryClient.invalidateQueries({ queryKey: ['mua-styles'] });
-      queryClient.invalidateQueries({ queryKey: ['mua-services'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['mua-profile'] });
+      await queryClient.invalidateQueries({ queryKey: ['feed'] });
+      await queryClient.invalidateQueries({ queryKey: ['mua'] });
+      await queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: ['customer-explore'] });
+      await queryClient.invalidateQueries({ queryKey: ['nearby-muas'] });
+      await queryClient.invalidateQueries({ queryKey: ['advisor'] });
+      await queryClient.invalidateQueries({ queryKey: ['mua-styles'] });
+      await queryClient.invalidateQueries({ queryKey: ['mua-services'] });
     },
   });
 };

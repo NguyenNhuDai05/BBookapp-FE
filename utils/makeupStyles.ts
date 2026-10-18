@@ -1,8 +1,19 @@
 import { isAxiosError } from 'axios';
 import { getApiError } from '../services/api';
 
-export type MakeupStyle = { styleId: number; name: string | null; isActive: boolean };
+export type MakeupStyle = { styleId: number; name: string | null; isActive: boolean; key?: string | null; description?: string | null; archivedAt?: string | null };
 export type StyleSelection = { styleIds: number[]; newStyleNames: string[] };
+// IDs are authoritative. Names are used only to resolve a newly typed draft,
+// never to remap existing profile/service identities.
+export function uniqueStyles(styles: MakeupStyle[]): MakeupStyle[] {
+  return [...new Map(styles.map(style => [style.styleId, style])).values()];
+}
+export function exceedsStyleLimit(value: StyleSelection, initialIds: number[], limit: number): boolean {
+  const ids = new Set(value.styleIds);
+  const names = new Set(value.newStyleNames.map(styleNameKey));
+  if (ids.size + names.size <= limit) return false;
+  return !(new Set(initialIds).size > limit && names.size === 0 && [...ids].every(id => initialIds.includes(id)));
+}
 export const styleDisplayName = (name: string | null | undefined) => (name || '').normalize('NFKC').trim().replace(/\s+/g, ' ');
 export const styleNameKey = (name: string | null | undefined) => styleDisplayName(name).toLowerCase();
 export const validStyleName = (name: string | null | undefined) => {
@@ -21,7 +32,7 @@ export function styleErrorMessage(error: unknown): string {
     STYLE_PAYLOAD_CONFLICT: 'Danh sách phong cách đã thay đổi. Hãy tải lại và kiểm tra trước khi lưu.',
     SERVICE_REQUEST_CONFLICT: 'Lần lưu trước có nội dung khác. Hãy kiểm tra danh sách dịch vụ trước khi tạo lại.',
     STYLE_CREATE_RATE_LIMITED: 'Bạn đã thêm nhiều phong cách mới. Vui lòng thử lại sau.',
-    MUA_STYLE_LIMIT_EXCEEDED: 'MUA có tối đa 20 phong cách. Hãy bỏ bớt phong cách chưa dùng trước khi thêm.',
+    MUA_STYLE_LIMIT_EXCEEDED: 'Tổng chuyên môn sẽ vượt 20 phong cách. Chưa có thay đổi nào được lưu. Hãy bỏ bớt chuyên môn chưa dùng trước khi thêm.',
     SERVICE_STYLE_LIMIT_EXCEEDED: 'Mỗi dịch vụ có tối đa 5 phong cách.',
   };
   return messages[parsed.code || ''] || parsed.message || 'Không thể lưu. Vui lòng thử lại.';

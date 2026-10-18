@@ -3,12 +3,23 @@ import {Image,StyleSheet,Text,View,type ImageSourcePropType,type StyleProp,type 
 import {Palette} from 'lucide-react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {colorFor,styleFor,styleImages} from './styleImages';
+import {advisorTheme as t} from './advisorTheme';
 export function AdvisorImage({source,label,style}:{source?:ImageSourcePropType;label:string;style:StyleProp<ViewStyle>}){
- const [failed,setFailed]=useState(false);
- return <View style={[ui.image,style]}>{source&&!failed?<Image source={source} accessibilityLabel={label} resizeMode="cover" resizeMethod="resize" onError={()=>setFailed(true)} style={StyleSheet.absoluteFill}/>:<LinearGradient colors={['#FFE3EF','#EBCBD9']} style={[StyleSheet.absoluteFill,ui.placeholder]}><Palette size={32} color="#AD6484" strokeWidth={1.2}/><Text style={ui.placeholderText}>Ảnh đang được bổ sung</Text></LinearGradient>}</View>;
+ const identity=JSON.stringify(source);
+ const [failedSource,setFailedSource]=useState<string>();
+ const frame=StyleSheet.flatten(style);
+ const compact=(typeof frame?.width==='number'&&frame.width<100)||(typeof frame?.height==='number'&&frame.height<90);
+ // Preserve every edge of the supplied posters/collages. Inset the image so
+ // rounded frame corners cannot clip it; keep Android decoding resize enabled.
+ return <View style={[ui.image,style]}>{source&&failedSource!==identity?<Image key={identity} source={source} accessibilityLabel={label} resizeMode="contain" resizeMethod="resize" onError={()=>setFailedSource(identity)} style={ui.fullImage}/>:<LinearGradient accessible accessibilityLabel={`${label} · Ảnh đang được bổ sung`} colors={['#F5F2F3','#EEE8EB']} style={[StyleSheet.absoluteFill,ui.placeholder]}><Palette size={24} color={t.body} strokeWidth={1.2}/>{!compact&&<Text style={ui.placeholderText}>Ảnh đang được bổ sung</Text>}</LinearGradient>}</View>;
 }
-export function MakeupStyleImage({styleKey}:{styleKey:string}){return <AdvisorImage key={styleKey} source={styleImages[styleFor(styleKey)?.imageKey||`${styleKey}.webp`]} label={`Minh họa ${styleFor(styleKey)?.displayName||styleKey}`} style={ui.hero}/>;}
+export function MakeupStyleImage({styleKey,style}:{styleKey:string;style?:StyleProp<ViewStyle>}){
+ const source=styleImages[styleFor(styleKey)?.imageKey||`${styleKey}.webp`];
+ const dimensions=source?Image.resolveAssetSource(source):undefined;
+ const aspectRatio=dimensions?.width&&dimensions?.height?dimensions.width/dimensions.height:3/4;
+ return <AdvisorImage key={styleKey} source={source} label={`Minh họa ${styleFor(styleKey)?.displayName||styleKey}`} style={[ui.hero,{aspectRatio},style]}/>;
+}
 export function MakeupStylePalette({colors}:{colors:string[]}){return <View accessibilityLabel="Bảng màu minh họa" style={ui.palette}>{colors.map(name=><View key={name} style={ui.color}><View accessibilityLabel={name} style={[ui.swatch,{backgroundColor:colorFor(name)||'#F3E9EF'}]}/><Text style={ui.colorName}>{name}</Text></View>)}</View>;}
-export const ui=StyleSheet.create({image:{overflow:'hidden',backgroundColor:'#FFE8F1',borderRadius:18},hero:{width:'100%',aspectRatio:4/5},placeholder:{justifyContent:'center',alignItems:'center',gap:12,padding:12},placeholderText:{fontSize:11,lineHeight:17,color:'#936078',textAlign:'center'},palette:{flexDirection:'row',flexWrap:'wrap',gap:10},color:{alignItems:'center',gap:5,maxWidth:70},swatch:{width:28,height:28,borderRadius:14,borderWidth:1,borderColor:'#FFFFFF'},colorName:{fontSize:10,lineHeight:14,color:'#806877',textAlign:'center'}});
+export const ui=StyleSheet.create({image:{backgroundColor:t.imageBackground,borderRadius:12},fullImage:{position:'absolute',top:4,bottom:4,left:4,right:4},hero:{width:'100%'},placeholder:{borderRadius:12,justifyContent:'center',alignItems:'center',gap:6,padding:6},placeholderText:{fontSize:11,lineHeight:16,color:t.body,textAlign:'center'},palette:{flexDirection:'row',flexWrap:'wrap',gap:12},color:{alignItems:'center',gap:5,maxWidth:76},swatch:{width:30,height:30,borderRadius:15,borderWidth:1,borderColor:'#DDD3D8'},colorName:{fontSize:11,lineHeight:16,color:t.body,textAlign:'center'}});
 
 

@@ -79,7 +79,7 @@ export default function MuaApplyScreen() {
           <Text style={s.section}>5. Kinh nghiệm</Text><Text style={s.helper}>Chọn mức phù hợp với bạn</Text>
           <View style={s.chips}>{EXPERIENCE_LEVELS.map(item => <TouchableOpacity key={item.value} onPress={() => setField('experienceLevel', item.value)} accessibilityRole="radio" accessibilityState={{ checked: form.experienceLevel === item.value }} style={[s.chip, form.experienceLevel === item.value && s.chipActive]}><Text style={[s.chipText, form.experienceLevel === item.value && s.chipTextActive]}>{item.label}</Text></TouchableOpacity>)}</View>
           <Text style={s.section}>6. Phong cách makeup *</Text>
-          <MakeupStylePicker styles={allStyles} value={{ styleIds: form.styleIds, newStyleNames: form.newStyleNames || [] }} onChange={value => { setForm(current => ({ ...current, ...value })); setErrors(current => ({ ...current, styleIds: '', submit: '' })); }} limit={20} disabled={saving} loading={stylesQuery.isLoading} loadError={stylesQuery.isError} onReload={() => stylesQuery.refetch()} />{fieldError('styleIds')}
+          <MakeupStylePicker styles={allStyles} value={{ styleIds: form.styleIds, newStyleNames: form.newStyleNames || [] }} onChange={value => { setForm(current => ({ ...current, ...value })); setErrors(current => ({ ...current, styleIds: '', submit: '' })); }} limit={20} disabled={saving} loading={stylesQuery.isFetching || stylesQuery.isLoading} loadError={stylesQuery.isError} fallbackReason={stylesQuery.fallbackReason} onReload={() => stylesQuery.refetch()} />{fieldError('styleIds')}
         </View>
         {fieldError('submit')}
         <TouchableOpacity disabled={saving || stylesQuery.isLoading} onPress={save} style={[s.primary, (saving || stylesQuery.isLoading) && s.disabled]}>{saving ? <ActivityIndicator color="#FFF" /> : <Text style={s.primaryText}>Tạo hồ sơ MUA</Text>}</TouchableOpacity>
@@ -107,4 +107,3 @@ const s = StyleSheet.create({
   primary: { minHeight: 52, borderRadius: 14, backgroundColor: BrandColors.accentRose, alignItems: 'center', justifyContent: 'center', marginVertical: 12 }, primaryText: { color: '#FFF', fontSize: 16, fontWeight: '800' }, disabled: { opacity: .5 }, error: { color: BrandColors.statusCancelled, fontSize: 13, marginTop: 8 }, center: { textAlign: 'center' },
   sheetScroll: { maxHeight: 360, marginTop: 12 }, areaRow: { minHeight: 48, justifyContent: 'center', borderBottomWidth: 1, borderBottomColor: BrandColors.borderLight },
 });
-

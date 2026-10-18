@@ -1,5 +1,5 @@
 import { MakeupStylePicker } from '../../components/mua/MakeupStylePicker';
-import { styleErrorMessage } from '../../utils/makeupStyles';
+import { styleErrorMessage, exceedsStyleLimit } from '../../utils/makeupStyles';
 import { ReviewReadOnlyScreen } from '../../components/ReviewReadOnlyScreen';
 import { OperatingAreaFields, type OperatingArea } from '../../components/mua/OperatingAreaFields';
 import { EXPERIENCE_LEVELS } from '../../utils/muaAreas';
@@ -25,7 +25,7 @@ function EditProfileScreen() {
   const { user, updateUser } = useAuthStore();
   const muaId = 'me';
 
-  const { data: profile, isLoading } = useMuaProfile(muaId);
+  const { data: profile, isLoading, isFetching, isError: profileError, refetch: refetchProfile } = useMuaProfile(muaId);
 
   const [avatar, setAvatar] = useState('');
   const [name, setName] = useState('');
@@ -45,12 +45,14 @@ function EditProfileScreen() {
   const [isUploading, setIsUploading] = useState(false);
   const stylesQuery = useMuaStyles();
   const initialized = useRef(false);
+  const [profileInitialized, setProfileInitialized] = useState(false);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (profile) {
-        if (initialized.current) return;
+        if (initialized.current || isFetching || profileError) return;
         initialized.current = true;
+        setProfileInitialized(true);
         setAvatar(profile.avatarUrl || '');
         setName(profile.name || profile.brandName || user?.name || '');
         setBio(profile.bio || '');
@@ -79,7 +81,7 @@ function EditProfileScreen() {
       }
     }, 0);
     return () => clearTimeout(timeoutId);
-  }, [profile, user]);
+  }, [profile, user, isFetching, profileError]);
 
   const { mutateAsync: updateProfile, isPending } = useUpdateMuaProfile();
   const isSaving = isPending || isUploading;
@@ -88,6 +90,7 @@ function EditProfileScreen() {
   const handleSave = async () => {
     if (saveLock.current) return;
     if ((initialStyleIds.length || newStyleNames.length) && !styleIds.length && !newStyleNames.length) { setFormError('Hãy chọn ít nhất một chuyên môn.'); return; }
+    if (exceedsStyleLimit({ styleIds, newStyleNames }, initialStyleIds, 20)) { setFormError('Tối đa 20 chuyên môn. Hồ sơ lịch sử vượt giới hạn chỉ có thể giữ nguyên hoặc giảm bớt.'); return; }
     const locationError = validateWorkLocation(area);
     if (locationError) { setFormError(locationError); return; }
     if (!name.trim()) {
@@ -140,12 +143,16 @@ function EditProfileScreen() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || (!profileInitialized && isFetching)) {
     return (
       <SafeAreaView style={styles.centerContainer}>
         <ActivityIndicator size="large" color={BrandColors.accentPink} />
       </SafeAreaView>
     );
+  }
+
+  if (profileError && !profileInitialized) {
+    return <SafeAreaView style={styles.centerContainer}><Text accessibilityRole="alert" style={styles.formError}>Không tải được hồ sơ mới nhất. Hãy thử lại trước khi chỉnh sửa chuyên môn.</Text><TouchableOpacity accessibilityRole="button" accessibilityLabel="Tải lại hồ sơ" onPress={() => { void refetchProfile(); }} style={styles.headerBtn}><Text>Thử lại</Text></TouchableOpacity></SafeAreaView>;
   }
 
   return (
@@ -230,7 +237,7 @@ function EditProfileScreen() {
             <View style={styles.inputGroup}><Text style={styles.label}>Kinh nghiệm</Text><View style={styles.styleChips}>{EXPERIENCE_LEVELS.map(item => <TouchableOpacity key={item.value} onPress={() => setExperienceLevel(item.value)} style={[styles.styleChip, experienceLevel === item.value && styles.styleChipSelected]}><Text style={[styles.styleChipText, experienceLevel === item.value && styles.styleChipTextSelected]}>{item.label}</Text></TouchableOpacity>)}</View></View>
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}><Sparkles size={16} color={BrandColors.textMuted}/><Text style={styles.label}>Chuyên môn</Text></View>
-              <MakeupStylePicker styles={[...(profile?.specialties || []), ...(stylesQuery.data || [])]} value={{ styleIds, newStyleNames }} onChange={value => { setStyleIds(value.styleIds); setNewStyleNames(value.newStyleNames); setFormError(''); }} limit={20} disabled={isSaving} loading={stylesQuery.isLoading} loadError={stylesQuery.isError} onReload={() => stylesQuery.refetch()} />
+              <MakeupStylePicker styles={stylesQuery.data || []} catalogLoaded={!!stylesQuery.data} historicalStyles={profile?.specialties || []} value={{ styleIds, newStyleNames }} onChange={value => { setStyleIds(value.styleIds); setNewStyleNames(value.newStyleNames); setFormError(''); }} limit={20} disabled={isSaving} loading={stylesQuery.isFetching || stylesQuery.isLoading} loadError={stylesQuery.isError} fallbackReason={stylesQuery.fallbackReason} onReload={() => stylesQuery.refetch()} />
             </View>
             <View style={styles.inputGroup}><Text style={styles.sectionLabel}>Liên kết mạng xã hội</Text><Text style={styles.helpText}>Không bắt buộc</Text></View>
             <ProfileInput icon={<FileText size={16} color={BrandColors.textMuted}/>} label="Instagram" value={instagramUrl} onChangeText={setInstagramUrl} placeholder="instagram.com/username" autoCapitalize="none" keyboardType="url" />

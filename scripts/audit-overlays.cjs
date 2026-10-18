@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const ts = require('typescript');
-const root = path.resolve(__dirname, '..');
+const root = path.dirname(require.resolve('../package.json'));
 const folders = ['app', 'components', 'hooks', 'services', 'repositories', 'store', 'utils', 'types', 'constants', 'lib'];
 const files = [];
 function walk(dir) {
