@@ -50,6 +50,7 @@
         }
       ],
       "expo-asset",
+      ["expo-secure-store", { "faceIDPermission": false, "configureAndroidBackup": true }],
       [
         "expo-notifications",
         {

@@ -7,7 +7,7 @@ import { authService } from '../../services/authService';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useRegistrationStore } from '../../store/useRegistrationStore';
 import { UserRole } from '../../types/auth';
-import { sanitizeUiMessage } from '../../utils/uiMessage';
+import { getApiError } from '../../services/api';
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
@@ -57,8 +57,10 @@ export default function VerifyEmailScreen() {
         setError('Tài khoản đã được tạo. Chưa thể đăng nhập, vui lòng thử lại.');
       }
     } catch (err: any) {
-      setError(sanitizeUiMessage(err?.response?.data?.message || err?.response?.data?.Message || err?.message,
-        accountCreated ? 'Tài khoản đã được tạo. Vui lòng thử đăng nhập lại.' : 'Không thể xác minh mã. Vui lòng thử lại.'));
+      const failure = getApiError(err);
+      setError(failure.isNetworkError
+        ? accountCreated ? 'Tài khoản đã được tạo. Chưa thể kết nối để đăng nhập, vui lòng thử lại.' : 'Chưa nhận được xác nhận từ máy chủ. Bạn có thể thử đăng nhập để kiểm tra tài khoản trước khi gửi lại mã.'
+        : failure.message || 'Không thể xác minh mã. Vui lòng thử lại.');
     } finally {
       inFlight.current = false;
       setBusy(false);
@@ -80,8 +82,8 @@ export default function VerifyEmailScreen() {
       input.current?.focus();
     } catch (err: any) {
       if (err?.response?.status === 429) { markSent(); setNow(Date.now()); }
-      setError(sanitizeUiMessage(err?.response?.data?.message || err?.response?.data?.Message || err?.message,
-        'Chưa thể gửi lại mã. Vui lòng thử lại.'));
+      const failure = getApiError(err);
+      setError(failure.isNetworkError ? 'Chưa thể kết nối để gửi lại mã. Vui lòng kiểm tra mạng và thử lại.' : failure.message || 'Chưa thể gửi lại mã. Vui lòng thử lại.');
     } finally {
       inFlight.current = false;
       setBusy(false);

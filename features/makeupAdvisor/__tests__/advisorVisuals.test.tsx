@@ -8,14 +8,15 @@ import type {MakeupRecommendation} from '../advisorRecommendation';
 jest.mock('react-native-safe-area-context',()=>jest.requireActual('react-native-safe-area-context/jest/mock').default);
 jest.mock('@react-native-async-storage/async-storage',()=>jest.requireActual('@react-native-async-storage/async-storage/jest/async-storage-mock'));
 
-test('all 20 supplied style images preserve their complete content without a clipping parent',async()=>{
+test('all 20 supplied style images preserve their complete content inside a bounded image frame',async()=>{
  await render(<View>{presentationCatalog.map(style=><MakeupStyleImage key={style.key} styleKey={style.key}/>)}</View>);
  expect(presentationCatalog).toHaveLength(20);
  for(const style of presentationCatalog){
   const image=screen.getByLabelText(`Minh họa ${style.displayName}`);
   expect(image.props.resizeMode).toBe('contain');
   expect(image.props.resizeMethod).toBe('resize');
-  expect(StyleSheet.flatten(image.parent?.props.style)?.overflow).not.toBe('hidden');
+  expect(StyleSheet.flatten(image.parent?.props.style)?.overflow).toBe('hidden');
+  expect(StyleSheet.flatten(image.props.style)).toMatchObject({width:'100%',height:'100%'});
  }
 });
 

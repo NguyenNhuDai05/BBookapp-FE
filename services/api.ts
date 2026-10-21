@@ -1,3 +1,5 @@
+import { withSessionStorage } from './sessionStorageLock';
+import { sessionCredentials } from './sessionCredentials';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Platform } from "react-native";
@@ -25,23 +27,84 @@ export const api = axios.create({
   timeout: 25000,
 });
 
-let unauthorizedHandler: (() => void | Promise<void>) | undefined;
+// Shared rotation: a burst of expired requests consumes the credential once.
+let rotating: Promise<string | null> | undefined;
+const rotateSession = () => {
+  if (rotating) return rotating;
+  rotating = (async () => {
+    const {refreshToken, previous} = await withSessionStorage(async () => ({
+      previous: await AsyncStorage.getItem('user_jwt_token'), refreshToken: await sessionCredentials.get(),
+    }));
+    if (!refreshToken || !previous) return null;
+    const {data} = await axios.post<{token:string; refreshToken:string}>(API_URL + '/Auth/refresh', {refreshToken}, {timeout:25000});
+    return withSessionStorage(async () => {
+      if (await AsyncStorage.getItem('user_jwt_token') !== previous) return null;
+      if (!data.token || !data.refreshToken) throw new Error('Invalid session response');
+      await sessionCredentials.save(data.refreshToken);
+      await AsyncStorage.setItem('user_jwt_token', data.token);
+      return data.token;
+    });
+  })().finally(() => { rotating = undefined; });
+  return rotating;
+};
+
+type RequestTiming = { area: 'login' | 'otp' | 'profile' | 'feed' | 'other'; milliseconds: number; status: number | null };
+const timings: RequestTiming[] = [];
+const started = new WeakMap<object, number>();
+export const getRequestTimings = (): readonly RequestTiming[] => timings.map(item => ({...item}));
+const recordTiming = (config: object & {url?: string}, status: number | null) => {
+  const start = started.get(config);
+  if (start === undefined) return;
+  started.delete(config);
+  const url = config.url || '';
+  const area = url === '/Auth/login' ? 'login' : url.includes('request-otp') ? 'otp' : url === '/User/profile' ? 'profile' : url.startsWith('/Feed') ? 'feed' : 'other';
+  timings.push({area,milliseconds:Date.now()-start,status});
+  if (timings.length > 30) timings.shift();
+};
+
+let readiness: Promise<void> | undefined;
+let readyUntil = 0;
+// Probe a safe GET before submitting auth mutations. Never replay registration
+// or OTP POSTs after a timeout: the server might already have processed them.
+export function ensureApiReady(): Promise<void> {
+  if (Date.now() < readyUntil) return Promise.resolve();
+  if (readiness) return readiness;
+  readiness = (async () => {
+    for (let attempt = 0; attempt < 6; attempt++) {
+      try {
+        await axios.get(API_URL.replace(/\/api\/?$/, '') + '/health', {timeout:10000});
+        readyUntil = Date.now() + 60000;
+        return;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status && error.response.status < 500) return;
+          if (!error.response && !['ECONNABORTED','ETIMEDOUT'].includes(error.code || '')) throw error;
+        }
+        if (attempt === 5) throw error;
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+    }
+  })().finally(() => { readiness = undefined; });
+  return readiness;
+}
+
+let unauthorizedHandler: ((expectedToken?: string) => void | Promise<void>) | undefined;
 let isHandlingUnauthorized = false;
 let hasPendingUnauthorized = false;
 
-const runUnauthorizedHandler = async () => {
+const runUnauthorizedHandler = async (expectedToken?: string) => {
   if (isHandlingUnauthorized || !unauthorizedHandler) return;
   isHandlingUnauthorized = true;
   hasPendingUnauthorized = false;
   try {
-    await unauthorizedHandler();
+    await unauthorizedHandler(expectedToken);
   } finally {
     isHandlingUnauthorized = false;
   }
 };
 
 export const setUnauthorizedHandler = (
-  handler?: () => void | Promise<void>,
+  handler?: (expectedToken?: string) => void | Promise<void>,
 ) => {
   unauthorizedHandler = handler;
   if (handler && hasPendingUnauthorized) void runUnauthorizedHandler();
@@ -88,7 +151,12 @@ export const getApiError = (error: unknown) => {
 
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem("user_jwt_token");
+    started.set(config, Date.now());
+    if (/^\/Auth\/(login|register(?:\/request-otp)?)$/.test(config.url || '')) {
+      try { await ensureApiReady(); }
+      catch (error) { recordTiming(config, axios.isAxiosError(error) ? error.response?.status ?? null : null); throw error; }
+    }
+    const token = await withSessionStorage(() => AsyncStorage.getItem("user_jwt_token"));
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -101,17 +169,35 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
+    recordTiming(response.config, response.status);
     response.data = normalizeMediaUrlsInPayload(response.data);
     return response;
   },
   async (error) => {
-    if (error.response?.status === 401) {
-      const token = await AsyncStorage.getItem("user_jwt_token");
+    const request = error.config;
+    if (request) recordTiming(request, error.response?.status ?? null);
+    const publicAuth = /\/Auth\/(login|register|forgot-password|reset-password|google|refresh|logout)/i.test(request?.url || '');
+    if (error.response?.status === 401 && request && !publicAuth) {
+      const token = await AsyncStorage.getItem('user_jwt_token');
+      if (token && !request._sessionRetried && request.headers?.Authorization !== 'Bearer ' + token) {
+        request._sessionRetried = true;
+        return api(request);
+      }
       if (token) {
-        if (unauthorizedHandler) await runUnauthorizedHandler();
-        else {
-          await AsyncStorage.removeItem("user_jwt_token");
-          hasPendingUnauthorized = true;
+        try {
+          const renewed = request._sessionRetried ? null : await rotateSession();
+          if (renewed) { request._sessionRetried = true; return api(request); }
+        } catch (refreshError) {
+          // Transport/server failures preserve credentials for a later retry.
+          if (!axios.isAxiosError(refreshError) || refreshError.response?.status !== 401) return Promise.reject(refreshError);
+        }
+        if (await AsyncStorage.getItem('user_jwt_token') === token) {
+          if (unauthorizedHandler) await runUnauthorizedHandler(token);
+          else {
+            await sessionCredentials.clear();
+            await AsyncStorage.removeItem('user_jwt_token');
+            hasPendingUnauthorized = true;
+          }
         }
       }
     }

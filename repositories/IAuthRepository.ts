@@ -24,7 +24,7 @@ export interface IAuthRepository {
   resetPassword(email: string, otp: string, newPassword: string): Promise<void>;
   changePassword(currentPassword: string, newPassword: string): Promise<void>;
   getMe(): Promise<UserDto>;
-  logout(): Promise<void>;
+  logout(refreshToken?: string): Promise<void>;
   becomeMua(request: MuaApplicationRequestDto): Promise<AuthResponseDto>;
   deleteAccount(): Promise<void>;
 }

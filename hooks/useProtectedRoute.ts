@@ -5,7 +5,7 @@ import { UserRole } from '../types/auth';
 import { hasMuaAccess } from '../utils/appMode';
 
 export function useProtectedRoute() {
-  const { user, isAuthenticated, activeMode, initialize, switchMode, isModeSwitching } = useAuthStore();
+  const { user, isAuthenticated, activeMode, initialize, switchMode, isModeSwitching, sessionError } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
@@ -25,7 +25,7 @@ export function useProtectedRoute() {
   }, [initialize]);
 
   useEffect(() => {
-    if (!isReady || !rootNavigationState?.key || isModeSwitching) return;
+    if (!isReady || sessionError || !rootNavigationState?.key || isModeSwitching) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const isPolicyScreen = segments[0] === 'policy';
@@ -75,9 +75,9 @@ export function useProtectedRoute() {
         router.replace('/(tabs)/home');
       }
     }
-  }, [user, isAuthenticated, activeMode, segments, isReady, rootNavigationState?.key, router, switchMode, isModeSwitching]);
+  }, [sessionError, user, isAuthenticated, activeMode, segments, isReady, rootNavigationState?.key, router, switchMode, isModeSwitching]);
 
-  if (!isReady) return false;
+  if (!isReady || sessionError) return false;
   const inAuthGroup = segments[0] === '(auth)';
   const isPolicyScreen = segments[0] === 'policy';
   if (!isAuthenticated) return inAuthGroup || isPolicyScreen;
