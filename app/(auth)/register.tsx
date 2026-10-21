@@ -5,11 +5,14 @@ import React, { useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRegistrationStore } from "../../store/useRegistrationStore";
+import { getApiError } from '../../services/api';
 import { authService } from "../../services/authService";
 
 const authLogo = require("../../assets/images/B.png");
 
 const getRegisterErrorMessage = (err: any) => {
+  const failure = getApiError(err);
+  if (failure.isNetworkError) return 'Chưa thể kết nối máy chủ để gửi mã. Vui lòng kiểm tra mạng và thử lại.';
   const data = err?.response?.data;
 
   if (typeof data === "string") return data;
@@ -85,7 +88,6 @@ export default function RegisterScreen() {
       useRegistrationStore.getState().begin({ fullName: fullName.trim(), email: trimmedEmail, password });
       router.push("/(auth)/verify-email" as any);
     } catch (err: any) {
-      console.error("Register error:", err?.response?.data || err?.message || err);
       setError(getRegisterErrorMessage(err));
     } finally {
       setLoading(false);
@@ -191,7 +193,7 @@ export default function RegisterScreen() {
                 style={[styles.primaryButton, (loading || !acceptedPolicy) && styles.disabledButton]}
               >
                 {loading ? (
-                  <ActivityIndicator color="#fff" />
+                  <View style={{flexDirection:'row',alignItems:'center',gap:8}}><ActivityIndicator color="#fff" /><Text style={styles.primaryButtonText}>Đang gửi mã…</Text></View>
                 ) : (
                   <Text style={styles.primaryButtonText}>Tiếp tục</Text>
                 )}

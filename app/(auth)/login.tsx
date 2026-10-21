@@ -2,7 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Eye, EyeOff, LockKeyhole, Mail, Sparkles } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -60,7 +60,7 @@ export default function LoginScreen() {
 
     appDialog.alert(
       "Đăng nhập không thành công",
-      "Email hoặc mật khẩu chưa chính xác. Vui lòng kiểm tra và thử lại.",
+      useAuthStore.getState().loginError || "Chưa thể đăng nhập. Vui lòng thử lại.",
       [{ text: 'Thử lại' }],
     );
   };
@@ -73,7 +73,7 @@ export default function LoginScreen() {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.flex}
         >
-          <View style={styles.content}>
+          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
             <View style={styles.brandBlock}>
               <Image source={authLogo} style={styles.authLogo} resizeMode="contain" />
             </View>
@@ -132,7 +132,7 @@ export default function LoginScreen() {
                 style={[styles.primaryButton, loading && styles.disabled]}
               >
                 {loading ? (
-                  <ActivityIndicator color="#fff" />
+                  <View style={{flexDirection:'row',alignItems:'center',gap:8}}><ActivityIndicator color="#fff" /><Text style={styles.primaryButtonText}>Đang kết nối…</Text></View>
                 ) : (
                   <Text style={styles.primaryButtonText}>Đăng nhập</Text>
                 )}
@@ -148,7 +148,7 @@ export default function LoginScreen() {
               </Pressable>
 
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   flex: { flex: 1 },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 22,
     paddingTop: 18,
     paddingBottom: 18,

@@ -12,7 +12,7 @@ jest.mock('../../services/NotificationService', () => ({ NotificationService: { 
 jest.mock('../../services/signalRService', () => ({ signalRService: { disconnect: jest.fn() } }));
 jest.mock('../../lib/queryClient', () => ({ queryClient: { clear: jest.fn() } }));
 const reviewer = { id: 'review', name: 'Review', email: 'test@example.test', role: UserRole.MUA, hasMuaProfile: true, isDemoAccount: true, demoCounterpartMuaId: 'counterpart', createdAt: '' };
-beforeEach(async () => { jest.clearAllMocks(); await AsyncStorage.clear(); useAuthStore.setState({ user: null, isAuthenticated: false, activeMode: 'CUSTOMER', isLoading: false }); useBookingStore.getState().resetDraft(); });
+beforeEach(async () => { jest.clearAllMocks(); await AsyncStorage.clear(); useAuthStore.setState({ user: null, isAuthenticated: false, activeMode: 'CUSTOMER', isLoading: false, sessionError: null, loginError: null }); useBookingStore.getState().resetDraft(); });
 it('hydrates server review profile after normal login and switches modes with the same token', async () => {
   (authService.login as jest.Mock).mockResolvedValue({ accessToken: 'same-token', user: { ...reviewer, demoCounterpartMuaId: null } });
   (authService.getMe as jest.Mock).mockResolvedValue(reviewer);
@@ -77,12 +77,49 @@ it('restores an email account after restart, logs out, and logs in again', async
 });
 
 it('clears rejected credentials and invalid persisted sessions', async () => {
-  (authService.login as jest.Mock).mockRejectedValue(new Error('Unauthorized'));
+  (authService.login as jest.Mock).mockRejectedValue({ isAxiosError: true, response: {status:401}, message:'Unauthorized' });
   expect(await useAuthStore.getState().login('an@example.com', 'wrong123')).toBe(false);
   expect(useAuthStore.getState().isAuthenticated).toBe(false);
   await AsyncStorage.setItem('user_jwt_token', 'expired-token');
-  (authService.getMe as jest.Mock).mockRejectedValue(new Error('Unauthorized'));
+  (authService.getMe as jest.Mock).mockRejectedValue({ isAxiosError: true, response: {status:401}, message:'Unauthorized' });
   expect(await useAuthStore.getState().initialize()).toBe(false);
   expect(await AsyncStorage.getItem('user_jwt_token')).toBeNull();
   expect(useAuthStore.getState().user).toBeNull();
+});
+
+it('preserves persisted credentials when profile times out or returns a server error', async () => {
+ for (const error of [{isAxiosError:true, code:'ECONNABORTED', message:'timeout'}, {isAxiosError:true,response:{status:503},message:'unavailable'}]) {
+  await AsyncStorage.setItem('user_jwt_token','valid-token');
+  (authService.getMe as jest.Mock).mockRejectedValue(error);
+  expect(await useAuthStore.getState().initialize()).toBe(false);
+  expect(await AsyncStorage.getItem('user_jwt_token')).toBe('valid-token');
+  expect(useAuthStore.getState().sessionError).toBeTruthy();
+ }
+});
+it('coalesces concurrent startup checks into one profile request', async () => {
+ await AsyncStorage.setItem('user_jwt_token','valid-token');
+ (authService.getMe as jest.Mock).mockResolvedValue(reviewer);
+ const result=await Promise.all([useAuthStore.getState().initialize(),useAuthStore.getState().initialize()]);
+ expect(result).toEqual([true,true]);expect(authService.getMe).toHaveBeenCalledTimes(1);
+});
+it('reports a connection failure without blaming the password', async () => {
+ (authService.login as jest.Mock).mockRejectedValue({isAxiosError:true,code:'ECONNABORTED',message:'timeout'});
+ expect(await useAuthStore.getState().login('session@example.test','secret123')).toBe(false);
+ expect(useAuthStore.getState().loginError).toContain('kết nối');
+ expect(useAuthStore.getState().loginError).not.toContain('mật khẩu');
+});
+it('does not restore an old profile after explicit session expiration', async () => {
+ await AsyncStorage.setItem('user_jwt_token','old-token');
+ let finish!: (value: typeof reviewer) => void;
+ (authService.getMe as jest.Mock).mockImplementation(()=>new Promise(resolve=>{finish=resolve;}));
+ const pending=useAuthStore.getState().initialize();
+ while(!finish) await Promise.resolve();
+ await useAuthStore.getState().expireSession();finish(reviewer);
+ expect(await pending).toBe(false);expect(useAuthStore.getState().user).toBeNull();
+});
+
+it('ignores session expiration requested by an older access token',async()=>{
+ await AsyncStorage.setItem('user_jwt_token','new-token');useAuthStore.setState({user:reviewer,isAuthenticated:true});
+ await useAuthStore.getState().expireSession('old-token');
+ expect(await AsyncStorage.getItem('user_jwt_token')).toBe('new-token');expect(useAuthStore.getState().isAuthenticated).toBe(true);
 });

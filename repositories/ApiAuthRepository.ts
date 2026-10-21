@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+import { sessionCredentials } from '../services/sessionCredentials';
 import { api } from '../services/api';
 import type { IAuthRepository, LoginRequest, RegisterRequest } from './IAuthRepository';
 import { UserRole, type AuthResponseDto, type UserDto } from '../types/auth';
@@ -5,6 +7,7 @@ import type { MuaApplicationRequestDto } from '../types/onboarding';
 
 interface BackendTokenDto {
   token: string;
+  refreshToken?: string;
   expiration: string;
   userId: string;
   fullName: string;
@@ -34,7 +37,7 @@ const mapBackendRole = (role: number | string): UserRole => {
 
 export class ApiAuthRepository implements IAuthRepository {
   async login(request: LoginRequest): Promise<AuthResponseDto> {
-    const response = await api.post<BackendTokenDto>('/Auth/login', request);
+    const response = await api.post<BackendTokenDto>('/Auth/login', { ...request, useRefreshSession: Platform.OS !== 'web' });
     return this.mapToAuthResponse(response.data);
   }
 
@@ -89,9 +92,9 @@ export class ApiAuthRepository implements IAuthRepository {
     };
   }
 
-  async logout(): Promise<void> {
-    // Usually handled client-side by dropping the token, or an optional backend call.
-    return Promise.resolve();
+  async logout(credential?: string): Promise<void> {
+    const refreshToken = credential ?? await sessionCredentials.get();
+    if (refreshToken) await api.post('/Auth/logout', {refreshToken});
   }
 
   async becomeMua(request: MuaApplicationRequestDto): Promise<AuthResponseDto> {
@@ -107,7 +110,7 @@ export class ApiAuthRepository implements IAuthRepository {
     const expiration = new Date(data.expiration).getTime();
     return {
       accessToken: data.token,
-      refreshToken: '', // Backend doesn't support refresh tokens yet
+      refreshToken: data.refreshToken || '',
       expiresIn: Number.isNaN(expiration) ? 0 : Math.max(0, Math.floor((expiration - Date.now()) / 1000)),
       user: {
         id: data.userId,

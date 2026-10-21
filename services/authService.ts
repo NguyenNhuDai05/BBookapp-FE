@@ -30,8 +30,8 @@ class AuthService {
     return this.repository.getMe();
   }
 
-  async logout(): Promise<void> {
-    return this.repository.logout();
+  async logout(refreshToken?: string): Promise<void> {
+    return this.repository.logout(refreshToken);
   }
 
   async becomeMua(request: MuaApplicationRequestDto): Promise<AuthResponseDto> {
