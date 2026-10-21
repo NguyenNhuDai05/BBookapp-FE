@@ -19,6 +19,8 @@ const git = (...args) => cp.execFileSync('git', args, { encoding: 'utf8' }).trim
 const inputs = () => {
   const files = ['app.json', 'app.config.ts', 'eas.json', 'package.json', 'package-lock.json',
     'google-services.json', 'features/makeupAdvisor/buildConfig.js', 'features/makeupAdvisor/flags.ts',
+    'features/makeupAdvisor/measurementRanking.ts', 'features/makeupAdvisor/recommendationCore.ts',
+    'features/makeupAdvisor/localEngine.ts', 'features/makeupAdvisor/bbook-makeup-catalog-20-vi-v1.2.json',
     '.github/workflows/android-apk.yml', ...fs.readdirSync('scripts/ci').map(f => `scripts/ci/${f}`)];
   return Object.fromEntries(files.sort().map(f => [f, hash(fs.readFileSync(f))]));
 };
@@ -29,6 +31,8 @@ if (mode === 'environment') {
   assert.equal(profile.developmentClient, false);
   assert.equal(profile.android.buildType, 'apk');
   assert.equal(businessEnv.BBOOK_ADVISOR_ENABLED, '1');
+  assert.equal(businessEnv.BBOOK_ADVISOR_FACE_AWARE_EXPERIMENTAL, '1');
+  assert.equal(businessEnv.BBOOK_ADVISOR_MEASUREMENT_RANKING, '1');
   assert.equal(businessEnv.BBOOK_ADVISOR_CLOUD_ENABLED, '0', 'Cloud changes require a separate configuration review.');
   assert.equal(businessEnv.BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL, 'pending');
   // Avoid runner/repository variables silently adding local, QA or experimental flags.

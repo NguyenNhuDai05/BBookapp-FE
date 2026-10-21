@@ -27,6 +27,23 @@ function config(profile, policy = {}) {
   }
 }
 const candidate = () => config('tester-apk', { BBOOK_APK_RELEASE_CANDIDATE: '1' });
+test('resolved APK configuration enables both runtime gates for local measurement ranking', () => {
+  const vm = require('node:vm');
+  const ts = require('typescript');
+  const module = { exports: {} };
+  const code = ts.transpileModule(fs.readFileSync('features/makeupAdvisor/flags.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true }
+  }).outputText;
+  vm.runInNewContext(code, {
+    module, exports: module.exports,
+    require(name) {
+      assert.equal(name, 'expo-constants');
+      return { expoConfig: candidate() };
+    }
+  });
+  assert.equal(module.exports.faceAwareExperimental, true);
+  assert.equal(module.exports.measurementRankingEnabled, true);
+});
 test('APK candidate resolves without device acceptance or tester approval', () => {
   const result = candidate();
   assert.equal(result.android.package, 'com.bbook.app');
@@ -35,7 +52,8 @@ test('APK candidate resolves without device acceptance or tester approval', () =
   assert.equal(result.extra.advisorTransport, 'https');
   assert.equal(result.extra.advisorEnabled, true);
   assert.equal(result.extra.advisorCloudEnabled, false);
-  assert.equal(result.extra.advisorFaceAwareExperimental, false);
+  assert.equal(result.extra.advisorFaceAwareExperimental, true);
+  assert.equal(result.extra.advisorMeasurementRanking, true);
   assert.equal(result.extra.advisorDiagnosticMode, false);
   assert.equal(result.extra.pushNotificationsEnabled, true);
   assert.equal(result.extra.advisorRemotePushEnabled, true);

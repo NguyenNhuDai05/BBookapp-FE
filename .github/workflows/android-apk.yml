@@ -91,6 +91,9 @@ jobs:
       - name: Check Release Candidate policy and runtime equivalence
         run: node --test scripts/ci/release-policy.test.cjs
 
+      - name: Verify measurement-based face ranking before APK build
+        run: npx --no-install jest --runInBand --watch=false --testTimeout=15000 --runTestsByPath features/makeupAdvisor/__tests__/measurementRanking.test.ts features/makeupAdvisor/__tests__/faceAwareIntegration.test.ts features/makeupAdvisor/__tests__/faceScanRecommendations.test.ts
+
       - name: Load Release Candidate build permission (not release approval)
         run: node scripts/ci/release-apk-config.cjs environment
 

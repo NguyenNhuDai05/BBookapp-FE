@@ -12,6 +12,8 @@ if (mode === 'config') {
   assert.equal(config.android.googleServicesFile, './google-services.json');
   assert.equal(config.extra.advisorEnabled, true);
   assert.equal(config.extra.advisorCloudEnabled, false);
+  assert.equal(config.extra.advisorFaceAwareExperimental, true);
+  assert.equal(config.extra.advisorMeasurementRanking, true);
   assert.equal(process.env.EAS_BUILD_PROFILE, 'tester-apk');
   assert.equal(config.extra.advisorReleaseEnvironment, 'closed-test');
   assert.equal(config.extra.advisorTransport, 'https');
