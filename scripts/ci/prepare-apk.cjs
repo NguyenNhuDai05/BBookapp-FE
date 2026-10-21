@@ -17,7 +17,6 @@ if (mode === 'config') {
   assert.equal(process.env.EAS_BUILD_PROFILE, 'tester-apk');
   assert.equal(config.extra.advisorReleaseEnvironment, 'closed-test');
   assert.equal(config.extra.advisorTransport, 'https');
-  assert.equal(config.extra.advisorFaceAwareExperimental, false);
   assert.equal(config.extra.advisorDiagnosticMode, false);
   assert.equal(config.extra.advisorDataProcessingApproved, false);
   assert.equal(config.extra.aiTestBuild, false);

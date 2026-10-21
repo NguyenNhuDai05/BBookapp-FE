@@ -27,6 +27,30 @@ function config(profile, policy = {}) {
   }
 }
 const candidate = () => config('tester-apk', { BBOOK_APK_RELEASE_CANDIDATE: '1' });
+test('actual APK preparation accepts resolved config and rejects disabled ranking or enabled cloud', () => {
+  const vm = require('node:vm');
+  const source = fs.readFileSync('scripts/ci/prepare-apk.cjs', 'utf8');
+  function prepare(resolved) {
+    vm.runInNewContext(source, {
+      require(name) {
+        if (name !== 'node:fs') return require(name);
+        return { ...fs, readFileSync(file, encoding) {
+          return file === 'fixture-config.json' ? JSON.stringify(resolved) : fs.readFileSync(file, encoding);
+        } };
+      },
+      process: { argv: ['node', 'prepare-apk.cjs', 'config', 'fixture-config.json'], env: { EAS_BUILD_PROFILE: 'tester-apk' } },
+      console: { log() {} }
+    });
+  }
+  const resolved = candidate();
+  assert.doesNotThrow(() => prepare(resolved));
+  for (const field of ['advisorFaceAwareExperimental', 'advisorMeasurementRanking']) {
+    const disabled = structuredClone(resolved); disabled.extra[field] = false;
+    assert.throws(() => prepare(disabled));
+  }
+  const cloud = structuredClone(resolved); cloud.extra.advisorCloudEnabled = true;
+  assert.throws(() => prepare(cloud));
+});
 test('resolved APK configuration enables both runtime gates for local measurement ranking', () => {
   const vm = require('node:vm');
   const ts = require('typescript');
