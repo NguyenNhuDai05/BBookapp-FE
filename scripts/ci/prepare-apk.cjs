@@ -14,7 +14,7 @@ if (mode === 'config') {
   assert.equal(config.extra.advisorCloudEnabled, false);
   assert.equal(config.extra.advisorFaceAwareExperimental, true);
   assert.equal(config.extra.advisorMeasurementRanking, true);
-  assert.equal(process.env.EAS_BUILD_PROFILE, 'tester-apk');
+  assert.equal(process.env.EAS_BUILD_PROFILE, process.env.CI_ANDROID_ARTIFACT === 'aab' ? 'tester-aab' : 'tester-apk');
   assert.equal(config.extra.advisorReleaseEnvironment, 'closed-test');
   assert.equal(config.extra.advisorTransport, 'https');
   assert.equal(config.extra.advisorDiagnosticMode, false);

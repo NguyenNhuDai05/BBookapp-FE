@@ -1,0 +1,204 @@
+name: Android AAB (manual only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      device_acceptance_confirmed:
+        description: 'I tested the APK on Android: login, booking, payment, notifications and face scan'
+        type: boolean
+        required: true
+        default: false
+      acceptance_reference:
+        description: 'Tested APK run URL/build ID and device test result (no passwords or personal data)'
+        type: string
+        required: true
+      version_code:
+        description: 'Must exceed ALL versionCodes already uploaded to Play; does not update EAS counters'
+        type: string
+        required: true
+      play_upload_sha256:
+        description: 'SHA-256 of Upload key certificate in Play Console > App integrity (not App signing certificate)'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-aab-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  aab:
+    if: ${{ inputs.device_acceptance_confirmed }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    # Repository secrets work with private repositories on GitHub Free.
+    defaults:
+      run:
+        shell: bash
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+      EXPO_NO_DOTENV: '1'
+      # Runtime is checked against tester-apk; packaging uses tester-aab.
+      NODE_ENV: production
+      APK_VERSION_CODE: ${{ inputs.version_code }}
+      APK_ARCHITECTURES: universal
+      CI_ANDROID_ARTIFACT: aab
+      DEVICE_ACCEPTANCE_CONFIRMED: ${{ inputs.device_acceptance_confirmed }}
+      DEVICE_ACCEPTANCE_REFERENCE: ${{ inputs.acceptance_reference }}
+      PLAY_UPLOAD_SHA256: ${{ inputs.play_upload_sha256 }}
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle-ci
+      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dorg.gradle.parallel=false -Dorg.gradle.jvmargs=-Xmx3g
+      CMAKE_BUILD_PARALLEL_LEVEL: '2'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Validate inputs and required signing secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          CERT_SHA256: ${{ secrets.ANDROID_SIGNING_CERT_SHA256 }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          for name in ['KEYSTORE_BASE64', 'STORE_PASSWORD', 'KEY_ALIAS', 'KEY_PASSWORD', 'CERT_SHA256']:
+              if not os.environ.get(name):
+                  raise SystemExit('Missing required signing secret: ' + name)
+          if not re.fullmatch(r'[1-9][0-9]{0,9}', os.environ['APK_VERSION_CODE']) or int(os.environ['APK_VERSION_CODE']) > 2100000000:
+              raise SystemExit('version_code must be an integer between 1 and 2100000000')
+          if os.environ['APK_ARCHITECTURES'] not in ['arm64-v8a', 'universal']:
+              raise SystemExit('Unsupported architecture')
+          if not re.fullmatch(r'[0-9a-fA-F]{64}', os.environ['CERT_SHA256'].replace(':', '').strip()):
+              raise SystemExit('Expected signing certificate SHA-256 is invalid')
+          upload = os.environ.get('PLAY_UPLOAD_SHA256', '').replace(':', '').strip().lower()
+          if not re.fullmatch(r'[0-9a-f]{64}', upload) or upload != os.environ['CERT_SHA256'].replace(':', '').strip().lower():
+              raise SystemExit('Signing secret does not match the Upload key certificate supplied from Play Console')
+          PY
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.3'
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install locked dependencies
+        run: npm ci --include=dev --no-audit --no-fund
+
+      - name: Check existing release policy and runtime equivalence
+        run: node --test scripts/ci/release-policy.test.cjs scripts/ci/release-aab.test.cjs
+
+      - name: Verify measurement-based face ranking before AAB build
+        run: npx --no-install jest --runInBand --watch=false --testTimeout=15000 --runTestsByPath features/makeupAdvisor/__tests__/measurementRanking.test.ts features/makeupAdvisor/__tests__/faceAwareIntegration.test.ts features/makeupAdvisor/__tests__/faceScanRecommendations.test.ts
+
+      - name: Validate operator acceptance and load equivalent AAB configuration
+        run: node scripts/ci/release-aab-config.cjs environment
+
+      - name: Restore Gradle dependencies (no signing files or build outputs)
+        uses: actions/cache@v4
+        with:
+          path: |
+            .gradle-ci/caches/modules-2
+            .gradle-ci/wrapper
+          key: apk-gradle-${{ runner.os }}-${{ hashFiles('package-lock.json', 'modules/**/build.gradle', 'plugins/**') }}
+          restore-keys: apk-gradle-${{ runner.os }}-
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+          log-accepted-android-sdk-licenses: 'false'
+
+      - name: Install matching SDK and NDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.1.12297006' 'cmake;3.22.1'
+
+      - name: Generate Android project on runner only
+        run: |
+          npx --no-install expo config --type public --json > "$RUNNER_TEMP/apk-expo-config.json"
+          node scripts/ci/prepare-apk.cjs config "$RUNNER_TEMP/apk-expo-config.json"
+          node scripts/ci/release-aab-config.cjs snapshot "$RUNNER_TEMP/apk-expo-config.json"
+          npx --no-install expo prebuild --platform android --clean --no-install
+          npx --no-install expo-modules-autolinking resolve --platform android --json > "$RUNNER_TEMP/apk-autolinking.json"
+          node scripts/ci/prepare-apk.cjs native "$RUNNER_TEMP/apk-autolinking.json"
+
+      - name: Compile standalone release AAB
+        working-directory: android
+        env:
+          NODE_ENV: production
+        run: |
+          chmod +x gradlew
+          abi="$APK_ARCHITECTURES"
+          if [[ "$abi" == universal ]]; then abi='armeabi-v7a,arm64-v8a,x86,x86_64'; fi
+          ./gradlew :app:bundleRelease --no-daemon --max-workers=2 --build-cache \
+            -PreactNativeArchitectures="$abi" -Porg.gradle.parallel=false \
+            -I ../scripts/ci/apk-memory.init.gradle
+
+      - name: Sign AAB with existing upload key and verify
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          CERT_SHA256: ${{ secrets.ANDROID_SIGNING_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+          export LC_ALL=C
+          umask 077
+          keyfile="$RUNNER_TEMP/bbook-aab-signing.jks"
+          trap 'rm -f "$keyfile"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keyfile"
+          mkdir -p aab-artifact
+          cp android/app/build/outputs/bundle/release/app-release.aab aab-artifact/BBook-release.aab
+          jarsigner -keystore "$keyfile" -storepass:env STORE_PASSWORD -keypass:env KEY_PASSWORD \
+            aab-artifact/BBook-release.aab "$KEY_ALIAS"
+          jarsigner -verify -verbose -certs aab-artifact/BBook-release.aab > "$RUNNER_TEMP/aab-verification.txt"
+          grep -q 'jar verified.' "$RUNNER_TEMP/aab-verification.txt"
+          keytool -printcert -jarfile aab-artifact/BBook-release.aab > "$RUNNER_TEMP/aab-certificate.txt"
+          python3 - <<'PY'
+          import os, pathlib, re, zipfile
+          cert = (pathlib.Path(os.environ['RUNNER_TEMP']) / 'aab-certificate.txt').read_text()
+          actual = re.findall(r'SHA256:\s*([0-9A-Fa-f:]+)', cert)
+          expected = os.environ['CERT_SHA256'].replace(':', '').strip().lower()
+          if len(actual) != 1 or actual[0].replace(':', '').lower() != expected:
+              raise SystemExit('AAB signing certificate differs from expected upload key')
+          with zipfile.ZipFile('aab-artifact/BBook-release.aab') as aab:
+              if aab.testzip() is not None:
+                  raise SystemExit('Corrupt AAB')
+              for name in ['BundleConfig.pb', 'base/manifest/AndroidManifest.xml', 'base/assets/index.android.bundle']:
+                  if name not in aab.namelist():
+                      raise SystemExit('Missing AAB entry: ' + name)
+              for abi in ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']:
+                  if not any(name.startswith('base/lib/' + abi + '/') for name in aab.namelist()):
+                      raise SystemExit('Missing native architecture: ' + abi)
+          PY
+          node scripts/ci/release-aab-config.cjs verify
+          cp "$RUNNER_TEMP/aab-release-provenance.json" aab-artifact/release-provenance.json
+          cp "$RUNNER_TEMP/apk-expo-config.json" aab-artifact/expo-public-config.json
+          cp "$RUNNER_TEMP/aab-certificate.txt" aab-artifact/signing-certificate.txt
+          printf 'Commit: %s\nPackage: com.bbook.app\nVersion code: %s\nFormat: AAB\n' \
+            "$GITHUB_SHA" "$APK_VERSION_CODE" > aab-artifact/build-info.txt
+          (cd aab-artifact && sha256sum BBook-release.aab > SHA256SUMS.txt)
+          (cd aab-artifact && sha256sum *.json *.txt BBook-release.aab > manifest.sha256)
+
+      - name: Downloadable AAB only (no Play submission)
+        uses: actions/upload-artifact@v4
+        with:
+          name: BBook-AAB-${{ github.run_number }}
+          path: aab-artifact/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/bbook-aab-signing.jks"
