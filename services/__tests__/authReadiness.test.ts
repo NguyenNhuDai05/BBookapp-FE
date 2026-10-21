@@ -24,3 +24,11 @@ it('never repeats a mutation when its own response times out',async()=>{
  const adapter=jest.fn(async()=>{throw new AxiosError('timeout','ECONNABORTED');});api.defaults.adapter=adapter;
  await expect(api.post('/Auth/register',{email:'test@example.test'})).rejects.toThrow('timeout');expect(adapter).toHaveBeenCalledTimes(1);
 });
+it('fails immediately for a suspended service and allows a later recovery check',async()=>{
+ const probe=jest.spyOn(axios,'get').mockRejectedValueOnce(new AxiosError('unavailable','ERR_BAD_RESPONSE',undefined,undefined,{
+  status:503,statusText:'Unavailable',headers:{'x-render-routing':'suspend-by-user'},data:'<html>Service Suspended</html>',config:{} as InternalAxiosRequestConfig,
+ })).mockResolvedValue({data:{status:'Healthy'}});
+ await expect(ensureApiReady()).rejects.toThrow('unavailable');
+ expect(probe).toHaveBeenCalledTimes(1);
+ await ensureApiReady();expect(probe).toHaveBeenCalledTimes(2);
+});
