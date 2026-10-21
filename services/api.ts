@@ -7,7 +7,7 @@ import { normalizeMediaUrlsInPayload } from "../utils/mediaUrl";
 import { sanitizeUiMessage } from "../utils/uiMessage";
 import { reviewErrorMessage } from '../utils/playReview';
 
-const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL;
+const configuredApiUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
 
 // On web, derive the API host from the URL used to open Expo. This avoids stale
 // LAN addresses breaking all requests whenever the development machine changes IP.
@@ -20,7 +20,7 @@ const webApiUrl =
 // always replaced the configured production URL with `<current-host>:5261`,
 // which made deployed/test builds call a developer LAN backend.
 export const API_URL =
-  configuredApiUrl || webApiUrl || "https://beautybook-13zj.onrender.com/api";
+  configuredApiUrl || webApiUrl || "https://beautybook-v3bi.onrender.com/api";
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -76,6 +76,8 @@ export function ensureApiReady(): Promise<void> {
         readyUntil = Date.now() + 60000;
         return;
       } catch (error) {
+        // A suspended deployment cannot wake up through repeated health probes.
+        if (getApiError(error).code === 'SERVICE_SUSPENDED') throw error;
         if (axios.isAxiosError(error)) {
           if (error.response?.status && error.response.status < 500) return;
           if (!error.response && !['ECONNABORTED','ETIMEDOUT'].includes(error.code || '')) throw error;
@@ -131,13 +133,20 @@ export const getApiError = (error: unknown) => {
       }
     | undefined;
   const validationErrors = payload?.errors ?? payload?.Errors;
+  const suspended = error.response?.status === 503 &&
+    error.response.headers?.['x-render-routing'] === 'suspend-by-user';
+  const serverUnavailable = (error.response?.status ?? 0) >= 500;
   const firstValidationMessage = validationErrors
     ? Object.values(validationErrors).flat().find(Boolean)
     : undefined;
   return {
     status: error.response?.status,
-    code: payload?.code ?? payload?.Code,
-    message: reviewErrorMessage(payload?.code ?? payload?.Code) ?? sanitizeUiMessage(
+    code: suspended ? 'SERVICE_SUSPENDED' : payload?.code ?? payload?.Code,
+    message: suspended
+      ? 'Dịch vụ đang tạm ngừng hoạt động. Vui lòng thử lại sau.'
+      : serverUnavailable
+      ? 'Máy chủ đang tạm thời gián đoạn. Vui lòng thử lại sau.'
+      : reviewErrorMessage(payload?.code ?? payload?.Code) ?? sanitizeUiMessage(
       firstValidationMessage ??
       payload?.message ??
       payload?.Message ??

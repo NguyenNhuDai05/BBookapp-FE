@@ -13,7 +13,7 @@
       },
       "env": {
         "BBOOK_BUILD_VARIANT": "ai-test",
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api"
       }
     },
     "development": {
@@ -26,7 +26,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api"
       }
     },
     "production": {
@@ -35,7 +35,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api"
       }
     },
     "advisor-qa": {
@@ -58,8 +58,8 @@
         "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
         "BBOOK_ADVISOR_GEMINI_APPROVED": "0",
         "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending",
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
-        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-13zj.onrender.com/api"
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api",
+        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-v3bi.onrender.com/api"
       }
     },
     "advisor-development": {
@@ -72,10 +72,10 @@
       },
       "env": {
         "BBOOK_ADVISOR_ENABLED": "1",
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api",
         "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
         "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending",
-        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-13zj.onrender.com/api"
+        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-v3bi.onrender.com/api"
       }
     },
     "advisor-preview": {
@@ -89,10 +89,10 @@
       "env": {
         "BBOOK_ADVISOR_ENABLED": "1",
         "BBOOK_ADVISOR_DIAGNOSTICS": "1",
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api",
         "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
         "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending",
-        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-13zj.onrender.com/api"
+        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-v3bi.onrender.com/api"
       },
       "environment": "preview",
       "credentialsSource": "remote"
@@ -101,8 +101,8 @@
       "env": {
         "BBOOK_ADVISOR_ENABLED": "1",
         "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
-        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-13zj.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api",
+        "BBOOK_ADVISOR_BACKEND_URL": "https://beautybook-v3bi.onrender.com/api",
         "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending"
       },
       "developmentClient": false,
@@ -123,7 +123,7 @@
       },
       "env": {
         "BBOOK_BUILD_VARIANT": "unified-qa",
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api",
         "BBOOK_ADVISOR_QA_ONLY": "1",
         "BBOOK_ADVISOR_ENABLED": "1",
         "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
@@ -141,7 +141,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api",
         "BBOOK_ADVISOR_ENABLED": "1",
         "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
         "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending"
@@ -157,7 +157,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://beautybook-13zj.onrender.com/api",
+        "EXPO_PUBLIC_API_URL": "https://beautybook-v3bi.onrender.com/api",
         "BBOOK_ADVISOR_ENABLED": "1",
         "BBOOK_ADVISOR_CLOUD_ENABLED": "0",
         "BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL": "pending"

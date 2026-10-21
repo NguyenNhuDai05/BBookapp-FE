@@ -4,6 +4,7 @@ import { ActivityIndicator, View, Text, Pressable } from "react-native";
 import "../global.css";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useProtectedRoute } from '../hooks/useProtectedRoute';
+import { useSessionRecovery } from '../hooks/useSessionRecovery';
 
 import { queryClient } from '../lib/queryClient';
 import { useAuthStore } from '../store/useAuthStore';
@@ -15,6 +16,7 @@ import { DialogHost } from '../components/ui/DialogHost';
 
 export default function RootLayout() {
   const canRenderRoute = useProtectedRoute();
+  useSessionRecovery();
   const [retrying, setRetrying] = useState(false);
   const review = useAuthStore(state => state.user?.isDemoAccount === true);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);

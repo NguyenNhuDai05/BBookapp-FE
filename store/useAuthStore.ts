@@ -118,7 +118,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const failure = getApiError(error);
       if (failure.status !== 401) {
         if (get().isAuthenticated) return true;
-        set({ sessionError: failure.isNetworkError ? "Chưa thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại." : "Chưa thể kiểm tra phiên đăng nhập. Vui lòng thử lại." });
+        set({ sessionError: failure.isNetworkError
+          ? "Chưa thể kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại."
+          : failure.status && failure.status >= 500
+          ? failure.message
+          : "Chưa thể kiểm tra phiên đăng nhập. Vui lòng thử lại." });
         return false;
       }
       await get().expireSession(startupToken || undefined);

@@ -41,7 +41,7 @@ test('APK candidate resolves without device acceptance or tester approval', () =
   assert.equal(result.extra.advisorRemotePushEnabled, true);
   assert(!JSON.stringify(result).includes('BBOOK_APK_RELEASE_CANDIDATE'));
   assert(result.plugins.some(p => Array.isArray(p) && p[0] === './plugins/withAdvisor' && p[1].enabled));
-  assert.equal(eas.build['tester-apk'].env.EXPO_PUBLIC_API_URL, 'https://beautybook-13zj.onrender.com/api');
+  assert.equal(eas.build['tester-apk'].env.EXPO_PUBLIC_API_URL, 'https://beautybook-v3bi.onrender.com/api');
 });
 test('candidate and approved release fixture have identical complete resolved app configuration', () => {
   assert.deepEqual(candidate(), config('tester-apk', fixtureApproval));

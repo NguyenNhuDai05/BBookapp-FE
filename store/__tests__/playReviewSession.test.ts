@@ -102,6 +102,17 @@ it('coalesces concurrent startup checks into one profile request', async () => {
  const result=await Promise.all([useAuthStore.getState().initialize(),useAuthStore.getState().initialize()]);
  expect(result).toEqual([true,true]);expect(authService.getMe).toHaveBeenCalledTimes(1);
 });
+it('preserves the suspended-server session and recovers on a subsequent retry', async () => {
+ await AsyncStorage.setItem('user_jwt_token','valid-token');
+ (authService.getMe as jest.Mock).mockRejectedValueOnce({isAxiosError:true,response:{status:503,headers:{'x-render-routing':'suspend-by-user'}}}).mockResolvedValue(reviewer);
+ expect(await useAuthStore.getState().initialize()).toBe(false);
+ expect(useAuthStore.getState().sessionError).toContain('tạm ngừng');
+ expect(await AsyncStorage.getItem('user_jwt_token')).toBe('valid-token');
+ expect(useAuthStore.getState().isAuthenticated).toBe(false);
+ expect(await useAuthStore.getState().initialize()).toBe(true);
+ expect(useAuthStore.getState().sessionError).toBeNull();
+ expect(useAuthStore.getState().user).toEqual(reviewer);
+});
 it('reports a connection failure without blaming the password', async () => {
  (authService.login as jest.Mock).mockRejectedValue({isAxiosError:true,code:'ECONNABORTED',message:'timeout'});
  expect(await useAuthStore.getState().login('session@example.test','secret123')).toBe(false);
