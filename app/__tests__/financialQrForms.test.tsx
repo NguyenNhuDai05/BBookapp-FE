@@ -47,34 +47,58 @@ describe.each([['MUA', MuaForm], ['refund', RefundForm]] as const)('%s receive a
     await waitFor(() => expect(mockOtp).toHaveBeenCalledWith(expect.objectContaining({ request: expect.objectContaining({ method, accountNumber }) })));
     expect(mockDecode).not.toHaveBeenCalled(); expect(mockAdd).not.toHaveBeenCalled();
   });
-  it('prefills only the phone from MoMo and leaves the holder for the user to enter', async () => {
-    mockDecode.mockResolvedValue({ method: 'MOMO', bankBin: 'MOMO', accountNumber: '0912345678', accountName: null });
+  it('uses private MoMo QR without a number and requires a holder when the image has no readable name', async () => {
+    mockDecode.mockResolvedValue({ method:'MOMO', bankBin:'MOMO', accountNumber:'0912345678', accountName:null });
     await render(<Form />);
     await fireEvent.press(screen.getByText('Đọc ảnh QR'));
     await fireEvent.press(screen.getByText('Chọn ảnh QR ngân hàng hoặc MoMo'));
-    await waitFor(() => expect(screen.getByLabelText('Số tài khoản nhận tiền').props.value).toBe('0912345678'));
+    await screen.findByText('Chưa đọc được tên chủ tài khoản từ ảnh. Vui lòng nhập đúng tên người nhận trước khi tiếp tục.');
+    expect(screen.queryByLabelText('Số tài khoản nhận tiền')).toBeNull();
     expect(screen.getByLabelText('Tên chủ tài khoản nhận tiền').props.value).toBe('');
     await fireEvent.press(screen.getByText('Tiếp tục')); expect(mockOtp).not.toHaveBeenCalled();
+    await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'TEST USER');
+    await fireEvent.press(screen.getByText('Tiếp tục'));
+    expect(mockOtp).toHaveBeenCalledWith(expect.objectContaining({request:expect.objectContaining({method:'MOMO',accountNumber:'',financialQrMediaId:'00000000-0000-4000-8000-000000000001'})}));
   });
-  it('handles MoMo multi-app without treating its opaque identifier as a phone', async () => {
-    mockDecode.mockResolvedValue({ method: 'MOMO', bankBin: '971025', accountNumber: null, accountName: null });
+  it('reads the owner printed below a multi-app MoMo QR and clears the previous bank recipient', async () => {
+    mockDecode.mockResolvedValue({method:'MOMO',bankBin:'971025',accountNumber:null,accountName:'NGUYEN VAN TEST',accountNameSource:'IMAGE'});
     await render(<Form />);
-    await fireEvent.changeText(screen.getByLabelText('Số tài khoản nhận tiền'), '0300000000');
-    await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'), 'TEST USER');
+    await fireEvent.changeText(screen.getByLabelText('Số tài khoản nhận tiền'),'12345678');
+    await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'OLD USER');
     await fireEvent.press(screen.getByText('Đọc ảnh QR'));
     await fireEvent.press(screen.getByText('Chọn ảnh QR ngân hàng hoặc MoMo'));
-    await screen.findByText('Đã đọc QR MoMo đa năng. Mã nhận tiền trong QR không phải số điện thoại; hãy nhập số MoMo và tên người nhận để Admin đối chiếu.');
-    expect(screen.getByLabelText('Số tài khoản nhận tiền').props.value).toBe('0300000000');
-    expect(screen.getByLabelText('Tên chủ tài khoản nhận tiền').props.value).toBe('TEST USER');
-    expect(mockOtp).not.toHaveBeenCalled(); expect(mockAdd).not.toHaveBeenCalled();
-    expect(mockPrivateUpload).toHaveBeenCalledTimes(1);
+    await waitFor(()=>expect(screen.getByLabelText('Tên chủ tài khoản nhận tiền').props.value).toBe('NGUYEN VAN TEST'));
+    expect(screen.queryByLabelText('Số tài khoản nhận tiền')).toBeNull();
+    expect(screen.getByText('Tên được đọc từ ảnh. Hãy kiểm tra và chỉnh lại nếu chưa đúng.')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Tiếp tục'));
+    await fireEvent.press(screen.getByText('Xác nhận OTP thử nghiệm'));
+    expect(mockAdd).toHaveBeenCalledWith(expect.objectContaining({method:'MOMO',accountNumber:'',accountHolderName:'NGUYEN VAN TEST',otp:'123456'}));
   });
-  it('editing shared MoMo preserves existing private reference and explicit remove binds null',async()=>{
+  it('reads the printed bank owner and lets the user correct OCR before requesting OTP', async () => {
+    mockDecode.mockResolvedValue({method:'BANK',bankBin:'970436',accountNumber:'1234567890',accountName:'NGUYEN VAN TEST',accountNameSource:'IMAGE'});
+    await render(<Form />);
+    await fireEvent.press(screen.getByText('Đọc ảnh QR'));
+    await fireEvent.press(screen.getByText('Chọn ảnh QR ngân hàng hoặc MoMo'));
+    await waitFor(()=>expect(screen.getByLabelText('Tên chủ tài khoản nhận tiền').props.value).toBe('NGUYEN VAN TEST'));
+    expect(mockPrivateUpload).not.toHaveBeenCalled();
+    await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'EDITED TEST');
+    await fireEvent.press(screen.getByText('Tiếp tục'));
+    expect(mockOtp).toHaveBeenCalledWith(expect.objectContaining({request:expect.objectContaining({method:'BANK',accountNumber:'1234567890',accountHolderName:'EDITED TEST'})}));
+  });
+  it('editing a private MoMo account preserves its reference, and removing QR requires a manual phone',async()=>{
     mockParams={id:'test-bank',bankBin:'MOMO',bankCode:'MOMO',method:'MOMO',financialQrMediaId:'qr-a'};
-    await render(<Form/>);await fireEvent.changeText(screen.getByLabelText('Số tài khoản nhận tiền'),'84300000000');await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'TEST USER');await fireEvent.press(screen.getByText('Tiếp tục'));
-    await waitFor(()=>expect(mockOtp).toHaveBeenCalledWith(expect.objectContaining({request:expect.objectContaining({financialQrMediaId:'qr-a',financialQrAction:'UNCHANGED',accountNumber:'0300000000'})})));
-    await fireEvent.press(screen.getByText('Bỏ QR, nhận tiền thủ công'));await fireEvent.press(screen.getByText('Tiếp tục'));
-    await waitFor(()=>expect(mockOtp).toHaveBeenLastCalledWith(expect.objectContaining({request:expect.objectContaining({financialQrAction:'REMOVE'})})));expect(mockOtp.mock.calls.at(-1)[0].request.financialQrMediaId).toBeUndefined();
+    await render(<Form/>);
+    expect(screen.queryByLabelText('Số tài khoản nhận tiền')).toBeNull();
+    await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'TEST USER');
+    await fireEvent.press(screen.getByText('Tiếp tục'));
+    expect(mockOtp).toHaveBeenCalledWith(expect.objectContaining({request:expect.objectContaining({financialQrMediaId:'qr-a',financialQrAction:'UNCHANGED',accountNumber:''})}));
+    mockOtp.mockClear();
+    await fireEvent.press(screen.getByText('Bỏ QR, nhận tiền thủ công'));
+    await fireEvent.press(screen.getByText('Tiếp tục')); expect(mockOtp).not.toHaveBeenCalled();
+    await fireEvent.changeText(screen.getByLabelText('Số tài khoản nhận tiền'),'84300000000');
+    await fireEvent.press(screen.getByText('Tiếp tục'));
+    expect(mockOtp).toHaveBeenCalledWith(expect.objectContaining({request:expect.objectContaining({financialQrAction:'REMOVE',accountNumber:'0300000000'})}));
+    expect(mockOtp.mock.calls.at(-1)[0].request.financialQrMediaId).toBeUndefined();
   });
   it('places the QR picker before the bank, account and holder fields', async () => {
     const result = await render(<Form />);
@@ -126,7 +150,7 @@ describe('MUA private MoMo QR',()=>{
   expect(mockOtp).not.toHaveBeenCalled();expect(mockAdd).not.toHaveBeenCalled();
  });
  it('private upload failure preserves fields and old reference',async()=>{
-  mockParams={bankCode:'MOMO',financialQrMediaId:'00000000-0000-4000-8000-000000000001'};mockPrivateUpload.mockRejectedValue(new Error('provider unavailable'));await render(<MuaForm/>);await fireEvent.changeText(screen.getByLabelText('Số tài khoản nhận tiền'),'0300000000');await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'TEST ONLY');
+  mockParams={bankCode:'MOMO',financialQrMediaId:'00000000-0000-4000-8000-000000000001'};mockPrivateUpload.mockRejectedValue(new Error('provider unavailable'));await render(<MuaForm/>);await fireEvent.changeText(screen.getByLabelText('Tên chủ tài khoản nhận tiền'),'TEST ONLY');
   await waitFor(()=>expect(mockPreview).toHaveBeenCalled());await fireEvent.press(screen.getByLabelText('QR MoMo riêng tư'));
   await screen.findByText('Không đọc được thông tin từ mã QR. Bạn có thể thử ảnh khác hoặc nhập thủ công.');expect(screen.getByLabelText('Tên chủ tài khoản nhận tiền').props.value).toBe('TEST ONLY');await fireEvent.press(screen.getByText('Tiếp tục'));await waitFor(()=>expect(mockOtp).toHaveBeenCalledWith(expect.objectContaining({request:expect.objectContaining({financialQrMediaId:'00000000-0000-4000-8000-000000000001'})})));
  });
