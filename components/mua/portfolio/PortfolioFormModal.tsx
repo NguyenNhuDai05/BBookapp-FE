@@ -12,7 +12,7 @@ import { reloadOwnerPortfolio } from '../../../hooks/useMuaPortfolio';
 import { getApiError } from '../../../services/api';
 import type { PortfolioItemDto, PortfolioWriteRequest } from '../../../types/portfolio';
 import { normalizePortfolio } from '../../../utils/portfolio';
-import { portfolioTagDraft, portfolioTagPatch, supportsPortfolioTagging, validatePortfolioTags } from '../../../utils/portfolioTagging';
+import { portfolioTagOptions, samePortfolioTags, servicePortfolioTags } from '../../../utils/portfolioTags';
 import { PortfolioSavedRefreshError, portfolioErrorMessage, uncertainPortfolioWrite, uploadPortfolioAlbum } from '../../../utils/portfolioWrite';
 import { PortfolioTaggingFields } from './PortfolioTaggingFields';
 
@@ -33,7 +33,8 @@ function PortfolioFormContent({ visible, onClose, onSubmit, initialData }: Portf
   const [description, setDescription] = useState(base.description || '');
   const [imageUrls, setImageUrls] = useState(base.imageUrls || []);
   const [serviceId, setServiceId] = useState<string | null>(base.serviceId || null);
-  const [tagDraft, setTagDraft] = useState(() => portfolioTagDraft(base.tagging));
+  const [manualTags, setTagDraft] = useState(() => base.tags || []);
+  const [defaultServiceId, setDefaultServiceId] = useState<string | null>(null);
   const [ready, setReady] = useState(!editId);
   const [ownerError, setOwnerError] = useState('');
   const [loadAttempt, setLoadAttempt] = useState(0);
@@ -53,10 +54,23 @@ function PortfolioFormContent({ visible, onClose, onSubmit, initialData }: Portf
   const catalog = useMuaStyles();
   const busy = isUploading || isPicking;
   const frozen = busy || Boolean(completed) || uncertain;
-  const canTag = supportsPortfolioTagging(catalog.catalog) && !catalog.isError && (!editId || (base.version !== undefined && base.tagging !== undefined));
+  const canTag = catalog.data !== undefined && !catalog.isError && !catalog.isLoading;
+  const defaultService = services.find(s => s.id === defaultServiceId);
+  const tagDraft = defaultService && canTag ? servicePortfolioTags(defaultService, catalog.data) : manualTags;
+  const tagsChanged = !samePortfolioTags(tagDraft, base.tags || []);
+  const selectService = (id: string | null) => {
+    if (id === serviceId) return;
+    setServiceId(id); setMessage('');
+    const service = services.find(s => s.id === id);
+    if (!service) { setTagDraft(tagDraft); setDefaultServiceId(null); return; }
+    // Capture defaults on selection. Defer only while the database list is loading.
+    const hasTags = Boolean(service.tags?.length || service.styleIds?.length || service.styleTags?.length);
+    setTagDraft(canTag ? servicePortfolioTags(service, catalog.data) : hasTags ? tagDraft : []);
+    setDefaultServiceId(!canTag && hasTags ? id : null);
+  };
   const initialize = useCallback((item: PortfolioItemDto) => {
     setBase(item); setDescription(item.description || ''); setImageUrls(item.imageUrls || []); setServiceId(item.serviceId || null);
-    setTagDraft(portfolioTagDraft(item.tagging)); setInputEpoch(e => e + 1); setReady(true); setOwnerError('');
+    setTagDraft(item.tags || []); setDefaultServiceId(null); setInputEpoch(e => e + 1); setReady(true); setOwnerError('');
     setConflict(false); setPreview(undefined); setUncertain(false); setReviewed(null); setMessage('');
   }, []);
   useEffect(() => {
@@ -84,23 +98,25 @@ function PortfolioFormContent({ visible, onClose, onSubmit, initialData }: Portf
   };
   const handleSubmit = async () => {
     if (saving.current || picking.current || frozen || !ready || !imageUrls.length) return;
-    const snapshot = { description, imageUrls: [...imageUrls], serviceId, tags: JSON.parse(JSON.stringify(tagDraft)) as typeof tagDraft };
-    const patch = portfolioTagPatch(snapshot.tags, portfolioTagDraft(base.tagging));
-    if (patch && !canTag) { setMessage('Chưa thể xác minh danh mục hoặc phiên bản tác phẩm. Hãy tải lại hoặc bỏ thay đổi tag.'); return; }
-    if (patch) {
-      const invalid = validatePortfolioTags(snapshot.tags, portfolioTagDraft(base.tagging), catalog.catalog);
-      if (invalid) { setMessage(invalid); return; }
+    const snapshot = { description, imageUrls: [...imageUrls], serviceId, tags: [...tagDraft] };
+    if ((defaultServiceId && (!canTag || !defaultService)) || (tagsChanged && !canTag)) { setMessage('Chưa tải được tag. Hãy tải lại hoặc bỏ thay đổi tag trước khi lưu.'); return; }
+    if (tagsChanged) {
+      const available = portfolioTagOptions(catalog.data);
+      if (snapshot.tags.some(tag => !available.some(s => s.name === tag))) { setMessage('Một tag không còn trong danh sách. Hãy xóa tag đó hoặc tải lại.'); return; }
     }
     saving.current = true; setIsUploading(true); setMessage('');
     let writeStarted = false;
     try {
       const finalUrls = await uploadPortfolioAlbum(snapshot.imageUrls, uploads.current, uploadImage);
       const payload: PortfolioWriteRequest = {};
-      if (!editId || snapshot.description !== (base.description || '')) payload.description = snapshot.description;
-      if (!editId || JSON.stringify(finalUrls) !== JSON.stringify(base.imageUrls || [])) payload.imageUrls = finalUrls;
-      if (!editId || snapshot.serviceId !== (base.serviceId || null)) payload.serviceId = snapshot.serviceId;
+      // Older servers replace the whole content; send retained fields when no version is exposed.
+      const replaceContent = !editId || base.version == null;
+      if (replaceContent || snapshot.description !== (base.description || '')) payload.description = snapshot.description;
+      if (replaceContent || JSON.stringify(finalUrls) !== JSON.stringify(base.imageUrls || [])) payload.imageUrls = finalUrls;
+      if (replaceContent || snapshot.serviceId !== (base.serviceId || null)) payload.serviceId = snapshot.serviceId;
+      if (editId && base.version == null) { payload.title = base.title ?? null; payload.tags = snapshot.tags; }
       if (editId && base.version != null) payload.expectedVersion = base.version;
-      if (patch) payload.tagging = patch;
+      if (tagsChanged) payload.tags = snapshot.tags;
       writeStarted = true;
       await onSubmit(payload);
       onClose();
@@ -143,11 +159,11 @@ function PortfolioFormContent({ visible, onClose, onSubmit, initialData }: Portf
           </ScrollView>
         </View>
         <View style={styles.inputGroup}><Text style={styles.label}>Gắn dịch vụ vào bài viết</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity disabled={frozen} style={[styles.serviceChip, !serviceId && styles.serviceChipActive]} onPress={() => setServiceId(null)}><Text>Không gắn</Text></TouchableOpacity>
-          {services.map(s => <TouchableOpacity disabled={frozen} key={s.id} style={[styles.serviceChip, serviceId === s.id && styles.serviceChipActive]} onPress={() => setServiceId(s.id)}><Text numberOfLines={1}>{s.name || s.serviceName}</Text></TouchableOpacity>)}
+          <TouchableOpacity disabled={frozen} style={[styles.serviceChip, !serviceId && styles.serviceChipActive]} onPress={() => selectService(null)}><Text>Không gắn</Text></TouchableOpacity>
+          {services.map(s => <TouchableOpacity disabled={frozen} key={s.id} style={[styles.serviceChip, serviceId === s.id && styles.serviceChipActive]} onPress={() => selectService(s.id)}><Text numberOfLines={1}>{s.name || s.serviceName}</Text></TouchableOpacity>)}
         </ScrollView></View>
         <View style={styles.inputGroup}><Text style={styles.label}>Mô tả</Text><TextInput key={inputEpoch} style={[styles.input, styles.textArea]} accessibilityLabel="Mô tả tác phẩm" editable={!frozen} defaultValue={base.description || ''} onChangeText={setDescription} placeholder="Cảm hứng hoặc thông tin chi tiết..." multiline numberOfLines={3} maxLength={MAX_DESCRIPTION_LENGTH} placeholderTextColor={BrandColors.textMuted} /><Text style={styles.characterCount}>{description.length}/{MAX_DESCRIPTION_LENGTH}</Text></View>
-        <PortfolioTaggingFields value={tagDraft} onChange={v => { setTagDraft(v); setMessage(''); }} history={base.tagging} catalog={catalog.catalog} supported={canTag} disabled={frozen} loading={catalog.isLoading} error={catalog.isError} onReload={() => { void catalog.refetch(); }} onDiscardChanges={portfolioTagPatch(tagDraft, portfolioTagDraft(base.tagging)) && !canTag ? () => { setTagDraft(portfolioTagDraft(base.tagging)); setMessage(''); } : undefined} />
+        <PortfolioTaggingFields value={tagDraft} onChange={v => { setTagDraft(v); setDefaultServiceId(null); setMessage(''); }} options={catalog.data} disabled={frozen} loading={catalog.isLoading} error={catalog.isError} onReload={() => { void catalog.refetch(); }} onDiscardChanges={(tagsChanged || defaultServiceId) && !canTag ? () => { setTagDraft(base.tags || []); setDefaultServiceId(null); setMessage(''); } : undefined} />
       </>}
       {message ? <Text accessibilityRole="alert" style={[styles.label, { marginVertical: 12 }]}>{message}</Text> : null}
       {(conflict || uncertain) && !completed && <TouchableOpacity accessibilityRole="button" disabled={busy} onPress={reviewLatest} style={styles.cancelBtn}><Text>{uncertain ? 'Kiểm tra danh sách đã lưu' : 'Tải bản mới để đối chiếu'}</Text></TouchableOpacity>}

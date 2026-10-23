@@ -12,7 +12,10 @@ import { catalogFixture, portfolioFixture } from '../../../../test-utils/portfol
 jest.mock('expo-image-picker', () => ({ requestMediaLibraryPermissionsAsync: async () => ({ granted: true }), launchImageLibraryAsync: async () => ({ canceled: false, assets: [{ uri: 'file:///new.jpg' }] }) }));
 jest.mock('../../../../services/supabase', () => ({ uploadImage: jest.fn() }));
 jest.mock('../../../../services/portfolioService', () => ({ portfolioService: { getPortfolio: jest.fn() } }));
-jest.mock('../../../../hooks/useMuaServices', () => ({ useMuaServices: () => ({ data: [{ id: 's1', name: 'Dịch vụ một' }] }) }));
+jest.mock('../../../../hooks/useMuaServices', () => ({ useMuaServices: () => ({ data: [
+  { id: 's1', name: 'Dịch vụ một', styleIds: [73], tags: ['Natural', 'Not in database'] },
+  { id: 's2', name: 'Dịch vụ hai', tags: ['Classic'] },
+] }) }));
 jest.mock('../../../../hooks/useMuaStyles', () => ({ useMuaStyles: jest.fn() }));
 jest.mock('../../../../services/api', () => ({ getApiError: (e: any) => ({ message: e.message || 'Không thể lưu', status: e.status, code: e.code, isNetworkError: e.network }) }));
 const metrics = { frame: { x: 0, y: 0, width: 360, height: 740 }, insets: { top: 24, bottom: 24, left: 0, right: 0 } };
@@ -52,7 +55,7 @@ it('locks controls and duplicate submits while uploading a captured snapshot', a
   await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
   expect(save).toHaveBeenCalledWith({ description: 'Snapshot', imageUrls: ['https://media.test/snapshot.jpg'], serviceId: null });
 });
-it('creates without any tags when capability is missing and never writes legacy Tags/Title', async () => {
+it('creates without tags when the database list is unavailable', async () => {
   jest.mocked(useMuaStyles).mockReturnValue({ data: [], refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
   const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} />, { wrapper: wrapper() });
   await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByText('Lưu'));
@@ -60,38 +63,95 @@ it('creates without any tags when capability is missing and never writes legacy 
   expect(save.mock.calls[0][0]).toEqual({ description: '', imageUrls: ['https://media.test/new.jpg'], serviceId: null });
   expect(screen.queryByLabelText('Tên tác phẩm')).toBeNull();
 });
-it('keeps selected tags if catalog refresh loses capability and requires explicit discard', async () => {
+it('keeps selected tags on a failed refresh and requires retry or explicit discard', async () => {
   const save = jest.fn(), close = jest.fn();
   const view = await render(<PortfolioFormModal visible onClose={close} onSubmit={save} />, { wrapper: wrapper() });
   await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm'));
-  await fireEvent.press(screen.getByLabelText('Chọn dịp phù hợp'));
-  await fireEvent.press(screen.getByRole('checkbox', { name: 'occasion:date' }));
-  jest.mocked(useMuaStyles).mockReturnValue({ data: [], refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
+  await fireEvent.press(screen.getByRole('checkbox', { name: 'Natural' }));
+  jest.mocked(useMuaStyles).mockReturnValue({ isError: true, refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
   await view.rerender(<PortfolioFormModal visible onClose={close} onSubmit={save} />);
-  expect(screen.getByLabelText('Bỏ date')).toBeTruthy();
+  expect(screen.getByLabelText('Bỏ Natural')).toBeTruthy();
   await fireEvent.press(screen.getByText('Lưu')); expect(save).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByText('Bỏ thay đổi tag, giữ nội dung'));
   await fireEvent.press(screen.getByText('Lưu'));
-  expect(save.mock.calls[0][0].tagging).toBeUndefined();
+  expect(save.mock.calls[0][0].tags).toBeUndefined();
 });
-it('creates all five groups from API options without applying style default metadata', async () => {
+it('selects database tags on a legacy server without structured tagging capability', async () => {
+  jest.mocked(useMuaStyles).mockReturnValue({ data: catalogFixture().styles, catalog: { source: 'legacy', styles: catalogFixture().styles }, refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
   const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} />, { wrapper: wrapper() });
   await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm'));
-  await fireEvent.press(screen.getByLabelText('Chọn dịp phù hợp')); await fireEvent.press(screen.getByRole('checkbox', { name: 'occasion:date' }));
-  await fireEvent.press(screen.getByLabelText('Chọn phong cách chính')); await fireEvent.press(screen.getByRole('radio', { name: 'Natural' }));
-  await fireEvent.press(screen.getByLabelText('Chọn mức độ trang điểm')); await fireEvent.press(screen.getByRole('radio', { name: 'intensity:medium' }));
-  await fireEvent.press(screen.getByText('Thêm tông màu và hiệu ứng'));
-  await fireEvent.press(screen.getByLabelText('Chọn tông màu')); await fireEvent.press(screen.getByRole('checkbox', { name: 'color-tone:peach' }));
-  await fireEvent.press(screen.getByLabelText('Chọn hiệu ứng makeup')); await fireEvent.press(screen.getByRole('checkbox', { name: 'effect:base-dewy' }));
+  await fireEvent.press(screen.getByRole('checkbox', { name: 'Natural' }));
+  await fireEvent.press(screen.getByRole('checkbox', { name: 'Classic' }));
   await fireEvent.press(screen.getByText('Lưu'));
-  expect(save.mock.calls[0][0].tagging).toEqual({ primaryStyleId: 73, occasionKeys: ['date'], intensityKey: 'medium', colorToneKeys: ['peach'], effectKeys: ['base-dewy'] });
+  expect(save.mock.calls[0][0].tags).toEqual(['Natural', 'Classic']);
+  expect(save.mock.calls[0][0].tagging).toBeUndefined();
+  for (const label of ['Thông tin makeup', 'Dịp phù hợp', 'Phong cách makeup', 'Mức độ trang điểm', 'Tông màu', 'Hiệu ứng makeup']) expect(screen.queryByText(label)).toBeNull();
 });
-it('loads fresh owner data and submits just one changed group with the fresh version', async () => {
+it('loads fresh owner tags and sends an explicit empty array to remove all portfolio tags', async () => {
   const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} initialData={{ id: 'p1', description: 'Stale', version: 1 }} />, { wrapper: wrapper() });
   await waitFor(() => expect(screen.getByLabelText('Mô tả tác phẩm').props.defaultValue).toBe('Mô tả mới từ server'));
   expect(portfolioService.getPortfolio).toHaveBeenCalledWith('me');
-  await fireEvent.press(screen.getByLabelText('Bỏ occasion:date')); await fireEvent.press(screen.getByText('Lưu'));
-  expect(save).toHaveBeenCalledWith({ expectedVersion: 7, tagging: { occasionKeys: [] } }); expect(uploadImage).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByLabelText('Bỏ legacy')); await fireEvent.press(screen.getByText('Lưu'));
+  expect(save).toHaveBeenCalledWith({ expectedVersion: 7, tags: [] }); expect(uploadImage).not.toHaveBeenCalled();
+});
+it('prefills service tags and saves portfolio additions/removals independently', async () => {
+  const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} />, { wrapper: wrapper() });
+  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm'));
+  await fireEvent.press(screen.getByText('Dịch vụ một'));
+  expect(screen.getByLabelText('Bỏ Natural')).toBeTruthy();
+  expect(screen.queryByLabelText('Bỏ Not in database')).toBeNull();
+  await fireEvent.press(screen.getByLabelText('Bỏ Natural'));
+  await fireEvent.press(screen.getByRole('checkbox', { name: 'Classic' }));
+  // Reselecting the attached service does not reset edits.
+  await fireEvent.press(screen.getByText('Dịch vụ một'));
+  await fireEvent.press(screen.getByText('Lưu'));
+  expect(save.mock.calls[0][0]).toEqual(expect.objectContaining({ serviceId: 's1', tags: ['Classic'] }));
+});
+it('uses the newly chosen service defaults and retains editable tags when detaching', async () => {
+  const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} />, { wrapper: wrapper() });
+  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm'));
+  await fireEvent.press(screen.getByText('Dịch vụ một'));
+  await fireEvent.press(screen.getByText('Dịch vụ hai'));
+  expect(screen.queryByLabelText('Bỏ Natural')).toBeNull();
+  expect(screen.getByLabelText('Bỏ Classic')).toBeTruthy();
+  await fireEvent.press(screen.getByText('Không gắn'));
+  await fireEvent.press(screen.getByText('Lưu'));
+  expect(save.mock.calls[0][0]).toEqual(expect.objectContaining({ serviceId: null, tags: ['Classic'] }));
+});
+it('waits for the database list before applying service defaults, then preserves edits on refresh', async () => {
+  jest.mocked(useMuaStyles).mockReturnValue({ isLoading: true, refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
+  const save = jest.fn(), close = jest.fn();
+  const view = await render(<PortfolioFormModal visible onClose={close} onSubmit={save} />, { wrapper: wrapper() });
+  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm'));
+  await fireEvent.press(screen.getByText('Dịch vụ một'));
+  await fireEvent.press(screen.getByText('Lưu')); expect(save).not.toHaveBeenCalled();
+  jest.mocked(useMuaStyles).mockReturnValue({ data: catalogFixture().styles, refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
+  await view.rerender(<PortfolioFormModal visible onClose={close} onSubmit={save} />);
+  expect(screen.getByLabelText('Bỏ Natural')).toBeTruthy();
+  await fireEvent.press(screen.getByLabelText('Bỏ Natural'));
+  await fireEvent.press(screen.getByRole('checkbox', { name: 'Classic' }));
+  jest.mocked(useMuaStyles).mockReturnValue({ data: [...catalogFixture().styles], refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
+  await view.rerender(<PortfolioFormModal visible onClose={close} onSubmit={save} />);
+  expect(screen.queryByLabelText('Bỏ Natural')).toBeNull();
+  expect(screen.getByLabelText('Bỏ Classic')).toBeTruthy();
+});
+it('reopens saved portfolio tags without reapplying the linked service defaults', async () => {
+  jest.mocked(portfolioService.getPortfolio).mockResolvedValue([{ ...portfolioFixture(), tags: ['Classic'] }]);
+  const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} initialData={{ id: 'p1' }} />, { wrapper: wrapper() });
+  await waitFor(() => expect(screen.getByLabelText('Bỏ Classic')).toBeTruthy());
+  expect(screen.queryByLabelText('Bỏ Natural')).toBeNull();
+  await fireEvent.press(screen.getByLabelText('Bỏ Classic'));
+  await fireEvent.press(screen.getByText('Lưu'));
+  expect(save).toHaveBeenCalledWith({ expectedVersion: 7, tags: [] });
+});
+it('retains the album and other content when updating tags on an unversioned legacy server', async () => {
+  const item = { ...portfolioFixture(), version: undefined, tagging: undefined, tags: ['Natural'] };
+  jest.mocked(portfolioService.getPortfolio).mockResolvedValue([item]);
+  const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} initialData={{ id: 'p1' }} />, { wrapper: wrapper() });
+  await waitFor(() => expect(screen.getByLabelText('Bỏ Natural')).toBeTruthy());
+  await fireEvent.press(screen.getByLabelText('Bỏ Natural'));
+  await fireEvent.press(screen.getByText('Lưu'));
+  expect(save).toHaveBeenCalledWith({ title: item.title, description: item.description, imageUrls: item.imageUrls, serviceId: item.serviceId, tags: [] });
 });
 it('does not reset a typed draft or version when background cache/caller props refresh', async () => {
   const client = new QueryClient({ defaultOptions: { queries: { gcTime: Infinity } } }); const save = jest.fn(); const close = jest.fn();
