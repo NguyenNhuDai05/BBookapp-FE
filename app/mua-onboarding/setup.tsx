@@ -23,6 +23,12 @@ function MuaSetupScreen() {
   if (isLoading) return <SafeAreaView style={styles.center}><ActivityIndicator color={BrandColors.accentRose} /><Text style={styles.loading}>Đang kiểm tra hồ sơ...</Text></SafeAreaView>;
   if (isError || !data) return <SafeAreaView style={styles.center}><Text style={styles.errorTitle}>Không thể tải tiến độ hồ sơ</Text><TouchableOpacity style={styles.retry} onPress={() => refetch()}><RefreshCw size={17} color="#FFF"/><Text style={styles.retryText}>Thử lại</Text></TouchableOpacity></SafeAreaView>;
 
+  const requirementGroups = [
+    { title: 'Các mục cần hoàn thiện', items: data.requirements.filter(item => !['identityVerification', 'bankAccount'].includes(item.key)) },
+    { title: 'CCCD/CMND và ảnh chân dung', items: data.requirements.filter(item => item.key === 'identityVerification') },
+    { title: 'Tài khoản ngân hàng', items: data.requirements.filter(item => item.key === 'bankAccount') },
+  ];
+
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.header}><TouchableOpacity onPress={() => router.back()} style={styles.iconButton} accessibilityLabel="Quay lại"><ArrowLeft size={23} color={BrandColors.textDark}/></TouchableOpacity><Text style={styles.headerTitle}>Hoàn thiện hồ sơ</Text><View style={styles.iconButton}/></View>
@@ -39,9 +45,10 @@ function MuaSetupScreen() {
           {(data.verificationStatus === 'Draft' || data.verificationStatus === 'Rejected') ? <TouchableOpacity disabled={data.missingRequirements.length > 0 || submitReview.isPending} style={[styles.submitReview,(data.missingRequirements.length > 0 || submitReview.isPending)&&styles.disabled]} onPress={()=>submitReview.mutate(undefined,{onError:e=>appDialog.alert('Không thể gửi hồ sơ',getApiError(e).message)})}>{submitReview.isPending?<ActivityIndicator color="#FFF"/>:<Text style={styles.submitReviewText}>{data.verificationStatus === 'Rejected' ? 'Gửi lại để xét duyệt' : 'Gửi admin xét duyệt'}</Text>}</TouchableOpacity> : null}
         </View>
 
-        <Text style={styles.sectionTitle}>Các mục cần hoàn thiện</Text>
+        {requirementGroups.filter(group => group.items.length > 0).map(group => <React.Fragment key={group.title}>
+        <Text style={styles.sectionTitle}>{group.title}</Text>
         <View style={styles.list}>
-          {data.requirements.map((item, index) => {
+          {group.items.map((item, index) => {
             const route = routes[item.key];
             return <TouchableOpacity key={item.key} disabled={!route} onPress={() => router.push(route as any)} style={[styles.row, index > 0 && styles.rowBorder]} accessibilityRole={route ? 'button' : undefined}>
               <View style={[styles.statusIcon, item.isMet && styles.statusIconDone]}>{item.isMet ? <CheckCircle2 size={20} color={BrandColors.statusConfirmed}/> : <Circle size={20} color={BrandColors.textMuted}/>}</View>
@@ -50,6 +57,7 @@ function MuaSetupScreen() {
             </TouchableOpacity>;
           })}
         </View>
+        </React.Fragment>)}
 
       </ScrollView>
     </SafeAreaView>
