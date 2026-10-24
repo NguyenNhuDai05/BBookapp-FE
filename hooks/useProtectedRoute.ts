@@ -6,7 +6,7 @@ import { hasMuaAccess } from '../utils/appMode';
 
 export function useProtectedRoute() {
   const { user, isAuthenticated, activeMode, initialize, switchMode, isModeSwitching, sessionError } = useAuthStore();
-  const segments = useSegments();
+  const segments: string[] = useSegments();
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
   const [isReady, setIsReady] = useState(false);

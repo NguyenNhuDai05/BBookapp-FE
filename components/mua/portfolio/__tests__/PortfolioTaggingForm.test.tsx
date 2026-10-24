@@ -9,6 +9,8 @@ import { uploadImage } from '../../../../services/supabase';
 import { useMuaStyles } from '../../../../hooks/useMuaStyles';
 import { PortfolioSavedRefreshError } from '../../../../utils/portfolioWrite';
 import { catalogFixture, portfolioFixture } from '../../../../test-utils/portfolioFixture';
+// Native modal setup can exceed five seconds in a cold, full-suite worker.
+jest.setTimeout(15_000);
 jest.mock('expo-image-picker', () => ({ requestMediaLibraryPermissionsAsync: async () => ({ granted: true }), launchImageLibraryAsync: async () => ({ canceled: false, assets: [{ uri: 'file:///new.jpg' }] }) }));
 jest.mock('../../../../services/supabase', () => ({ uploadImage: jest.fn() }));
 jest.mock('../../../../services/portfolioService', () => ({ portfolioService: { getPortfolio: jest.fn() } }));
