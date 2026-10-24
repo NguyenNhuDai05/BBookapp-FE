@@ -122,6 +122,7 @@ export class ApiMuaBookingRepository implements IMuaBookingRepository {
       createdAt: b.createdAt ?? '',
       updatedAt: b.updatedAt ?? '',
       depositPaidAt: b.depositPaidAt,
+      muaConfirmationDeadline: b.muaConfirmationDeadline,
       confirmedAt: b.confirmedAt,
       startedAt: b.startedAt,
       waitingCustomerAt: b.waitingCustomerAt,

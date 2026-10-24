@@ -25,6 +25,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { SamplePaymentConfirmation } from '../../components/booking/SamplePaymentConfirmation';
 import type { BookingPaymentDto } from '../../types/booking';
+import { BOOKING_CONFIRMATION_POLICY } from '../../components/booking/BookingConfirmationNotice';
 
 function createLocalBookingDate(date: string, time: string) {
   const [year, month, day] = date.split('-').map(Number);
@@ -370,6 +371,7 @@ export default function CheckoutScreen() {
           onSelect={() => undefined}
         />
         <Text style={styles.paymentMethodHelp}>{review ? 'Khoản cọc mẫu được xác nhận trong ứng dụng.' : 'Quét QR bằng ứng dụng ngân hàng của bạn'}</Text>
+        <Text style={styles.paymentMethodHelp}>{BOOKING_CONFIRMATION_POLICY}</Text>
       </ScrollView>
 
       {/* Footer */}

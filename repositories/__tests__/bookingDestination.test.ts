@@ -31,6 +31,17 @@ it('MUA list receives the same canonical destination snapshot as customer detail
   const [mua] = await new ApiMuaBookingRepository().getAllBookings(snapshot.muaId);
   for (const key of ['address', 'serviceLatitude', 'serviceLongitude', 'serviceLocationType', 'serviceLocationName', 'note'] as const) expect(mua[key]).toEqual(customer[key]);
 });
+it('preserves the server response deadline and timeout refund reason for both participants', async () => {
+  const expired = { ...snapshot, status: 3, paymentStatus: 7,
+    cancellationPolicyRule: 'MUA_CONFIRMATION_TIMEOUT_FULL', cancellationReason: 'MUA không xác nhận trước giờ bắt đầu lịch hẹn.',
+    muaConfirmationDeadline: '2026-10-25T04:00:00Z' };
+  jest.mocked(api.get).mockResolvedValueOnce({ data: expired }).mockResolvedValueOnce({ data: [expired] });
+  const customer = await new ApiBookingRepository().getBookingDetail(snapshot.bookingId);
+  const [mua] = await new ApiMuaBookingRepository().getAllBookings(snapshot.muaId);
+  for (const item of [customer, mua]) expect(item).toMatchObject({ status: 'CANCELLED', paymentStatus: 7,
+    cancellationPolicyRule: expired.cancellationPolicyRule, cancellationReason: expired.cancellationReason,
+    muaConfirmationDeadline: expired.muaConfirmationDeadline });
+});
 it('MUA legacy and workplace mapping uses snapshots without live-profile fallback', async () => {
   jest.mocked(api.get).mockResolvedValue({ data: [{ ...snapshot, serviceAddress: null, serviceLatitude: null, serviceLongitude: null }, { ...snapshot, serviceLocationType: 'MUA_WORK_LOCATION', serviceLocationName: 'Snapshot', muaProfile: { workLocationAddress: 'New private address' } }] });
   const [legacy, workplace] = await new ApiMuaBookingRepository().getAllBookings(snapshot.muaId);

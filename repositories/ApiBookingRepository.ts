@@ -164,6 +164,7 @@ export class ApiBookingRepository implements IBookingRepository {
       updatedAt: b.updatedAt ?? '',
       isReviewed: b.hasReview || false,
       depositPaidAt: b.depositPaidAt,
+      muaConfirmationDeadline: b.muaConfirmationDeadline,
       confirmedAt: b.confirmedAt,
       startedAt: b.startedAt,
       waitingCustomerAt: b.waitingCustomerAt,

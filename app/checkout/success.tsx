@@ -12,6 +12,7 @@ import { composeLocationAddress } from '../../utils/locationAddress';
 import { useDepositConfirmation } from '../../hooks/useDepositConfirmation';
 import { depositConfirmationState } from '../../utils/depositConfirmation';
 import * as WebBrowser from 'expo-web-browser';
+import { BookingConfirmationNotice } from '../../components/booking/BookingConfirmationNotice';
 
 export default function CheckoutSuccessScreen() {
   const router = useRouter();
@@ -186,10 +187,7 @@ export default function CheckoutSuccessScreen() {
         {/* Status Timeline */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Trạng thái đơn</Text>
-          <View style={styles.timerBanner}>
-            <Clock size={16} color="#FF9800" />
-            <Text style={styles.timerText}>Chuyên gia có 24h để xác nhận lịch này</Text>
-          </View>
+          <BookingConfirmationNotice booking={booking} />
 
           <View style={styles.timeline}>
             <View style={styles.timelineItem}>

@@ -1,4 +1,5 @@
 import { BookingChatButton } from '../../components/booking/BookingChatButton';
+import { BookingConfirmationNotice } from '../../components/booking/BookingConfirmationNotice';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
@@ -104,6 +105,7 @@ export default function BookingDetailScreen() {
           <Text style={[styles.statusBannerText, { color: statusInfo.color }]}>{statusInfo.label}</Text>
         </View>
 
+        <BookingConfirmationNotice booking={booking} />
         {booking.refund ? (
           <TouchableOpacity
             style={styles.card}

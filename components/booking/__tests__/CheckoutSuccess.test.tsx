@@ -47,6 +47,8 @@ it('renders the receipt from verified server data, including the persisted appoi
   const screen = await render(<CheckoutSuccessScreen />);
   expect(screen.getByText('Thanh toán thành công!')).toBeTruthy();
   expect(screen.getByText('10:00 - 2026-10-26')).toBeTruthy();
+  expect(screen.getByText(/MUA cần xác nhận trước 10:00 ngày 26\/10\/2026/)).toBeTruthy();
+  expect(screen.queryByText('Chuyên gia có 24h để xác nhận lịch này')).toBeNull();
 });
 it('shows refund handling instead of a permanent waiting state', async () => {
   mockConfirmation.data = { ...booking, paymentStatus: PaymentStatus.REFUND_PENDING, status: 'CANCELLED' };
