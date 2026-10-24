@@ -1,4 +1,5 @@
 import { BookingChatButton } from '../../../components/booking/BookingChatButton';
+import { BookingConfirmationNotice } from '../../../components/booking/BookingConfirmationNotice';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { ReviewNotice } from '../../../components/ReviewNotice';
 import { REVIEW_FINANCIAL_NOTICE } from '../../../utils/playReview';
@@ -135,6 +136,7 @@ export default function MuaBookingDetailScreen() {
           </View>
         </View>
 
+        <BookingConfirmationNotice booking={booking} viewAs="mua" />
         {/* Schedule Info */}
         <View style={styles.section}>
           <View style={styles.card}>

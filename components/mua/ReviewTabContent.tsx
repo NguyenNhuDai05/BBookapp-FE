@@ -59,6 +59,8 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
 
   const totalReviews = reviews.length;
   const averageRating = (reviews.reduce((acc, rev) => acc + rev.rating, 0) / totalReviews).toFixed(1);
+  const canReply = isOwner && reviews.some(review => review.reviewId === replyingToReviewId && !review.isAuthorDeleted);
+  const visibleImage = reviews.some(review => !review.isAuthorDeleted && review.imageUrl === selectedImage) ? selectedImage : null;
 
   const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   reviews.forEach(r => {
@@ -73,7 +75,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
   };
 
   const handleReplySubmit = () => {
-    if (!replyingToReviewId || !replyText.trim()) return;
+    if (!replyingToReviewId || !canReply || !replyText.trim()) return;
     submitReply(
       { reviewId: replyingToReviewId, replyContent: replyText.trim() },
       {
@@ -93,7 +95,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
     if (filter === 'all') return true;
     if (filter === '5') return r.rating === 5;
     if (filter === '4') return r.rating === 4;
-    if (filter === 'has_image') return !!r.imageUrl;
+    if (filter === 'has_image') return !r.isAuthorDeleted && !!r.imageUrl;
     return true;
   });
 
@@ -176,7 +178,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
             <View key={review.reviewId} style={styles.reviewCard}>
               <View style={styles.reviewHeader}>
                 <View style={styles.headerLeft}>
-                  <Text style={styles.customerName}>{review.customerName}</Text>
+                  <Text style={styles.customerName}>{review.isAuthorDeleted ? 'Người dùng đã xóa' : review.customerName}</Text>
                   <Text style={styles.reviewDate}>{timeAgo(review.createdAt)}</Text>
                 </View>
                 <View style={styles.headerRight}>
@@ -192,12 +194,12 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
               </View>
 
               <Text style={styles.commentText}>
-                {review.comment || 'Khách hàng không để lại bình luận.'}
+                {review.isAuthorDeleted ? 'Nội dung đánh giá đã được xóa.' : review.comment || 'Khách hàng không để lại bình luận.'}
               </Text>
 
               <View style={styles.imageGallery}>
-                {review.imageUrl ? (
-                  <TouchableOpacity onPress={() => setSelectedImage(review.imageUrl!)}>
+                {!review.isAuthorDeleted && review.imageUrl ? (
+                  <TouchableOpacity accessibilityRole="button" accessibilityLabel="Xem ảnh đánh giá" onPress={() => setSelectedImage(review.imageUrl!)}>
                     <Image
                       source={{ uri: review.imageUrl }}
                       style={styles.reviewImage}
@@ -225,7 +227,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
                   </View>
                   <Text style={styles.replyText}>{review.muaReply}</Text>
                 </View>
-              ) : isOwner ? (
+              ) : isOwner && !review.isAuthorDeleted ? (
                 <TouchableOpacity
                   style={styles.replyBtn}
                   onPress={() => setReplyingToReviewId(review.reviewId)}
@@ -242,7 +244,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
                   <Text style={styles.helpfulText}>Hữu ích (0)</Text>
                 </TouchableOpacity>
 
-                <SafetyButton target={{ type: 'Review', id: review.reviewId }} ownerId={review.customerId} />
+                <SafetyButton target={{ type: 'Review', id: review.reviewId }} ownerId={review.customerId} ownerDeleted={review.isAuthorDeleted} />
               </View>
             </View>
           ))
@@ -250,7 +252,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
       </View>
 
       {/* Image Modal */}
-      <AppOverlay visible={!!selectedImage} transparent={true} animationType="fade" onRequestClose={() => setSelectedImage(null)}>
+      <AppOverlay visible={!!visibleImage} transparent={true} animationType="fade" onRequestClose={() => setSelectedImage(null)}>
         <View style={styles.modalContainer}>
           <TouchableOpacity
             style={styles.closeBtn}
@@ -259,9 +261,9 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
           >
             <X size={24} color="#FFF" />
           </TouchableOpacity>
-          {selectedImage && (
+          {visibleImage && (
             <Image
-              source={{ uri: selectedImage }}
+              source={{ uri: visibleImage }}
               style={styles.fullImage}
               contentFit="contain"
             />
@@ -270,7 +272,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
       </AppOverlay>
 
       {/* MUA REPLY MODAL */}
-      <AppBottomSheet visible={!!replyingToReviewId} title="Phản hồi đánh giá" onClose={()=>setReplyingToReviewId(null)} loading={isReplying}  >
+      <AppBottomSheet visible={canReply} title="Phản hồi đánh giá" onClose={()=>setReplyingToReviewId(null)} loading={isReplying}  >
 
 <TextInput
               style={styles.replyInput}

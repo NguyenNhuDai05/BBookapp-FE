@@ -34,6 +34,7 @@ export type BankQrScanResult = {
   bankBin?: string;
   accountNumber?: string;
   accountName?: string;
+  accountNameSource?: 'QR' | 'IMAGE' | null;
   requiresManualAccountName: boolean;
   requiresManualAccountNumber: boolean;
 };
@@ -58,6 +59,7 @@ export const uploadBankQr = async (uri: string): Promise<BankQrScanResult> => {
     bankBin: data.bankBin,
     accountNumber: data.accountNumber,
     accountName: data.accountName,
+    ...(data.accountNameSource ? { accountNameSource: data.accountNameSource } : {}),
     requiresManualAccountName: data.requiresManualAccountName,
     requiresManualAccountNumber: data.requiresManualAccountNumber,
   };

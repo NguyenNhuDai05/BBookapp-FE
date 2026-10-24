@@ -5,6 +5,7 @@ import { BrandColors, Spacing, Typography, Radius, Shadows } from '../../constan
 import type { BookingDto } from '../../types/booking';
 import { useUpdateBookingStatus } from '../../hooks/useMuaBookings';
 import { BookingServiceList } from '../BookingServiceList';
+import { BookingConfirmationNotice } from '../booking/BookingConfirmationNotice';
 
 interface MuaBookingCardProps {
   booking: BookingDto;
@@ -75,6 +76,7 @@ export function MuaBookingCard({ booking, onPress }: MuaBookingCardProps) {
       </View>
 
       <BookingServiceList services={booking.services} />
+      <BookingConfirmationNotice booking={booking} viewAs="mua" />
 
       <View style={styles.footer}>
         <View style={styles.footerTotals}>

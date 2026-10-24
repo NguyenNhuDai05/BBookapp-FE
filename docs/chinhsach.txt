@@ -17,6 +17,10 @@ CHÍNH SÁCH QUYỀN RIÊNG TƯ BBOOK
 
 Bản sửa đổi: 10/10/2026 · Dành cho người từ đủ 18 tuổi
 
+## Thống kê truy cập website và cookie
+
+Website bbookmakeup.com sử dụng Google Analytics 4 khi bạn đồng ý trong bảng tùy chọn thống kê. Google nhận dữ liệu sử dụng trang, nguồn truy cập, thông tin thiết bị và lượt nhấn tải APK hoặc Google Play để BBook đánh giá hiệu quả website. Cookie analytics không được bật trước khi đồng ý; bạn có thể từ chối hoặc rút lại bằng nút “Tùy chọn thống kê / cookie” ở cuối trang. Việc từ chối không ảnh hưởng đến tải ứng dụng. BBook không chủ động gửi tên, email, số điện thoại hay thông tin tài khoản vào Analytics. Số lần nhấn tải không xác nhận tải hoàn tất hoặc cài đặt ứng dụng. Dữ liệu được Google xử lý theo chính sách quyền riêng tư của Google; thời hạn lưu dữ liệu sự kiện được quản lý trong cấu hình property GA4 của BBook.
+
 ## 1. Phạm vi và thông tin liên hệ
 
 BBook là nền tảng kết nối khách hàng với Makeup Artist (MUA), hỗ trợ người dùng tìm kiếm MUA, xem hồ sơ và dịch vụ, đặt lịch, trao đổi và sử dụng các chức năng liên quan đến dịch vụ trang điểm.

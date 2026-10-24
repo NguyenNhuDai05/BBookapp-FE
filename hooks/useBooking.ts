@@ -47,13 +47,14 @@ export const useUserBookings = () => {
 };
 
 export const useBookingDetail = (bookingId: string, pollUntilPaid = false) => {
+  const focused = useIsFocused();
   const query = useQuery({
     queryKey: ['bookingDetail', bookingId],
     queryFn: () => bookingService.getBookingDetail(bookingId),
     enabled: !!bookingId,
     refetchInterval: pollUntilPaid
       ? query => query.state.data && depositConfirmationState(query.state.data) !== 'pending' ? false : 2000
-      : false,
+      : query => focused && query.state.data?.status === 'PENDING_CONFIRMATION' ? 15000 : false,
   });
   const { refetch } = query;
   useFocusEffect(useCallback(() => { if (bookingId) void refetch(); }, [bookingId, refetch]));

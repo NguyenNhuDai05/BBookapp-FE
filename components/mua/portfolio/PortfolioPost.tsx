@@ -50,10 +50,6 @@ function PortfolioPostComponent({ compact = true, item, onLike, onSave, onOption
   const followLock = useRef(false);
   const [followingBusy, setFollowingBusy] = useState(false);
   const [expandedTags, setExpandedTags] = useState(false);
-  const structuredLabels = useMemo(() => item.tagging ? [item.tagging.primaryStyle?.name,
-    ...item.tagging.occasions.map(t => t.label), item.tagging.intensity?.label,
-    ...item.tagging.secondaryStyles.map(s => s.name), ...item.tagging.colorTones.map(t => t.label),
-    ...item.tagging.effects.map(t => t.label)].filter((s): s is string => Boolean(s)) : [], [item.tagging]);
   // TODO: wire follow only when a real backend contract exists; never toggle local fake follow state.
   const follow = async () => {
     if (!onFollow || followLock.current) return;
@@ -72,7 +68,7 @@ function PortfolioPostComponent({ compact = true, item, onLike, onSave, onOption
     () => normalizeHashtags(item.hashtags?.length ? item.hashtags : item.tags || []),
     [item.hashtags, item.tags],
   );
-  const allLabels = [...new Set([...structuredLabels, ...hashtags])];
+  const allLabels = [...new Set(hashtags)];
 
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
     const nextWidth = Math.round(event.nativeEvent.layout.width);

@@ -6,6 +6,7 @@ import { BrandColors, Radius, Spacing, Shadows } from '../../constants/theme';
 import { Strings } from '../../constants/strings';
 import { CategoryChip } from '../ui/CategoryChip';
 import type { ReviewDto } from '../../types/ReviewDto';
+import { SafetyButton } from '../moderation/SafetyButton';
 
 interface ReviewsTabProps {
   reviews: ReviewDto[];
@@ -116,12 +117,12 @@ export function ReviewsTab({ reviews, averageRating, totalReviews }: ReviewsTabP
                 style={styles.avatarGradient}
               >
                 <Text style={styles.avatarInitial}>
-                  {review.customerName?.[0]?.toUpperCase() || 'K'}
+                  {review.isAuthorDeleted ? '?' : review.customerName?.[0]?.toUpperCase() || 'K'}
                 </Text>
               </LinearGradient>
             </View>
             <View style={styles.reviewInfo}>
-              <Text style={styles.reviewName}>{review.customerName}</Text>
+              <Text style={styles.reviewName}>{review.isAuthorDeleted ? 'Người dùng đã xóa' : review.customerName}</Text>
               <Text style={styles.reviewDate}>{formatDate(review.createdAt)}</Text>
             </View>
             <View style={styles.reviewStars}>
@@ -135,7 +136,7 @@ export function ReviewsTab({ reviews, averageRating, totalReviews }: ReviewsTabP
               ))}
             </View>
           </View>
-          <Text style={styles.reviewComment}>{review.comment}</Text>
+          <Text style={styles.reviewComment}>{review.isAuthorDeleted ? 'Nội dung đánh giá đã được xóa.' : review.comment}</Text>
 
           {/* Review Actions */}
           <View style={styles.reviewActions}>
@@ -143,10 +144,10 @@ export function ReviewsTab({ reviews, averageRating, totalReviews }: ReviewsTabP
               <ThumbsUp size={14} color={BrandColors.textMuted} />
               <Text style={styles.actionText}>{Strings.muaHelpful}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
+            {review.isAuthorDeleted ? <SafetyButton target={{ type: 'Review', id: review.reviewId }} ownerId={review.customerId} ownerDeleted /> : <TouchableOpacity style={styles.actionButton}>
               <Flag size={14} color={BrandColors.textMuted} />
               <Text style={styles.actionText}>{Strings.muaReport}</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
         </View>
       ))}

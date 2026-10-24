@@ -28,7 +28,7 @@ const digits = (value: string) => value.replace(/\D/g, '');
 export function ServiceFormModal(props: ServiceFormModalProps) {
   return props.visible ? <ServiceFormContent {...props} /> : null;
 }
-function ServiceFormContent({ onClose, onSubmit, initialData, availableStyles = [], stylesLoading, stylesError, onReloadStyles }: ServiceFormModalProps) {
+function ServiceFormContent({ onClose, onSubmit, initialData, availableStyles = [], stylesLoading, onReloadStyles }: ServiceFormModalProps) {
   const catalog = useMuaStyles();
   const reloadProfile = useRef(onReloadStyles);
   useEffect(() => { reloadProfile.current?.(); }, []);
@@ -118,9 +118,8 @@ function ServiceFormContent({ onClose, onSubmit, initialData, availableStyles = 
               {images.length > 0 && images.length < 5 && <TouchableOpacity accessibilityLabel="Thêm ảnh minh họa" style={[s.imageWrap, s.add]} disabled={disabled || picking} onPress={pickImages}><Text style={s.addText}>{picking ? '...' : '+'}</Text></TouchableOpacity>}
             </View>{error('images')}
           </View>
-          <View style={s.card}><Text style={s.section}>4. Phong cách makeup</Text><Text style={s.subtitle}>Chọn tối đa 5 phong cách. Phong cách mới sẽ được thêm vào chuyên môn của bạn khi lưu.</Text>
+          <View style={s.card}><Text style={s.section}>4. Phong cách makeup</Text><Text style={s.subtitle}>Chọn tối đa 5 phong cách.</Text>
             <MakeupStylePicker styles={catalog.data || []} catalogLoaded={!!catalog.data} historicalStyles={[...availableStyles, ...(initialData?.styleTags || [])]} preferredStyleIds={availableStyles.map(item => item.styleId)} value={selection} onChange={value => { setSelection(value); setStylesDirty(true); clear('submit'); }} limit={5} disabled={disabled} loading={catalog.isFetching || catalog.isLoading || stylesLoading} loadError={catalog.isError} fallbackReason={catalog.fallbackReason} onReload={() => { void catalog.refetch(); onReloadStyles?.(); }} />
-            {!!stylesError && <Text style={s.subtitle}>Chưa tải được chuyên môn hiện tại. Bạn vẫn có thể tìm trong catalog; hệ thống sẽ kiểm tra tổng chuyên môn khi lưu.</Text>}
             {!!initialData?.tags?.length && <Text style={s.subtitle}>Từ khóa đã lưu: {initialData.tags.join(', ')}. Từ khóa lịch sử chưa ánh xạ vẫn được giữ.</Text>}
           </View>
           {retryPending && <Text style={s.subtitle}>Chưa xác nhận được lần lưu trước. Bấm Lưu để thử lại cùng nội dung; kiểm tra danh sách dịch vụ trước khi đóng và tạo mới.</Text>}

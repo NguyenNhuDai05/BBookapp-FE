@@ -3,6 +3,7 @@ export interface ReviewDto {
   bookingId: string;
   customerId: string;
   customerName: string;
+  isAuthorDeleted?: boolean;
   muaId: string;
   rating: number;
   comment?: string;

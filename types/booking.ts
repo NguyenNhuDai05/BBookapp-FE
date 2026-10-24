@@ -142,6 +142,7 @@ export interface BookingDto {
   // Status timestamps
   confirmedAt?: string;
   depositPaidAt?: string;
+  muaConfirmationDeadline?: string;
   startedAt?: string;
   waitingCustomerAt?: string;
   customerConfirmationDeadline?: string;
