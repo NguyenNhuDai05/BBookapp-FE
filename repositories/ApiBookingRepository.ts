@@ -4,6 +4,10 @@ import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, Cance
 import { mapBookingPaymentStatus, mapBookingStatus, mapPaymentStatus, mapRefundSummary } from '../utils/bookingStatus';
 
 export class ApiBookingRepository implements IBookingRepository {
+  async reconcileDeposit(bookingId: string): Promise<BookingDto> {
+    const { data } = await api.post(`/Booking/${bookingId}/deposit-payment/reconcile`);
+    return this.mapToBookingDto(data);
+  }
   async performDemoAction(bookingId: string, action: import('../utils/playReview').DemoBookingAction): Promise<BookingDto> {
     const paths = { paymentSucceed: 'demo-payment/succeed', counterpartAccept: 'demo-counterpart/accept', counterpartReject: 'demo-counterpart/reject' };
     if (!Object.prototype.hasOwnProperty.call(paths, action)) throw new Error('Thao tác không hợp lệ.');

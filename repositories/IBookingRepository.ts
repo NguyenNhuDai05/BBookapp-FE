@@ -5,6 +5,7 @@ export interface IBookingRepository {
   getAvailableTimeSlots(muaId: string, date: string, durationMinutes: number): Promise<TimeSlotDto[]>;
   createBooking(request: CreateBookingRequest): Promise<BookingDto>;
   createDepositPayment(bookingId: string): Promise<BookingPaymentDto>;
+  reconcileDeposit(bookingId: string): Promise<BookingDto>;
   disputeBooking(bookingId: string, reason: string): Promise<BookingDto>;
   getUserBookings(): Promise<BookingDto[]>;
   getBookingDetail(bookingId: string): Promise<BookingDto>;

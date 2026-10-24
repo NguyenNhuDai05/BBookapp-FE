@@ -5,6 +5,7 @@ import { getApiError } from '../services/api';
 import { MUA_ELIGIBILITY_QUERY_KEY } from './useMuaEligibility';
 import { useIsFocused, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
+import { depositConfirmationState } from '../utils/depositConfirmation';
 
 const invalidateBookingState = (queryClient: ReturnType<typeof useQueryClient>, bookingId?: string) => {
   queryClient.invalidateQueries({ queryKey: ['userBookings'] });
@@ -46,14 +47,17 @@ export const useUserBookings = () => {
 };
 
 export const useBookingDetail = (bookingId: string, pollUntilPaid = false) => {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['bookingDetail', bookingId],
     queryFn: () => bookingService.getBookingDetail(bookingId),
     enabled: !!bookingId,
     refetchInterval: pollUntilPaid
-      ? query => query.state.data?.paymentStatus === 4 ? false : 2000
+      ? query => query.state.data && depositConfirmationState(query.state.data) !== 'pending' ? false : 2000
       : false,
   });
+  const { refetch } = query;
+  useFocusEffect(useCallback(() => { if (bookingId) void refetch(); }, [bookingId, refetch]));
+  return query;
 };
 
 export const useCreateBooking = () => {
