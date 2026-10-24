@@ -42,6 +42,7 @@ export interface PortfolioCommentDto {
   parentCommentId?: string;
   userName?: string;
   userAvatarUrl?: string;
+  isAuthorDeleted?: boolean;
   content: string;
   createdAt: string;
   replies?: PortfolioCommentDto[];

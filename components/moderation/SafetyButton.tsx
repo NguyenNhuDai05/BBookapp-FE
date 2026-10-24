@@ -8,7 +8,7 @@ import { ReportSheet } from './ReportSheet';
 import { moderationService, type ReportTarget } from '../../services/moderationService';
 import { useAuthStore } from '../../store/useAuthStore';
 import { getApiError } from '../../services/api';
-export function SafetyButton({ target, ownerId }: { target: ReportTarget; ownerId: string }) {
+export function SafetyButton({ target, ownerId, ownerDeleted = false }: { target: ReportTarget; ownerId: string; ownerDeleted?: boolean }) {
   const self = useAuthStore(state => state.user?.id); const cache = useQueryClient();
   const [open, setOpen] = useState(false); const [report, setReport] = useState<ReportTarget | null>(null);
   if (!self || ownerId.toLowerCase() === self.toLowerCase()) return null;
@@ -19,9 +19,11 @@ export function SafetyButton({ target, ownerId }: { target: ReportTarget; ownerI
       catch (error) { AppAlert.alert('Không thể chặn', getApiError(error).message); }
     } }]);
   }
-  return <><TouchableOpacity accessibilityRole="button" accessibilityLabel="Báo cáo hoặc chặn người dùng" onPress={() => setOpen(true)} style={{ paddingVertical: 8 }}><Text style={{ color: '#C71585', fontSize: 12 }}>Báo cáo / Chặn</Text></TouchableOpacity><ActionSheet visible={open} title="An toàn nội dung" onClose={() => setOpen(false)} actions={[
+  return <><TouchableOpacity accessibilityRole="button" accessibilityLabel={ownerDeleted ? 'Báo cáo nội dung' : 'Báo cáo hoặc chặn người dùng'} onPress={() => setOpen(true)} style={{ paddingVertical: 8 }}><Text style={{ color: '#C71585', fontSize: 12 }}>{ownerDeleted ? 'Báo cáo' : 'Báo cáo / Chặn'}</Text></TouchableOpacity><ActionSheet visible={open} title="An toàn nội dung" onClose={() => setOpen(false)} actions={[
     { id: 'content', label: 'Báo cáo nội dung', icon: Flag, onPress: () => { setOpen(false); setReport(target); } },
-    { id: 'user', label: 'Báo cáo người dùng', icon: Flag, onPress: () => { setOpen(false); setReport({ type: 'User', id: ownerId }); } },
-    { id: 'block', label: 'Chặn người dùng', icon: UserRoundX, destructive: true, onPress: block },
+    ...(!ownerDeleted ? [
+      { id: 'user', label: 'Báo cáo người dùng', icon: Flag, onPress: () => { setOpen(false); setReport({ type: 'User', id: ownerId }); } },
+      { id: 'block', label: 'Chặn người dùng', icon: UserRoundX, destructive: true, onPress: block },
+    ] : []),
   ]} /><ReportSheet target={report} onClose={() => setReport(null)} /></>;
 }
