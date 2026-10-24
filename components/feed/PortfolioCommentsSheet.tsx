@@ -17,6 +17,20 @@ type Props = {
 
 const getPostId = (item: PortfolioItemDto) => String(item.id || item.portfolioId || '');
 
+function CommentContent({ comment, onReply }: { comment: PortfolioCommentDto; onReply?: (comment: PortfolioCommentDto) => void }) {
+  return <>
+    <Text style={styles.user}>{comment.isAuthorDeleted ? 'Người dùng đã xóa' : comment.userName || 'Người dùng'}</Text>
+    <Text style={styles.content}>{comment.isAuthorDeleted ? 'Bình luận đã được xóa' : comment.content}</Text>
+    {!comment.isAuthorDeleted && <>
+      <SafetyButton target={{ type: 'Comment', id: comment.id }} ownerId={comment.userId} />
+      {onReply && <TouchableOpacity accessibilityRole="button" accessibilityLabel={`Trả lời ${comment.userName || 'người dùng'}`} onPress={() => onReply(comment)}><Text style={styles.replyAction}>Trả lời</Text></TouchableOpacity>}
+    </>}
+    {(comment.replies || []).map(reply => (
+      <View key={reply.id} style={styles.reply}><CommentContent comment={reply} /></View>
+    ))}
+  </>;
+}
+
 export function PortfolioCommentsSheet({ item, onClose }: Props) {
   const queryClient = useQueryClient();
   const [comments, setComments] = useState<PortfolioCommentDto[]>([]);
@@ -32,12 +46,14 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
     portfolioService.getComments(currentPostId)
       .then(data => {
         if (mounted) {
+          setReplyingTo(current => current ? data.find(comment => comment.id === current.id && !comment.isAuthorDeleted) ?? null : null);
           setComments(data);
           setLoadedPostId(currentPostId);
         }
       })
       .catch(() => {
         if (mounted) {
+          setReplyingTo(null);
           setComments([]);
           setLoadedPostId(currentPostId);
           appDialog.alert('Không thể tải bình luận', 'Vui lòng kiểm tra kết nối và thử lại.');
@@ -57,7 +73,7 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
   };
 
   const sendComment = async () => {
-    if (!item || !text.trim() || sending) return;
+    if (!item || loading || !text.trim() || sending || replyingTo?.isAuthorDeleted) return;
     setSending(true);
     try {
       if (replyingTo) {
@@ -92,17 +108,9 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
               keyExtractor={(comment, index) => String(comment.id || index)}
               renderItem={({ item: comment }) => (
                 <View style={styles.row}>
-                  <View style={styles.avatar}><Text>{(comment.userName || 'U')[0]}</Text></View>
+                  <View style={styles.avatar}><Text>{comment.isAuthorDeleted ? '?' : (comment.userName || 'U')[0]}</Text></View>
                   <View style={styles.bubble}>
-                    <Text style={styles.user}>{comment.userName || 'Người dùng'}</Text>
-                    <Text style={styles.content}>{comment.content}</Text><SafetyButton target={{ type: 'Comment', id: comment.id }} ownerId={comment.userId} />
-                    <TouchableOpacity onPress={() => setReplyingTo(comment)}><Text style={styles.replyAction}>Trả lời</Text></TouchableOpacity>
-                    {(comment.replies || []).map(reply => (
-                      <View key={reply.id} style={styles.reply}>
-                        <Text style={styles.user}>{reply.userName || 'Người dùng'}</Text>
-                        <Text style={styles.content}>{reply.content}</Text><SafetyButton target={{ type: 'Comment', id: reply.id }} ownerId={reply.userId} />
-                      </View>
-                    ))}
+                    <CommentContent comment={comment} onReply={setReplyingTo} />
                   </View>
                 </View>
               )}
@@ -126,7 +134,7 @@ export function PortfolioCommentsSheet({ item, onClose }: Props) {
               maxLength={1000}
               style={styles.input}
             />
-            <TouchableOpacity onPress={sendComment} disabled={sending || !text.trim()} style={styles.sendButton}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Gửi bình luận" onPress={sendComment} disabled={loading || sending || !text.trim()} style={styles.sendButton}>
               {sending ? <ActivityIndicator color={BrandColors.accentPink} /> : <Send size={22} color={text.trim() ? BrandColors.accentPink : BrandColors.textLight} />}
             </TouchableOpacity>
           </View>
