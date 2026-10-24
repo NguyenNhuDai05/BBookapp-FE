@@ -3,6 +3,9 @@ import { ApiBookingRepository } from '../repositories/ApiBookingRepository';
 import { BookingDto, BookingPaymentDto, TimeSlotDto, CreateBookingRequest, CancelBookingRequest, ReviewCreateRequest } from '../types/booking';
 
 class BookingService {
+  reconcileDeposit(bookingId: string): Promise<BookingDto> {
+    return this.repository.reconcileDeposit(bookingId);
+  }
   performDemoAction(bookingId: string, action: import('../utils/playReview').DemoBookingAction) {
     return this.repository.performDemoAction(bookingId, action);
   }

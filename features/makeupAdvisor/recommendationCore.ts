@@ -5,6 +5,7 @@ import overlay from './compatibilityOverlay20.json';
 import legacy from './bbook-makeup-style-library.vi.json';
 import {buildFaceProfile} from './faceFeatures/profileV2';
 import {compatibilityRules,type TechniqueKey} from './techniqueCompatibility';
+import {scoreMeasurements} from './measurementRanking';
 import type {Extraction,FaceFeatureSummaryV3} from './faceFeatures/extractor';
 import type {Intensity,LibraryPreferences,Occasion} from './styleLibrary';
 export const scoringPolicy={faceBudget:1,occasionBonus:.12,intensityBonus:.08} as const;
@@ -24,7 +25,7 @@ export function validateConfiguration(pool:readonly Candidate[],order:readonly s
 }
 validateConfiguration(candidates,tieBreakOrder);
 export type StyleScore={styleKey:string;displayName:string;faceScore:number;preferenceScore:number;finalScore:number;selected:boolean;selectionReason:'face-technique-match'|'explicit-preference'|'diverse-discovery';evidenceStatus:'experimental'|'preference-only'|'fallback';ruleContributions:{ruleId:string;feature:string;techniqueKey:TechniqueKey;contribution:number;explanation:string}[];preferenceContributions:{kind:'occasion'|'intensity';value:string;contribution:number;explanation:string}[];explanations:string[]};
-export type EngineOptions={experimental?:boolean;localFeatures?:Extraction['features'];qualityContext?:Extraction['qualityContext']};
+export type EngineOptions={experimental?:boolean;measurementRanking?:boolean;localFeatures?:Extraction['features'];qualityContext?:Extraction['qualityContext']};
 export function evaluateRanking(summary:FaceFeatureSummaryV3|undefined,preferences:LibraryPreferences={occasion:null,intensity:null},options:EngineOptions={}){
  const profile=buildFaceProfile(summary,options.localFeatures,options.qualityContext);
  const active=options.experimental===false?[]:compatibilityRules.filter(r=>{const m=profile.measurements[r.feature];return m?.quality===r.requiredQuality&&m.calibration==='provisional'&&m.observation===r.observation&&r.evidenceStatus==='experimental'&&r.reviewStatus==='pending';});
@@ -32,19 +33,20 @@ export function evaluateRanking(summary:FaceFeatureSummaryV3|undefined,preferenc
  const pool=candidates;
  const ranked=pool.filter(c=>c.key!=='bridal-soft-glam'||preferences.occasion==='wedding').map(c=>{
   const rules=active.filter(r=>c.ruleIds.includes(r.id)&&c.techniqueKeys.includes(r.techniqueKey));
-  const faceScore=activeFeatures.length?new Set(rules.map(r=>r.feature)).size/activeFeatures.length*scoringPolicy.faceBudget:0;
+  const measured = options.measurementRanking && options.experimental !== false ? scoreMeasurements(c.key, profile) : null;
+  const faceScore=measured ? measured.reduce((sum, r) => sum + r.contribution, 0) : activeFeatures.length?new Set(rules.map(r=>r.feature)).size/activeFeatures.length*scoringPolicy.faceBudget:0;
   const prefs:StyleScore['preferenceContributions']=[];
   if(preferences.occasion&&c.occasions.includes(preferences.occasion))prefs.push({kind:'occasion',value:preferences.occasion,contribution:scoringPolicy.occasionBonus,explanation:`Sở thích dịp ${preferences.occasion}: +${scoringPolicy.occasionBonus}`});
   if(preferences.intensity&&c.intensity===preferences.intensity)prefs.push({kind:'intensity',value:preferences.intensity,contribution:scoringPolicy.intensityBonus,explanation:`Sở thích độ đậm ${preferences.intensity}: +${scoringPolicy.intensityBonus}`});
   const preferenceScore=prefs.reduce((sum,p)=>sum+p.contribution,0);
-  const contributions=rules.map(r=>({ruleId:r.id,feature:r.feature,techniqueKey:r.techniqueKey,contribution:scoringPolicy.faceBudget/Math.max(1,activeFeatures.length)/rules.filter(x=>x.feature===r.feature).length,explanation:r.explanation}));
-  const row:StyleScore={styleKey:c.key,displayName:c.displayName,faceScore,preferenceScore,finalScore:faceScore+preferenceScore,selected:false,selectionReason:rules.length?'face-technique-match':preferenceScore?'explicit-preference':'diverse-discovery',evidenceStatus:rules.length?'experimental':preferenceScore?'preference-only':'fallback',ruleContributions:contributions,preferenceContributions:prefs,explanations:[...new Set(contributions.map(r=>r.explanation)),...prefs.map(p=>p.explanation)]};
+  const contributions=measured ?? rules.map(r=>({ruleId:r.id,feature:r.feature,techniqueKey:r.techniqueKey,contribution:scoringPolicy.faceBudget/Math.max(1,activeFeatures.length)/rules.filter(x=>x.feature===r.feature).length,explanation:r.explanation}));
+  const row:StyleScore={styleKey:c.key,displayName:c.displayName,faceScore,preferenceScore,finalScore:faceScore+preferenceScore,selected:false,selectionReason:faceScore>0?'face-technique-match':preferenceScore?'explicit-preference':'diverse-discovery',evidenceStatus:faceScore>0?'experimental':preferenceScore?'preference-only':'fallback',ruleContributions:contributions,preferenceContributions:prefs,explanations:[...new Set(contributions.map(r=>r.explanation)),...prefs.map(p=>p.explanation)]};
   return {row,intensity:c.intensity};
  }).sort((a,b)=>b.row.finalScore-a.row.finalScore||tieBreakOrder.indexOf(a.row.styleKey)-tieBreakOrder.indexOf(b.row.styleKey)||a.row.styleKey.localeCompare(b.row.styleKey));
  const scoreOrder=ranked.map(r=>r.row.styleKey),selected:typeof ranked=[];
  while(selected.length<Math.min(3,pool.length)&&ranked.length){const best=ranked[0].row.finalScore,candidates=ranked.filter(r=>r.row.finalScore===best);const next=candidates.find(r=>!selected.some(s=>s.intensity===r.intensity))||candidates[0];next.row.selected=true;selected.push(next);ranked.splice(ranked.indexOf(next),1);}
- return {top3:selected.map(r=>r.row),scores:[...selected,...ranked].map(r=>r.row),scoreOrder,activatedRules:active.map(r=>r.id),acceptedFeatures:Object.values(profile.measurements).filter(m=>m.quality==='provisional').map(m=>m.key),rejectedFeatures:Object.values(profile.measurements).filter(m=>m.quality!=='provisional').map(m=>({key:m.key,reason:m.reason})),preferences};
+ return {measurements:Object.entries(profile.measurements).filter(([key])=>['eyeSpacing','eyeAspect','browArch','mouthAspect'].includes(key)).map(([key,m])=>({key,value:m.value,quality:m.quality,reason:m.reason})),top3:selected.map(r=>r.row),scores:[...selected,...ranked].map(r=>r.row),scoreOrder,activatedRules:options.measurementRanking ? [...new Set([...selected, ...ranked].flatMap(r => r.row.ruleContributions.map(c => c.ruleId)))] : active.map(r=>r.id),acceptedFeatures:Object.values(profile.measurements).filter(m=>m.quality==='provisional').map(m=>m.key),rejectedFeatures:Object.values(profile.measurements).filter(m=>m.quality!=='provisional').map(m=>({key:m.key,reason:m.reason})),preferences};
 }
 
-export type RankingTrace={experimentalEnabled:boolean;acceptedFeatures:string[];rejectedFeatures:{key:string;reason:string}[];activatedRules:string[];source:'face-aware'|'fallback';styles:{styleKey:string;ruleContributions:{ruleId:string;feature:string;techniqueKey:TechniqueKey;contribution:number}[];faceScore:number;preferenceScore:number;finalScore:number;selected:boolean;selectionReason:string;selectionBasis?:string}[]};
+export type RankingTrace={algorithmVersion?:string;measurements?:{key:string;value:number|null;quality:string;reason:string|null}[];experimentalEnabled:boolean;acceptedFeatures:string[];rejectedFeatures:{key:string;reason:string}[];activatedRules:string[];source:'face-aware'|'fallback';styles:{styleKey:string;ruleContributions:{ruleId:string;feature:string;techniqueKey:TechniqueKey;contribution:number}[];faceScore:number;preferenceScore:number;finalScore:number;selected:boolean;selectionReason:string;selectionBasis?:string}[]};
 

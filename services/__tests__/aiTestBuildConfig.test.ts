@@ -29,7 +29,7 @@ it('isolates standalone AI APK package, scheme and push without changing product
   expect(eas.build.production.autoIncrement).toBe(true);
   expect(eas.build['ai-test'].developmentClient).toBe(false);
   expect(eas.build['ai-test'].android.buildType).toBe('apk');
-  expect(eas.build['ai-test'].env.EXPO_PUBLIC_API_URL).toBe('https://beautybook-13zj.onrender.com/api');
+  expect(eas.build['ai-test'].env.EXPO_PUBLIC_API_URL).toBe('https://beautybook-v3bi.onrender.com/api');
 });
 it('fails closed if variant and EAS profile disagree', () => {
   process.env.BBOOK_BUILD_VARIANT = 'ai-test'; process.env.EAS_BUILD_PROFILE = 'production';

@@ -13,13 +13,13 @@ import { REVIEW_FINANCIAL_NOTICE } from '../../utils/playReview';
 import { ReviewNotice } from '../../components/ReviewNotice';
 import { ReviewCounterpartActions } from '../../components/booking/ReviewCounterpartActions';
 import { SamplePaymentConfirmation } from '../../components/booking/SamplePaymentConfirmation';
-import type { BookingPaymentDto } from '../../types/booking';
 import { getApiError } from '../../services/api';
 import { ComplaintEntry } from '../../components/booking/ComplaintEntry';
-import { BookingStatus } from '../../types/booking';
+import { PaymentStatus, type BookingStatus, type BookingPaymentDto } from '../../types/booking';
 import { BookingTimeline } from '../../components/BookingTimeline';
 import { openDepositCheckout } from '../../services/bookingPaymentFlow';
 import { BookingLocationCard } from '../../components/booking/BookingLocationCard';
+import { hasRecordedDeposit, depositConfirmationState } from '../../utils/depositConfirmation';
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; color: string; bg: string }> = {
   PENDING_PAYMENT: { label: 'Chờ thanh toán cọc', color: '#FF9800', bg: '#FFF3E0' },
@@ -64,6 +64,13 @@ export default function BookingDetailScreen() {
   }
 
   const statusInfo = STATUS_CONFIG[booking.status];
+  const depositRecorded = hasRecordedDeposit(booking);
+  const depositState = depositConfirmationState(booking);
+  const depositLabel = !depositRecorded ? 'Tiền cọc chưa được xác nhận'
+    : booking.paymentStatus === PaymentStatus.REFUND_PENDING ? 'Khoản cọc đang xử lý hoàn'
+    : booking.paymentStatus === PaymentStatus.REFUNDED ? 'Khoản cọc đã hoàn'
+    : depositState === 'refund' ? 'Khoản cọc đã có kết quả xử lý'
+    : user?.isDemoAccount ? 'Khoản cọc mẫu đã xác nhận' : `Đã cọc qua ${booking.paymentMethod}`;
 
   const handlePayDeposit = async () => {
     try {
@@ -184,11 +191,11 @@ export default function BookingDetailScreen() {
             <Text style={styles.paymentValueTotal}>{booking.totalAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
           <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>{user?.isDemoAccount ? 'Khoản cọc mẫu' : `Đã cọc qua ${booking.paymentMethod}`}</Text>
-            <Text style={styles.paymentValuePaid}>- {booking.depositAmount.toLocaleString('vi-VN')}đ</Text>
+            <Text style={styles.paymentLabel}>{depositLabel}</Text>
+            <Text style={[styles.paymentValuePaid, !depositRecorded && { color: BrandColors.textBody }]}>{depositState === 'success' ? '- ' : ''}{booking.depositAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
           <View style={styles.paymentRow}>
-            <Text style={styles.paymentLabel}>Cần thanh toán sau</Text>
+            <Text style={styles.paymentLabel}>{depositRecorded ? 'Cần thanh toán sau' : 'Còn lại sau khi xác nhận cọc'}</Text>
             <Text style={styles.paymentValueRemaining}>{booking.remainingAmount.toLocaleString('vi-VN')}đ</Text>
           </View>
           <View style={styles.paymentRow}>
@@ -223,8 +230,11 @@ export default function BookingDetailScreen() {
       {samplePayment ? <SamplePaymentConfirmation payment={samplePayment} onClose={() => setSamplePayment(null)} onSuccess={() => setSamplePayment(null)} /> : null}
 
       {/* Cancel Action */}
-      {booking.status === 'PENDING_PAYMENT' && (
+      {booking.status === 'PENDING_PAYMENT' && !depositRecorded && (
         <View style={styles.footer}>
+          <TouchableOpacity style={{ padding: 10, alignItems: 'center' }} onPress={() => router.push({ pathname: '/checkout/success', params: { bookingId: booking.id } })}>
+            <Text style={{ color: BrandColors.accentPink, fontFamily: Typography.bold }}>Đã chuyển tiền? Kiểm tra thanh toán</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.primaryBtn} onPress={handlePayDeposit} disabled={isPaying}>
             <Text style={styles.actionBtnText}>{isPaying ? 'Đang thanh toán...' : 'Thanh toán cọc'}</Text>
           </TouchableOpacity>

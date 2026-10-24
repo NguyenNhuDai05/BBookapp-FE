@@ -73,7 +73,36 @@
         "Nâu nhạt",
         "San hô"
       ],
-      "intensityLabel": "Nhẹ nhàng"
+      "intensityLabel": "Nhẹ nhàng",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-high-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-high-soft",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "douyin",
@@ -145,7 +174,36 @@
         "Nâu",
         "Đỏ"
       ],
-      "intensityLabel": "Đậm nét"
+      "intensityLabel": "Đậm nét",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-low-outer",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-high-gradient",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-high-soft",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "clean-girl",
@@ -217,7 +275,31 @@
         "Ánh đồng",
         "Hồng phấn"
       ],
-      "intensityLabel": "Nhẹ nhàng"
+      "intensityLabel": "Nhẹ nhàng",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-high-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-high-natural",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "natural",
@@ -279,7 +361,36 @@
         "Đào nude",
         "Be nhạt"
       ],
-      "intensityLabel": "Nhẹ nhàng"
+      "intensityLabel": "Nhẹ nhàng",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-high-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-high-natural",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-high-soft",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "peach",
@@ -351,7 +462,46 @@
         "Hồng ấm",
         "Cam mơ"
       ],
-      "intensityLabel": "Vừa phải"
+      "intensityLabel": "Vừa phải",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-low-outer",
+            "weight": 1
+          },
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-high-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-high-gradient",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-high-soft",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "strawberry",
@@ -416,7 +566,36 @@
         "Đỏ mọng",
         "Nâu dịu"
       ],
-      "intensityLabel": "Vừa phải"
+      "intensityLabel": "Vừa phải",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-high-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-high-natural",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-high-soft",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "latte",
@@ -488,7 +667,41 @@
         "Be ấm",
         "Ánh đồng"
       ],
-      "intensityLabel": "Vừa phải"
+      "intensityLabel": "Vừa phải",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-low-outer",
+            "weight": 1
+          },
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-high-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-high-gradient",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-low-outline",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "soft-glam",
@@ -553,7 +766,41 @@
         "Nâu xám",
         "Hồng tím đất"
       ],
-      "intensityLabel": "Đậm nét"
+      "intensityLabel": "Đậm nét",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-low-outer",
+            "weight": 1
+          },
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-high-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-high-gradient",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-low-outline",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "thai-glam",
@@ -625,7 +872,31 @@
         "Nude ấm",
         "Cam cháy"
       ],
-      "intensityLabel": "Đậm nét"
+      "intensityLabel": "Đậm nét",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-low-outer",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-high-gradient",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-low-outline",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "smokey-eyes",
@@ -688,7 +959,26 @@
         "Bạc",
         "Nude"
       ],
-      "intensityLabel": "Đậm nét"
+      "intensityLabel": "Đậm nét",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-high-gradient",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-low-soft",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "bridal-soft-glam",
@@ -751,7 +1041,41 @@
         "Đào nhạt",
         "Trắng ngọc trai"
       ],
-      "intensityLabel": "Vừa phải"
+      "intensityLabel": "Vừa phải",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-high-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-high-gradient",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-low-outline",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "classic-glam",
@@ -816,7 +1140,26 @@
         "Trắng ngà",
         "Vàng kim"
       ],
-      "intensityLabel": "Đậm nét"
+      "intensityLabel": "Đậm nét",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-low-outer",
+            "weight": 1
+          },
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-low-outline",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "j-beauty",
@@ -874,7 +1217,26 @@
         "Be",
         "San hô"
       ],
-      "intensityLabel": "Nhẹ nhàng"
+      "intensityLabel": "Nhẹ nhàng",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-high-natural",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "igari",
@@ -932,7 +1294,15 @@
         "San hô",
         "Cam đào"
       ],
-      "intensityLabel": "Vừa phải"
+      "intensityLabel": "Vừa phải",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "preference-only",
+        "featureRules": []
+      }
     },
     {
       "key": "ulzzang",
@@ -990,7 +1360,26 @@
         "Nâu",
         "San hô"
       ],
-      "intensityLabel": "Vừa phải"
+      "intensityLabel": "Vừa phải",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-low-soft",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "western-glam",
@@ -1046,7 +1435,26 @@
         "Nâu ấm",
         "Nude"
       ],
-      "intensityLabel": "Đậm nét"
+      "intensityLabel": "Đậm nét",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "mouthAspect",
+            "ruleId": "lip-low-outline",
+            "weight": 1
+          },
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-high-gradient",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "nude-makeup",
@@ -1104,7 +1512,26 @@
         "Nâu xám",
         "Hồng tím đất"
       ],
-      "intensityLabel": "Vừa phải"
+      "intensityLabel": "Vừa phải",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-high-natural",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "fox-eye",
@@ -1162,7 +1589,21 @@
         "Nâu xám",
         "Hồng hoa hồng"
       ],
-      "intensityLabel": "Đậm nét"
+      "intensityLabel": "Đậm nét",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeSpacing",
+            "ruleId": "spacing-low-outer",
+            "weight": 1
+          }
+        ]
+      }
     },
     {
       "key": "sunkissed",
@@ -1220,7 +1661,15 @@
         "San hô",
         "Caramel"
       ],
-      "intensityLabel": "Vừa phải"
+      "intensityLabel": "Vừa phải",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "preference-only",
+        "featureRules": []
+      }
     },
     {
       "key": "glass-skin",
@@ -1278,7 +1727,26 @@
         "Vàng champagne",
         "Cam đào"
       ],
-      "intensityLabel": "Nhẹ nhàng"
+      "intensityLabel": "Nhẹ nhàng",
+      "recommendationProfile": {
+        "version": "measurements-v2",
+        "evidenceStatus": "experimental",
+        "reviewStatus": "pending",
+        "missingFeaturePolicy": "ignore-and-report",
+        "mode": "face-and-preference",
+        "featureRules": [
+          {
+            "feature": "eyeAspect",
+            "ruleId": "opening-low-soft",
+            "weight": 1
+          },
+          {
+            "feature": "browArch",
+            "ruleId": "arch-high-natural",
+            "weight": 1
+          }
+        ]
+      }
     }
   ],
   "localizationNote": "Machine fields key/name/intensity/occasions/tags/colorPalette retained for compatibility; UI must render displayName/intensityLabel/occasionLabels/tagLabels/colorPaletteLabels. Editorial content needs professional review."

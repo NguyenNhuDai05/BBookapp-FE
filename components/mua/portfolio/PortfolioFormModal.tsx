@@ -1,6 +1,8 @@
+import { ArrowLeft, Camera, Plus, ShoppingBag, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppBottomSheet } from '../../ui/AppBottomSheet';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { ActivityIndicator, View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Image, useWindowDimensions } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { AppAlert as appDialog } from '../../ui/dialogStore';
 import * as ImagePicker from 'expo-image-picker';
@@ -28,6 +30,8 @@ export function PortfolioFormModal(props: PortfolioFormModalProps) {
 }
 function PortfolioFormContent({ visible, onClose, onSubmit, initialData }: PortfolioFormModalProps) {
   const client = useQueryClient();
+  const { width } = useWindowDimensions();
+  const photoUnit = (Math.min(width, 640) - 60) / 4;
   const editId = initialData?.id || initialData?.portfolioId;
   const [base, setBase] = useState(() => normalizePortfolio(initialData));
   const [description, setDescription] = useState(base.description || '');
@@ -38,6 +42,7 @@ function PortfolioFormContent({ visible, onClose, onSubmit, initialData }: Portf
   const [ownerError, setOwnerError] = useState('');
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [inputEpoch, setInputEpoch] = useState(0);
+  const [servicesOpen, setServicesOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isPicking, setIsPicking] = useState(false);
   const [message, setMessage] = useState('');
@@ -132,21 +137,21 @@ function PortfolioFormContent({ visible, onClose, onSubmit, initialData }: Portf
     catch { setMessage('Đã lưu portfolio, nhưng chưa tải lại được dữ liệu mới. Vui lòng thử tải lại.'); }
     finally { saving.current = false; setIsUploading(false); }
   };
-  return <AppBottomSheet visible={visible} title={editId ? 'Sửa Portfolio' : 'Thêm tác phẩm'} onClose={onClose} loading={busy} contentStyle={{ height: '85%' }}>
+  return <AppBottomSheet visible={visible} onClose={onClose} loading={busy} contentStyle={styles.composer}>
+    <View style={styles.composerHeader}><TouchableOpacity accessibilityRole="button" accessibilityLabel="Quay lại" onPress={onClose} disabled={busy} style={styles.backButton}><ArrowLeft size={24} color="#191528" /></TouchableOpacity><Text accessibilityRole="header" style={styles.composerTitle}>{editId ? 'Chỉnh sửa bài viết' : 'Đăng bài'}</Text><Text style={styles.composerSubtitle}>Chia sẻ tác phẩm của bạn</Text></View>
     <ScrollView style={styles.formContent} contentContainerStyle={{ paddingBottom: Spacing.lg }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
       {!ready ? <View><ActivityIndicator color={BrandColors.accentRose} /><Text style={styles.label}>{ownerError || 'Đang tải tác phẩm mới nhất…'}</Text>{ownerError ? <TouchableOpacity accessibilityRole="button" onPress={() => setLoadAttempt(a => a + 1)} style={styles.cancelBtn}><Text>Tải lại tác phẩm</Text></TouchableOpacity> : null}</View> : <>
         <View style={styles.inputGroup}>
-          <View style={styles.imageHeader}><Text style={styles.label}>Hình ảnh * · {imageUrls.length}/5</Text>{imageUrls.length > 0 && <TouchableOpacity accessibilityRole="button" accessibilityLabel="Xóa tất cả ảnh" disabled={frozen} onPress={() => setImageUrls([])} style={styles.clearImages}><Text style={styles.clearImagesText}>Xóa tất cả</Text></TouchableOpacity>}</View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {imageUrls.map((uri, idx) => <View key={`${uri}-${idx}`} style={[styles.imagePickerBtn, { width: 120, height: 160, marginRight: 10 }]}><Image source={{ uri }} style={styles.previewImage} /><TouchableOpacity accessibilityRole="button" accessibilityLabel={`Xóa ảnh ${idx + 1}`} disabled={frozen} style={styles.removeImage} onPress={() => setImageUrls(current => current.filter((_, i) => i !== idx))}><Text style={styles.removeImageText}>×</Text></TouchableOpacity></View>)}
-            {imageUrls.length < 5 && <TouchableOpacity accessibilityRole="button" accessibilityLabel="Thêm ảnh tác phẩm" disabled={frozen} style={[styles.imagePickerBtn, { width: 120, height: 160 }]} onPress={pickImage}><Text style={styles.imagePickerText}>+ Chọn ảnh</Text></TouchableOpacity>}
+          <View style={styles.imageHeader}><Text style={styles.label}>Chọn ảnh</Text><Text style={styles.imageCount}>{imageUrls.length}/5</Text>{imageUrls.length > 0 && <TouchableOpacity accessibilityRole="button" accessibilityLabel="Xóa tất cả ảnh" disabled={frozen} onPress={() => setImageUrls([])} style={styles.clearImages}><Text style={styles.clearImagesText}>Xóa tất cả</Text></TouchableOpacity>}</View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoRow}>
+            {imageUrls.map((uri, idx) => <View key={uri} style={[styles.imagePickerBtn, idx === 0 ? [styles.heroPhoto, { width: photoUnit * 2 }] : [styles.smallPhoto, { width: photoUnit }]]}><Image source={{ uri }} style={styles.previewImage} /><TouchableOpacity accessibilityRole="button" accessibilityLabel={`Xóa ảnh ${idx + 1}`} disabled={frozen} style={styles.removeImage} onPress={() => setImageUrls(current => current.filter((_, i) => i !== idx))}><Text style={styles.removeImageText}>×</Text></TouchableOpacity></View>)}
+            {Array.from({ length: Math.max(0, 3 - imageUrls.length) || (imageUrls.length < 5 ? 1 : 0) }, (_, index) => <TouchableOpacity key={index} accessibilityRole="button" accessibilityLabel={index === 0 ? 'Thêm ảnh tác phẩm' : 'Thêm ảnh vào album'} disabled={frozen} style={[styles.imagePickerBtn, !imageUrls.length && index === 0 ? [styles.heroPhoto, { width: photoUnit * 2 }] : [styles.smallPhoto, { width: photoUnit }]]} onPress={pickImage}><LinearGradient colors={['#FFF9FB', '#FFF0F5']} style={StyleSheet.absoluteFill} /><View style={styles.photoIcon}>{!imageUrls.length && index === 0 ? <Camera size={28} color="#F23879" /> : <Plus size={28} color="#F23879" />}</View>{!imageUrls.length && index === 0 && <Text style={styles.imagePickerText}>Thêm ảnh</Text>}</TouchableOpacity>)}
           </ScrollView>
         </View>
-        <View style={styles.inputGroup}><Text style={styles.label}>Gắn dịch vụ vào bài viết</Text><ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity disabled={frozen} style={[styles.serviceChip, !serviceId && styles.serviceChipActive]} onPress={() => setServiceId(null)}><Text>Không gắn</Text></TouchableOpacity>
-          {services.map(s => <TouchableOpacity disabled={frozen} key={s.id} style={[styles.serviceChip, serviceId === s.id && styles.serviceChipActive]} onPress={() => setServiceId(s.id)}><Text numberOfLines={1}>{s.name || s.serviceName}</Text></TouchableOpacity>)}
-        </ScrollView></View>
-        <View style={styles.inputGroup}><Text style={styles.label}>Mô tả</Text><TextInput key={inputEpoch} style={[styles.input, styles.textArea]} accessibilityLabel="Mô tả tác phẩm" editable={!frozen} defaultValue={base.description || ''} onChangeText={setDescription} placeholder="Cảm hứng hoặc thông tin chi tiết..." multiline numberOfLines={3} maxLength={MAX_DESCRIPTION_LENGTH} placeholderTextColor={BrandColors.textMuted} /><Text style={styles.characterCount}>{description.length}/{MAX_DESCRIPTION_LENGTH}</Text></View>
+        <View style={styles.inputGroup}><Text style={styles.label}>Nội dung bài viết</Text><View style={styles.descriptionBox}><TextInput key={inputEpoch} style={[styles.input, styles.textArea]} accessibilityLabel="Mô tả tác phẩm" editable={!frozen} defaultValue={base.description || ''} onChangeText={setDescription} placeholder="Mô tả layout makeup, phong cách, điểm nổi bật..." multiline numberOfLines={4} maxLength={MAX_DESCRIPTION_LENGTH} placeholderTextColor={BrandColors.textMuted} /><Text style={styles.characterCount}>{description.length}/{MAX_DESCRIPTION_LENGTH}</Text></View></View>
+        <View style={styles.inputGroup}><TouchableOpacity accessibilityRole="button" accessibilityLabel="Gắn dịch vụ vào bài viết" accessibilityState={{ expanded: servicesOpen }} disabled={frozen} onPress={() => setServicesOpen(!servicesOpen)} style={styles.serviceSelector}><View style={styles.serviceIcon}><ShoppingBag size={24} color="#F23879" /></View><View style={{ flex: 1 }}><Text style={styles.serviceTitle}>Gắn dịch vụ</Text><Text style={styles.serviceHint} numberOfLines={1}>{services.find(s => s.id === serviceId)?.name || services.find(s => s.id === serviceId)?.serviceName || 'Chọn dịch vụ'}</Text></View>{servicesOpen ? <ChevronUp size={21} color="#9891A4" /> : <ChevronDown size={21} color="#9891A4" />}</TouchableOpacity>
+          {servicesOpen && <View style={styles.serviceOptions}><TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: !serviceId }} disabled={frozen} style={[styles.serviceChip, !serviceId && styles.serviceChipActive]} onPress={() => { setServiceId(null); setServicesOpen(false); }}><Text>Không gắn</Text></TouchableOpacity>{services.map(s => <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: serviceId === s.id }} disabled={frozen} key={s.id} style={[styles.serviceChip, serviceId === s.id && styles.serviceChipActive]} onPress={() => { setServiceId(s.id); setServicesOpen(false); }}><Text>{s.name || s.serviceName}</Text></TouchableOpacity>)}{!services.length && <Text style={styles.serviceHint}>Bạn chưa có dịch vụ để gắn.</Text>}</View>}
+        </View>
         <PortfolioTaggingFields value={tagDraft} onChange={v => { setTagDraft(v); setMessage(''); }} history={base.tagging} catalog={catalog.catalog} supported={canTag} disabled={frozen} loading={catalog.isLoading} error={catalog.isError} onReload={() => { void catalog.refetch(); }} onDiscardChanges={portfolioTagPatch(tagDraft, portfolioTagDraft(base.tagging)) && !canTag ? () => { setTagDraft(portfolioTagDraft(base.tagging)); setMessage(''); } : undefined} />
       </>}
       {message ? <Text accessibilityRole="alert" style={[styles.label, { marginVertical: 12 }]}>{message}</Text> : null}
@@ -156,22 +161,39 @@ function PortfolioFormContent({ visible, onClose, onSubmit, initialData }: Portf
     </ScrollView>
     <View style={styles.modalFooter}>
       <TouchableOpacity style={styles.cancelBtn} onPress={onClose} disabled={busy}><Text style={styles.cancelBtnText}>{completed ? 'Đóng' : 'Hủy'}</Text></TouchableOpacity>
-      <TouchableOpacity accessibilityRole="button" style={[styles.submitBtn, (!ready || !imageUrls.length || busy || uncertain) && styles.submitBtnDisabled]} onPress={completed ? retryRead : handleSubmit} disabled={!ready || busy || (!completed && (!imageUrls.length || uncertain))}><Text style={styles.submitBtnText}>{busy ? 'Đang xử lý…' : completed ? 'Tải lại dữ liệu' : 'Lưu'}</Text></TouchableOpacity>
+      <TouchableOpacity accessibilityRole="button" style={[styles.submitBtn, (!ready || !imageUrls.length || busy || uncertain) && styles.submitBtnDisabled]} onPress={completed ? retryRead : handleSubmit} disabled={!ready || busy || (!completed && (!imageUrls.length || uncertain))}><Text style={styles.submitBtnText}>{busy ? 'Đang xử lý…' : completed ? 'Tải lại dữ liệu' : editId ? 'Lưu thay đổi' : 'Đăng bài'}</Text></TouchableOpacity>
     </View>
   </AppBottomSheet>;
 }
 const styles = StyleSheet.create({
+composer: { height: '100%', maxHeight: '100%', paddingHorizontal: 0, paddingTop: 0, backgroundColor: '#FFF6F9', borderTopLeftRadius: 0, borderTopRightRadius: 0 },
+composerHeader: { paddingBottom: 20, paddingHorizontal: 48, alignItems: 'center' },
+backButton: { position: 'absolute', left: 14, top: 0, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+composerTitle: { fontFamily: Typography.semiBold, fontSize: 23, color: '#191528' },
+composerSubtitle: { fontSize: 14, color: '#9891A4', marginTop: 5 },
+imageCount: { marginLeft: 'auto', color: '#9891A4', fontSize: 14 },
+photoRow: { gap: 10 }, heroPhoto: { width: 180, height: 140 }, smallPhoto: { width: 90, height: 140 },
+photoIcon: { width: 54, height: 54, borderRadius: 27, backgroundColor: '#FFE2EC', alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+descriptionBox: { borderWidth: 1, borderColor: '#FFD0E0', borderRadius: 14, backgroundColor: '#FFF', overflow: 'hidden' },
+serviceSelector: { borderWidth: 1, borderColor: '#FFD0E0', borderRadius: 16, padding: 12, flexDirection: 'row', gap: 14, alignItems: 'center', minHeight: 76 },
+serviceIcon: { width: 46, height: 46, borderRadius: 23, backgroundColor: '#FFF0F5', alignItems: 'center', justifyContent: 'center' },
+serviceTitle: { fontFamily: Typography.medium, fontSize: 16, color: '#191528' }, serviceHint: { fontSize: 14, color: '#9891A4', marginTop: 4 },
+serviceOptions: { gap: 8, paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap' },
 imageHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
 clearImages: { minHeight: 44, paddingHorizontal: 10, justifyContent: 'center' },
 clearImagesText: { color: BrandColors.accentRose, fontSize: 13, fontFamily: Typography.semiBold },
 removeImage: { position: 'absolute', top: 4, right: 4, width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(33,26,41,0.75)' },
 removeImageText: { color: '#FFF', fontSize: 28 },
 formContent: {
-    padding: Spacing.md,
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
   },
 imagePickerBtn: {
     borderWidth: 1,
-    borderColor: BrandColors.borderLight,
+    borderColor: '#FFBED4',
     borderStyle: 'dashed',
     borderRadius: Radius.md,
     height: 160,
@@ -186,7 +208,7 @@ previewImage: {
     resizeMode: 'cover',
   },
 imagePickerText: {
-    color: BrandColors.textMuted,
+    color: '#8A1846',
     fontFamily: Typography.medium,
     fontSize: 14,
   },
@@ -195,14 +217,12 @@ inputGroup: {
   },
 label: {
     fontFamily: Typography.medium,
-    fontSize: 14,
+    fontSize: 18,
     color: BrandColors.textDark,
     marginBottom: Spacing.xs,
   },
 input: {
-    borderWidth: 1,
-    borderColor: BrandColors.borderLight,
-    borderRadius: Radius.md,
+    borderWidth: 0,
     paddingHorizontal: Spacing.md,
     paddingVertical: 12,
     fontSize: 14,
@@ -211,11 +231,12 @@ input: {
     backgroundColor: BrandColors.bgPrimary,
   },
 textArea: {
-    height: 80,
+    height: 112,
     textAlignVertical: 'top',
   },
 characterCount: {
-    marginTop: Spacing.xs,
+    paddingRight: 12,
+    paddingBottom: 10,
     textAlign: 'right',
     color: BrandColors.textMuted,
     fontFamily: Typography.regular,
@@ -227,7 +248,7 @@ modalFooter: {
     flexDirection: 'row',
     padding: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: BrandColors.borderLight,
+    borderTopColor: '#FFF0F5', backgroundColor: '#FFF',
     gap: Spacing.md,
   },
 cancelBtn: {
@@ -235,23 +256,23 @@ cancelBtn: {
     paddingVertical: 14,
     borderRadius: Radius.md,
     borderWidth: 1,
-    borderColor: BrandColors.borderLight,
+    borderColor: '#F23879',
     alignItems: 'center',
   },
 cancelBtnText: {
     fontFamily: Typography.semiBold,
     fontSize: 15,
-    color: BrandColors.textDark,
+    color: '#F23879',
   },
 submitBtn: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: Radius.md,
-    backgroundColor: BrandColors.accentRose,
+    backgroundColor: '#F23879',
     alignItems: 'center',
   },
 submitBtnDisabled: {
-    backgroundColor: BrandColors.textMuted,
+    opacity: 0.45,
   },
 submitBtnText: {
     fontFamily: Typography.semiBold,

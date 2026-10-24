@@ -23,10 +23,10 @@ it('removes a single image, clears the remaining images and allows choosing agai
   expect(screen.queryByLabelText('Xóa ảnh 2')).toBeNull();
   await fireEvent.press(screen.getByLabelText('Xóa tất cả ảnh'));
   expect(screen.queryByLabelText('Xóa ảnh 1')).toBeNull();
-  await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(save).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm'));
-  await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(uploadImage).toHaveBeenCalledWith('file:///new.jpg', 'portfolio');
   expect(save).toHaveBeenCalledWith(expect.objectContaining({ imageUrls: ['file:///new.jpg'] }));
 });
@@ -38,7 +38,7 @@ it('saves text inserted in the middle and uploads only the retained image', asyn
   expect(input.props.value).toBeUndefined();
   await fireEvent.changeText(input, 'hôm nay tôi đi chơi');
   await fireEvent.press(screen.getByLabelText('Xóa ảnh 1'));
-  await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(save).toHaveBeenCalledWith(expect.objectContaining({ description: 'hôm nay tôi đi chơi', imageUrls: ['https://example.com/2.jpg'] }));
   expect(uploadImage).not.toHaveBeenCalledWith('https://example.com/1.jpg', 'portfolio');
 });

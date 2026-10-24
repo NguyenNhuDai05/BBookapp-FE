@@ -33,8 +33,8 @@ export function MakeupRecommendationCard({row,index,onDetail}:{row:MakeupRecomme
   <View style={ui.cardCopy}><Text style={ui.name}>{row.title}</Text><Text numberOfLines={2} style={ui.description}>{row.shortDescription}</Text><Tags tags={[...new Set(tags)].slice(0,2)}/><TouchableOpacity accessibilityRole="button" accessibilityLabel={`Xem chi tiết ${row.title}`} onPress={onDetail} style={ui.detailButton}><Text style={ui.detailText}>Khám phá</Text><ArrowRight size={16} color={t.accent}/></TouchableOpacity></View>
  </View>;
 }
-type Props={result:AdvisorResult;catalog?:ExploreHome;onStyle:(s:ExploreStyle)=>void;onReset:()=>void;onNewPhoto?:()=>void;busy?:boolean;catalogLoading?:boolean;photoUri?:string;extraction?:Extraction;effects?:MakeupEffect[];onEffects?:(v:MakeupEffect[])=>void;preferences?:LibraryPreferences;onPreferences?:(p:LibraryPreferences)=>void};
-export function AdvisorResults({result,catalog,onStyle,onReset,onNewPhoto,busy=false,catalogLoading=false,photoUri,extraction,effects,onEffects,preferences,onPreferences}:Props){
+type Props={result:AdvisorResult;catalog?:ExploreHome;onStyle:(s:ExploreStyle)=>void;onReset:()=>void;onNewPhoto?:()=>void;onTryMakeup?:()=>void;busy?:boolean;catalogLoading?:boolean;photoUri?:string;extraction?:Extraction;effects?:MakeupEffect[];onEffects?:(v:MakeupEffect[])=>void;preferences?:LibraryPreferences;onPreferences?:(p:LibraryPreferences)=>void};
+export function AdvisorResults({result,catalog,onStyle,onReset,onNewPhoto,onTryMakeup,busy=false,catalogLoading=false,photoUri,extraction,effects,onEffects,preferences,onPreferences}:Props){
  const [detail,setDetail]=useState<MakeupRecommendation|CatalogStyle>(),[browse,setBrowse]=useState(false);
  const insets=useSafeAreaInsets(),{height}=useWindowDimensions();
  const recommendation=detail&&'styleKey' in detail?presentRecommendation(detail):undefined;
@@ -46,6 +46,7 @@ export function AdvisorResults({result,catalog,onStyle,onReset,onNewPhoto,busy=f
  const detailTags=library?[...catalogLabels(library,'tagLabels'),...(detailLabels?.occasions||(recommendation?.scoringMetadataVersion?recommendation.occasionFit:catalogLabels(library,'occasionLabels'))),...(detailLabels?[detailLabels.intensity]:recommendation?.scoringMetadataVersion&&recommendation.scoringIntensityLabel?[recommendation.scoringIntensityLabel]:catalogIntensityLabel(library))]:[];
  return <>
   <AdvisorResultHeader photoUri={photoUri}/>
+  {onTryMakeup&&<AdvisorButton resultStyle primary title="Thử makeup trên tôi" disabled={busy} onPress={onTryMakeup}/>}
   {((effects&&onEffects)||(preferences&&onPreferences))&&<AdvisorDisclosure title="Tùy chỉnh gợi ý · Không bắt buộc" summary={selectedCount?`${selectedCount} lựa chọn · Có thể thay đổi hoặc xóa`:'Không cần chọn gì để nhận đủ 3 gợi ý'}>
    {effects&&onEffects&&<AdvisorEffects embedded value={effects} onChange={onEffects} disabled={busy} conflict={result.effectConflict}/>}
    {preferences&&onPreferences&&<AdvisorPreferences embedded value={preferences} disabled={busy} onChange={onPreferences}/>}

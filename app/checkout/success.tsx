@@ -9,14 +9,16 @@ import { CheckCircle, ShieldCheck, Clock, Home, FileText } from 'lucide-react-na
 import { BrandColors, Radius, Spacing, Typography, Shadows } from '../../constants/theme';
 import { useBookingStore } from '../../store/useBookingStore';
 import { composeLocationAddress } from '../../utils/locationAddress';
-import { useBookingDetail } from '../../hooks/useBooking';
+import { useDepositConfirmation } from '../../hooks/useDepositConfirmation';
+import { depositConfirmationState } from '../../utils/depositConfirmation';
 import * as WebBrowser from 'expo-web-browser';
 
 export default function CheckoutSuccessScreen() {
   const router = useRouter();
   const review=useAuthStore(state=>state.user?.isDemoAccount===true);
-  const { bookingId } = useLocalSearchParams<{ bookingId?: string }>();
-  const { data: booking, isLoading } = useBookingDetail(bookingId || '', true);
+  const params = useLocalSearchParams<{ bookingId?: string | string[] }>();
+  const bookingId = typeof params.bookingId === 'string' ? params.bookingId : '';
+  const { data: booking, isLoading, isError, isFetching, timedOut, retry } = useDepositConfirmation(bookingId);
   const { draft, resetDraft } = useBookingStore();
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function CheckoutSuccessScreen() {
     router.replace('/(tabs)/bookings');
   };
 
-  if (isLoading || !booking) {
+  if (bookingId && isLoading && !isError && !timedOut) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.center}>
@@ -52,36 +54,45 @@ export default function CheckoutSuccessScreen() {
     );
   }
 
-  const travelFee = booking.travelFee;
-  const totalAmount = booking.totalAmount;
-  const depositAmount = booking.depositAmount;
-  const remainingAmount = booking.remainingAmount;
-
-  if (booking && booking.paymentStatus !== 4) {
+  const paymentState = booking ? depositConfirmationState(booking) : 'unknown';
+  if (!booking || paymentState !== 'success') {
+    const pending = !!bookingId && !isError && !timedOut && paymentState === 'pending';
+    const title = !bookingId ? 'Thiếu mã lịch đặt' : isError ? 'Chưa kết nối được để xác nhận'
+      : paymentState === 'refund' ? 'Khoản cọc cần xem trạng thái xử lý'
+      : paymentState === 'failed' ? 'Lịch đặt chưa được xác nhận cọc'
+      : paymentState === 'unknown' ? 'Chưa đọc được trạng thái thanh toán'
+      : timedOut ? 'Chưa xác nhận được tiền cọc' : 'Đang xác nhận tiền cọc';
     return (
       <SafeAreaView style={styles.waitingScreen}>
-        <View style={styles.waitingContent}>
+        <ScrollView contentContainerStyle={styles.waitingContent}>
           <View style={styles.waitingCard}>
             <View style={styles.waitingIcon}>
-              <ActivityIndicator size="large" color={BrandColors.accentPink} />
+              {pending || isFetching ? <ActivityIndicator size="large" color={BrandColors.accentPink} /> : <Clock size={32} color={BrandColors.accentPink} />}
             </View>
-            <Text style={styles.waitingEyebrow}>ĐANG XỬ LÝ THANH TOÁN</Text>
-            <Text style={styles.waitingTitle}>Đang xác nhận tiền cọc</Text>
+            <Text style={styles.waitingEyebrow}>{pending ? 'ĐANG KIỂM TRA THANH TOÁN' : 'TRẠNG THÁI THANH TOÁN'}</Text>
+            <Text style={styles.waitingTitle}>{title}</Text>
             <Text style={styles.waitingSubtitle}>
-              {review ? 'Vui lòng xem chi tiết lịch đặt để kiểm tra trạng thái thanh toán mẫu.' : 'payOS đang gửi kết quả thanh toán về BeautyBook. Quá trình này thường chỉ mất vài giây.'}
+              {!bookingId ? 'Mở lịch đặt trong Lịch sử để kiểm tra giao dịch của bạn.'
+                : paymentState === 'refund' ? 'Khoản tiền đã có trạng thái xử lý riêng. Mở chi tiết lịch đặt để xem thông tin hoàn tiền hoặc liên hệ hỗ trợ.'
+                : review ? 'Vui lòng xem chi tiết lịch đặt để kiểm tra trạng thái thanh toán mẫu.'
+                : timedOut || isError ? 'Chưa lấy được kết quả xác nhận. Nếu đã chuyển tiền, hãy chọn kiểm tra lại hoặc liên hệ hỗ trợ; không thanh toán thêm.'
+                : 'BBook đang kiểm tra kết quả thanh toán. Nếu bạn đã chuyển tiền thành công, không thanh toán thêm.'}
             </Text>
 
             <View style={styles.waitingNotice}>
               <Clock size={18} color="#A85B16" />
               <Text style={styles.waitingNoticeText}>
-                Bạn có thể rời màn hình này. Trạng thái booking sẽ tự động cập nhật khi giao dịch được xác nhận.
+                Bạn có thể mở chi tiết lịch đặt để kiểm tra. Nếu chưa có kết quả, liên hệ hỗ trợ và cung cấp mã booking.
               </Text>
             </View>
 
+            {!!bookingId && <TouchableOpacity style={styles.waitingPrimaryBtn} disabled={isFetching} onPress={retry}>
+              <Text style={styles.primaryBtnText}>{isFetching ? 'Đang kiểm tra…' : 'Kiểm tra lại thanh toán'}</Text>
+            </TouchableOpacity>}
             <TouchableOpacity
-              style={styles.waitingPrimaryBtn}
+              style={[styles.waitingPrimaryBtn, { marginTop: Spacing.sm }]}
               activeOpacity={0.85}
-              onPress={() => router.replace(`/booking/${booking.id}`)}
+              onPress={() => bookingId ? router.replace(`/booking/${bookingId}`) : handleGoBookings()}
             >
               <FileText size={18} color="#FFF" />
               <Text style={styles.primaryBtnText}>Xem chi tiết booking</Text>
@@ -90,10 +101,15 @@ export default function CheckoutSuccessScreen() {
               <Text style={styles.waitingSecondaryBtnText}>Về trang chủ</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
+
+  const travelFee = booking.travelFee;
+  const totalAmount = booking.totalAmount;
+  const depositAmount = booking.depositAmount;
+  const remainingAmount = booking.remainingAmount;
 
   return (
     <View style={styles.container}>
@@ -128,7 +144,7 @@ export default function CheckoutSuccessScreen() {
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Thời gian</Text>
-            <Text style={styles.infoValue}>{review ? booking.time : draft.time} - {review ? booking.date : draft.date}</Text>
+            <Text style={styles.infoValue}>{booking.time} - {booking.date}</Text>
           </View>
           
           <View style={styles.infoRow}>
@@ -241,7 +257,7 @@ const styles = StyleSheet.create({
     backgroundColor: BrandColors.bgPrimary,
   },
   waitingContent: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.xl,

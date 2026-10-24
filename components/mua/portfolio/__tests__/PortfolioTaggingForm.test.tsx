@@ -9,6 +9,8 @@ import { uploadImage } from '../../../../services/supabase';
 import { useMuaStyles } from '../../../../hooks/useMuaStyles';
 import { PortfolioSavedRefreshError } from '../../../../utils/portfolioWrite';
 import { catalogFixture, portfolioFixture } from '../../../../test-utils/portfolioFixture';
+// Native modal setup can exceed five seconds in a cold, full-suite worker.
+jest.setTimeout(15_000);
 jest.mock('expo-image-picker', () => ({ requestMediaLibraryPermissionsAsync: async () => ({ granted: true }), launchImageLibraryAsync: async () => ({ canceled: false, assets: [{ uri: 'file:///new.jpg' }] }) }));
 jest.mock('../../../../services/supabase', () => ({ uploadImage: jest.fn() }));
 jest.mock('../../../../services/portfolioService', () => ({ portfolioService: { getPortfolio: jest.fn() } }));
@@ -30,7 +32,7 @@ it('preserves legacy and structured history when editing with an unsupported cat
   await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} initialData={{ id: 'p1' }} />, { wrapper: wrapper() });
   await waitFor(() => expect(screen.getByLabelText('Mô tả tác phẩm')).toBeTruthy());
   await fireEvent.changeText(screen.getByLabelText('Mô tả tác phẩm'), 'Chỉ sửa mô tả');
-  await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(save).toHaveBeenCalledWith({ expectedVersion: 7, description: 'Chỉ sửa mô tả' });
 });
 it('locks controls and duplicate submits while uploading a captured snapshot', async () => {
@@ -41,7 +43,7 @@ it('locks controls and duplicate submits while uploading a captured snapshot', a
   await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm'));
   await fireEvent.changeText(screen.getByLabelText('Mô tả tác phẩm'), 'Snapshot');
   // Keep the async event pending while checking controls during the upload.
-  const submit = fireEvent.press(screen.getByText('Lưu'));
+  const submit = fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   await waitFor(() => expect(screen.getByLabelText('Mô tả tác phẩm').props.editable).toBe(false));
   await fireEvent.press(screen.getByLabelText('Xóa ảnh 1'));
   await fireEvent.press(screen.getByText('Hủy'));
@@ -55,7 +57,7 @@ it('locks controls and duplicate submits while uploading a captured snapshot', a
 it('creates without any tags when capability is missing and never writes legacy Tags/Title', async () => {
   jest.mocked(useMuaStyles).mockReturnValue({ data: [], refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
   const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} />, { wrapper: wrapper() });
-  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   await waitFor(() => expect(save).toHaveBeenCalled());
   expect(save.mock.calls[0][0]).toEqual({ description: '', imageUrls: ['https://media.test/new.jpg'], serviceId: null });
   expect(screen.queryByLabelText('Tên tác phẩm')).toBeNull();
@@ -69,9 +71,9 @@ it('keeps selected tags if catalog refresh loses capability and requires explici
   jest.mocked(useMuaStyles).mockReturnValue({ data: [], refetch: jest.fn() } as unknown as ReturnType<typeof useMuaStyles>);
   await view.rerender(<PortfolioFormModal visible onClose={close} onSubmit={save} />);
   expect(screen.getByLabelText('Bỏ date')).toBeTruthy();
-  await fireEvent.press(screen.getByText('Lưu')); expect(save).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ })); expect(save).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByText('Bỏ thay đổi tag, giữ nội dung'));
-  await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(save.mock.calls[0][0].tagging).toBeUndefined();
 });
 it('creates all five groups from API options without applying style default metadata', async () => {
@@ -83,14 +85,14 @@ it('creates all five groups from API options without applying style default meta
   await fireEvent.press(screen.getByText('Thêm tông màu và hiệu ứng'));
   await fireEvent.press(screen.getByLabelText('Chọn tông màu')); await fireEvent.press(screen.getByRole('checkbox', { name: 'color-tone:peach' }));
   await fireEvent.press(screen.getByLabelText('Chọn hiệu ứng makeup')); await fireEvent.press(screen.getByRole('checkbox', { name: 'effect:base-dewy' }));
-  await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(save.mock.calls[0][0].tagging).toEqual({ primaryStyleId: 73, occasionKeys: ['date'], intensityKey: 'medium', colorToneKeys: ['peach'], effectKeys: ['base-dewy'] });
 });
 it('loads fresh owner data and submits just one changed group with the fresh version', async () => {
   const save = jest.fn(); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} initialData={{ id: 'p1', description: 'Stale', version: 1 }} />, { wrapper: wrapper() });
   await waitFor(() => expect(screen.getByLabelText('Mô tả tác phẩm').props.defaultValue).toBe('Mô tả mới từ server'));
   expect(portfolioService.getPortfolio).toHaveBeenCalledWith('me');
-  await fireEvent.press(screen.getByLabelText('Bỏ occasion:date')); await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByLabelText('Bỏ occasion:date')); await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(save).toHaveBeenCalledWith({ expectedVersion: 7, tagging: { occasionKeys: [] } }); expect(uploadImage).not.toHaveBeenCalled();
 });
 it('does not reset a typed draft or version when background cache/caller props refresh', async () => {
@@ -99,32 +101,32 @@ it('does not reset a typed draft or version when background cache/caller props r
   await waitFor(() => expect(screen.getByLabelText('Mô tả tác phẩm')).toBeTruthy()); await fireEvent.changeText(screen.getByLabelText('Mô tả tác phẩm'), 'Bản nháp của tôi');
   await act(async () => client.setQueryData(['mua-portfolio', 'me'], [{ ...portfolioFixture(), version: 9, description: 'Background' }]));
   await view.rerender(<PortfolioFormModal visible onClose={close} onSubmit={save} initialData={{ ...portfolioFixture(), version: 9 }} />);
-  await fireEvent.press(screen.getByText('Lưu')); expect(save).toHaveBeenCalledWith({ expectedVersion: 7, description: 'Bản nháp của tôi' });
+  await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ })); expect(save).toHaveBeenCalledWith({ expectedVersion: 7, description: 'Bản nháp của tôi' });
 });
 it('retains uploads on validation error and resubmits without uploading the album again', async () => {
   const save = jest.fn().mockRejectedValueOnce({ status: 400, code: 'PORTFOLIO_TAG_LIMIT' }).mockResolvedValueOnce(undefined);
   await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} />, { wrapper: wrapper() });
-  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByText('Lưu'));
-  expect(screen.getByText(/Số lựa chọn vượt giới hạn/)).toBeTruthy(); await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
+  expect(screen.getByText(/Số lựa chọn vượt giới hạn/)).toBeTruthy(); await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(save).toHaveBeenCalledTimes(2); expect(uploadImage).toHaveBeenCalledTimes(1);
 });
 it('blocks resend after ambiguous POST and performs GET only when the user checks the list', async () => {
   const save = jest.fn().mockRejectedValue({ network: true }); await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} />, { wrapper: wrapper() });
-  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByText('Lưu'));
-  expect(screen.getByText(/Chưa xác định được máy chủ/)).toBeTruthy(); await fireEvent.press(screen.getByText('Lưu')); expect(save).toHaveBeenCalledTimes(1);
+  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
+  expect(screen.getByText(/Chưa xác định được máy chủ/)).toBeTruthy(); await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ })); expect(save).toHaveBeenCalledTimes(1);
   await fireEvent.press(screen.getByText('Kiểm tra danh sách đã lưu')); expect(portfolioService.getPortfolio).toHaveBeenCalledTimes(1); expect(save).toHaveBeenCalledTimes(1);
 });
 it('after acknowledged write and failed refetch, retries GET only and never retries the mutation', async () => {
   const reload = jest.fn().mockResolvedValue([]); const close = jest.fn(); const save = jest.fn().mockRejectedValue(new PortfolioSavedRefreshError(reload));
   await render(<PortfolioFormModal visible onClose={close} onSubmit={save} />, { wrapper: wrapper() });
-  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByText('Lưu'));
+  await fireEvent.press(screen.getByLabelText('Thêm ảnh tác phẩm')); await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   expect(screen.getByText('Đã lưu portfolio, nhưng chưa tải lại được dữ liệu mới.')).toBeTruthy(); await fireEvent.press(screen.getByText('Tải lại dữ liệu'));
   expect(reload).toHaveBeenCalledTimes(1); expect(save).toHaveBeenCalledTimes(1); expect(uploadImage).toHaveBeenCalledTimes(1); expect(close).toHaveBeenCalledTimes(1);
 });
 it('keeps draft on version conflict and only replaces it after explicit use-new action', async () => {
   const save = jest.fn().mockRejectedValue({ status: 409, code: 'PORTFOLIO_VERSION_CONFLICT' });
   await render(<PortfolioFormModal visible onClose={jest.fn()} onSubmit={save} initialData={{ id: 'p1' }} />, { wrapper: wrapper() });
-  await waitFor(() => expect(screen.getByLabelText('Mô tả tác phẩm')).toBeTruthy()); await fireEvent.changeText(screen.getByLabelText('Mô tả tác phẩm'), 'Bản nháp'); await fireEvent.press(screen.getByText('Lưu'));
+  await waitFor(() => expect(screen.getByLabelText('Mô tả tác phẩm')).toBeTruthy()); await fireEvent.changeText(screen.getByLabelText('Mô tả tác phẩm'), 'Bản nháp'); await fireEvent.press(screen.getByRole('button', { name: /^(Đăng bài|Lưu thay đổi)$/ }));
   jest.mocked(portfolioService.getPortfolio).mockResolvedValue([{ ...portfolioFixture(), description: 'Từ người sửa khác', version: 8 }]);
   await fireEvent.press(screen.getByText('Tải bản mới để đối chiếu')); expect(screen.getByLabelText('Mô tả tác phẩm').props.defaultValue).toBe('Mô tả mới từ server'); expect(save).toHaveBeenCalledTimes(1);
   await fireEvent.press(screen.getByText('Dùng bản mới (bỏ bản nháp)')); expect(screen.getByLabelText('Mô tả tác phẩm').props.defaultValue).toBe('Từ người sửa khác');

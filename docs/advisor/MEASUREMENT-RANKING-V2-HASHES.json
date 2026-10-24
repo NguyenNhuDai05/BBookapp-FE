@@ -1,0 +1,9 @@
+{
+  "reason": "User-requested APK face measurement ranking v2; scan UI/native pipeline unchanged",
+  "normalization": "LF",
+  "files": {
+    "features/makeupAdvisor/localEngine.ts": "4756a3f49b5f7c8750d208ec24aa27c04daad4cc0eb6fb4fcdc556443065affc",
+    "features/makeupAdvisor/recommendationCore.ts": "5931a1f2d4a54326d7ca6496115b4952b1ab613d58b4aa0c65034132a303ec7b",
+    "features/makeupAdvisor/bbook-makeup-catalog-20-vi-v1.2.json": "0befb2175c7def43b68afd9a05cb959f078d8ab9a9aa58f0470a82637de6dca7"
+  }
+}

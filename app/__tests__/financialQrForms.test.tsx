@@ -3,6 +3,8 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
 import MuaForm from '../(mua)/bank-account-form';
 import RefundForm from '../refund-bank-account-form';
+// Allow native form initialization in a cold, full-suite worker.
+jest.setTimeout(15_000);
 const mockPrivateUpload = jest.fn(); const mockPreview = jest.fn();
 const mockDecode = jest.fn(); const mockOtp = jest.fn(); const mockAdd = jest.fn();
 let mockParams: Record<string, string> = {};

@@ -1,7 +1,8 @@
 import React from 'react';
-import {fireEvent,render,screen,waitFor} from '@testing-library/react-native';
-import {AppState,Text as MockText,TouchableOpacity as MockTouchableOpacity} from 'react-native';
+import {act,fireEvent,render,screen,waitFor} from '@testing-library/react-native';
+import {AppState,BackHandler,Text as MockText,TouchableOpacity as MockTouchableOpacity} from 'react-native';
 import MakeupAdvisor from '../../../app/makeup-advisor';
+import {photo as studioPhoto,sample as studioAnalysis} from '../../makeupStudio/testSupport/fixtures';
 jest.mock('react-native-safe-area-context',()=>jest.requireActual('react-native-safe-area-context/jest/mock').default);
 const mockPush=jest.fn(),mockPick=jest.fn(),mockScan=jest.fn();let mockAi:Record<string,unknown>;
 const mockService={id:'fixture-service',muaId:'fixture-mua',name:'Fixture service',authorName:'Fixture MUA',price:50,durationMinutes:60,tags:[],imageUrls:[]};
@@ -29,3 +30,16 @@ test('gallery cancellation restores camera without scanning or clearing previous
 test('error view has two recovery buttons and header back clears the failed scan',async()=>{mockAi.stage='error';mockAi.phase='processing_error';mockAi.failure={code:'E_MEMORY_BUDGET',kind:'resource',main:'Chưa thể phân tích ảnh này'};await render(<MakeupAdvisor/>);expect(screen.queryByText('Hủy quét / xóa ảnh')).toBeNull();expect(screen.getByText('Chụp lại')).toBeTruthy();await fireEvent.press(screen.getByLabelText('Quay về Khám phá'));expect(mockAi.reset).toHaveBeenCalled();});
 
 test('local result offers effects after success, displays source and invokes only effect handler',async()=>{mockAi.stage='results';mockAi.result={source:'local',recommendations:[{...row,suggestionSource:'face-aware'}]};mockAi.effectsEnabled=true;mockAi.effects=[];mockAi.setEffects=jest.fn();await render(<MakeupAdvisor/>);expect(screen.queryByText('Theo đường nét')).toBeNull();expect(screen.queryByText('Hiệu ứng bạn muốn thử')).toBeNull();await fireEvent.press(screen.getByText('Tùy chỉnh gợi ý · Không bắt buộc'));expect(mockAi.setEffects).not.toHaveBeenCalled();expect(screen.getByText('Hiệu ứng bạn muốn thử')).toBeTruthy();await fireEvent.press(screen.getByText('Hiệu ứng bronzer/ánh đồng'));expect(mockAi.setEffects).toHaveBeenCalledWith(['bronzed-glow']);expect(mockScan).not.toHaveBeenCalled();expect(mockPick).not.toHaveBeenCalled();});
+
+test('Studio reuses the session, returns to results on header/hardware back, and never navigates or scans',async()=>{
+ mockAi.stage='results';mockAi.result={source:'local',recommendations:[row]};mockAi.photo=studioPhoto;mockAi.analysis=studioAnalysis();
+ const back=jest.spyOn(BackHandler,'addEventListener');
+ await render(<MakeupAdvisor/>);await fireEvent.press(screen.getByText('Thử makeup trên tôi'));
+ expect(screen.getByText('Thử makeup')).toBeTruthy();expect(mockPush).not.toHaveBeenCalled();
+ await fireEvent.press(screen.getByLabelText('Quay lại kết quả Advisor'));expect(screen.getAllByText(row.title)[0]).toBeTruthy();
+ await fireEvent.press(screen.getByText('Thử makeup trên tôi'));
+ const handler=back.mock.calls.filter(c=>c[0]==='hardwareBackPress').at(-1)?.[1];
+ await act(()=>{expect(handler?.({type:'hardwareBackPress',timeStamp:1})).toBe(true);});
+ expect(screen.getByText('Thử makeup trên tôi')).toBeTruthy();expect(mockAi.reset).not.toHaveBeenCalled();expect(mockScan).not.toHaveBeenCalled();expect(mockPick).not.toHaveBeenCalled();expect(mockAi.photo).toBe(studioPhoto);
+ back.mockRestore();
+});
