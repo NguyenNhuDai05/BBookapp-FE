@@ -17,7 +17,7 @@ type Props = {
   fallbackReason?: string;
   onReload?: () => void;
 };
-export function MakeupStylePicker({ styles, historicalStyles = [], catalogLoaded = true, preferredStyleIds = [], value, onChange, limit, disabled, loading, loadError, fallbackReason, onReload }: Props) {
+export function MakeupStylePicker({ styles, historicalStyles = [], catalogLoaded = true, preferredStyleIds = [], value, onChange, limit, disabled, loading, loadError, onReload }: Props) {
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
@@ -62,7 +62,6 @@ export function MakeupStylePicker({ styles, historicalStyles = [], catalogLoaded
     {creating && <Text style={s.helper}>Nhập tên mới rồi bấm Thêm. Nếu đã có tên này, hãy chọn phong cách có sẵn.</Text>}
     {loading && <View style={s.status}><ActivityIndicator color={BrandColors.accentRose} /><Text style={s.helper}>Đang tải phong cách…</Text></View>}
     {loadError && <Text accessibilityRole="alert" style={s.error}>Không tải được phong cách. Các lựa chọn đã lưu vẫn được giữ; hãy thử lại.</Text>}
-    {!!fallbackReason && <Text style={s.helper}>{fallbackReason}</Text>}
     {!!onReload && <TouchableOpacity accessibilityRole="button" disabled={disabled || loading} onPress={onReload} style={s.reload}><Text style={s.add}>{loadError ? 'Thử lại phong cách' : 'Tải lại phong cách'}</Text></TouchableOpacity>}
     <ScrollView nestedScrollEnabled style={s.options} keyboardShouldPersistTaps="handled" accessibilityLabel="Danh sách phong cách">
       {!!preferredStyleIds.length && <><Text style={s.group}>Chuyên môn của bạn</Text>{preferred.map(row)}{!preferred.length && !loading && <Text style={s.helper}>Không còn mục phù hợp chưa chọn trong chuyên môn.</Text>}</>}
@@ -71,7 +70,6 @@ export function MakeupStylePicker({ styles, historicalStyles = [], catalogLoaded
     </ScrollView>
     {!!query.trim() ? <TouchableOpacity accessibilityRole="button" disabled={blocked || count >= limit} onPress={add} style={s.create}><Text style={s.add}>Thêm “{styleDisplayName(query)}”</Text></TouchableOpacity> : <TouchableOpacity accessibilityRole="button" accessibilityLabel="Thêm phong cách mới" disabled={blocked || count >= limit} onPress={() => { setCreating(true); input.current?.focus(); }} style={s.create}><Text style={s.add}>+ Thêm phong cách mới</Text></TouchableOpacity>}
     {!!error && <Text accessibilityRole="alert" style={s.error}>{error}</Text>}
-    <Text style={s.helper}>Phong cách mới chỉ được lưu khi bạn lưu biểu mẫu.</Text>
   </View>;
 }
 const s = StyleSheet.create({
