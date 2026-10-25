@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Check, Eye, EyeOff, LockKeyhole, Mail, Sparkles, UserRound } from "lucide-react-native";
 import React, { useState } from "react";
 import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRegistrationStore } from "../../store/useRegistrationStore";
 import { getApiError } from '../../services/api';
 import { authService } from "../../services/authService";
+import { profileReturnRoute } from '../../utils/profileLinks';
 
 const authLogo = require("../../assets/images/B.png");
 
@@ -35,6 +36,8 @@ const getRegisterErrorMessage = (err: any) => {
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ returnTo?: string }>();
+  const returnTo = profileReturnRoute(params.returnTo);
 
 
   const [fullName, setFullName] = useState("");
@@ -86,7 +89,7 @@ export default function RegisterScreen() {
       const trimmedEmail = email.trim();
       await authService.requestRegistrationOtp(trimmedEmail);
       useRegistrationStore.getState().begin({ fullName: fullName.trim(), email: trimmedEmail, password });
-      router.push("/(auth)/verify-email" as any);
+      router.push(returnTo ? { pathname: '/(auth)/verify-email', params: { returnTo } } : '/(auth)/verify-email');
     } catch (err: any) {
       setError(getRegisterErrorMessage(err));
     } finally {
@@ -200,7 +203,7 @@ export default function RegisterScreen() {
               </TouchableOpacity>
 
 
-              <Pressable onPress={() => router.replace("/login" as any)} style={styles.switchRow}>
+              <Pressable onPress={() => router.replace(returnTo ? { pathname: '/(auth)/login', params: { returnTo } } : '/login')} style={styles.switchRow}>
                 <Text style={styles.switchText}>Đã có tài khoản?</Text>
                 <Text style={styles.switchAction}> Đăng nhập</Text>
               </Pressable>

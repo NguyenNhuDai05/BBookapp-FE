@@ -1,4 +1,9 @@
 import config from '../../../app.config';
+function expectProductionAndroid(android: ReturnType<typeof config>['android']) {
+ const {intentFilters,...identity}=android!;
+ expect(identity).toEqual(context.config.android);
+ expect(intentFilters).toEqual([{action:'VIEW',autoVerify:true,category:['BROWSABLE','DEFAULT'],data:['/mua/','/posts/'].map(pathPrefix=>({scheme:'https',host:'bbookmakeup.com',pathPrefix}))}]);
+}
 const old={...process.env};
 const context={config:{name:'BBook',slug:'BBook-app',android:{package:'com.bbook.app',googleServicesFile:'./google-services.json'},scheme:'bbookapp',plugins:['expo-notifications'],extra:{eas:{projectId:'existing'}}}} as unknown as Parameters<typeof config>[0];
 beforeEach(()=>{for(const key of Object.keys(process.env))if(key.startsWith('BBOOK_ADVISOR'))delete process.env[key];delete process.env.EAS_BUILD_PROFILE;});
@@ -10,7 +15,7 @@ test('reviewed experimental mapping remains explicit in development and blocked 
  env('advisor-closed-test');process.env.BBOOK_ADVISOR_FACE_AWARE_EXPERIMENTAL='1';expect(()=>config(context)).toThrow('rollout is not approved');
  env('production');process.env.BBOOK_ADVISOR_PRODUCTION_APPROVED='1';expect(()=>config(context)).toThrow('rollout is not approved');
 });
-test('production default remains off and identity/Firebase/push preserved',()=>{process.env.EAS_BUILD_PROFILE='production';const c=config(context);expect(c.extra?.advisorEnabled).toBe(false);expect(c.extra?.advisorCloudEnabled).toBe(false);expect(c.android).toEqual(context.config.android);expect(c.scheme).toBe('bbookapp');expect(c.extra?.eas).toEqual(context.config.extra?.eas);expect(c.plugins).toContain('expo-notifications');});
+test('production default remains off and identity/Firebase/push preserved',()=>{process.env.EAS_BUILD_PROFILE='production';const c=config(context);expect(c.extra?.advisorEnabled).toBe(false);expect(c.extra?.advisorCloudEnabled).toBe(false);expectProductionAndroid(c.android);expect(c.scheme).toBe('bbookapp');expect(c.extra?.eas).toEqual(context.config.extra?.eas);expect(c.plugins).toContain('expo-notifications');});
 test('production native requires separate release approval',()=>{env('production');expect(()=>config(context)).toThrow('release approval');process.env.BBOOK_ADVISOR_PRODUCTION_APPROVED='1';expect(()=>config(context)).toThrow('rollout is not approved');});
 test.each(['advisor-preview','advisor-closed-test'])('%s strips nonce/localhost even from inherited config',profile=>{env(profile);process.env.BBOOK_ADVISOR_ENABLED='0';process.env.BBOOK_ADVISOR_LOCAL_URL='http://127.0.0.1:5088/api';process.env.BBOOK_ADVISOR_LOCAL_NONCE='A'.repeat(48);const c=config({...context,config:{...context.config,extra:{...context.config.extra,advisorLocalNonce:'stale',advisorLocalUrl:'stale',advisorApiKey:'stale'}}});expect(c.extra).not.toHaveProperty('advisorLocalNonce');expect(c.extra).not.toHaveProperty('advisorLocalUrl');expect(c.extra).not.toHaveProperty('advisorApiKey');expect(c.extra).not.toHaveProperty('advisorBackendUrl');expect(c.extra?.advisorCloudEnabled).toBe(false);expect(c.extra?.advisorDiagnosticMode).toBe(false);});
 test('cloud permission requires native, data approval and configured HTTPS',()=>{env('advisor-preview',true);expect(()=>config(context)).toThrow('reviewed data');process.env.BBOOK_ADVISOR_DATA_PROCESSING_APPROVAL='approved';expect(()=>config(context)).toThrow('rollout is not approved');delete process.env.BBOOK_ADVISOR_BACKEND_URL;expect(()=>config(context)).toThrow('configuration missing');});
@@ -33,7 +38,7 @@ test('only manual preview EAS profile opts into memory diagnostics',()=>{
 
 test('preview package and deep link are isolated while production/closed keep BBook identity',()=>{
  env('advisor-preview');process.env.BBOOK_ADVISOR_ENABLED='0';const c=config(context);expect(c.android?.package).toBe('com.bbook.advisor');expect(c.name).toBe('BBook Advisor');expect(c.scheme).toBe('bbookadvisor');expect(c.android?.googleServicesFile).toBeUndefined();expect(c.extra?.advisorRemotePushEnabled).toBe(false);expect(c.plugins).toContainEqual(['expo-dev-client',{addGeneratedScheme:false}]);
- env('advisor-closed-test');process.env.BBOOK_ADVISOR_ENABLED='0';const closed=config(context);expect(closed.android).toEqual(context.config.android);expect(closed.scheme).toBe('bbookapp');expect(closed.extra?.advisorRemotePushEnabled).toBe(true);
+ env('advisor-closed-test');process.env.BBOOK_ADVISOR_ENABLED='0';const closed=config(context);expectProductionAndroid(closed.android);expect(closed.scheme).toBe('bbookapp');expect(closed.extra?.advisorRemotePushEnabled).toBe(true);
 });
 test('missing separate Firebase file fails explicitly, never reuses production client',()=>{
  env('advisor-preview');process.env.BBOOK_ADVISOR_GOOGLE_SERVICES_FILE='missing-advisor-firebase-file.json';expect(()=>config(context)).toThrow();
@@ -44,5 +49,3 @@ test('camera config enables photos without introducing microphone permission or 
  expect(c.plugins).toContainEqual(['expo-camera',{cameraPermission:'Cho phép BBook dùng camera khi bạn chụp selfie tư vấn makeup hoặc xác minh danh tính.',microphonePermission:false,recordAudioAndroid:false,barcodeScannerEnabled:false}]);
  expect(c.android?.package).toBe(context.config.android?.package);expect(c.scheme).toBe(context.config.scheme);
 });
-
-

@@ -10,9 +10,10 @@ interface ServiceListProps {
   onEdit: (service: ServiceDto) => void;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
+  busy?: boolean;
 }
 
-export function ServiceList({ services, onEdit, onArchive, onDelete, readOnly = false }: ServiceListProps) {
+export function ServiceList({ services, onEdit, onArchive, onDelete, readOnly = false, busy = false }: ServiceListProps) {
   if (services.length === 0) {
     return (
       <View style={styles.emptyState}>
@@ -47,15 +48,15 @@ export function ServiceList({ services, onEdit, onArchive, onDelete, readOnly = 
           </View>
 
           {!readOnly && <View style={styles.actions}>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => onEdit(service)}>
+            <TouchableOpacity disabled={busy} style={styles.actionBtn} onPress={() => onEdit(service)}>
               <Edit2 size={16} color={BrandColors.textDark} />
               <Text style={styles.actionText}>Sửa</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => onArchive(service.id || service.serviceId)}>
+            <TouchableOpacity disabled={busy} style={styles.actionBtn} onPress={() => onArchive(service.id || service.serviceId)}>
               {service.status === 'ACTIVE' ? <Archive size={16} color={BrandColors.statusPending} /> : <RotateCcw size={16} color={BrandColors.statusConfirmed} />}
-              <Text style={[styles.actionText, { color: service.status === 'ACTIVE' ? BrandColors.statusPending : BrandColors.statusConfirmed }]}>{service.status === 'ACTIVE' ? 'Tạm ẩn' : 'Kích hoạt'}</Text>
+              <Text style={[styles.actionText, { color: service.status === 'ACTIVE' ? BrandColors.statusPending : BrandColors.statusConfirmed }]}>{service.status === 'ACTIVE' ? 'Tạm ẩn' : 'Kích hoạt lại'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionBtn} onPress={() => onDelete(service.id || service.serviceId)}>
+            <TouchableOpacity disabled={busy} style={styles.actionBtn} onPress={() => onDelete(service.id || service.serviceId)}>
               <Trash2 size={16} color={BrandColors.statusCancelled} />
               <Text style={[styles.actionText, { color: BrandColors.statusCancelled }]}>Xóa</Text>
             </TouchableOpacity>
@@ -161,6 +162,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     borderTopWidth: 1,
     borderTopColor: BrandColors.borderLight,
     paddingTop: Spacing.sm,

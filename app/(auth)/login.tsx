@@ -6,12 +6,13 @@ import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, Sc
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../../store/useAuthStore";
+import { profileReturnRoute } from '../../utils/profileLinks';
 
 const authLogo = require("../../assets/images/B.png");
 
 export default function LoginScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ email?: string; registered?: string; passwordReset?: string }>();
+  const params = useLocalSearchParams<{ email?: string; registered?: string; passwordReset?: string; returnTo?: string }>();
   const login = useAuthStore((state) => state.login);
 
   const [email, setEmail] = useState(params.email || "");
@@ -22,8 +23,8 @@ export default function LoginScreen() {
   );
 
   const goHome = useCallback(() => {
-    router.replace("/(tabs)/home" as any);
-  }, [router]);
+    router.replace((profileReturnRoute(params.returnTo) || '/(tabs)/home') as never);
+  }, [router, params.returnTo]);
 
 
   const handleLogin = async () => {
@@ -140,7 +141,7 @@ export default function LoginScreen() {
 
 
               <Pressable
-                onPress={() => router.push("/register" as any)}
+                onPress={() => { const returnTo = profileReturnRoute(params.returnTo); router.push(returnTo ? { pathname: '/(auth)/register', params: { returnTo } } : '/register'); }}
                 style={styles.switchRow}
               >
                 <Text style={styles.switchText}>Chưa có tài khoản?</Text>

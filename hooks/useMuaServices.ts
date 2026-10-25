@@ -4,12 +4,14 @@ import { CreateServiceRequest, UpdateServiceRequest } from '../types/ServiceDto'
 import { MUA_ELIGIBILITY_QUERY_KEY } from './useMuaEligibility';
 
 
-const refreshServicesAndEligibility = async (queryClient: ReturnType<typeof useQueryClient>, muaId: string) => {
+const refreshServicesAndEligibility = async (queryClient: ReturnType<typeof useQueryClient>) => {
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: ['mua-profile'] }),
     queryClient.invalidateQueries({ queryKey: ['advisor'] }),
     queryClient.invalidateQueries({ queryKey: ['mua-styles'] }),
-    queryClient.invalidateQueries({ queryKey: ['mua-services', muaId] }),
+    queryClient.invalidateQueries({ queryKey: ['mua-services'] }),
+    queryClient.invalidateQueries({ queryKey: ['mua'] }),
+    queryClient.invalidateQueries({ queryKey: ['mua-portfolio'] }),
     queryClient.invalidateQueries({ queryKey: MUA_ELIGIBILITY_QUERY_KEY }),
     queryClient.invalidateQueries({ queryKey: ['customer-explore'] }),
     queryClient.invalidateQueries({ queryKey: ['feed'] }),
@@ -28,32 +30,32 @@ export const useCreateService = (muaId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (service: CreateServiceRequest) => muaServicesService.createService(muaId, service),
-    onSuccess: () => refreshServicesAndEligibility(queryClient, muaId),
+    onSuccess: () => refreshServicesAndEligibility(queryClient),
   });
 };
 
-export const useUpdateService = (muaId: string) => {
+export const useUpdateService = (_muaId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ serviceId, updates }: { serviceId: string; updates: UpdateServiceRequest }) => 
       muaServicesService.updateService(serviceId, updates),
-    onSuccess: () => refreshServicesAndEligibility(queryClient, muaId),
+    onSuccess: () => refreshServicesAndEligibility(queryClient),
   });
 };
 
-export const useDeleteService = (muaId: string) => {
+export const useDeleteService = (_muaId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (serviceId: string) => muaServicesService.deleteService(serviceId),
-    onSuccess: () => refreshServicesAndEligibility(queryClient, muaId),
+    onSuccess: () => refreshServicesAndEligibility(queryClient),
   });
 };
 
-export const useSetServiceActive = (muaId: string) => {
+export const useSetServiceActive = (_muaId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ serviceId, isActive }: { serviceId: string; isActive: boolean }) =>
       muaServicesService.setActive(serviceId, isActive),
-    onSuccess: () => refreshServicesAndEligibility(queryClient, muaId),
+    onSuccess: () => refreshServicesAndEligibility(queryClient),
   });
 };

@@ -7,7 +7,8 @@ import { View, FlatList, StyleSheet, TouchableOpacity, Text, Dimensions } from '
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import {ChevronLeft, Edit2, Trash2} from 'lucide-react-native';
+import {ChevronLeft, Edit2, Trash2, Eye, EyeOff, Share2} from 'lucide-react-native';
+import { PostShareSheet } from '../../components/profile/ProfileShareSheet';
 import { FollowPortfolioPost as PortfolioPost } from '../../components/feed/FollowPortfolioPost';
 import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioFormModal';
 import { useMuaPortfolio } from '../../hooks/useMuaPortfolio';
@@ -18,14 +19,16 @@ import { PortfolioCommentsSheet } from '../../components/feed/PortfolioCommentsS
 export default function PortfolioFeedScreen() {
   const router = useRouter();
   const { initialIndex, portfolioId } = useLocalSearchParams();
-  const { data: portfolio, deleteItem, updateItem, isDeleting, toggleLike, toggleSave } = useMuaPortfolio('me');
+  const { data: portfolio, deleteItem, updateItem, isDeleting, toggleLike, toggleSave, setVisibility, isChangingVisibility } = useMuaPortfolio('me');
   const flatListRef = useRef<FlatList>(null);
 
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [optionsVisible, setOptionsVisible] = useState(false);
+  const [sharingPostId, setSharingPostId] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [commentItem, setCommentItem] = useState<any>(null);
+  const currentPost = portfolio?.find(item => item.id === (selectedPost?.id || selectedPost?.portfolioId)) || selectedPost;
 
   const hasScrolledRef = useRef(false);
 
@@ -123,8 +126,14 @@ export default function PortfolioFeedScreen() {
         )}
       />
 
-      <ActionSheet visible={optionsVisible} title="Tùy chọn bài viết" onClose={()=>setOptionsVisible(false)} actions={[
+      <ActionSheet visible={optionsVisible} loading={isChangingVisibility} title="Tùy chọn bài viết" onClose={()=>setOptionsVisible(false)} actions={[
+        {id:'share',label:'Chia sẻ bài viết',icon:Share2,onPress:()=>{if(currentPost){setSharingPostId(currentPost.id || currentPost.portfolioId);setOptionsVisible(false);}}},
         {id:'edit',label:'Chỉnh sửa bài viết',icon:Edit2,onPress:handleEdit},
+        {id:'visibility',label:currentPost?.isHidden ? 'Kích hoạt lại tác phẩm' : 'Tạm ẩn tác phẩm',icon:currentPost?.isHidden ? Eye : EyeOff,onPress:async()=>{
+          if (!currentPost || review) return;
+          await setVisibility({itemId:currentPost.id || currentPost.portfolioId,isHidden:!currentPost.isHidden});
+          setOptionsVisible(false);
+        }},
         {id:'delete',label:'Xóa bài viết',icon:Trash2,destructive:true,onPress:()=>{setOptionsVisible(false);setDeleteVisible(true);}},
       ]} />
 
@@ -148,6 +157,7 @@ export default function PortfolioFeedScreen() {
         onConfirm={handleDelete}
       />
       <PortfolioCommentsSheet item={commentItem} onClose={() => setCommentItem(null)} />
+      {sharingPostId && <PostShareSheet visible postId={sharingPostId} onClose={() => setSharingPostId(null)} />}
     </SafeAreaView>
   );
 }

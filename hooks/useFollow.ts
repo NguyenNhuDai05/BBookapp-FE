@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { followService, FollowStatus } from '../services/followService';
 import { useAuthStore } from '../store/useAuthStore';
 import { AppAlert } from '../components/ui/dialogStore';
+import { requireProfileLogin, validProfileId } from '../utils/profileLinks';
 const inFlight = new Set<string>();
 export function useFollow(muaId?: string) {
   const userId = useAuthStore(s => s.user?.id);
@@ -29,10 +30,13 @@ export function useFollow(muaId?: string) {
       void client.invalidateQueries({ queryKey: key });
       void client.invalidateQueries({ queryKey: ['following-list', userId] });
       void client.invalidateQueries({ queryKey: ['feed', userId] });
+      void client.invalidateQueries({ queryKey: ['mua-followers-summary'] });
+      void client.invalidateQueries({ queryKey: ['mua-followers'] });
     },
   });
   const change = async (following: boolean) => {
     if (!userId) {
+      if (validProfileId(muaId)) { requireProfileLogin(router, muaId, 'follow'); return; }
       AppAlert.alert('Đăng nhập để theo dõi', 'Bạn cần đăng nhập để theo dõi chuyên gia.', [
         { text: 'Để sau', style: 'cancel' }, { text: 'Đăng nhập', onPress: () => router.push('/(auth)/login') },
       ]);
