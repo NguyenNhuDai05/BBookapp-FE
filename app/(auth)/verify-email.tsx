@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Redirect, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,9 +8,12 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useRegistrationStore } from '../../store/useRegistrationStore';
 import { UserRole } from '../../types/auth';
 import { getApiError } from '../../services/api';
+import { profileReturnRoute } from '../../utils/profileLinks';
 
 export default function VerifyEmailScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ returnTo?: string }>();
+  const returnTo = profileReturnRoute(params.returnTo);
   const { draft, resendAt, markSent, clear } = useRegistrationStore();
   const login = useAuthStore((state) => state.login);
   const [otp, setOtp] = useState('');
@@ -52,7 +55,7 @@ export default function VerifyEmailScreen() {
       }
       if (await login(draft.email, draft.password)) {
         clear();
-        router.replace('/(tabs)/home' as any);
+        router.replace((returnTo || '/(tabs)/home') as never);
       } else {
         setError('Tài khoản đã được tạo. Chưa thể đăng nhập, vui lòng thử lại.');
       }

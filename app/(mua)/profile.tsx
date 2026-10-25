@@ -6,12 +6,12 @@ import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import {Menu, CheckCircle2, Image as ImageIcon, MoreVertical, Edit2, Trash2, X, User, Plus} from 'lucide-react-native';
+import {Menu, CheckCircle2, Image as ImageIcon, MoreVertical, Edit2, Trash2, X, User, Plus, Eye, EyeOff, Share2} from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useMuaProfile } from '../../hooks/useMuaProfile';
 import { useMuaPortfolio } from '../../hooks/useMuaPortfolio';
-import { useMuaServices, useCreateService, useDeleteService, useUpdateService } from '../../hooks/useMuaServices';
+import { useMuaServices, useCreateService, useDeleteService, useUpdateService, useSetServiceActive } from '../../hooks/useMuaServices';
 import { useReviews } from '../../hooks/useReviews';
 import { ServiceFormModal } from '../../components/mua/services/ServiceFormModal';
 import { PortfolioFormModal } from '../../components/mua/portfolio/PortfolioFormModal';
@@ -21,6 +21,9 @@ import { BrandColors } from '../../constants/theme';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { getApiError } from '../../services/api';
 import { normalizeSocialUrl } from '../../utils/socialUrl';
+import { useFollowerSummary } from '../../hooks/useFollowers';
+import { FollowersBadge } from '../../components/profile/FollowersBadge';
+import { ProfileShareSheet, PostShareSheet } from '../../components/profile/ProfileShareSheet';
 
 export default function MuaProfilePremiumScreen() {
   const router = useRouter();
@@ -34,12 +37,16 @@ export default function MuaProfilePremiumScreen() {
 
   // Real API calls
   const { data: profile, refetch: refetchProfile } = useMuaProfile('me');
-  const { data: portfolio, refetch: refetchPortfolio, createItem: createPortfolioItem, updateItem: updatePortfolioItem, deleteItem: deletePortfolioItem, isDeleting: isDeletingPortfolio } = useMuaPortfolio('me');
+  const { data: portfolio, refetch: refetchPortfolio, createItem: createPortfolioItem, updateItem: updatePortfolioItem, deleteItem: deletePortfolioItem, isDeleting: isDeletingPortfolio, setVisibility, isChangingVisibility } = useMuaPortfolio('me');
   const { data: services, refetch: refetchServices } = useMuaServices('me');
   const { data: reviews, isLoading: isReviewsLoading, refetch: refetchReviews } = useReviews(profile?.id || '');
   const createService = useCreateService('me');
   const updateService = useUpdateService('me');
   const deleteService = useDeleteService('me');
+  const followerSummary = useFollowerSummary();
+  const [sharingProfile, setSharingProfile] = useState(false);
+  const [sharingPostId, setSharingPostId] = useState<string | null>(null);
+  const setServiceActive = useSetServiceActive('me');
 
   const [isServiceModalVisible, setIsServiceModalVisible] = useState(false);
   const [editingService, setEditingService] = useState<any>(null);
@@ -52,6 +59,8 @@ export default function MuaProfilePremiumScreen() {
   const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
   const [editingPortfolioItem, setEditingPortfolioItem] = useState<any>(null);
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<any>(null);
+  const currentService = services?.find(item => item.id === (selectedService?.id || selectedService?.serviceId)) || selectedService;
+  const currentPortfolioItem = portfolio?.find(item => item.id === (selectedPortfolioItem?.id || selectedPortfolioItem?.portfolioId)) || selectedPortfolioItem;
 
   const handleServiceOptions = (svc: any) => {
     if(review)return;
@@ -215,6 +224,8 @@ export default function MuaProfilePremiumScreen() {
             </View> : null}
           </View>
 
+          <FollowersBadge count={followerSummary.data?.followersCount} loading={followerSummary.isLoading} error={followerSummary.isError}
+            onRetry={() => { void followerSummary.refetch(); }} onPress={() => router.push('/followers')} />
           {/* Action Buttons */}
           <View style={styles.igActionRow}>
             <TouchableOpacity
@@ -223,7 +234,7 @@ export default function MuaProfilePremiumScreen() {
             >
               <Text style={styles.igPrimaryBtnText}>Chỉnh sửa trang</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.igSecondaryBtn}>
+            <TouchableOpacity style={styles.igSecondaryBtn} accessibilityRole="button" accessibilityLabel="Chia sẻ hồ sơ" onPress={() => setSharingProfile(true)}>
               <Text style={styles.igSecondaryBtnText}>Chia sẻ hồ sơ</Text>
             </TouchableOpacity>
           </View>
@@ -286,6 +297,7 @@ export default function MuaProfilePremiumScreen() {
                   }}
                 >
                   <Image source={{ uri: (item.imageUrls && item.imageUrls.length > 0) ? item.imageUrls[0] : (item.imageUrl || '') }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                  {item.isHidden && <View style={{position:'absolute',left:4,bottom:4,backgroundColor:'rgba(48,23,38,.75)',borderRadius:4,paddingHorizontal:6,paddingVertical:3}}><Text style={{color:'#FFF',fontSize:11}}>Tạm ẩn</Text></View>}
                   {(item.imageUrls && item.imageUrls.length > 1) && (
                     <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2 }}>
                       <Text style={{ color: '#FFF', fontSize: 10, fontWeight: 'bold' }}>1/{item.imageUrls.length}</Text>
@@ -342,6 +354,7 @@ export default function MuaProfilePremiumScreen() {
 
                     <View style={styles.serviceInfo}>
                       <Text style={styles.serviceName}>{svc.name || svc.serviceName}</Text>
+                      <Text style={{color:svc.status === 'ACTIVE' ? BrandColors.statusConfirmed : BrandColors.textMuted,fontSize:12,marginTop:4}}>{svc.status === 'ACTIVE' ? 'Đang hoạt động' : 'Đang tạm ẩn'}</Text>
                       {svc.description ? <Text style={styles.serviceDesc} numberOfLines={2}>{svc.description}</Text> : null}
                       <Text style={styles.serviceDuration}>{"\u23F3"} {svc.durationMinutes} {"ph\u00FAt"}</Text>
                     </View>
@@ -472,19 +485,32 @@ export default function MuaProfilePremiumScreen() {
         initialData={editingPortfolioItem}
       />
 
-        <ActionSheet visible={!review && isServiceOptionsVisible} title="Tùy chọn dịch vụ" onClose={()=>setIsServiceOptionsVisible(false)} actions={[
+        <ActionSheet visible={!review && isServiceOptionsVisible} loading={setServiceActive.isPending} title="Tùy chọn dịch vụ" onClose={()=>setIsServiceOptionsVisible(false)} actions={[
           {id:'edit',label:'Chỉnh sửa dịch vụ',icon:Edit2,onPress:()=>{setIsServiceOptionsVisible(false);setSelectedService(null);setEditingService(selectedService);setIsServiceModalVisible(true);}},
+          {id:'visibility',label:currentService?.status === 'ACTIVE' ? 'Tạm ẩn dịch vụ' : 'Kích hoạt lại dịch vụ',icon:currentService?.status === 'ACTIVE' ? EyeOff : Eye,onPress:async()=>{
+            if (!currentService || review) return;
+            await setServiceActive.mutateAsync({serviceId:currentService.id || currentService.serviceId,isActive:currentService.status !== 'ACTIVE'});
+            setIsServiceOptionsVisible(false); setSelectedService(null);
+          }},
           {id:'delete',label:'Xóa dịch vụ',icon:Trash2,destructive:true,onPress:()=>{setIsServiceOptionsVisible(false);setDeleteServiceVisible(true);}},
         ]} />
 
-        <ActionSheet visible={!review && isPortfolioOptionsVisible} title="Tùy chọn bài viết" onClose={()=>setIsPortfolioOptionsVisible(false)} actions={[
+        <ActionSheet visible={!review && isPortfolioOptionsVisible} loading={isChangingVisibility} title="Tùy chọn bài viết" onClose={()=>setIsPortfolioOptionsVisible(false)} actions={[
+          {id:'share',label:'Chia sẻ bài viết',icon:Share2,onPress:()=>{if(currentPortfolioItem){setSharingPostId(currentPortfolioItem.id || currentPortfolioItem.portfolioId);setIsPortfolioOptionsVisible(false);}}},
           {id:'edit',label:'Chỉnh sửa tác phẩm',icon:Edit2,onPress:()=>{setIsPortfolioOptionsVisible(false);setEditingPortfolioItem(selectedPortfolioItem);setIsPortfolioModalVisible(true);}},
+          {id:'visibility',label:currentPortfolioItem?.isHidden ? 'Kích hoạt lại tác phẩm' : 'Tạm ẩn tác phẩm',icon:currentPortfolioItem?.isHidden ? Eye : EyeOff,onPress:async()=>{
+            if (!currentPortfolioItem || review) return;
+            await setVisibility({itemId:currentPortfolioItem.id || currentPortfolioItem.portfolioId,isHidden:!currentPortfolioItem.isHidden});
+            setIsPortfolioOptionsVisible(false); setSelectedPortfolioItem(null);
+          }},
           {id:'delete',label:'Xóa tác phẩm',icon:Trash2,destructive:true,onPress:()=>{setIsPortfolioOptionsVisible(false);setDeletePortfolioVisible(true);}},
         ]} />
 
         <ConfirmDialog visible={!review && deleteServiceVisible} title="Xóa dịch vụ" message="Bạn có chắc chắn muốn xóa dịch vụ này?" confirmLabel="Xóa" destructive loading={deleteService.isPending} onCancel={() => { setDeleteServiceVisible(false); setSelectedService(null); }} onConfirm={confirmDeleteService}/>
         <ConfirmDialog visible={!review && deletePortfolioVisible} title="Xóa tác phẩm" message="Bạn có chắc chắn muốn xóa tác phẩm này khỏi Portfolio?" confirmLabel="Xóa" destructive loading={isDeletingPortfolio} onCancel={() => { setDeletePortfolioVisible(false); setSelectedPortfolioItem(null); }} onConfirm={confirmDeletePortfolio}/>
 
+        <ProfileShareSheet visible={sharingProfile} muaId={user?.id} onClose={() => setSharingProfile(false)} />
+        {sharingPostId && <PostShareSheet visible postId={sharingPostId} onClose={() => setSharingPostId(null)} />}
       </SafeAreaView>
   );
 }

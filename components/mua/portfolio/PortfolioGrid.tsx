@@ -3,16 +3,18 @@ import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'r
 import { Image } from 'expo-image';
 import { PortfolioItemDto } from '../../../types/portfolio';
 import { BrandColors, Radius, Spacing, Typography } from '../../../constants/theme';
-import { Eye, EyeOff, Star, Trash2 } from 'lucide-react-native';
+import { Edit2, Eye, EyeOff, Star, Trash2 } from 'lucide-react-native';
 
 interface PortfolioGridProps {
   readOnly?: boolean;
   items: PortfolioItemDto[];
   onDelete: (id: string) => void;
+  onEdit: (item: PortfolioItemDto) => void;
   onToggleVisibility?: (id: string, isHidden: boolean) => void;
+  busy?: boolean;
 }
 
-export function PortfolioGrid({ items, onDelete, onToggleVisibility, readOnly = false }: PortfolioGridProps) {
+export function PortfolioGrid({ items, onDelete, onEdit, onToggleVisibility, readOnly = false, busy = false }: PortfolioGridProps) {
   const { width } = useWindowDimensions();
   const isDesktop = width > 768;
   const numColumns = isDesktop ? 6 : 3;
@@ -53,11 +55,17 @@ export function PortfolioGrid({ items, onDelete, onToggleVisibility, readOnly = 
           
           {/* Overlay Actions */}
           {!readOnly && <View style={styles.overlayActions}>
-            <TouchableOpacity style={styles.visibilityBtn} onPress={() => onToggleVisibility?.(item.id, !item.isHidden)} accessibilityLabel={item.isHidden ? 'Hiện tác phẩm' : 'Ẩn tác phẩm'}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Chỉnh sửa tác phẩm" disabled={busy} style={styles.visibilityBtn} onPress={() => onEdit(item)}>
+              <Edit2 size={14} color="#FFF" />
+            </TouchableOpacity>
+            <TouchableOpacity accessibilityRole="button" disabled={busy} style={styles.visibilityBtn} onPress={() => onToggleVisibility?.(item.id, !item.isHidden)} accessibilityLabel={item.isHidden ? 'Kích hoạt lại tác phẩm' : 'Tạm ẩn tác phẩm'}>
               {item.isHidden ? <Eye size={14} color="#FFF"/> : <EyeOff size={14} color="#FFF"/>}
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.deleteBtn} 
+              accessibilityRole="button"
+              accessibilityLabel="Xóa tác phẩm"
+              disabled={busy}
               onPress={() => onDelete(item.id)}
             >
               <Trash2 size={14} color="#FFF" />
@@ -70,7 +78,7 @@ export function PortfolioGrid({ items, onDelete, onToggleVisibility, readOnly = 
               <Text style={styles.coverText}>Ảnh bìa</Text>
             </View>
           )}
-          <View style={[styles.visibilityBadge, item.isHidden && styles.hiddenBadge]}><Text style={styles.visibilityText}>{item.isHidden ? 'Ẩn' : 'Công khai'}</Text></View>
+          <View style={[styles.visibilityBadge, item.isHidden && styles.hiddenBadge]}><Text style={styles.visibilityText}>{item.isHidden ? 'Tạm ẩn' : 'Công khai'}</Text></View>
 
         </View>
       ))}

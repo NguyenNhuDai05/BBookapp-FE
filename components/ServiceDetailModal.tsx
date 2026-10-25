@@ -13,11 +13,12 @@ interface ServiceDetailModalProps {
   onClose: () => void;
   service: ServiceDto | null;
   mua: ArtistDto | null;
+  onRequireLogin?: () => void;
 }
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-export default function ServiceDetailModal({ visible, onClose, service, mua }: ServiceDetailModalProps) {
+export default function ServiceDetailModal({ visible, onClose, service, mua, onRequireLogin }: ServiceDetailModalProps) {
   const insets = useSafeAreaInsets();
   const draft = useBookingStore(state => state.draft);
   const updateServiceParticipantsCount = useBookingStore(state => state.updateServiceParticipantsCount);
@@ -52,6 +53,7 @@ export default function ServiceDetailModal({ visible, onClose, service, mua }: S
 
   const handleAddToCart = () => {
     if (!service || !mua) return;
+    if (onRequireLogin) { onRequireLogin(); return; }
 
     if (cartItem) {
       // Add localQuantity to existing count

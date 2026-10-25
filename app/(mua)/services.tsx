@@ -14,6 +14,9 @@ import { ServiceFormModal } from '../../components/mua/services/ServiceFormModal
 import { Plus } from 'lucide-react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useMuaEligibility } from '../../hooks/useMuaEligibility';
+import type { PortfolioItemDto } from '../../types/portfolio';
+import { AppAlert as appDialog } from '../../components/ui/dialogStore';
+import { getApiError } from '../../services/api';
 
 type TabType = 'SERVICES' | 'PORTFOLIO';
 
@@ -26,10 +29,11 @@ export default function MuaManagementScreen() {
   const [isServiceModalVisible, setIsServiceModalVisible] = useState(false);
   const [editingService, setEditingService] = useState<any>(null);
   const [isPortfolioModalVisible, setIsPortfolioModalVisible] = useState(false);
+  const [editingPortfolio, setEditingPortfolio] = useState<PortfolioItemDto | null>(null);
 
   const profileQuery = useMuaProfile(muaId);
   const { data: services = [], isLoading: isLoadingServices } = useMuaServices(muaId);
-  const { data: portfolio = [], isLoading: isLoadingPortfolio, deleteItem, createItem: createPortfolioItem, setVisibility } = useMuaPortfolio(muaId);
+  const { data: portfolio = [], isLoading: isLoadingPortfolio, deleteItem, createItem: createPortfolioItem, updateItem: updatePortfolioItem, setVisibility, isChangingVisibility, isDeleting } = useMuaPortfolio(muaId);
   const { data: eligibility } = useMuaEligibility();
   const portfolioRequirement = eligibility?.requirements.find(item => item.key === 'publicPortfolioImages');
   const deleteService = useDeleteService(muaId);
@@ -57,7 +61,10 @@ export default function MuaManagementScreen() {
 
   const handleArchiveService = (serviceId: string) => {
     const service = services.find(item => (item.id || item.serviceId) === serviceId);
-    setServiceActive.mutate({ serviceId, isActive: service?.status !== 'ACTIVE' });
+    if (!service || setServiceActive.isPending) return;
+    setServiceActive.mutate({ serviceId, isActive: service.status !== 'ACTIVE' }, {
+      onError: error => appDialog.alert('Chưa thể cập nhật dịch vụ', getApiError(error).message),
+    });
   };
 
   const handleDeleteService = (serviceId: string) => {
@@ -103,6 +110,7 @@ export default function MuaManagementScreen() {
                 onEdit={handleEditService}
                 onArchive={handleArchiveService}
                 onDelete={handleDeleteService}
+                busy={setServiceActive.isPending || deleteService.isPending}
               />
             )}
           </>
@@ -110,7 +118,7 @@ export default function MuaManagementScreen() {
           <>
             <View style={styles.sectionHeader}>
               <View><Text style={styles.sectionTitle}>Hình ảnh Portfolio ({portfolio.length})</Text>{portfolioRequirement?.required != null ? <Text style={styles.requirementHint}>{portfolioRequirement.current || 0}/{portfolioRequirement.required} ảnh công khai</Text> : null}</View>
-              <TouchableOpacity disabled={review} style={styles.addBtn} onPress={() => setIsPortfolioModalVisible(true)}>
+              <TouchableOpacity disabled={review} style={styles.addBtn} onPress={() => { setEditingPortfolio(null); setIsPortfolioModalVisible(true); }}>
                 <Plus size={16} color="#FFF" />
                 <Text style={styles.addBtnText}>Tải ảnh lên</Text>
               </TouchableOpacity>
@@ -120,8 +128,10 @@ export default function MuaManagementScreen() {
             ) : (
               <PortfolioGrid readOnly={review}
                 items={portfolio}
-                onDelete={(id) => deleteItem(id)}
-                onToggleVisibility={(id, isHidden) => setVisibility({ itemId: id, isHidden })}
+                busy={isChangingVisibility || isDeleting}
+                onEdit={item => { setEditingPortfolio(item); setIsPortfolioModalVisible(true); }}
+                onDelete={id => { void deleteItem(id).catch(() => undefined); }}
+                onToggleVisibility={(id, isHidden) => { void setVisibility({ itemId: id, isHidden }).catch(error => appDialog.alert('Chưa thể cập nhật tác phẩm', getApiError(error).message)); }}
               />
             )}
           </>
@@ -140,8 +150,12 @@ export default function MuaManagementScreen() {
       />
       <PortfolioFormModal
         visible={!review && isPortfolioModalVisible}
-        onClose={() => setIsPortfolioModalVisible(false)}
-        onSubmit={async data => { await createPortfolioItem(data); }}
+        onClose={() => { setIsPortfolioModalVisible(false); setEditingPortfolio(null); }}
+        initialData={editingPortfolio}
+        onSubmit={async data => {
+          if (editingPortfolio) await updatePortfolioItem({ id: editingPortfolio.id, updates: data });
+          else await createPortfolioItem(data);
+        }}
       />
     </SafeAreaView>
   );

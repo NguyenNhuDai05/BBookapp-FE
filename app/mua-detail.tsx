@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View, Text, TouchableOpacity, Dimensions, Image, RefreshControl } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {ArrowLeft, CheckCircle2, MoreHorizontal, Users} from 'lucide-react-native';
+import {ArrowLeft, CheckCircle2, MoreHorizontal, Share2} from 'lucide-react-native';
 import { ErrorView } from '../components/ui/ErrorView';
 import { useFollow } from '../hooks/useFollow';
 import { useMuaDetail } from '../hooks/useMuaDetail';
@@ -20,6 +20,9 @@ import BookingCartBottomSheet from '../components/BookingCartBottomSheet';
 import ServiceDetailModal from '../components/ServiceDetailModal';
 import ReviewTabContent from '../components/mua/ReviewTabContent';
 import { chatService } from '../services/chatService';
+import { FollowersBadge } from '../components/profile/FollowersBadge';
+import { ProfileShareSheet } from '../components/profile/ProfileShareSheet';
+import { requireProfileLogin } from '../utils/profileLinks';
 
 const { width } = Dimensions.get('window');
 
@@ -40,6 +43,7 @@ export default function MuaDetailScreen() {
   const sample=user?.isDemoAccount===true && user.demoCounterpartMuaId===id;
   const follow = useFollow(id);
   const [optionsVisible, setOptionsVisible] = useState(false);
+  const [sharingProfile, setSharingProfile] = useState(false);
   const [activeTab, setActiveTab] = useState(tab || 'Portfolio');
   const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
   const [selectedServiceForDetail, setSelectedServiceForDetail] = useState<ServiceDto | null>(null);
@@ -53,6 +57,7 @@ export default function MuaDetailScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     refetch(); // Trigger refetch
+    void follow.refetch();
     // Artificial delay for UX
     setTimeout(() => {
       setRefreshing(false);
@@ -63,6 +68,7 @@ export default function MuaDetailScreen() {
 
   const handleBookService = (service: ServiceDto) => {
     if (!muaInfo) return;
+    if (!user) { requireProfileLogin(router, muaInfo.id, 'book', service.id || service.serviceId); return; }
 
     // If the cart already has services from a different MUA, reset it
     if (draft.mua && draft.mua.id !== muaInfo.id) {
@@ -125,10 +131,13 @@ export default function MuaDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} hitSlop={{top:10, bottom:10, left:10, right:10}}>
           <ArrowLeft size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{displayName}</Text>
+        <Text style={styles.headerTitle} numberOfLines={1}>{displayName}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Chia sẻ hồ sơ" onPress={() => setSharingProfile(true)} style={{ padding: 6 }}><Share2 size={22} color={BrandColors.textDark} /></TouchableOpacity>
         <TouchableOpacity onPress={() => setOptionsVisible(true)} accessibilityRole="button" accessibilityLabel="Tùy chọn hồ sơ" hitSlop={{top:10, bottom:10, left:10, right:10}}>
           <MoreHorizontal size={24} color={BrandColors.textDark} />
         </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -180,12 +189,7 @@ export default function MuaDetailScreen() {
             <Text style={styles.igBioText}>{displayBio}</Text>
           </View>
 
-          {follow.status ? <View style={styles.followersBadge}>
-            <View style={styles.followersIcon}><Users size={16} color={BrandColors.accentPink} /></View>
-            <Text style={styles.followersCount}>{follow.status.followersCount.toLocaleString('vi-VN')}</Text>
-            <Text style={styles.followersLabel}>người theo dõi</Text>
-          </View> : null}
-          {follow.error ? <TouchableOpacity onPress={() => { void follow.refetch(); }} style={{ padding: 12 }}><Text style={{ color: BrandColors.primaryPink }}>Không tải được trạng thái theo dõi. Nhấn để thử lại.</Text></TouchableOpacity> : null}
+          <FollowersBadge count={follow.status?.followersCount} loading={follow.loading} error={follow.error} onRetry={() => { void follow.refetch(); }} />
           {/* Action Buttons for Customer */}
           <View style={styles.igActionRow}>
             <TouchableOpacity
@@ -201,6 +205,7 @@ export default function MuaDetailScreen() {
               style={styles.igSecondaryBtn}
               onPress={async () => {
                 if (!muaInfo) return;
+                if (!user) { requireProfileLogin(router, muaInfo.id, 'chat'); return; }
                 try {
                   const room = await chatService.getOrCreateRoomWithMua(muaInfo.id);
                   router.push(`/chat/${room.chatRoomId}`);
@@ -352,10 +357,11 @@ export default function MuaDetailScreen() {
       </ScrollView>
 
       <PostActionSheet visible={optionsVisible} authorId={id} authorName={displayName} onClose={() => setOptionsVisible(false)} />
+      <ProfileShareSheet visible={sharingProfile} muaId={id} onClose={() => setSharingProfile(false)} />
       {/* Cart Integration */}
       <BookingCartFloatingBar
         onPressCart={() => setBottomSheetVisible(true)}
-        onPressCheckout={() => router.push('/checkout')}
+        onPressCheckout={() => { if (!user) requireProfileLogin(router, id, 'book'); else router.push('/checkout'); }}
       />
 
       {/* Booking Cart Bottom Sheet */}
@@ -369,6 +375,7 @@ export default function MuaDetailScreen() {
         onClose={() => { setSelectedServiceForDetail(null); setDismissedServiceLink(serviceLink); }}
         service={serviceForDetail}
         mua={muaInfo as any}
+        onRequireLogin={!user ? () => requireProfileLogin(router, id, 'book', serviceForDetail?.id || serviceForDetail?.serviceId) : undefined}
       />
     </SafeAreaView>
   );
@@ -394,6 +401,9 @@ headerContainer: {
     backgroundColor: '#FAFAFA',
   },
 headerTitle: {
+      flex: 1,
+      marginHorizontal: 16,
+      textAlign: 'center',
     fontSize: 18,
     fontWeight: '700',
     color: BrandColors.textDark,

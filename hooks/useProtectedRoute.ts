@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useRootNavigationState, useRouter, useSegments } from 'expo-router';
+import { useGlobalSearchParams, useRootNavigationState, useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '../store/useAuthStore';
 import { UserRole } from '../types/auth';
 import { hasMuaAccess } from '../utils/appMode';
+import { profileReturnRoute } from '../utils/profileLinks';
 
 export function useProtectedRoute() {
   const { user, isAuthenticated, activeMode, initialize, switchMode, isModeSwitching, sessionError } = useAuthStore();
   const segments: string[] = useSegments();
+  const { returnTo } = useGlobalSearchParams<{ returnTo?: string }>();
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
   const [isReady, setIsReady] = useState(false);
@@ -29,12 +31,13 @@ export function useProtectedRoute() {
 
     const inAuthGroup = segments[0] === '(auth)';
     const isPolicyScreen = segments[0] === 'policy';
+    const isPublicProfile = ['mua-detail', 'mua', 'shared-post', 'posts', 'profile-unavailable'].includes(segments[0]);
     
     if (
       // If the user is not authenticated and not already in the auth group...
       !isAuthenticated &&
       !inAuthGroup &&
-      !isPolicyScreen
+      !isPolicyScreen && !isPublicProfile
     ) {
       // Redirect to the login page.
       router.replace('/(auth)/login');
@@ -52,6 +55,8 @@ export function useProtectedRoute() {
         }
         return;
       }
+      const profileReturn = profileReturnRoute(returnTo);
+      if (inAuthGroup && profileReturn) { router.replace(profileReturn as never); return; }
 
       // Signed-in Customer/MUA can recover their password without leaving the account first.
       if (inAuthGroup && segments[1] === 'forgot-password') return;
@@ -75,12 +80,12 @@ export function useProtectedRoute() {
         router.replace('/(tabs)/home');
       }
     }
-  }, [sessionError, user, isAuthenticated, activeMode, segments, isReady, rootNavigationState?.key, router, switchMode, isModeSwitching]);
+  }, [returnTo, sessionError, user, isAuthenticated, activeMode, segments, isReady, rootNavigationState?.key, router, switchMode, isModeSwitching]);
 
   if (!isReady || sessionError) return false;
   const inAuthGroup = segments[0] === '(auth)';
   const isPolicyScreen = segments[0] === 'policy';
-  if (!isAuthenticated) return inAuthGroup || isPolicyScreen;
+  if (!isAuthenticated) return inAuthGroup || isPolicyScreen || ['mua-detail', 'mua', 'shared-post', 'posts', 'profile-unavailable'].includes(segments[0]);
   if (user?.role === UserRole.Admin) return segments[0] === '(admin)';
   return segments[0] !== '(admin)';
 }

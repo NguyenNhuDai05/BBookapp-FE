@@ -1,3 +1,4 @@
+import { expectProductionProfileLinkAndroid } from '../../../test-utils/profileLinkConfig';
 import config from '../../../app.config';
 import {readFileSync} from 'node:fs';
 const original={...process.env};
@@ -30,7 +31,7 @@ test.each(['production','advisor-closed-test','advisor-preview'])('QA approval c
 });
 test('production without Advisor keeps identity and has no diagnostics even with stale QA inputs',()=>{
  process.env.EAS_BUILD_PROFILE='production';delete process.env.BBOOK_ADVISOR_QA_ONLY;process.env.BBOOK_ADVISOR_ENABLED='0';
- const c=config(context);expect(c.android).toEqual(context.config.android);expect(c.scheme).toBe('bbookapp');expect(c.extra?.advisorDiagnosticMode).toBe(false);expect(c.extra?.advisorFaceAwareExperimental).toBe(false);expect(c.extra?.advisorRemotePushEnabled).toBe(true);
+ const c=config(context);expectProductionProfileLinkAndroid(c.android,context.config.android);expect(c.scheme).toBe('bbookapp');expect(c.extra?.advisorDiagnosticMode).toBe(false);expect(c.extra?.advisorFaceAwareExperimental).toBe(false);expect(c.extra?.advisorRemotePushEnabled).toBe(true);
 });
 test('EAS QA produces internal standalone APK with explicit local-only scope',()=>{
  const eas=JSON.parse(readFileSync('eas.json','utf8'));const qa=eas.build['advisor-qa'];

@@ -15,6 +15,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android.versionCode = 1;
     // Isolated test app deliberately has no FCM identity or push registration.
     delete android.googleServicesFile;
+    delete android.intentFilters;
+  } else {
+    android.intentFilters = [...(android.intentFilters || []), {
+      action: 'VIEW', autoVerify: true, category: ['BROWSABLE', 'DEFAULT'],
+      // Only advertise the host serving assetlinks.json. Extra unconfigured
+      // hosts can break verification on Android 11 and earlier.
+      data: ['/mua/', '/posts/'].map(pathPrefix => ({ scheme: 'https', host: 'bbookmakeup.com', pathPrefix })),
+    }];
   }
   const baseConfig: ExpoConfig = {
     ...config,
@@ -28,5 +36,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       : [...(config.plugins || [])],
   };
   if (aiTest && process.env.BBOOK_ADVISOR_ENABLED === '1') throw new Error('AI test cannot enable native Advisor');
-  return configureAdvisor({ config: baseConfig } as ConfigContext);
+  const resolved = configureAdvisor({ config: baseConfig } as ConfigContext);
+  // Test/Advisor packages must never claim production profile links.
+  if (resolved.android && resolved.android.package !== 'com.bbook.app') {
+    resolved.android.intentFilters = resolved.android.intentFilters?.filter(filter =>
+      !JSON.stringify(filter.data).includes('bbookmakeup.com'));
+    if (!resolved.android.intentFilters?.length) delete resolved.android.intentFilters;
+  }
+  return resolved;
 };
