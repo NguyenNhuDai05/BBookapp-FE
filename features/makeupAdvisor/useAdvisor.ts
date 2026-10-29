@@ -1,3 +1,4 @@
+import {requireCustomerAiAccess} from '../../services/customerAiAccess';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {AppState,Platform} from 'react-native';
 import {useFocusEffect} from 'expo-router';
@@ -59,11 +60,14 @@ export function useAdvisor(){
  function failed(e:unknown,at:'scan'|'pick'){
   setDiagnosticSnapshot(logMemoryCheckpoint?.());
   const code=e&&typeof e==='object'&&'code' in e?e.code:undefined;
+  if(code==='E_AI_SUBSCRIPTION'){showFailure({code:'PROCESSING_ERROR',kind:'processing',main:'Chưa đăng ký AI quét mặt',secondary:'Gói 20.000đ một lần, sử dụng vĩnh viễn. Đồng bộ lại sau khi đăng ký.'},working.current);return;}
   const kind=advisorErrorKind(e),nativeCode=advisorFailureCode(e);setErrorKind(kind);
   const domain:ScanFailure['kind']=kind==='resource-pressure'||nativeCode==='E_CLEANUP_PENDING'?'resource':nativeCode==='E_NORMALIZATION_INPUT'||nativeCode==='E_INPUT'||nativeCode==='E_PICKER_ASSET'?'input':nativeCode==='E_DETECTION'?'native':at==='pick'&&!working.current?'acquisition':'processing';
   showFailure(code==='E_RECOMMENDATIONS'?{code:'E_RECOMMENDATIONS',kind:'recommendation',main:'Chưa tạo được đủ 3 gợi ý makeup',secondary:'Vui lòng thử lại.'}:{code:nativeCode,kind:domain,main:'Chưa thể phân tích ảnh này',secondary:advisorFailure(e,at)},working.current);
  }
  async function run(output:Photo,id:number,log:(event:Parameters<typeof scanDiagnostic>[1])=>void=()=>undefined):Promise<CompletedScan|undefined>{
+  if(!alive.current||id!==generation.current)return;
+  await requireCustomerAiAccess();
   if(!alive.current||id!==generation.current)return;
   const startedAt=Date.now(),controller=new AbortController();presentation.current=controller;
   scanning.current=true;setStage('scanning');setPhase('initializing');

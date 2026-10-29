@@ -1,3 +1,5 @@
+import {loadCustomerAiAccess} from '../services/customerAiAccess';
+import {useAuthStore} from '../store/useAuthStore';
 import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {ActivityIndicator,AppState,BackHandler,KeyboardAvoidingView,Modal,Platform,ScrollView,StyleSheet,Switch,Text,TouchableOpacity,View} from 'react-native';
 import {StatusBar} from 'expo-status-bar';
@@ -24,6 +26,9 @@ import {RecommendationDebug} from '../features/makeupAdvisor/RecommendationDebug
 import {MakeupStudio} from '../features/makeupStudio/MakeupStudio';
 export default function MakeupAdvisor(){
  const router=useRouter(),ai=useAdvisor(),insets=useSafeAreaInsets();
+ const userId=useAuthStore(state=>state.user?.id);
+ const access=useQuery({queryKey:['customer-ai-access',userId],queryFn:loadCustomerAiAccess,staleTime:0,retry:1});
+ useFocusEffect(useCallback(()=>{void access.refetch();},[access.refetch]));
  const [consent,setConsent]=useState(false),[chosen,setChosen]=useState<ExploreStyle>();
  const [privacy,setPrivacy]=useState(false),[capture,setCapture]=useState(false),[matching,setMatching]=useState(false);
  const [studio,setStudio]=useState(false);
@@ -46,6 +51,7 @@ export default function MakeupAdvisor(){
  };
  const reset=()=>{ai.reset();setChosen(undefined);setMatching(false);setStudio(false);};
  const isResults=ai.stage==='results'&&!!ai.result;
+ if(advisorEnabled&&access.data?.hasAccess!==true)return <SafeAreaView style={s.page}><View style={{padding:24,gap:16}}><Text style={{fontSize:24,fontWeight:'700'}}>AI quét mặt</Text><Text>20.000đ một lần · Sử dụng vĩnh viễn</Text><Text>{access.isPending?'Đang đồng bộ quyền sử dụng…':access.isError?'Chưa đồng bộ được quyền sử dụng. Vui lòng thử lại.':'Đăng ký gói AI cho tài khoản Customer để phân tích khuôn mặt và nhận gợi ý makeup. Sau khi đăng ký, quyền sử dụng được đồng bộ theo tài khoản.'}</Text><AdvisorButton title="Đồng bộ quyền sử dụng" disabled={access.isFetching} onPress={()=>void access.refetch()}/><AdvisorButton title="Quay về" onPress={()=>router.back()}/></View></SafeAreaView>;
  if(!advisorEnabled)return <SafeAreaView style={s.page}><Text>Makeup Advisor chưa được bật trong bản này.</Text><AdvisorButton title="Quay về" onPress={()=>router.back()}/></SafeAreaView>;
  return <SafeAreaView edges={capture?[]:['top','bottom']} style={s.page}>
   {!capture&&<StatusBar style="dark"/>}

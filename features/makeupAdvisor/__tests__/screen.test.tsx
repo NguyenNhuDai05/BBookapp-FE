@@ -1,4 +1,6 @@
 import React from 'react';
+jest.mock('../../../services/customerAiAccess',()=>({loadCustomerAiAccess:jest.fn()}));
+jest.mock('../../../store/useAuthStore',()=>({useAuthStore:(selector:any)=>selector({user:{id:'fixture-user'}})}));
 import {act,fireEvent,render,screen,waitFor} from '@testing-library/react-native';
 import {AppState,BackHandler,Text as MockText,TouchableOpacity as MockTouchableOpacity} from 'react-native';
 import MakeupAdvisor from '../../../app/makeup-advisor';
@@ -13,7 +15,7 @@ jest.mock('../ScanPhoto',()=>({ScanPhoto:()=>null}));
 jest.mock('../flags',()=>({advisorEnabled:true}));
 jest.mock('../useAdvisor',()=>({useAdvisor:()=>mockAi}));
 jest.mock('../../../services/exploreService',()=>({exploreService:{home:jest.fn(),search:jest.fn()}}));
-jest.mock('@tanstack/react-query',()=>({useInfiniteQuery:(o:{queryKey:string[];enabled:boolean})=>({data:o.enabled?{pages:[{items:o.queryKey[2]==='services'?[mockService]:[],nextCursor:null,weak:false}]}:undefined}),useQuery:(o:{queryKey:string[];enabled:boolean})=>o.queryKey[1]==='home'?{data:{styles:[{id:97,name:'Korean',artistCount:1}],provinces:[]}}:{data:o.enabled?{items:o.queryKey[1]==='services'?[mockService]:[],nextCursor:null}:undefined}}));
+jest.mock('@tanstack/react-query',()=>({useInfiniteQuery:(o:{queryKey:string[];enabled:boolean})=>({data:o.enabled?{pages:[{items:o.queryKey[2]==='services'?[mockService]:[],nextCursor:null,weak:false}]}:undefined}),useQuery:(o:{queryKey:string[];enabled:boolean})=>o.queryKey[0]==='customer-ai-access'?{data:{hasAccess:true},refetch:jest.fn()}:o.queryKey[1]==='home'?{data:{styles:[{id:97,name:'Korean',artistCount:1}],provinces:[]}}:{data:o.enabled?{items:o.queryKey[1]==='services'?[mockService]:[],nextCursor:null}:undefined}}));
 beforeEach(()=>{AppState.currentState='active';jest.clearAllMocks();mockPick.mockReset();mockAi={photo:undefined,analysis:undefined,stage:'start',phase:'idle',busy:false,error:'',reset:jest.fn(),pick:mockPick,scan:mockScan,prepareRetry:jest.fn(),scanAvailable:true};});
 async function startCamera(){await fireEvent.press(screen.getByText('Bắt đầu khám phá'));expect(mockPick).not.toHaveBeenCalled();await fireEvent(screen.getByLabelText('Đồng ý xử lý ảnh trên thiết bị'),'valueChange',true);await fireEvent.press(screen.getByText('Tiếp tục chọn ảnh'));}
 test('explicit consent precedes camera, gallery keeps existing acquisition pipeline',async()=>{await render(<MakeupAdvisor/>);expect(screen.queryByText('Camera preview fixture')).toBeNull();await startCamera();expect(screen.getByText('Camera preview fixture')).toBeTruthy();await fireEvent.press(screen.getByText('Chọn từ thư viện'));expect(mockPick).toHaveBeenCalledWith(false);expect(mockScan).not.toHaveBeenCalled();},15000);

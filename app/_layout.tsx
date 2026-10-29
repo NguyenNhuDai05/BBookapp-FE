@@ -5,6 +5,7 @@ import "../global.css";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useProtectedRoute } from '../hooks/useProtectedRoute';
 import { useSessionRecovery } from '../hooks/useSessionRecovery';
+import { useMuaEntitlementSync } from '../hooks/useMuaMonetization';
 
 import { queryClient } from '../lib/queryClient';
 import { useAuthStore } from '../store/useAuthStore';
@@ -18,6 +19,7 @@ export default function RootLayout() {
   const segments: string[] = useSegments();
   const canRenderRoute = useProtectedRoute();
   useSessionRecovery();
+  useMuaEntitlementSync();
   const review = useAuthStore(state => state.user?.isDemoAccount === true);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 

@@ -15,6 +15,7 @@ import type { ExploreArtist, ExploreItem, ExploreKind, ExplorePost, ExploreServi
 import { useAuthStore } from '../../store/useAuthStore';
 import { ReviewNotice } from '../../components/ReviewNotice';
 import { AiMakeupEntry } from '../../components/aiMakeup/AiMakeupEntry';
+import { SponsoredMuas } from '../../components/explore/SponsoredMuas';
 
 const KINDS: { key: ExploreKind; label: string }[] = [
   { key: 'portfolio', label: 'Tác phẩm' }, { key: 'artists', label: 'Chuyên gia' }, { key: 'services', label: 'Dịch vụ' },
@@ -51,6 +52,7 @@ export default function ExploreScreen() {
       <ExploreArtistCard item={item as ExploreArtist} onPress={() => openArtist(item.id)} /> : <ExploreServiceCard item={item as ExploreService} onPress={() => openService(item as ExploreService)} />}
   </View>;
   const header = <>
+    <SponsoredMuas filters={filters} q={explore.debouncedQuery} onPress={openArtist} />
     <AiMakeupEntry />
     <AdvisorEntry />
     {reviewUser?.isDemoAccount && reviewUser.demoCounterpartMuaId ? <TouchableOpacity accessibilityRole="button" onPress={() => openArtist(reviewUser.demoCounterpartMuaId!)}><ReviewNotice title="MUA mẫu cho đánh giá" message="Xem hồ sơ, chọn dịch vụ và trải nghiệm đặt lịch với MUA mẫu." /></TouchableOpacity> : null}

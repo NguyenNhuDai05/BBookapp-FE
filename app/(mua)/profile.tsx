@@ -1,3 +1,4 @@
+import { ServiceImageGallery } from '../../components/ServiceImageGallery';
 import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
 import { ActionSheet } from '../../components/ui/ActionSheet';
 import React, { useState } from 'react';
@@ -23,6 +24,8 @@ import { getApiError } from '../../services/api';
 import { normalizeSocialUrl } from '../../utils/socialUrl';
 import { useFollowerSummary } from '../../hooks/useFollowers';
 import { FollowersBadge } from '../../components/profile/FollowersBadge';
+import { MuaMonetizationStatus } from '../../components/mua/MuaMonetizationStatus';
+import { refreshMuaMonetization } from '../../hooks/useMuaMonetization';
 import { ProfileShareSheet, PostShareSheet } from '../../components/profile/ProfileShareSheet';
 
 export default function MuaProfilePremiumScreen() {
@@ -111,6 +114,7 @@ export default function MuaProfilePremiumScreen() {
     refetchPortfolio();
     refetchServices();
     refetchReviews();
+    if (user?.id) void refreshMuaMonetization(user.id).catch(() => {});
     // Simulate delay
     setTimeout(() => {
       setRefreshing(false);
@@ -150,6 +154,7 @@ export default function MuaProfilePremiumScreen() {
       />
 
       {review?<ReviewNotice/>:null}
+      <MuaMonetizationStatus />
       {/* Top Header */}
       <View style={styles.header}>
         {/* Placeholder for back arrow if needed */}
@@ -404,13 +409,7 @@ export default function MuaProfilePremiumScreen() {
               </View>
 
 <ScrollView showsVerticalScrollIndicator={false}>
-                {selectedService.imageUrl ? (
-                  <Image source={{ uri: selectedService.imageUrl }} style={{ width: '100%', height: 250 }} resizeMode="cover" />
-                ) : (
-                  <View style={{ width: '100%', height: 200, backgroundColor: '#EEE', alignItems: 'center', justifyContent: 'center' }}>
-                    <ImageIcon size={40} color="#CCC" />
-                  </View>
-                )}
+                <ServiceImageGallery key={currentService?.id || currentService?.serviceId} imageUrls={currentService?.imageUrls} imageUrl={currentService?.imageUrl} />
                 <View style={{ padding: 20 }}>
                   <Text style={{ fontSize: 22, fontWeight: '700', color: '#22152B', marginBottom: 8 }}>{selectedService.name || selectedService.serviceName}</Text>
                   <Text style={{ fontSize: 18, fontWeight: '700', color: '#C42A64', marginBottom: 16 }}>{(selectedService.price || 0).toLocaleString('vi-VN')}đ</Text>

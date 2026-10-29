@@ -1,9 +1,10 @@
+import { ServiceImageGallery } from './ServiceImageGallery';
 import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { AppOverlay } from './ui/OverlayProvider';
 import { useBookingStore } from '../store/useBookingStore';
 import { BrandColors } from '../constants/theme';
-import { ArrowLeft, Share2, Minus, Plus, ImageIcon } from 'lucide-react-native';
+import { ArrowLeft, Share2, Minus, Plus } from 'lucide-react-native';
 import { ServiceDto } from '../types/ServiceDto';
 import { ArtistDto } from '../types/ArtistDto';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,7 +17,6 @@ interface ServiceDetailModalProps {
   onRequireLogin?: () => void;
 }
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function ServiceDetailModal({ visible, onClose, service, mua, onRequireLogin }: ServiceDetailModalProps) {
   const insets = useSafeAreaInsets();
@@ -90,13 +90,7 @@ export default function ServiceDetailModal({ visible, onClose, service, mua, onR
         <ScrollView style={styles.scrollView} bounces={false} showsVerticalScrollIndicator={false}>
           {/* Cover Image Section */}
           <View style={styles.imageContainer}>
-            {service.imageUrl ? (
-              <Image source={{ uri: service.imageUrl }} style={styles.coverImage} resizeMode="cover" />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <ImageIcon size={48} color="#CCC" />
-              </View>
-            )}
+            <ServiceImageGallery key={`${service.id}:${visible}`} imageUrls={service.imageUrls} imageUrl={service.imageUrl} />
 
             {/* Header Actions */}
             <View style={[styles.headerActions, { top: insets.top + 16 }]}>
@@ -173,19 +167,8 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: SCREEN_HEIGHT * 0.4,
     backgroundColor: '#F5F5F5',
     position: 'relative',
-  },
-  coverImage: {
-    width: '100%',
-    height: '100%',
-  },
-  imagePlaceholder: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerActions: {
     position: 'absolute',

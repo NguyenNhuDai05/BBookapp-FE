@@ -40,7 +40,7 @@ export const useExplore = () => {
   }, [results.data]);
   const refetch = async () => { await Promise.allSettled([home.refetch(), results.refetch()]); };
   const clearFilters = () => { setSearchQuery(''); setFilters({}); };
-  return { home, results, items, filters, setFilters, kind, setKind, searchQuery, setSearchQuery, clearFilters, refetch,
+  return { home, results, items, filters, setFilters, kind, setKind, searchQuery, debouncedQuery, setSearchQuery, clearFilters, refetch,
     isTyping: searchQuery.trim() !== debouncedQuery,
     isFiltered: Boolean(searchQuery.trim() || Object.values(filters).some(value => value !== undefined)),
   };
