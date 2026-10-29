@@ -1,3 +1,4 @@
+import { PlanStatusEntry } from '../../components/profile/PlanStatusEntry';
 import { useAppMode } from '../../hooks/useAppMode';
 import { ReviewNotice } from '../../components/ReviewNotice';
 import { REVIEW_PASSWORD_NOTICE, REVIEW_PROTECTED_NOTICE } from '../../utils/playReview';
@@ -285,6 +286,7 @@ export default function ProfileScreen() {
         {/* CÁC NHÓM CHỨC NĂNG HỆ THỐNG */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionHeader}>Tài khoản của tôi</Text>
+          {!authUser?.isDemoAccount && <PlanStatusEntry onPress={() => router.push('/account-plans' as never)} />}
           <View style={styles.cardWrapper}>
             {renderSettingRow(
               <User size={20} color="#ff7c98" />,

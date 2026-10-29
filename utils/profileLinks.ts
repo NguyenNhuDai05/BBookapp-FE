@@ -20,6 +20,7 @@ export function profileReturnRoute(value: unknown): string | null {
 export function redirectProfileLink(path: string): string {
   try {
     const url = new URL(path, 'https://bbook.internal');
+    if (url.protocol === 'bbookapp:' && url.hostname === 'account-plans' && (!url.pathname || url.pathname === '/') && !url.search && !url.hash) return '/account-plans';
     const post = url.pathname.startsWith('/posts/') || (url.protocol === 'bbookapp:' && url.hostname === 'posts');
     const custom = url.protocol === 'bbookapp:' && (url.hostname === 'mua' || url.hostname === 'posts');
     const shared = custom ? url.pathname : url.pathname.startsWith('/mua/') ? url.pathname.slice(4) : post ? url.pathname.slice(6) : null;

@@ -1,3 +1,4 @@
+import { PlanStatusEntry } from '../../components/profile/PlanStatusEntry';
 import { ServiceImageGallery } from '../../components/ServiceImageGallery';
 import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
 import { ActionSheet } from '../../components/ui/ActionSheet';
@@ -178,6 +179,7 @@ export default function MuaProfilePremiumScreen() {
         }
       >
 
+        {!review && <PlanStatusEntry onPress={() => router.push('/account-plans' as never)} />}
         {/* Instagram-inspired Header */}
         <View style={styles.igHeaderContainer}>
           <View style={styles.igTopRow}>

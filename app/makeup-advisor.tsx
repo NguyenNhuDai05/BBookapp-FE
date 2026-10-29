@@ -29,6 +29,7 @@ export default function MakeupAdvisor(){
  const userId=useAuthStore(state=>state.user?.id);
  const access=useQuery({queryKey:['customer-ai-access',userId],queryFn:loadCustomerAiAccess,staleTime:0,retry:1});
  useFocusEffect(useCallback(()=>{void access.refetch();},[access.refetch]));
+ useEffect(()=>{const sub=AppState.addEventListener('change',state=>{if(state==='active')void access.refetch();});return()=>sub.remove();},[access.refetch]);
  const [consent,setConsent]=useState(false),[chosen,setChosen]=useState<ExploreStyle>();
  const [privacy,setPrivacy]=useState(false),[capture,setCapture]=useState(false),[matching,setMatching]=useState(false);
  const [studio,setStudio]=useState(false);

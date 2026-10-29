@@ -27,3 +27,8 @@ it('requests login with the original MUA/service and does not navigate on cancel
   expect(push).not.toHaveBeenCalled(); actions[1].onPress?.();
   expect(push).toHaveBeenCalledWith({ pathname: '/(auth)/login', params: { returnTo: expect.stringContaining(`id=${id}`) } });
 });
+
+it('opens account status from the website without accepting payment proof in a return URL', () => {
+  expect(redirectProfileLink('bbookapp://account-plans')).toBe('/account-plans');
+  expect(redirectProfileLink('bbookapp://account-plans?status=PAID')).not.toBe('/account-plans');
+});

@@ -1,0 +1,25 @@
+import React from 'react';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { AppState } from 'react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAccountPlans } from '../useAccountPlans';
+import { accountPlansService } from '../../services/accountPlans';
+jest.mock('expo-router', () => ({ useFocusEffect: jest.fn() }));
+jest.mock('../../store/useAuthStore', () => ({ useAuthStore: (select: any) => select({ user: { id: 'owner', isDemoAccount: false } }) }));
+jest.mock('../../services/accountPlans', () => ({ accountPlansService: { get: jest.fn(), sync: jest.fn() } }));
+const free = { role: 'Customer', ai: { hasAccess: false, purchased: false }, orders: [], evaluatedAt: '2026-10-29T00:00:00Z' } as any;
+it('refreshes server access on returning to the foreground and applies explicit sync results', async () => {
+  let foreground: (state: string) => void = () => {};
+  jest.spyOn(AppState, 'addEventListener').mockImplementation((_, callback: any) => { foreground = callback; return { remove: jest.fn() }; });
+  jest.mocked(accountPlansService.get).mockResolvedValue(free);
+  jest.mocked(accountPlansService.sync).mockResolvedValue({ ...free, ai: { ...free.ai, hasAccess: true, purchased: true } });
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  const wrapper = ({ children }: React.PropsWithChildren) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  const hook = await renderHook(useAccountPlans, { wrapper });
+  await waitFor(() => expect(hook.result.current.data?.ai.hasAccess).toBe(false));
+  await act(async () => foreground('active'));
+  await waitFor(() => expect(accountPlansService.get).toHaveBeenCalledTimes(2));
+  await act(async () => { await hook.result.current.sync.mutateAsync(); });
+  await waitFor(() => expect(hook.result.current.data?.ai.purchased).toBe(true));
+  await hook.unmount(); client.clear(); jest.restoreAllMocks();
+});
