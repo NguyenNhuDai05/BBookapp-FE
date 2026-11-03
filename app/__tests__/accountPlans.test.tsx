@@ -4,6 +4,7 @@ import AccountPlansScreen from '../account-plans';
 const mockSync = jest.fn(); const mockBack = jest.fn();
 let mockResult: any;
 jest.mock('../../hooks/useAccountPlans', () => ({ useAccountPlans: () => mockResult }));
+jest.mock('../../components/profile/PlanPurchase', () => ({ PlanPurchase: () => null }));
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack }) }));
 jest.mock('react-native-safe-area-context', () => jest.requireActual('react-native-safe-area-context/jest/mock').default);
 beforeEach(() => { jest.clearAllMocks(); mockResult = { enabled: true, isPending: false, isFetching: false, isError: false, sync: { isPending: false, mutate: mockSync }, data: { role: 'Customer', ai: { purchased: true, hasAccess: true }, orders: [], evaluatedAt: '2026-10-29T09:00:00Z' } }; });
