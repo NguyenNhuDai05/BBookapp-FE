@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/useAuthStore';
 
 export type CommerceCatalog = {
   role: 'Customer' | 'MUA'; termsVersion: string; enabled: boolean; checkoutEnabled: boolean; unavailableReason?: string | null;
-  products: { id: string; name: string; amountVnd: number; days: number | null }[];
+  products: { id: string; name: string; amountVnd: number; days: number | null; description?: string; termsVersion?: string; version?: number }[];
 };
 export type CommerceOrder = {
   id: string; productId: string; amountVnd: number; currency: string; state: string;
