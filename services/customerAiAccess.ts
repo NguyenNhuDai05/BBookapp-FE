@@ -12,5 +12,5 @@ export async function loadCustomerAiAccess(): Promise<CustomerAiAccess> {
 }
 export async function requireCustomerAiAccess() {
   const state = await loadCustomerAiAccess();
-  if (!state.hasAccess) throw { code: 'E_AI_SUBSCRIPTION', message: 'Cần đăng ký AI quét mặt 20.000đ một lần để dùng vĩnh viễn.' };
+  if (!state.hasAccess) throw { code: 'E_AI_SUBSCRIPTION', message: 'Mở Gói và quyền lợi để xem giá và đăng ký AI quét mặt trọn đời.' };
 }
