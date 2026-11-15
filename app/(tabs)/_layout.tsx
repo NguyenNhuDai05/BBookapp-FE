@@ -10,6 +10,7 @@ import { ActivityIndicator, Platform, View } from "react-native";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { BrandColors, CustomerTabBarTokens, getCustomerTabBarMetrics, Shadows } from "../../constants/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { renderBoundedTabBarButton } from "../../components/navigation/BoundedTabBarButton";
 
 export default function TabsLayout() {
   const checkingAuth = useRequireAuth();
@@ -59,6 +60,7 @@ export default function TabsLayout() {
         tabBarItemStyle:
           Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : undefined,
 
+        tabBarButton: renderBoundedTabBarButton,
         tabBarActiveTintColor: BrandColors.primaryPink,
       }}
     >

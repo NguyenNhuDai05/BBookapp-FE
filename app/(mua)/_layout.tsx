@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { LayoutDashboard, ListTodo, Calendar, User, MessageCircle } from 'lucide-react-native';
 import { BrandColors } from '../../constants/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { renderBoundedTabBarButton } from '../../components/navigation/BoundedTabBarButton';
 
 export default function MuaLayout() {
   const insets = useSafeAreaInsets();
@@ -11,6 +12,7 @@ export default function MuaLayout() {
       headerShown: false,
       tabBarActiveTintColor: BrandColors.accentRose,
       tabBarInactiveTintColor: BrandColors.textMuted,
+      tabBarButton: renderBoundedTabBarButton,
       tabBarStyle: {
         borderTopWidth: 1,
         borderTopColor: BrandColors.borderLight,

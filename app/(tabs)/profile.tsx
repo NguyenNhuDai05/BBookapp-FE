@@ -21,7 +21,8 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import {ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, Image} from 'react-native';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { getCustomerTabBarMetrics } from '../../constants/theme';
 import { userService, type UserProfile } from "../../services/userService";
 import { useAuthStore } from "../../store/useAuthStore";
 import { bookingService } from "../../services/bookingService";
@@ -30,6 +31,8 @@ import { portfolioService } from "../../services/portfolioService";
 // Định nghĩa đúng cấu trúc dữ liệu trả về từ Resource "users" trên MockAPI
 export default function ProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = getCustomerTabBarMetrics(insets.bottom).height;
   const { initialize, logout, deleteAccount, user: authUser } = useAuthStore();
 
   // Các State lưu trữ trạng thái dữ liệu thực tế từ Server
@@ -234,10 +237,16 @@ export default function ProfileScreen() {
 
   // 3. GIAO DIỆN CHÍNH KHI ĐÃ ĐỔ DỮ LIỆU THẬT THÀNH CÔNG
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        bounces={false}
+        alwaysBounceVertical={false}
+        overScrollMode="never"
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: tabBarHeight + 16 },
+        ]}
       >
         {authUser?.isDemoAccount ? <ReviewNotice/> : null}
         {/* HEADER GRADIENT BANNER (Đồng bộ bộ màu từ màn Splash của bạn) */}
@@ -356,7 +365,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <View style={[styles.sectionContainer, { marginBottom: 30 }]}>
+        <View style={styles.sectionContainer}>
           <View style={styles.cardWrapper}>
             {renderSettingRow(
               isDeletingAccount ? <ActivityIndicator color="#F5446A" /> : <Trash2 size={20} color="#F5446A" />,
@@ -382,7 +391,7 @@ export default function ProfileScreen() {
 // ─── THIẾT KẾ STYLE LAYOUT CHUẨN NATIVE RESPONSIVE ───
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9F6F8" },
-  scrollContent: { paddingBottom: 160 },
+  scrollContent: { flexGrow: 1 },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
@@ -458,18 +467,32 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
   },
-  statBox: { flex: 1, alignItems: "center", justifyContent: "center" },
+  statBox: {
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   statBorder: {
     borderLeftWidth: 0.5,
     borderRightWidth: 0.5,
     borderColor: "#EEE5EA",
   },
-  statNumber: { fontSize: 18, fontWeight: "800", color: "#1F1B36" },
+  statNumber: {
+    width: "100%",
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1F1B36",
+    textAlign: "center",
+  },
   statLabel: {
+    width: "100%",
     fontSize: 11,
     color: "#8C8390",
     marginTop: 4,
     fontWeight: "500",
+    textAlign: "center",
   },
   sectionContainer: { marginTop: 24, paddingHorizontal: 20 },
   sectionHeader: {
