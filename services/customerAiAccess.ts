@@ -1,16 +1,11 @@
-import { api, getApiError } from './api';
+import { api } from './api';
 export type CustomerAiAccess = { hasAccess: boolean; purchased: boolean; lifetime: boolean; amountVnd: number; checkoutEnabled: boolean; enforcementEnabled: boolean };
 export async function loadCustomerAiAccess(): Promise<CustomerAiAccess> {
-  // Existing builds retain fully local scans until the paid feature is explicitly released.
-  if (process.env.EXPO_PUBLIC_CUSTOMER_AI_ENABLED !== 'true') return { hasAccess: true, purchased: false, lifetime: true, amountVnd: 20000, checkoutEnabled: false, enforcementEnabled: false };
-  try { return (await api.get<CustomerAiAccess>('/customer/me/ai-access')).data; }
-  catch (error) {
-    // Backends before the additive rollout have no access endpoint; retain their free scan flow.
-    if (getApiError(error).status === 404) return { hasAccess: true, purchased: false, lifetime: true, amountVnd: 20000, checkoutEnabled: false, enforcementEnabled: false };
-    throw error;
-  }
+  const { data } = await api.get<CustomerAiAccess>('/customer/me/ai-access');
+  // Never turn an old rollout flag or a missing endpoint into free access.
+  return { ...data, hasAccess: data.hasAccess === true && data.purchased === true };
 }
 export async function requireCustomerAiAccess() {
   const state = await loadCustomerAiAccess();
-  if (!state.hasAccess) throw { code: 'E_AI_SUBSCRIPTION', message: 'Mở Gói và quyền lợi để xem giá và đăng ký AI quét mặt trọn đời.' };
+  if (!state.hasAccess) throw { code: 'E_AI_SUBSCRIPTION', message: 'Mở Gói và quyền lợi để mua gói AI quét mặt trọn đời.' };
 }

@@ -1,13 +1,14 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import Settings from '../(mua)/settings';
 import type { MuaProfileDto } from '../../types/muaProfile';
 
+const mockPush = jest.fn();
 const mockRefetch = jest.fn();
 const mockCache = { invalidateQueries: jest.fn() };
 const mockUser = { name: 'MUA', email: 'nguyenhuynhhoang060305@gmail.com', avatarUrl: 'https://example.com/old.jpg' };
 let mockProfile: MuaProfileDto;
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn(), back: jest.fn() }), useFocusEffect: (callback: () => void) => { const React = jest.requireActual<typeof import('react')>('react'); React.useEffect(callback, [callback]); } }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, back: jest.fn() }), useFocusEffect: (callback: () => void) => { const React = jest.requireActual<typeof import('react')>('react'); React.useEffect(callback, [callback]); } }));
 jest.mock('@tanstack/react-query', () => ({ useQueryClient: () => mockCache }));
 jest.mock('../../hooks/useMuaEligibility', () => ({ MUA_ELIGIBILITY_QUERY_KEY: ['mua', 'eligibility'] }));
 jest.mock('../../hooks/useMuaProfile', () => ({ useMuaProfile: () => ({ data: mockProfile, isLoading: false, isRefetching: false, refetch: mockRefetch }) }));
@@ -46,3 +47,5 @@ it('shows approval after refreshed profile data even while the listing remains D
   await view.rerender(<Settings />);
   expect(screen.getByText('Đang hiển thị trên BBook')).toBeTruthy();
 });
+
+it('places plans alongside service, history and withdrawal rows',async()=>{await render(<Settings/>);expect(screen.getByText('Dịch vụ & Portfolio')).toBeTruthy();expect(screen.getByText('Rút tiền & Thanh toán')).toBeTruthy();await fireEvent.press(screen.getByText('Gói và quyền lợi'));expect(mockPush).toHaveBeenCalledWith('/account-plans');});

@@ -6,6 +6,7 @@ let mockOwner: { id: string; isDemoAccount?: boolean } | null = { id: 'owner' };
 jest.mock('@react-native-async-storage/async-storage', () => require('@react-native-async-storage/async-storage/jest/async-storage-mock'));
 jest.mock('../../store/useAuthStore', () => ({ useAuthStore: { getState: () => ({ user: mockOwner }) } }));
 jest.mock('../api', () => ({ api: { get: jest.fn(), post: jest.fn() }, getApiError: (error: unknown) => error }));
+jest.mock('expo-web-browser', () => ({ openBrowserAsync: jest.fn() }));
 jest.mock('expo-crypto', () => ({ randomUUID: jest.fn(() => 'persistent-request-key') }));
 const storageKey = 'bbook-commerce:owner:product';
 beforeEach(async () => { jest.clearAllMocks(); await AsyncStorage.clear(); mockOwner = { id: 'owner' }; });
@@ -16,7 +17,7 @@ it('retains the same account-scoped request key after a lost response instead of
   await expect(appCommerce.buy('owner', 'product', 'terms', false)).resolves.toBe('order');
   const calls = jest.mocked(api.post).mock.calls;
   expect(calls[0][2]?.headers).toEqual(calls[1][2]?.headers);
-  expect(calls[0][1]).toEqual({ productId: 'product', termsVersion: 'terms', acceptedTerms: true, portfolioConsent: false });
+  expect(calls[0][1]).toEqual({ productId: 'product', termsVersion: 'terms', acceptedTerms: true, portfolioConsent: false, mode: 'CUSTOMER' });
   expect(JSON.parse((await AsyncStorage.getItem(storageKey))!)).toEqual({ key: 'persistent-request-key', orderId: 'order' });
 });
 it('never renders a response from the previous account after logout or account switch', async () => {
@@ -34,4 +35,27 @@ it('does not clear the current request key when reading a different historical c
   jest.mocked(api.get).mockResolvedValue({ data: { id: 'old-order', productId: 'product', state: 'Cancelled' } });
   await appCommerce.order('owner', 'old-order');
   expect(JSON.parse((await AsyncStorage.getItem(storageKey))!).key).toBe('new-request');
+});
+
+it('opens only the payOS link of a pending unexpired order without granting access', async () => {
+  const browser = require('expo-web-browser');
+  await appCommerce.openCheckout('owner', { state: 'PaymentPending', expiresAt: new Date(Date.now()+60000).toISOString(), checkoutUrl: 'https://pay.payos.vn/web/test' } as any);
+  expect(browser.openBrowserAsync).toHaveBeenCalledWith('https://pay.payos.vn/web/test');
+  expect(api.post).not.toHaveBeenCalled();
+});
+it.each(['https://evil.test/pay', 'http://pay.payos.vn/web/test', 'https://pay.payos.vn.evil.test/pay', 'https://user@pay.payos.vn/pay'])('refuses untrusted checkout URL %s', async checkoutUrl => {
+  await expect(appCommerce.openCheckout('owner', { state: 'PaymentPending', expiresAt: new Date(Date.now()+60000).toISOString(), checkoutUrl } as any)).rejects.toThrow();
+  expect(require('expo-web-browser').openBrowserAsync).not.toHaveBeenCalled();
+});
+it.each(['Fulfilled','Cancelled','ManualReview'])('never opens checkout for %s orders', async state => {
+  await expect(appCommerce.openCheckout('owner', { state, expiresAt: new Date(Date.now()+60000).toISOString(), checkoutUrl: 'https://pay.payos.vn/web/test' } as any)).rejects.toThrow();
+});
+it('requests the customer catalog in customer mode even for an artist account',async()=>{
+  jest.mocked(api.get).mockResolvedValue({data:{role:'Customer',products:[]}});
+  await appCommerce.catalog('owner','CUSTOMER');
+  expect(api.get).toHaveBeenCalledWith('/me/commerce/catalog',{params:{mode:'CUSTOMER'}});
+});
+it('does not display visibility if an older server returns the wrong catalog role',async()=>{
+  jest.mocked(api.get).mockResolvedValue({data:{role:'MUA',products:[{id:'visibility'}]}});
+  expect(await appCommerce.catalog('owner','CUSTOMER')).toMatchObject({role:'Customer',checkoutEnabled:false,products:[]});
 });

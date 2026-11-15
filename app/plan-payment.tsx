@@ -1,126 +1,83 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import * as Clipboard from 'expo-clipboard';
-import * as FileSystem from 'expo-file-system/legacy';
-import * as Sharing from 'expo-sharing';
-import Svg, { Path, Rect } from 'react-native-svg';
-import { toQR } from 'toqr';
 import { appCommerce, commerceMessage, terminalOrder } from '../services/appCommerce';
 import { useAuthStore } from '../store/useAuthStore';
 
 const labels: Record<string, string> = { PaymentPending: 'Chờ thanh toán', PaidAwaitingFulfillment: 'Đã nhận tiền · Đang cấp quyền', Fulfilled: 'Đã hoàn tất', ManualReview: 'Giao dịch cần được hỗ trợ kiểm tra', Cancelled: 'Đơn đã hủy hoặc hết hạn', Refunded: 'Đã ghi nhận hoàn tiền', Revoked: 'Quyền đã thu hồi' };
-
 export default function PlanPaymentScreen() {
   const user = useAuthStore(state => state.user);
-  const params = useLocalSearchParams<{ id?: string | string[] }>();
+  const params = useLocalSearchParams<{ id?: string; open?: string }>();
   const id = typeof params.id === 'string' ? params.id : '';
-  return <PaymentBody key={`${user?.id}:${id}`} owner={user?.id} demo={user?.isDemoAccount === true} id={id} />;
+  return <PaymentBody key={String(user?.id) + ':' + id} owner={user?.id} demo={user?.isDemoAccount === true} id={id} autoOpen={params.open === '1'} />;
 }
-
-function PaymentBody({ owner, demo, id }: { owner?: string; demo: boolean; id: string }) {
-  const router = useRouter();
-  const client = useQueryClient();
-  const svg = useRef<Svg>(null);
-  const [notice, setNotice] = useState('');
-  const [sharing, setSharing] = useState(false);
+function PaymentBody({ owner, demo, id, autoOpen }: { owner?: string; demo: boolean; id: string; autoOpen: boolean }) {
+  const router = useRouter(); const client = useQueryClient();
+  const [notice, setNotice] = useState(''); const [opening, setOpening] = useState(false);
   const [active, setActive] = useState(AppState.currentState === 'active');
-  const [now, setNow] = useState(Date.now());
-  const started = useRef(Date.now());
+  const [now, setNow] = useState(() => Date.now());
+  const started = useRef(now); const opened = useRef(false); const openingLock = useRef(false);
   const enabled = !!owner && !demo && /^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/i.test(id);
   const key = ['app-commerce-order', owner, id] as const;
   const query = useQuery({ queryKey: key, queryFn: () => appCommerce.order(owner!, id), enabled, retry: 1,
-    refetchInterval: state => active && Date.now() - started.current < 300_000 && (!state.state.data || ['PaymentPending', 'PaidAwaitingFulfillment'].includes(state.state.data.state)) ? 5000 : false,
+    refetchInterval: state => active && Date.now() - started.current < 300000 && (!state.state.data || ['PaymentPending', 'PaidAwaitingFulfillment'].includes(state.state.data.state)) ? 5000 : false,
     refetchIntervalInBackground: false });
   const sync = useMutation({ mutationFn: () => appCommerce.order(owner!, id, true), onSuccess: data => {
     if (useAuthStore.getState().user?.id === owner) client.setQueryData(key, data);
   } });
   const syncRef = useRef(sync);
-  syncRef.current = sync;
+  useEffect(() => { syncRef.current = sync; }, [sync]);
   const order = query.data;
+  const state = order?.state;
   useEffect(() => {
     const listener = AppState.addEventListener('change', state => {
       setActive(state === 'active');
       if (state === 'active' && enabled && !syncRef.current.isPending) { started.current = Date.now(); syncRef.current.mutate(); }
-    });
-    return () => listener.remove();
+    }); return () => listener.remove();
   }, [enabled]);
   useEffect(() => {
-    if (!active || !enabled || order && (terminalOrder(order.state) || order.state === 'ManualReview')) return;
+    if (!active || !enabled || state && (terminalOrder(state) || state === 'ManualReview')) return;
     const tick = setInterval(() => setNow(Date.now()), 1000);
-    const reconcile = setInterval(() => {
-      if (Date.now() - started.current < 300_000 && !syncRef.current.isPending) syncRef.current.mutate();
-    }, 30_000);
-    return () => { clearInterval(tick); clearInterval(reconcile); };
-  }, [active, enabled, order?.state]);
+    const interval = setInterval(() => { if (Date.now() - started.current < 300000 && !syncRef.current.isPending) syncRef.current.mutate(); }, 30000);
+    return () => { clearInterval(tick); clearInterval(interval); };
+  }, [active, enabled, state]);
   useEffect(() => {
     if (!owner || !order || !['Fulfilled', 'Revoked', 'Refunded'].includes(order.state)) return;
-    for (const queryKey of [['account-plans', owner], ['customer-ai-access', owner], ['mua-monetization', owner], ['app-commerce-catalog', owner], ['sponsored-muas'], ['mua']]) void client.invalidateQueries({ queryKey });
-  }, [owner, order?.state, client]);
-
-  const expired = !!order && new Date(order.expiresAt).getTime() <= now;
-  const payment = order?.state === 'PaymentPending' && !expired && !query.isError && !sync.isError ? order.payment : null;
-  const qr = useMemo(() => {
-    if (!payment?.qrCode) return null;
-    try {
-      const cells = toQR(payment.qrCode); const side = Math.sqrt(cells.length);
-      let path = '';
-      for (let i = 0; i < cells.length; i++) if (cells[i]) path += `M${i % side + 4},${Math.floor(i / side) + 4}h1v1h-1z`;
-      return { side: side + 8, path };
-    } catch { return null; }
-  }, [payment?.qrCode]);
-  async function copy(value: string) {
-    try { await Clipboard.setStringAsync(value); setNotice('Đã sao chép.'); }
-    catch { setNotice('Chưa sao chép được. Bạn có thể nhấn giữ thông tin để sao chép.'); }
-  }
-  async function shareQr() {
-    if (!svg.current || sharing) return;
-    setSharing(true); setNotice('');
-    let file: string | undefined;
-    try {
-      if (!await Sharing.isAvailableAsync() || !FileSystem.cacheDirectory) throw new Error('Thiết bị chưa hỗ trợ chia sẻ ảnh QR.');
-      const image = await new Promise<string>((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Chưa tạo được ảnh QR.')), 10_000);
-        svg.current!.toDataURL(value => { clearTimeout(timeout); resolve(value); });
-      });
-      file = `${FileSystem.cacheDirectory}bbook-payment-${id}.png`;
-      await FileSystem.writeAsStringAsync(file, image, { encoding: FileSystem.EncodingType.Base64 });
-      await Sharing.shareAsync(file, { mimeType: 'image/png', dialogTitle: 'Lưu hoặc chia sẻ QR thanh toán', UTI: 'public.png' });
-    } catch (error) { setNotice(error instanceof Error ? error.message : 'Chưa chia sẻ được ảnh QR.'); }
-    finally { if (file) await FileSystem.deleteAsync(file, { idempotent: true }).catch(() => {}); setSharing(false); }
-  }
-  const pending = query.isFetching || sync.isPending;
+    for (const queryKey of [['account-plans', owner], ['customer-ai-access', owner], ['mua-monetization', owner], ['app-commerce-catalog', owner], ['sponsored-muas']]) void client.invalidateQueries({ queryKey });
+  }, [owner, order, client]);
+  const expired = !!order && (!Number.isFinite(new Date(order.expiresAt).getTime()) || new Date(order.expiresAt).getTime() <= now);
+  const canOpen = enabled && !!order?.checkoutUrl && order.state === 'PaymentPending' && !expired && !query.isError && !sync.isError;
+  const openCheckout = useCallback(async () => {
+    if (!canOpen || !owner || !order || openingLock.current) return;
+    openingLock.current = true; setOpening(true); setNotice('');
+    try { await appCommerce.openCheckout(owner, order); if (useAuthStore.getState().user?.id === owner) { started.current = Date.now(); syncRef.current.mutate(); } }
+    catch (error) { setNotice(commerceMessage(error)); }
+    finally { openingLock.current = false; setOpening(false); }
+  }, [canOpen, owner, order]);
+  useEffect(() => { if (autoOpen && canOpen && !opened.current) { opened.current = true; void openCheckout(); } }, [autoOpen, canOpen, openCheckout]);
+  const busy = query.isFetching || sync.isPending;
   return <SafeAreaView style={s.page}>
-    <View style={s.header}><Pressable accessibilityRole="button" accessibilityLabel="Quay lại" onPress={() => router.back()} style={s.back}><Text style={s.backText}>‹</Text></Pressable><Text style={s.title}>Thanh toán gói</Text></View>
+    <View style={s.header}><Pressable accessibilityLabel="Quay lại" onPress={() => router.back()} style={s.back}><Text style={s.backText}>‹</Text></Pressable><Text style={s.title}>Thanh toán gói</Text></View>
     <ScrollView contentContainerStyle={s.body}>
-      {!enabled && <Text style={s.error}>Đơn không hợp lệ hoặc tài khoản chưa được đăng nhập.</Text>}
-      {query.isPending && enabled && <ActivityIndicator accessibilityLabel="Đang tải đơn thanh toán" />}
-      {(query.isError || sync.isError) && <Text accessibilityRole="alert" style={s.error}>{commerceMessage(sync.error || query.error)} Dữ liệu đang hiển thị có thể chưa cập nhật; không chuyển khoản lại nếu đã trả tiền.</Text>}
+      {!enabled && <Text style={s.note}>Mở đơn từ lịch sử giao dịch của tài khoản đã đăng nhập.</Text>}
+      {enabled && query.isPending && <ActivityIndicator accessibilityLabel="Đang tải đơn" />}
+      {(query.isError || sync.isError) && <Text accessibilityRole="alert" style={s.error}>{commerceMessage(query.error || sync.error)}</Text>}
       {order && <View style={s.card}>
-        <Text style={s.title}>{order.productId === 'bbook_customer_ai_lifetime_v1' ? 'AI quét mặt vĩnh viễn' : 'Quảng bá MUA 30 ngày'}</Text>
-        <Text style={s.price}>{order.amountVnd.toLocaleString('vi-VN')}đ</Text>
-        <Text accessibilityLiveRegion="polite" style={s.status}>{labels[order.state] || 'Đang cập nhật'}</Text>
-        <Text selectable style={s.note}>Mã đơn: {order.id}</Text>
-        {payment && <>
-          {qr ? <View style={s.qr}><Svg ref={svg} width={260} height={260} viewBox={`0 0 ${qr.side} ${qr.side}`} accessibilityLabel="QR thanh toán payOS"><Rect width={qr.side} height={qr.side} fill="#fff" /><Path d={qr.path} fill="#000" /></Svg></View> : <Text style={s.error}>Chưa hiển thị được QR. Vui lòng kiểm tra lại đơn.</Text>}
-          {qr && <Pressable accessibilityRole="button" disabled={sharing} onPress={() => void shareQr()} style={s.secondary}><Text style={s.action}>{sharing ? 'Đang tạo ảnh…' : 'Lưu / chia sẻ ảnh QR'}</Text></Pressable>}
-          <Text style={s.note}>Quét QR từ ứng dụng ngân hàng trên thiết bị khác, hoặc lưu ảnh rồi chọn ảnh QR trong ngân hàng của bạn. Kiểm tra đúng người nhận, số tiền và nội dung trước khi chuyển.</Text>
-          <Text selectable style={s.note}>Ngân hàng (BIN): {payment.bankBin}</Text><Text selectable style={s.title}>{payment.accountName}</Text>
-          <Pressable accessibilityRole="button" onPress={() => void copy(payment.accountNumber)} style={s.secondary}><Text selectable style={s.action}>Tài khoản: {payment.accountNumber} · Sao chép</Text></Pressable>
-          <Pressable accessibilityRole="button" onPress={() => void copy(payment.description)} style={s.secondary}><Text selectable style={s.action}>Nội dung: {payment.description} · Sao chép</Text></Pressable>
-          <Text style={s.note}>Hạn thanh toán: {new Date(order.expiresAt).toLocaleString('vi-VN')}</Text>
+        <Text style={s.price}>{order.amountVnd.toLocaleString('vi-VN')}đ</Text><Text style={s.status}>{labels[order.state] || 'Đang cập nhật'}</Text><Text selectable style={s.note}>Mã đơn: {order.id}</Text>
+        {order.state === 'PaymentPending' && <>
+          <Text style={s.note}>{expired ? 'Đã qua hạn thanh toán. Hãy kiểm tra trạng thái trước khi tạo đơn mới.' : 'Thanh toán trên trang payOS. Bạn có thể quét mã QR hoặc làm theo hướng dẫn tại đó.'}</Text>
+          {canOpen ? <Pressable accessibilityRole="button" disabled={opening} onPress={() => void openCheckout()} style={s.button}><Text style={s.buttonText}>{opening ? 'Đang mở payOS…' : 'Thanh toán qua payOS'}</Text></Pressable> : !expired && !query.isError && !sync.isError ? <Text style={s.note}>Đang chuẩn bị đường dẫn thanh toán payOS…</Text> : null}
         </>}
-        {order.state === 'PaymentPending' && !payment && <Text style={s.note}>{expired ? 'Đã qua hạn thanh toán. Không chuyển khoản theo QR cũ; hãy kiểm tra lại trạng thái đơn.' : 'Chưa có QR để thanh toán. Hệ thống đang chuẩn bị hoặc tạm dừng thanh toán. Hãy kiểm tra lại; nếu đây là đơn cũ trên website, đợi đơn hết hạn trước khi tạo đơn mới.'}</Text>}
-        {order.state === 'Fulfilled' && <Text style={s.note}>Quyền lợi đã được ghi nhận theo tài khoản. Bạn có thể quay lại sử dụng.</Text>}
-        {order.state === 'PaidAwaitingFulfillment' && <Text style={s.note}>Đã xác minh tiền. Hệ thống đang cấp quyền; không thanh toán thêm.</Text>}
+        {order.state === 'Fulfilled' && <Text style={s.note}>Thanh toán đã được xác nhận. Quyền lợi đã được mở cho tài khoản của bạn.</Text>}
+        {order.state === 'PaidAwaitingFulfillment' && <Text style={s.note}>Đã nhận tiền và đang cấp quyền. Không thanh toán thêm.</Text>}
         {order.state === 'ManualReview' && <Text style={s.note}>Giữ mã đơn và liên hệ bbooksupport@gmail.com để được hỗ trợ. Không thanh toán lại.</Text>}
       </View>}
-      {enabled && <Pressable accessibilityRole="button" accessibilityState={{ disabled: pending, busy: pending }} disabled={pending} onPress={() => { started.current = Date.now(); sync.mutate(); }} style={[s.button, pending && s.disabled]}><Text style={s.buttonText}>{pending ? 'Đang kiểm tra…' : 'Kiểm tra thanh toán'}</Text></Pressable>}
-      {!!notice && <Text accessibilityLiveRegion="polite" style={s.note}>{notice}</Text>}
-      <Text style={s.note}>Đóng màn hình không hủy đơn. Bạn có thể mở lại trong lịch sử giao dịch. BBook chỉ cấp quyền khi máy chủ xác minh thanh toán.</Text>
+      {enabled && <Pressable accessibilityRole="button" disabled={busy} onPress={() => { started.current = Date.now(); sync.mutate(); }} style={[s.button, busy && s.disabled]}><Text style={s.buttonText}>{busy ? 'Đang kiểm tra…' : 'Kiểm tra thanh toán'}</Text></Pressable>}
+      {!!notice && <Text accessibilityRole="alert" style={s.error}>{notice}</Text>}
+      <Text style={s.note}>Quay lại app sau khi thanh toán để cập nhật quyền lợi. Đóng trang payOS không tự hủy đơn; bạn có thể mở lại trong lịch sử giao dịch.</Text>
     </ScrollView>
   </SafeAreaView>;
 }
-const s = StyleSheet.create({ page: { flex: 1, backgroundColor: '#FFF8FB' }, header: { padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }, back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }, backText: { fontSize: 34, color: '#A82E62' }, title: { fontSize: 19, fontWeight: '700', color: '#2B1B2A' }, body: { padding: 20, paddingBottom: 48, gap: 16 }, card: { backgroundColor: '#fff', padding: 20, borderWidth: 1, borderColor: '#F1D7E3', borderRadius: 25, gap: 14 }, price: { fontSize: 32, fontWeight: '800', color: '#C42C68' }, status: { color: '#A82E62', fontSize: 16, lineHeight: 24 }, note: { color: '#75646d', lineHeight: 22, fontSize: 14 }, qr: { alignItems: 'center', backgroundColor: '#fff', paddingVertical: 12 }, action: { color: '#A82E62', lineHeight: 23 }, secondary: { padding: 12, borderRadius: 10, borderWidth: 1, borderColor: '#EED4DF', minHeight: 48 }, button: { padding: 16, backgroundColor: '#C42C68', alignItems: 'center', borderRadius: 18 }, buttonText: { color: '#fff', fontWeight: '700' }, disabled: { opacity: .5 }, error: { color: '#9D3140', lineHeight: 22 } });
+const s = StyleSheet.create({ page: { flex: 1, backgroundColor: '#FFF8FB' }, header: { padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }, back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }, backText: { fontSize: 34, color: '#A82E62' }, title: { fontSize: 19, fontWeight: '700', color: '#2B1B2A' }, body: { padding: 20, paddingBottom: 48, gap: 16 }, card: { backgroundColor: '#fff', padding: 20, borderWidth: 1, borderColor: '#F1D7E3', borderRadius: 25, gap: 14 }, price: { fontSize: 32, fontWeight: '800', color: '#C42C68' }, status: { color: '#A82E62', fontSize: 16, lineHeight: 24 }, note: { color: '#75646d', lineHeight: 22, fontSize: 14 }, button: { padding: 16, backgroundColor: '#C42C68', alignItems: 'center', borderRadius: 18 }, buttonText: { color: '#fff', fontWeight: '700' }, disabled: { opacity: .5 }, error: { color: '#9D3140', lineHeight: 22 } });

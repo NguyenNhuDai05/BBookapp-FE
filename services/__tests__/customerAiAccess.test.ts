@@ -4,14 +4,18 @@ jest.mock('../api', () => ({ api: { get: jest.fn() }, getApiError: jest.fn((erro
 const originalFlag = process.env.EXPO_PUBLIC_CUSTOMER_AI_ENABLED;
 beforeEach(() => { jest.clearAllMocks(); process.env.EXPO_PUBLIC_CUSTOMER_AI_ENABLED = 'true'; });
 afterAll(() => { if (originalFlag === undefined) delete process.env.EXPO_PUBLIC_CUSTOMER_AI_ENABLED; else process.env.EXPO_PUBLIC_CUSTOMER_AI_ENABLED = originalFlag; });
-it('keeps existing offline scans working without requesting the API while rollout is disabled', async () => {
+it('does not grant access when the build rollout flag is missing', async () => {
   delete process.env.EXPO_PUBLIC_CUSTOMER_AI_ENABLED;
-  await expect(requireCustomerAiAccess()).resolves.toBeUndefined();
-  expect(api.get).not.toHaveBeenCalled();
+  jest.mocked(api.get).mockResolvedValue({ data: { hasAccess: true, purchased: false } });
+  await expect(requireCustomerAiAccess()).rejects.toMatchObject({ code: 'E_AI_SUBSCRIPTION' });
+  expect(api.get).toHaveBeenCalled();
 });
-it('retains the free scan flow with an older backend that has no access endpoint', async () => {
+it('does not grant free scans when the access endpoint is missing', async () => {
   jest.mocked(api.get).mockRejectedValue({ status: 404 });
-  expect(await loadCustomerAiAccess()).toMatchObject({ hasAccess: true, purchased: false, enforcementEnabled: false });
+  await expect(loadCustomerAiAccess()).rejects.toEqual({ status: 404 });
+});
+it('accepts only a confirmed purchase', async () => {
+  jest.mocked(api.get).mockResolvedValue({ data: { hasAccess: true, purchased: true } });
   await expect(requireCustomerAiAccess()).resolves.toBeUndefined();
 });
 it.each([401, 403, 500])('does not treat an auth or server error as free access (%s)', async status => {

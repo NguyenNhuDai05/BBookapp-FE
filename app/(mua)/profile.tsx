@@ -1,4 +1,3 @@
-import { PlanStatusEntry } from '../../components/profile/PlanStatusEntry';
 import { ServiceImageGallery } from '../../components/ServiceImageGallery';
 import { AppBottomSheet } from '../../components/ui/AppBottomSheet';
 import { ActionSheet } from '../../components/ui/ActionSheet';
@@ -25,7 +24,6 @@ import { getApiError } from '../../services/api';
 import { normalizeSocialUrl } from '../../utils/socialUrl';
 import { useFollowerSummary } from '../../hooks/useFollowers';
 import { FollowersBadge } from '../../components/profile/FollowersBadge';
-import { MuaMonetizationStatus } from '../../components/mua/MuaMonetizationStatus';
 import { refreshMuaMonetization } from '../../hooks/useMuaMonetization';
 import { ProfileShareSheet, PostShareSheet } from '../../components/profile/ProfileShareSheet';
 
@@ -155,7 +153,7 @@ export default function MuaProfilePremiumScreen() {
       />
 
       {review?<ReviewNotice/>:null}
-      <MuaMonetizationStatus />
+
       {/* Top Header */}
       <View style={styles.header}>
         {/* Placeholder for back arrow if needed */}
@@ -179,7 +177,7 @@ export default function MuaProfilePremiumScreen() {
         }
       >
 
-        {!review && <PlanStatusEntry onPress={() => router.push('/account-plans' as never)} />}
+
         {/* Instagram-inspired Header */}
         <View style={styles.igHeaderContainer}>
           <View style={styles.igTopRow}>

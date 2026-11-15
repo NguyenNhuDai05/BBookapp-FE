@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
+import * as WebBrowser from 'expo-web-browser';
 import { api, getApiError } from './api';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -10,6 +11,7 @@ export type CommerceCatalog = {
 export type CommerceOrder = {
   id: string; productId: string; amountVnd: number; currency: string; state: string;
   createdAt: string; expiresAt: string; verifiedPaidAt?: string | null;
+  checkoutUrl?: string | null;
   payment: { qrCode: string; bankBin: string; accountNumber: string; accountName: string; description: string } | null;
 };
 export const terminalOrder = (state: string) => ['Fulfilled', 'Cancelled', 'Refunded', 'Revoked'].includes(state);
@@ -22,7 +24,7 @@ export const commerceMessage = (error: unknown) => {
   const messages: Record<string, string> = {
     CUSTOMER_AI_CHECKOUT_DISABLED: 'Đăng ký AI hiện chưa mở. Vui lòng thử lại sau.',
     WEB_CHECKOUT_DISABLED: 'Đăng ký quảng bá hiện chưa mở. Vui lòng thử lại sau.',
-    AI_ALREADY_PURCHASED: 'Tài khoản đã có giao dịch AI. Hãy đồng bộ quyền lợi; không cần thanh toán lại.',
+    AI_ALREADY_PURCHASED: 'Tài khoản đã có giao dịch AI. Hãy cập nhật trạng thái; không cần thanh toán lại.',
     MUA_NOT_ELIGIBLE: 'Hồ sơ MUA cần được duyệt và hoàn thiện trước khi đăng ký quảng bá.',
     TERMS_VERSION_MISMATCH: 'Điều khoản đã cập nhật. Vui lòng tải lại danh sách gói.',
     PENDING_ORDER_NEEDS_REVIEW: 'Đơn trước cần được kiểm tra. Không chuyển khoản thêm; hãy giữ mã đơn để được hỗ trợ.',
@@ -34,17 +36,29 @@ export const commerceMessage = (error: unknown) => {
 };
 
 export const appCommerce = {
-  async catalog(owner: string): Promise<CommerceCatalog> {
+  async openCheckout(owner: string, order: CommerceOrder): Promise<void> {
+    scope(owner);
+    const expires = new Date(order.expiresAt).getTime();
+    if (order.state !== 'PaymentPending' || !Number.isFinite(expires) || expires <= Date.now()) throw new Error('Đơn không còn chờ thanh toán. Vui lòng kiểm tra lại trạng thái.');
+    const url = new URL(order.checkoutUrl || '');
+    if (url.protocol !== 'https:' || url.hostname !== 'pay.payos.vn' || url.port || url.username || url.password) throw new Error('Chưa có đường dẫn payOS hợp lệ. Vui lòng thử lại.');
+    await WebBrowser.openBrowserAsync(url.href);
+    scope(owner);
+  },
+  async catalog(owner: string, mode = useAuthStore.getState().activeMode || 'CUSTOMER'): Promise<CommerceCatalog> {
     scope(owner);
     try {
-      const { data } = await api.get<CommerceCatalog>('/me/commerce/catalog'); scope(owner); return data;
+      const { data } = await api.get<CommerceCatalog>('/me/commerce/catalog', { params: { mode } }); scope(owner);
+      const role = mode === 'MUA' ? 'MUA' : 'Customer';
+      if (data.role !== role) return { role, termsVersion: '', enabled: true, checkoutEnabled: false, products: [], unavailableReason: 'CHECKOUT_DISABLED' };
+      return data;
     } catch (error) {
       scope(owner);
       if (getApiError(error).status === 404) return { role: 'Customer', termsVersion: '', enabled: false, checkoutEnabled: false, products: [] };
       throw error;
     }
   },
-  async buy(owner: string, productId: string, termsVersion: string, portfolioConsent: boolean): Promise<string> {
+  async buy(owner: string, productId: string, termsVersion: string, portfolioConsent: boolean, mode = useAuthStore.getState().activeMode || 'CUSTOMER'): Promise<string> {
     scope(owner);
     const storageKey = `bbook-commerce:${owner}:${productId}`;
     const saved = await AsyncStorage.getItem(storageKey);
@@ -55,7 +69,7 @@ export const appCommerce = {
     }
     await AsyncStorage.setItem(storageKey, JSON.stringify(pending)); scope(owner);
     const { data } = await api.post<{ id: string }>('/me/commerce/orders',
-      { productId, termsVersion, acceptedTerms: true, portfolioConsent }, { headers: { 'Idempotency-Key': pending.key } });
+      { productId, termsVersion, acceptedTerms: true, portfolioConsent, mode }, { headers: { 'Idempotency-Key': pending.key } });
     scope(owner);
     await AsyncStorage.setItem(storageKey, JSON.stringify({ ...pending, orderId: data.id }));
     return data.id;
