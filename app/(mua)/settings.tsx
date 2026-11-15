@@ -25,7 +25,8 @@ import {
   KeyRound,
 } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
-import {ActivityIndicator, AppState, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {ActivityIndicator, AppState, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppAlert as appDialog } from '../../components/ui/dialogStore';
 import { useAuthStore } from "../../store/useAuthStore";
 import { useMuaProfile } from "../../hooks/useMuaProfile";
@@ -168,9 +169,12 @@ export default function MuaSettingsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        bounces={false}
+        alwaysBounceVertical={false}
+        overScrollMode="never"
         contentContainerStyle={styles.scrollContent}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refresh} tintColor="#F5446A" colors={['#F5446A']} />}
       >
@@ -291,7 +295,7 @@ export default function MuaSettingsScreen() {
           </View>
         </View>
 
-        <View style={[styles.sectionContainer, { marginBottom: 30 }]}>
+        <View style={styles.sectionContainer}>
           <View style={styles.cardWrapper}>
             {renderSettingRow(
               isDeletingAccount ? <ActivityIndicator color="#F5446A" /> : <Trash2 size={20} color="#F5446A" />,
@@ -316,7 +320,7 @@ export default function MuaSettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9F6F8" },
-  scrollContent: { paddingBottom: 160 },
+  scrollContent: { flexGrow: 1, paddingBottom: 16 },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
