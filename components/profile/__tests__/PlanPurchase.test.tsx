@@ -21,7 +21,7 @@ it('uses the selected product price and terms and requires consent', async () =>
   expect(mockBuy).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByRole('checkbox'));
   await fireEvent.press(screen.getByText('Mua và kích hoạt'));
-  await waitFor(() => expect(mockBuy).toHaveBeenCalledWith('owner', 'custom_ai', 'product-v2', false));
+  await waitFor(() => expect(mockBuy).toHaveBeenCalledWith('owner', 'custom_ai', 'product-v2', false, 'CUSTOMER'));
   expect(mockPush).toHaveBeenCalled();
 });
 it('requires fresh consent when the catalog version or price changes', async () => {

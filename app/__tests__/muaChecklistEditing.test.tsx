@@ -6,6 +6,7 @@ import IdentityScreen from '../(mua)/identity-verification';
 import { uploadVerificationImage } from '../../services/verificationMediaService';
 
 const mockPush = jest.fn();
+const mockSubmitReview = jest.fn();
 const mockSave = jest.fn(async () => ({}));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, back: jest.fn(), replace: jest.fn() }) }));
 jest.mock('expo-image-picker', () => ({
@@ -22,9 +23,8 @@ jest.mock('../../hooks/useMuaEligibility', () => ({
   useMuaEligibility: () => ({ data: { completionPercentage: 100, verificationStatus: 'Draft', missingRequirements: [], requirements: [
     { key: 'identityVerification', label: 'Danh tính', isMet: true },
     { key: 'activeService', label: 'Dịch vụ', isMet: true },
-    { key: 'bankAccount', label: 'Ngân hàng', isMet: true },
   ] }, refetch: jest.fn() }),
-  useSubmitMuaForReview: () => ({ mutate: jest.fn() }),
+  useSubmitMuaForReview: () => ({ mutate: mockSubmitReview }),
   useMuaIdentity: () => ({ data: { identityFrontMediaId: 'front-id', identityBackMediaId: 'back-id', portraitMediaId: 'portrait-id', certificateMediaIds: ['certificate-id'], identityFrontUrl: 'https://example.com/front.jpg', identityBackUrl: 'https://example.com/back.jpg', portraitUrl: 'https://example.com/portrait.jpg', certificateUrls: ['https://example.com/certificate.jpg'] } }),
   useSaveMuaIdentity: () => ({ mutateAsync: mockSave, isPending: false }),
 }));
@@ -35,8 +35,14 @@ it('allows completed checklist items to be opened for editing', async () => {
   expect(mockPush).toHaveBeenLastCalledWith('/(mua)/identity-verification');
   await fireEvent.press(screen.getByText('Dịch vụ'));
   expect(mockPush).toHaveBeenLastCalledWith('/(mua)/services');
-  await fireEvent.press(screen.getByText('Ngân hàng'));
-  expect(mockPush).toHaveBeenLastCalledWith('/(mua)/bank-accounts');
+});
+
+it('submits a complete profile without a bank account step', async () => {
+  await render(<SetupScreen />);
+  expect(screen.queryByText('Tài khoản ngân hàng')).toBeNull();
+  expect(screen.queryByText('Ngân hàng')).toBeNull();
+  await fireEvent.press(screen.getByText('Gửi admin xét duyệt'));
+  expect(mockSubmitReview).toHaveBeenCalled();
 });
 
 it('loads existing identity photos and preserves certificates when saving again', async () => {

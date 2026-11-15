@@ -10,7 +10,13 @@ jest.mock('../../hooks/useMuaBookings',()=>({useEarningsSnapshot:()=>({data:mock
 jest.mock('../../hooks/useMuaPayouts',()=>({useMuaPayouts:()=>({data:[{id:'payout',amount:6600,status:'PAID',bankName:'MB Bank',maskedAccountNumber:'****5244',createdAt:'2026-09-29T00:00:00Z',paidAt:'2026-09-30T00:00:00Z'}],refetch:mockRefresh})}));
 jest.mock('../../hooks/useMuaEligibility',()=>({useMuaEligibility:()=>({data:{canWithdraw:false},refetch:mockRefresh})}));
 jest.mock('../../services/api',()=>({getApiError:()=>({message:'error'})}));
-beforeEach(()=>{mockRefresh.mockClear();mockPush.mockClear();});
+beforeEach(()=>{mockRefresh.mockClear();mockPush.mockClear();mockSnapshot.availableTotal=0;});
+it('opens receiving account setup when funds are available but bank approval is missing',async()=>{
+ mockSnapshot.availableTotal=100000;
+ await render(<Earnings/>);
+ await fireEvent.press(screen.getByText('Thiết lập tài khoản để rút tiền'));
+ expect(mockPush).toHaveBeenCalledWith('/(mua)/withdraw');
+});
 it('shows distinct held booking and frozen funds without reclassifying paid income',async()=>{
  await render(<Earnings/>);
  expect(screen.getByText('Booking: booking-held')).toBeTruthy();

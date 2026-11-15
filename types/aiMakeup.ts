@@ -1,4 +1,4 @@
-export type AiMakeupCapabilities = { enabled: boolean; consentVersion: string; maxImageBytes: number };
+export type AiMakeupCapabilities = { enabled: boolean; purchaseRequired?: boolean; consentVersion: string; maxImageBytes: number };
 export type AiMakeupResult = {
   imageStatus: 'valid' | 'no_face' | 'multiple_faces' | 'blurry' | 'occluded' | 'insufficient';
   observations: { feature: string; description: string; certainty: 'uncertain' | 'tentative' }[];

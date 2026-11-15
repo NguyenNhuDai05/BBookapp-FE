@@ -11,6 +11,7 @@ import { getMuaListingLabel, getMuaStatusLabel } from '../../utils/muaStatus';
 import {
   Bell,
   BriefcaseBusiness,
+  Sparkles,
   ChevronRight,
   CreditCard,
   History,
@@ -238,6 +239,12 @@ export default function MuaSettingsScreen() {
               "Dịch vụ & Portfolio",
               authUser?.isDemoAccount ? "Xem dịch vụ và portfolio mẫu" : "Thêm hoặc cập nhật hình ảnh dự án",
               () => router.push("/(mua)/services" as any),
+            )}
+            {!authUser?.isDemoAccount && renderSettingRow(
+              <Sparkles size={20} color="#ff7c98" />,
+              "Gói và quyền lợi",
+              "Đăng ký quảng bá và xem quyền lợi MUA",
+              () => router.push("/account-plans" as never),
             )}
             {renderSettingRow(
               <History size={20} color="#ff7c98" />,

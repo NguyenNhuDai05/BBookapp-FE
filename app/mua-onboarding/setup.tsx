@@ -11,7 +11,7 @@ import { getApiError } from '../../services/api';
 import { BrandColors, Radius, Shadows, Spacing, Typography } from '../../constants/theme';
 
 const routes: Record<string, string> = {
-  accountActive: '/(mua)/settings', basicInformation: '/(mua)/edit-profile', avatar: '/(mua)/edit-profile', phoneNumber: '/(mua)/edit-profile', city: '/(mua)/edit-profile', address: '/(mua)/edit-profile', bio: '/(mua)/edit-profile', specialty: '/(mua)/edit-profile', activeService: '/(mua)/services', publicPortfolioImages: '/(mua)/services?tab=PORTFOLIO', identityVerification: '/(mua)/identity-verification', bankAccount: '/(mua)/bank-accounts',
+  accountActive: '/(mua)/settings', basicInformation: '/(mua)/edit-profile', avatar: '/(mua)/edit-profile', phoneNumber: '/(mua)/edit-profile', city: '/(mua)/edit-profile', address: '/(mua)/edit-profile', bio: '/(mua)/edit-profile', specialty: '/(mua)/edit-profile', activeService: '/(mua)/services', publicPortfolioImages: '/(mua)/services?tab=PORTFOLIO', identityVerification: '/(mua)/identity-verification',
 };
 
 function MuaSetupScreen() {
@@ -26,7 +26,6 @@ function MuaSetupScreen() {
   const requirementGroups = [
     { title: 'Các mục cần hoàn thiện', items: data.requirements.filter(item => !['identityVerification', 'bankAccount'].includes(item.key)) },
     { title: 'CCCD/CMND và ảnh chân dung', items: data.requirements.filter(item => item.key === 'identityVerification') },
-    { title: 'Tài khoản ngân hàng', items: data.requirements.filter(item => item.key === 'bankAccount') },
   ];
 
   return (

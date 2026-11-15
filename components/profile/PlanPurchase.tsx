@@ -25,8 +25,8 @@ function PurchaseBody({ owner, catalog }: { owner?: string; catalog: ReturnType<
     if (!owner || !data?.checkoutEnabled || (!consent || consentProduct !== productId) || submitting.current) return;
     submitting.current = true; setBusy(true); setError('');
     try {
-      const id = await appCommerce.buy(owner, productId, data.products.find(p => p.id === productId)?.termsVersion || data.termsVersion, data.role === 'MUA');
-      if (useAuthStore.getState().user?.id === owner) router.push({ pathname: '/plan-payment', params: { id } } as never);
+      const id = await appCommerce.buy(owner, productId, data.products.find(p => p.id === productId)?.termsVersion || data.termsVersion, data.role === 'MUA', data.role === 'MUA' ? 'MUA' : 'CUSTOMER');
+      if (useAuthStore.getState().user?.id === owner) router.push({ pathname: '/plan-payment', params: { id, open: '1' } } as never);
     } catch (failure) { setError(commerceMessage(failure)); void catalog.refetch(); }
     finally { submitting.current = false; setBusy(false); }
   }
@@ -37,7 +37,7 @@ function PurchaseBody({ owner, catalog }: { owner?: string; catalog: ReturnType<
   const mua = data.role === 'MUA';
   const benefits = mua
     ? ['Luân phiên nổi bật trong Khám phá', '1 bài Facebook BBook mỗi chu kỳ', 'Mua thêm nối tiếp thời hạn', 'Hỗ trợ 1 lần chỉnh sửa nội dung']
-    : ['Mở khóa quét gương mặt AI', 'Quyền sử dụng trọn đời theo tài khoản', 'Đồng bộ trên các thiết bị', 'Không cần mua lại sau khi kích hoạt'];
+    : ['Mở khóa quét gương mặt AI', 'Quyền sử dụng trọn đời theo tài khoản', 'Dùng trên các thiết bị của bạn', 'Không cần mua lại sau khi kích hoạt'];
   return <View style={s.stack}>
     {!data.products.length && <View style={s.card}><Text style={s.title}>Gói đăng ký đang được cập nhật</Text><Text style={s.note}>Quyền lợi đã mua vẫn được giữ trong tài khoản của bạn.</Text></View>}
     {data.products.map(product => {

@@ -6,6 +6,7 @@ import {AppState,BackHandler,Text as MockText,TouchableOpacity as MockTouchableO
 import MakeupAdvisor from '../../../app/makeup-advisor';
 import {photo as studioPhoto,sample as studioAnalysis} from '../../makeupStudio/testSupport/fixtures';
 jest.mock('react-native-safe-area-context',()=>jest.requireActual('react-native-safe-area-context/jest/mock').default);
+let mockHasAccess = true;
 const mockPush=jest.fn(),mockPick=jest.fn(),mockScan=jest.fn();let mockAi:Record<string,unknown>;
 const mockService={id:'fixture-service',muaId:'fixture-mua',name:'Fixture service',authorName:'Fixture MUA',price:50,durationMinutes:60,tags:[],imageUrls:[]};
 const row={styleKey:'korean',title:'Korean · tươi sáng',shortDescription:'Fixture description',whyItFits:'Gợi ý tham khảo',makeupFocus:['Mắt fixture','Mày fixture','Má fixture','Môi fixture'],colorSuggestions:['Hồng'],occasionFit:['Đi chơi'],serviceQueryKeywords:['Korean']};
@@ -15,8 +16,8 @@ jest.mock('../ScanPhoto',()=>({ScanPhoto:()=>null}));
 jest.mock('../flags',()=>({advisorEnabled:true}));
 jest.mock('../useAdvisor',()=>({useAdvisor:()=>mockAi}));
 jest.mock('../../../services/exploreService',()=>({exploreService:{home:jest.fn(),search:jest.fn()}}));
-jest.mock('@tanstack/react-query',()=>({useInfiniteQuery:(o:{queryKey:string[];enabled:boolean})=>({data:o.enabled?{pages:[{items:o.queryKey[2]==='services'?[mockService]:[],nextCursor:null,weak:false}]}:undefined}),useQuery:(o:{queryKey:string[];enabled:boolean})=>o.queryKey[0]==='customer-ai-access'?{data:{hasAccess:true},refetch:jest.fn()}:o.queryKey[1]==='home'?{data:{styles:[{id:97,name:'Korean',artistCount:1}],provinces:[]}}:{data:o.enabled?{items:o.queryKey[1]==='services'?[mockService]:[],nextCursor:null}:undefined}}));
-beforeEach(()=>{AppState.currentState='active';jest.clearAllMocks();mockPick.mockReset();mockAi={photo:undefined,analysis:undefined,stage:'start',phase:'idle',busy:false,error:'',reset:jest.fn(),pick:mockPick,scan:mockScan,prepareRetry:jest.fn(),scanAvailable:true};});
+jest.mock('@tanstack/react-query',()=>({useInfiniteQuery:(o:{queryKey:string[];enabled:boolean})=>({data:o.enabled?{pages:[{items:o.queryKey[2]==='services'?[mockService]:[],nextCursor:null,weak:false}]}:undefined}),useQuery:(o:{queryKey:string[];enabled:boolean})=>o.queryKey[0]==='customer-ai-access'?{data:{hasAccess:mockHasAccess},refetch:jest.fn()}:o.queryKey[1]==='home'?{data:{styles:[{id:97,name:'Korean',artistCount:1}],provinces:[]}}:{data:o.enabled?{items:o.queryKey[1]==='services'?[mockService]:[],nextCursor:null}:undefined}}));
+beforeEach(()=>{mockHasAccess=true;AppState.currentState='active';jest.clearAllMocks();mockPick.mockReset();mockAi={photo:undefined,analysis:undefined,stage:'start',phase:'idle',busy:false,error:'',reset:jest.fn(),pick:mockPick,scan:mockScan,prepareRetry:jest.fn(),scanAvailable:true};});
 async function startCamera(){await fireEvent.press(screen.getByText('Bắt đầu khám phá'));expect(mockPick).not.toHaveBeenCalled();await fireEvent(screen.getByLabelText('Đồng ý xử lý ảnh trên thiết bị'),'valueChange',true);await fireEvent.press(screen.getByText('Tiếp tục chọn ảnh'));}
 test('explicit consent precedes camera, gallery keeps existing acquisition pipeline',async()=>{await render(<MakeupAdvisor/>);expect(screen.queryByText('Camera preview fixture')).toBeNull();await startCamera();expect(screen.getByText('Camera preview fixture')).toBeTruthy();await fireEvent.press(screen.getByText('Chọn từ thư viện'));expect(mockPick).toHaveBeenCalledWith(false);expect(mockScan).not.toHaveBeenCalled();},15000);
 test('scanning hides matching and has only cancel, with no continue step',async()=>{mockAi.stage='scanning';mockAi.phase='initializing';mockAi.photo={uri:'fixture',width:720,height:960};await render(<MakeupAdvisor/>);expect(screen.getByText('Đang khám phá đường nét của bạn')).toBeTruthy();expect(screen.getByText('Hủy quét / chụp lại')).toBeTruthy();expect(screen.queryByText('Phong cách trên BBook')).toBeNull();expect(screen.queryByText('Tiếp tục')).toBeNull();});
@@ -45,3 +46,5 @@ test('Studio reuses the session, returns to results on header/hardware back, and
  expect(screen.getByText('Thử makeup trên tôi')).toBeTruthy();expect(mockAi.reset).not.toHaveBeenCalled();expect(mockScan).not.toHaveBeenCalled();expect(mockPick).not.toHaveBeenCalled();expect(mockAi.photo).toBe(studioPhoto);
  back.mockRestore();
 });
+
+test('unpaid users see a purchase action instead of scan controls',async()=>{mockHasAccess=false;await render(<MakeupAdvisor/>);expect(screen.queryByText('Bắt đầu khám phá')).toBeNull();await fireEvent.press(screen.getByText('Mua gói AI'));expect(mockPush).toHaveBeenCalledWith('/account-plans');expect(mockPick).not.toHaveBeenCalled();});

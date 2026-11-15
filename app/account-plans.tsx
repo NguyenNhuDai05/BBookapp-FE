@@ -1,10 +1,10 @@
 import React from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAccountPlans } from '../hooks/useAccountPlans';
+import { useAuthStore } from '../store/useAuthStore';
 import { PlanPurchase } from '../components/profile/PlanPurchase';
 
 const states: Record<string, string> = { PaymentPending: 'Chờ xác nhận thanh toán', PaidAwaitingFulfillment: 'Đã nhận tiền · Đang cấp quyền', Fulfilled: 'Đã hoàn tất', ManualReview: 'Đang được hỗ trợ kiểm tra', Cancelled: 'Đã hủy hoặc hết hạn', Refunded: 'Đã hoàn tiền', Revoked: 'Quyền đã thu hồi' };
@@ -14,24 +14,25 @@ export default function AccountPlansScreen() {
   const router = useRouter();
   const query = useAccountPlans();
   const data = query.data;
+  const mode = useAuthStore(state => state.activeMode) || 'CUSTOMER';
+  const mua = mode === 'MUA';
+  const orders = data?.orders.filter(order => order.role ? order.role === (mua ? 'MUA' : 'Customer') : mua ? order.productId !== 'bbook_customer_ai_lifetime_v1' : order.productId === 'bbook_customer_ai_lifetime_v1') || [];
   const busy = query.isFetching || query.sync.isPending;
   return <SafeAreaView style={s.page}>
     <View style={s.header}><TouchableOpacity accessibilityRole="button" accessibilityLabel="Quay lại" onPress={() => router.back()} style={s.back}><Ionicons name="chevron-back" size={27} color="#C42A64" /></TouchableOpacity><Text style={s.title}>Gói và quyền lợi</Text></View>
-    <ScrollView contentContainerStyle={s.body} refreshControl={<RefreshControl refreshing={query.sync.isPending} onRefresh={() => { if (!busy && query.enabled) query.sync.mutate(); }} />}>
-      <Text style={s.intro}>Quyền lợi được gắn với tài khoản BBook của bạn và đồng bộ khi đăng nhập trên thiết bị khác.</Text>
+    <ScrollView contentContainerStyle={s.body} refreshControl={<RefreshControl testID="refresh-plans" refreshing={query.sync.isPending} onRefresh={() => { if (!busy && query.enabled) query.sync.mutate(); }} />}>
+      <Text style={s.intro}>{mua ? 'Đăng ký gói quảng bá để tăng khả năng tiếp cận khách hàng.' : 'Mua một lần để mở khóa AI quét mặt và gợi ý makeup trọn đời.'}</Text>
       {!query.enabled ? <Text style={s.note}>Đăng nhập tài khoản cá nhân để xem quyền lợi.</Text> : query.isPending ? <ActivityIndicator accessibilityLabel="Đang tải quyền lợi" color="#C42A64" /> : null}
-      {(query.isError || query.sync.isError) && <Text accessibilityRole="alert" style={s.error}>Chưa đồng bộ được quyền lợi. Vui lòng kiểm tra kết nối và thử lại. Dữ liệu cũ có thể chưa phản ánh giao dịch mới nhất.</Text>}
+      {(query.isError || query.sync.isError) && <View><Text accessibilityRole="alert" style={s.error}>Chưa cập nhật được quyền lợi. Vui lòng kiểm tra kết nối và thử lại. Dữ liệu cũ có thể chưa phản ánh giao dịch mới nhất.</Text><TouchableOpacity accessibilityRole="button" disabled={busy} onPress={() => query.sync.mutate()}><Text style={s.detailLink}>Thử lại</Text></TouchableOpacity></View>}
       {data && <>
         <PlanPurchase />
-        <View style={s.card}><View style={s.cardHeading}><View style={s.iconBox}><Ionicons name="ribbon-outline" size={26} color="#D53577" /></View><Text style={s.cardTitle}>Trạng thái quyền lợi AI</Text></View><Text style={s.status}>{data.ai.purchased ? 'Đã mở khóa vĩnh viễn' : data.ai.hasAccess ? 'Tính năng hiện sẵn dùng' : 'Chưa kích hoạt'}</Text><Text style={s.note}>{data.ai.purchased ? 'Không giới hạn thời hạn sử dụng theo tài khoản.' : 'Trạng thái được xác nhận từ hệ thống BBook.'}</Text></View>
-        {data.role === 'MUA' && <View style={s.card}><View style={s.cardHeading}><View style={s.iconBox}><Ionicons name="megaphone-outline" size={26} color="#D53577" /></View><Text style={s.cardTitle}>Quảng bá MUA</Text></View><Text style={s.status}>{data.mua?.visibilityEndsAt ? `Có hiệu lực đến ${date(data.mua.visibilityEndsAt)}` : data.mua?.visibilityStatus === 'Expired' ? 'Đã hết thời hạn quảng bá' : 'Chưa có quảng bá đang hoạt động'}</Text><Text style={s.note}>Đăng ký MUA miễn phí. Hết quảng bá vẫn nhận booking thông thường khi hồ sơ đủ điều kiện.</Text></View>}
+        {!mua && <View style={s.card}><View style={s.cardHeading}><View style={s.iconBox}><Ionicons name="ribbon-outline" size={26} color="#D53577" /></View><Text style={s.cardTitle}>Trạng thái quyền lợi AI</Text></View><Text style={s.status}>{data.ai.purchased ? 'Đã mở khóa vĩnh viễn' : 'Chưa kích hoạt'}</Text><Text style={s.note}>{data.ai.purchased ? 'Không giới hạn thời hạn sử dụng theo tài khoản.' : 'Mua gói AI để bắt đầu quét mặt và nhận gợi ý.'}</Text></View>}
+        {mua && <View style={s.card}><View style={s.cardHeading}><View style={s.iconBox}><Ionicons name="megaphone-outline" size={26} color="#D53577" /></View><Text style={s.cardTitle}>Quảng bá MUA</Text></View><Text style={s.status}>{data.mua?.visibilityEndsAt ? `Có hiệu lực đến ${date(data.mua.visibilityEndsAt)}` : data.mua?.visibilityStatus === 'Expired' ? 'Đã hết thời hạn quảng bá' : 'Chưa có quảng bá đang hoạt động'}</Text><Text style={s.note}>Đăng ký MUA miễn phí. Hết quảng bá vẫn nhận booking thông thường khi hồ sơ đủ điều kiện.</Text></View>}
         <Text style={s.section}>Lịch sử giao dịch</Text>
-        {data.orders.length === 0 && <View style={[s.card, s.empty]}><View style={s.emptyIcon}><Ionicons name="receipt-outline" size={43} color="#DF4A88" /></View><Text style={s.note}>Chưa có giao dịch nào</Text><Text style={s.emptyNote}>Giao dịch của bạn sẽ được lưu tại đây.</Text></View>}
-        {data.orders.map(order => <View style={s.card} key={order.id}><View style={s.receiptLabel}><Ionicons name="receipt-outline" size={16} color="#C42A64" /><Text style={s.receiptText}>GIAO DỊCH BBOOK</Text></View><Text style={s.cardTitle}>{order.productName || name(order.productId)}</Text><Text style={s.amount}>{order.amountVnd.toLocaleString('vi-VN')}đ</Text><Text style={s.status}>{states[order.state] || 'Đang cập nhật'}</Text><Text style={s.note}>{date(order.createdAt)}</Text><Text selectable style={s.reference}>Mã đơn: {order.id}</Text>{order.state === 'ManualReview' && <Text style={s.note}>Giữ mã đơn để được hỗ trợ kiểm tra giao dịch. Không cần thanh toán lại.</Text>}<TouchableOpacity accessibilityRole="button" onPress={() => router.push({ pathname: '/plan-payment', params: { id: order.id } } as never)} style={s.detailButton}><View style={s.cardHeading}><Text style={s.detailLink}>Xem chi tiết</Text><Ionicons name="arrow-forward" size={17} color="#C42A64" /></View></TouchableOpacity></View>)}
+        {orders.length === 0 && <View style={[s.card, s.empty]}><View style={s.emptyIcon}><Ionicons name="receipt-outline" size={43} color="#DF4A88" /></View><Text style={s.note}>Chưa có giao dịch nào</Text><Text style={s.emptyNote}>Giao dịch của bạn sẽ được lưu tại đây.</Text></View>}
+        {orders.map(order => <View style={s.card} key={order.id}><View style={s.receiptLabel}><Ionicons name="receipt-outline" size={16} color="#C42A64" /><Text style={s.receiptText}>GIAO DỊCH BBOOK</Text></View><Text style={s.cardTitle}>{order.productName || name(order.productId)}</Text><Text style={s.amount}>{order.amountVnd.toLocaleString('vi-VN')}đ</Text><Text style={s.status}>{states[order.state] || 'Đang cập nhật'}</Text><Text style={s.note}>{date(order.createdAt)}</Text><Text selectable style={s.reference}>Mã đơn: {order.id}</Text>{order.state === 'ManualReview' && <Text style={s.note}>Giữ mã đơn để được hỗ trợ kiểm tra giao dịch. Không cần thanh toán lại.</Text>}<TouchableOpacity accessibilityRole="button" onPress={() => router.push({ pathname: '/plan-payment', params: { id: order.id } } as never)} style={s.detailButton}><View style={s.cardHeading}><Text style={s.detailLink}>Xem chi tiết</Text><Ionicons name="arrow-forward" size={17} color="#C42A64" /></View></TouchableOpacity></View>)}
         <Text style={s.note}>Cập nhật: {date(data.evaluatedAt)}</Text>
       </>}
-      <TouchableOpacity accessibilityRole="button" disabled={!query.enabled || busy} accessibilityState={{ disabled: !query.enabled || busy, busy }} onPress={() => query.sync.mutate()} style={[s.button, (!query.enabled || busy) && s.disabled]}><LinearGradient colors={['#EA5A98', '#BF1C5F']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.syncInner}><Ionicons name="sync-outline" size={23} color="#fff" /><Text style={s.buttonText}>{busy ? 'Đang đồng bộ…' : 'Đồng bộ quyền lợi'}</Text></LinearGradient></TouchableOpacity>
-      {query.sync.isSuccess && <Text accessibilityLiveRegion="polite" style={s.note}>Đã đồng bộ trạng thái mới nhất từ máy chủ.</Text>}
     </ScrollView>
   </SafeAreaView>;
 }

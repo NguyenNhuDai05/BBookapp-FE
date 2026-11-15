@@ -1,10 +1,10 @@
 import { AppModal } from '../../components/ui/AppModal';
-import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {ArrowLeft, Building2, CheckCircle2, Circle} from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import * as Crypto from 'expo-crypto';
 import { BrandColors, Radius, Spacing, Typography } from '../../constants/theme';
 import { useEarningsSnapshot } from '../../hooks/useMuaBookings';
@@ -28,6 +28,15 @@ export default function WithdrawScreen() {
   const banks = useBankAccounts();
   const create = useCreateMuaPayout();
   const eligibility = useMuaEligibility();
+  const { refetch: refetchBanks } = banks;
+  const { refetch: refetchEligibility } = eligibility;
+  const { refetch: refetchEarnings } = earnings;
+  const refresh = useCallback(() => {
+    void refetchBanks();
+    void refetchEligibility();
+    void refetchEarnings();
+  }, [refetchBanks, refetchEligibility, refetchEarnings]);
+  useFocusEffect(refresh);
   const submitLock = useRef(false);
   const [selected, setSelected] = useState<string>();
   const [confirmationVisible, setConfirmationVisible] = useState(false);
@@ -72,11 +81,16 @@ export default function WithdrawScreen() {
 
   return <SafeAreaView style={styles.safe} edges={['top']}>
     <View style={styles.header}><TouchableOpacity style={styles.back} onPress={() => router.back()} disabled={create.isPending}><ArrowLeft size={23} color={BrandColors.textDark}/></TouchableOpacity><Text style={styles.title}>{review?'Rút tiền mẫu':'Rút tiền'}</Text><View style={styles.back}/></View>
-    <ScrollView contentContainerStyle={styles.content}>{review?<ReviewNotice message={REVIEW_FINANCIAL_NOTICE}/>:null}
+    <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={Boolean(banks.isRefetching || eligibility.isRefetching || earnings.isRefetching)} onRefresh={refresh}/>}>{review?<ReviewNotice message={REVIEW_FINANCIAL_NOTICE}/>:null}
       {loading ? <ActivityIndicator color={BrandColors.accentRose}/> : earnings.isError || banks.isError || eligibility.isError ? <Text style={styles.error}>{getApiError(earnings.error || banks.error || eligibility.error).message}</Text> : <>
         <View style={styles.amountCard}><Text style={styles.label}>Số tiền yêu cầu</Text><Text style={styles.amount}>{money(amount)}</Text><Text style={styles.caption}>{availableIds.length} khoản thu nhập khả dụng</Text></View>
         <View style={styles.sectionRow}><Text style={styles.section}>Tài khoản nhận</Text><TouchableOpacity disabled={review} onPress={() => router.push('/(mua)/bank-account-form' as any)}><Text style={styles.link}>Thêm mới</Text></TouchableOpacity></View>
-        {!visibleBanks?.length ? <TouchableOpacity disabled={review} style={styles.empty} onPress={() => router.push('/(mua)/bank-account-form' as any)}><Building2 size={30} color={BrandColors.textMuted}/><Text style={styles.emptyText}>{review ? 'Tài khoản mẫu hiện chưa khả dụng. Vui lòng làm mới thu nhập.' : 'Thêm tài khoản ngân hàng trước khi rút tiền.'}</Text></TouchableOpacity> : visibleBanks!.map(bank => {const state=getBankAccountPresentation(bank);const selectable=review?canRequestSamplePayout(user,earnings.data)&&bank.id===permittedId:state.selectable;return <TouchableOpacity key={bank.id} style={[styles.bank, selectedId === bank.id && styles.bankSelected,!selectable&&styles.bankDisabled]} onPress={() => selectable&&setSelected(bank.id)} disabled={!selectable}><View style={{flex:1}}><Text style={styles.bankName}>{bank.bankName || bank.bankCode}</Text><Text style={styles.bankMeta}>{bank.maskedAccountNumber} · {bank.accountHolderName}</Text><Text style={[styles.bankState,state.selectable&&styles.bankStateUsable]}>{review?'Tài khoản mẫu · '+state.label:state.label}</Text></View>{selectedId === bank.id ? <CheckCircle2 size={22} color={BrandColors.accentRose}/> : <Circle size={22} color={BrandColors.textMuted}/>}</TouchableOpacity>})}
+        {!visibleBanks?.length ? <TouchableOpacity disabled={review} style={styles.empty} onPress={() => router.push('/(mua)/bank-account-form' as any)}><Building2 size={30} color={BrandColors.textMuted}/><Text style={styles.emptyText}>{review ? 'Tài khoản mẫu hiện chưa khả dụng. Vui lòng làm mới thu nhập.' : 'Thêm tài khoản ngân hàng và chờ Admin duyệt trước khi rút tiền.'}</Text></TouchableOpacity> : visibleBanks!.map(bank => {const state=getBankAccountPresentation(bank);const selectable=review?canRequestSamplePayout(user,earnings.data)&&bank.id===permittedId:state.selectable;return <TouchableOpacity key={bank.id} style={[styles.bank, selectedId === bank.id && styles.bankSelected,!selectable&&styles.bankDisabled]} onPress={() => selectable&&setSelected(bank.id)} disabled={!selectable}><View style={{flex:1}}><Text style={styles.bankName}>{bank.bankName || bank.bankCode}</Text><Text style={styles.bankMeta}>{bank.maskedAccountNumber} · {bank.accountHolderName}</Text><Text style={[styles.bankState,state.selectable&&styles.bankStateUsable]}>{review?'Tài khoản mẫu · '+state.label:state.label}</Text></View>{selectedId === bank.id ? <CheckCircle2 size={22} color={BrandColors.accentRose}/> : <Circle size={22} color={BrandColors.textMuted}/>}</TouchableOpacity>})}
+        {!review ? <>
+          <Text style={styles.captionText}>Tài khoản nhận tiền dùng chung với chế độ khách hàng. Tài khoản đã được duyệt có thể dùng để rút tiền mà không cần đăng ký lại.</Text>
+          {Boolean(visibleBanks?.length) && !visibleBanks?.some(isBankAccountSelectable) ? <Text style={styles.captionText}>Tài khoản nhận tiền cần được Admin duyệt trước khi rút tiền. Kéo xuống để cập nhật trạng thái sau khi được duyệt.</Text> : null}
+          <TouchableOpacity onPress={() => router.push('/(mua)/bank-accounts' as any)}><Text style={styles.link}>Quản lý tài khoản nhận tiền</Text></TouchableOpacity>
+        </> : null}
         <Text style={styles.notice}>{review ? REVIEW_FINANCIAL_NOTICE : 'Số tiền được Backend tính từ các khoản phải thu khả dụng. Sau khi gửi, yêu cầu sẽ chờ Admin kiểm tra và chuyển khoản.'}</Text>
         {submitError ? <Text style={styles.error}>{submitError}</Text> : null}
         <TouchableOpacity style={[styles.submit, !canSubmit && styles.disabled]} disabled={!canSubmit} onPress={openConfirmation}>{create.isPending ? <ActivityIndicator color="#FFF"/> : <Text style={styles.submitText}>Xác nhận rút {money(amount)}</Text>}</TouchableOpacity>
@@ -116,6 +130,7 @@ bankState:{fontFamily:Typography.semiBold,fontSize:11,color:'#9A6700',marginTop:
 bankStateUsable:{color:BrandColors.statusConfirmed},
 empty:{alignItems:'center',padding:Spacing.xl,backgroundColor:'#FFF',borderRadius:Radius.md,borderWidth:1,borderStyle:'dashed',borderColor:BrandColors.borderLight},
 emptyText:{fontFamily:Typography.regular,color:BrandColors.textMuted,textAlign:'center',marginTop:10},
+captionText:{fontFamily:Typography.regular,fontSize:12,lineHeight:18,color:BrandColors.textSecondary,marginBottom:Spacing.md},
 notice:{fontFamily:Typography.regular,fontSize:12,lineHeight:18,color:BrandColors.textSecondary,marginVertical:Spacing.lg},
 submit:{minHeight:54,alignItems:'center',justifyContent:'center',backgroundColor:BrandColors.textDark,borderRadius:Radius.full,marginTop:Spacing.md},
 submitText:{fontFamily:Typography.bold,color:'#FFF'},
