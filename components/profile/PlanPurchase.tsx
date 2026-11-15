@@ -51,7 +51,7 @@ function PurchaseBody({ owner, catalog }: { owner?: string; catalog: ReturnType<
         <View style={s.benefits}>{benefits.map((text, i) => <View key={text} style={s.benefit}><View style={s.check}><Ionicons name={mua ? (['sparkles-outline', 'logo-facebook', 'calendar-outline', 'create-outline'] as const)[i] : 'checkmark'} size={17} color="#D22D70" /></View><Text style={s.benefitText}>{text}</Text></View>)}</View>
         {!!product.description && <Text style={s.description}>{product.description}</Text>}
         <View style={s.divider} />
-        <Text style={s.note}>{mua ? 'Không cam kết số booking. Bài Facebook do BBook biên tập và đăng trong 3 ngày làm việc từ đầu chu kỳ.' : 'Trải nghiệm tư vấn và thử makeup cá nhân hóa. Thanh toán một lần, không tự gia hạn.'}</Text>
+        <Text style={s.note}>{mua ? 'Không cam kết số booking. Bài Facebook do BBook biên tập và đăng trong 3 ngày làm việc từ đầu chu kỳ.' : 'Trải nghiệm phân tích gương mặt và gợi ý makeup cá nhân hóa. Thanh toán một lần, không tự gia hạn.'}</Text>
         {mua && <Text style={s.support}>Liên hệ bbooksupport@gmail.com khi cần hỗ trợ.</Text>}
         {data.checkoutEnabled ? <>
           <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: accepted, disabled: busy }} disabled={busy} onPress={() => { setConsentProduct(product.id); setConsent(!accepted); }} style={s.consent}>
