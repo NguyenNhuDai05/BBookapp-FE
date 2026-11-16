@@ -152,14 +152,16 @@ export default function BookingsTab() {
         <BookingServiceList services={booking.services} />
 
         {booking.status === 'WAITING_CUSTOMER' && (
-          <View style={[styles.reviewBanner, { backgroundColor: '#E0F7FA' }]}>
-            <Text style={[styles.reviewBannerText, { color: '#006064' }]}>MUA đã hoàn tất dịch vụ. Vui lòng xác nhận để giải ngân tiền cọc.</Text>
+          <View style={styles.reviewBanner}>
+            <Text style={styles.reviewBannerText}>MUA đã hoàn tất dịch vụ. Vui lòng xác nhận để giải ngân tiền cọc.</Text>
             <TouchableOpacity 
               style={[styles.confirmBtn, isConfirming && { opacity: 0.5 }]}
+              accessibilityRole="button"
+              accessibilityState={{ busy: isConfirming }}
               onPress={() => confirmCompletion(booking.id)}
               disabled={isConfirming}
             >
-              <Text style={styles.confirmBtnText}>Xác nhận & Giải ngân</Text>
+              <Text style={styles.confirmBtnText}>{isConfirming ? 'Đang xác nhận...' : 'Xác nhận & Giải ngân'}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -398,18 +400,18 @@ const styles = StyleSheet.create({
   },
   
   reviewBanner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFF8E1', // light yellow
-    padding: Spacing.sm,
+    alignItems: 'stretch',
+    gap: Spacing.md,
+    backgroundColor: '#E0F7FA',
+    padding: Spacing.md,
     borderRadius: Radius.md,
     marginBottom: Spacing.md,
   },
   reviewBannerText: {
     fontFamily: Typography.medium,
-    fontSize: 12,
-    color: '#FF8F00',
+    fontSize: 13,
+    lineHeight: 20,
+    color: '#006064',
   },
   reviewBtnText: {
     fontFamily: Typography.bold,
@@ -472,16 +474,21 @@ const styles = StyleSheet.create({
     color: BrandColors.textMuted,
   },
   confirmBtn: {
+    alignSelf: 'stretch',
+    minHeight: 44,
     backgroundColor: '#00BCD4',
     borderRadius: Radius.md,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.base,
     alignItems: 'center',
-    marginTop: Spacing.sm,
+    justifyContent: 'center',
   },
   confirmBtnText: {
     fontFamily: Typography.bold,
     fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    flexShrink: 1,
     color: '#FFF',
   },
   footerTotalsBlock: {
