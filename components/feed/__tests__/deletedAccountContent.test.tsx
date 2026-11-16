@@ -30,6 +30,30 @@ const review = (deleted: boolean): ReviewDto => ({ reviewId: 'review', bookingId
 
 beforeEach(() => jest.clearAllMocks());
 
+it.each([undefined, null, '', '   '])('omits the entire photo gallery and photo filter results for imageUrl %p', async imageUrl => {
+  const withoutImage = { ...review(false), imageUrl } as ReviewDto;
+  await render(<ReviewTabContent reviews={[withoutImage]} isLoading={false} />);
+  expect(screen.getByText('Nội dung riêng')).toBeTruthy();
+  expect(screen.queryByTestId('review-images-review')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Xem ảnh đánh giá' })).toBeNull();
+  await fireEvent.press(screen.getByText('Có ảnh'));
+  expect(screen.getByText('Không có đánh giá nào phù hợp bộ lọc.')).toBeTruthy();
+});
+
+it('opens a photo with surrounding whitespace and hides the gallery and preview when it is removed', async () => {
+  const withImage = { ...review(false), imageUrl: '  https://example.test/review.jpg  ' };
+  const view = await render(<ReviewTabContent reviews={[withImage]} isLoading={false} />);
+  await fireEvent.press(screen.getByText('Có ảnh'));
+  expect(screen.getByTestId('review-images-review')).toBeTruthy();
+  await fireEvent.press(screen.getByRole('button', { name: 'Xem ảnh đánh giá' }));
+  expect(JSON.stringify(screen.toJSON())).toContain('https://example.test/review.jpg');
+  expect(JSON.stringify(screen.toJSON())).not.toContain(withImage.imageUrl);
+  await view.rerender(<ReviewTabContent reviews={[{ ...withImage, imageUrl: '' }]} isLoading={false} />);
+  expect(screen.getByText('Không có đánh giá nào phù hợp bộ lọc.')).toBeTruthy();
+  expect(screen.queryByTestId('review-images-review')).toBeNull();
+  expect(JSON.stringify(screen.toJSON())).not.toContain('https://example.test/review.jpg');
+});
+
 it('shows anonymous tombstones and all surviving replies without actions on deleted authors', async () => {
   jest.mocked(portfolioService.getComments).mockResolvedValue([comment('root', true, [comment('middle', true, [comment('live')])])]);
   await render(<PortfolioCommentsSheet item={post} onClose={jest.fn()} />);

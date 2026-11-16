@@ -212,8 +212,12 @@ export default function BookingDetailScreen() {
           <View style={[styles.card, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.sm }]}>
             <TouchableOpacity
               style={[styles.reviewBtn, booking.isReviewed && styles.reviewedBtn]}
+              accessibilityRole="button"
               disabled={booking.isReviewed}
-              onPress={() => { /* Navigate to review screen if needed */ }}
+              onPress={() => router.push({
+                pathname: '/booking/review',
+                params: { id: booking.id, muaName: booking.mua.name },
+              })}
             >
               <Text style={[styles.reviewBtnText, booking.isReviewed && styles.reviewedBtnText]}>
                 {booking.isReviewed ? 'Đã đánh giá' : 'Đánh giá'}
