@@ -177,8 +177,9 @@ export default function BookingsTab() {
 
         <View style={styles.cardFooter}>
           <View style={styles.leftActions}>
-            {booking.status === 'COMPLETED' && (
+            {(booking.status === 'COMPLETED' || booking.status === 'AUTO_COMPLETED') && (
               <TouchableOpacity 
+                accessibilityRole="button"
                 disabled={booking.isReviewed}
                 onPress={() => {
                   if (!booking.isReviewed) {

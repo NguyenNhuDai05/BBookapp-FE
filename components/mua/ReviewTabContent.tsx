@@ -16,6 +16,9 @@ interface ReviewTabContentProps {
   isOwner?: boolean;
 }
 
+const getReviewImageUrl = (review: ReviewDto) =>
+  review.isAuthorDeleted ? undefined : review.imageUrl?.trim() || undefined;
+
 const timeAgo = (dateStr: string) => {
   const date = new Date(dateStr);
   const now = new Date();
@@ -60,7 +63,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
   const totalReviews = reviews.length;
   const averageRating = (reviews.reduce((acc, rev) => acc + rev.rating, 0) / totalReviews).toFixed(1);
   const canReply = isOwner && reviews.some(review => review.reviewId === replyingToReviewId && !review.isAuthorDeleted);
-  const visibleImage = reviews.some(review => !review.isAuthorDeleted && review.imageUrl === selectedImage) ? selectedImage : null;
+  const visibleImage = reviews.some(review => getReviewImageUrl(review) === selectedImage) ? selectedImage : null;
 
   const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   reviews.forEach(r => {
@@ -95,7 +98,7 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
     if (filter === 'all') return true;
     if (filter === '5') return r.rating === 5;
     if (filter === '4') return r.rating === 4;
-    if (filter === 'has_image') return !r.isAuthorDeleted && !!r.imageUrl;
+    if (filter === 'has_image') return !!getReviewImageUrl(r);
     return true;
   });
 
@@ -174,80 +177,78 @@ export default function ReviewTabContent({ reviews, isLoading, isOwner = false }
         {filteredReviews.length === 0 ? (
           <Text style={{ textAlign: 'center', color: '#888', marginTop: 20 }}>Không có đánh giá nào phù hợp bộ lọc.</Text>
         ) : (
-          filteredReviews.map((review) => (
-            <View key={review.reviewId} style={styles.reviewCard}>
-              <View style={styles.reviewHeader}>
-                <View style={styles.headerLeft}>
-                  <Text style={styles.customerName}>{review.isAuthorDeleted ? 'Người dùng đã xóa' : review.customerName}</Text>
-                  <Text style={styles.reviewDate}>{timeAgo(review.createdAt)}</Text>
-                </View>
-                <View style={styles.headerRight}>
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star
-                      key={s}
-                      size={14}
-                      color="#C71585"
-                      fill={s <= review.rating ? "#C71585" : "transparent"}
-                    />
-                  ))}
-                </View>
-              </View>
-
-              <Text style={styles.commentText}>
-                {review.isAuthorDeleted ? 'Nội dung đánh giá đã được xóa.' : review.comment || 'Khách hàng không để lại bình luận.'}
-              </Text>
-
-              <View style={styles.imageGallery}>
-                {!review.isAuthorDeleted && review.imageUrl ? (
-                  <TouchableOpacity accessibilityRole="button" accessibilityLabel="Xem ảnh đánh giá" onPress={() => setSelectedImage(review.imageUrl!)}>
-                    <Image
-                      source={{ uri: review.imageUrl }}
-                      style={styles.reviewImage}
-                      contentFit="cover"
-                      transition={200}
-                    />
-                  </TouchableOpacity>
-                ) : (
-                  <>
-                    <View style={styles.reviewImagePlaceholder} />
-                    <View style={styles.reviewImagePlaceholder} />
-                  </>
-                )}
-              </View>
-
-              {/* MUA REPLY */}
-              {review.muaReply ? (
-                <View style={styles.replyContainer}>
-                  <View style={styles.replyHeader}>
-                    <CornerDownRight size={16} color="#666" style={{ marginRight: 6 }} />
-                    <Text style={styles.replyTitle}>Phản hồi từ MUA</Text>
-                    {review.muaReplyAt && (
-                      <Text style={styles.replyDate}>{timeAgo(review.muaReplyAt)}</Text>
-                    )}
+          filteredReviews.map((review) => {
+            const imageUrl = getReviewImageUrl(review);
+            return (
+              <View key={review.reviewId} style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <View style={styles.headerLeft}>
+                    <Text style={styles.customerName}>{review.isAuthorDeleted ? 'Người dùng đã xóa' : review.customerName}</Text>
+                    <Text style={styles.reviewDate}>{timeAgo(review.createdAt)}</Text>
                   </View>
-                  <Text style={styles.replyText}>{review.muaReply}</Text>
+                  <View style={styles.headerRight}>
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        size={14}
+                        color="#C71585"
+                        fill={s <= review.rating ? "#C71585" : "transparent"}
+                      />
+                    ))}
+                  </View>
                 </View>
-              ) : isOwner && !review.isAuthorDeleted ? (
-                <TouchableOpacity
-                  style={styles.replyBtn}
-                  onPress={() => setReplyingToReviewId(review.reviewId)}
-                >
-                  <MessageCircle size={14} color={BrandColors.accentPink} style={{ marginRight: 6 }} />
-                  <Text style={styles.replyBtnText}>Phản hồi</Text>
-                </TouchableOpacity>
-              ) : null}
 
-              {/* CARD FOOTER */}
-              <View style={styles.cardFooter}>
-                <TouchableOpacity style={styles.helpfulBtn}>
-                  <ThumbsUp size={16} color="#C71585" style={{ marginRight: 6 }} />
-                  <Text style={styles.helpfulText}>Hữu ích (0)</Text>
-                </TouchableOpacity>
+                <Text style={styles.commentText}>
+                  {review.isAuthorDeleted ? 'Nội dung đánh giá đã được xóa.' : review.comment || 'Khách hàng không để lại bình luận.'}
+                </Text>
 
-                <SafetyButton target={{ type: 'Review', id: review.reviewId }} ownerId={review.customerId} ownerDeleted={review.isAuthorDeleted} />
+                {imageUrl ? (
+                  <View style={styles.imageGallery} testID={`review-images-${review.reviewId}`}>
+                    <TouchableOpacity accessibilityRole="button" accessibilityLabel="Xem ảnh đánh giá" onPress={() => setSelectedImage(imageUrl)}>
+                      <Image
+                        source={{ uri: imageUrl }}
+                        style={styles.reviewImage}
+                        contentFit="cover"
+                        transition={200}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+
+                {/* MUA REPLY */}
+                {review.muaReply ? (
+                  <View style={styles.replyContainer}>
+                    <View style={styles.replyHeader}>
+                      <CornerDownRight size={16} color="#666" style={{ marginRight: 6 }} />
+                      <Text style={styles.replyTitle}>Phản hồi từ MUA</Text>
+                      {review.muaReplyAt && (
+                        <Text style={styles.replyDate}>{timeAgo(review.muaReplyAt)}</Text>
+                      )}
+                    </View>
+                    <Text style={styles.replyText}>{review.muaReply}</Text>
+                  </View>
+                ) : isOwner && !review.isAuthorDeleted ? (
+                  <TouchableOpacity
+                    style={styles.replyBtn}
+                    onPress={() => setReplyingToReviewId(review.reviewId)}
+                  >
+                    <MessageCircle size={14} color={BrandColors.accentPink} style={{ marginRight: 6 }} />
+                    <Text style={styles.replyBtnText}>Phản hồi</Text>
+                  </TouchableOpacity>
+                ) : null}
+
+                {/* CARD FOOTER */}
+                <View style={styles.cardFooter}>
+                  <TouchableOpacity style={styles.helpfulBtn}>
+                    <ThumbsUp size={16} color="#C71585" style={{ marginRight: 6 }} />
+                    <Text style={styles.helpfulText}>Hữu ích (0)</Text>
+                  </TouchableOpacity>
+
+                  <SafetyButton target={{ type: 'Review', id: review.reviewId }} ownerId={review.customerId} ownerDeleted={review.isAuthorDeleted} />
+                </View>
               </View>
-            </View>
-          ))
+            );
+          })
         )}
       </View>
 
@@ -465,14 +466,6 @@ reviewImage: {
     height: 100,
     borderRadius: 16,
     backgroundColor: '#F5F5F5',
-  },
-reviewImagePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 16,
-    backgroundColor: '#FCFBFC',
-    borderWidth: 1,
-    borderColor: '#F6F3F5',
   },
 cardFooter: {
     flexDirection: 'row',

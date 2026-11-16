@@ -97,6 +97,9 @@ export default function ReviewScreen() {
               {[1, 2, 3, 4, 5].map((star) => (
                 <TouchableOpacity
                   key={star}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${star} sao`}
+                  accessibilityState={{ selected: rating === star }}
                   onPress={() => setRating(star)}
                   style={styles.starBtn}
                 >
